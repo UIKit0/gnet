@@ -1,8 +1,8 @@
 <!-- ##### SECTION Title ##### -->
-UDP module
+UDP
 
 <!-- ##### SECTION Short_Description ##### -->
-UDP (datagram) functions.
+UDP (datagram).
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
@@ -26,6 +26,12 @@ UDP.
 <para>
 
 </para>
+
+<!-- ##### STRUCT GUdpSocket ##### -->
+<para>
+
+</para>
+
 
 <!-- ##### FUNCTION gnet_udp_socket_new ##### -->
 <para>

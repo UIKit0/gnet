@@ -31,6 +31,7 @@
 #include "tcp.h"
 
 #ifndef GNET_WIN32	/* New stuff, not ported to Win32 yet */
+#include "pack.h"
 #include "url.h"
 #include "conn.h"
 #include "server.h"

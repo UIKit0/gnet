@@ -1,0 +1,86 @@
+<!-- ##### SECTION Title ##### -->
+pack
+
+<!-- ##### SECTION Short_Description ##### -->
+Data packing and unpacking.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Perl/python style functions for converting a list of data to an array
+of bytes (packing) and back again (unpacking).
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gnet_pack ##### -->
+<para>
+
+</para>
+
+@format: 
+@buffer: 
+@len: 
+@Varargs: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@str: 
+
+
+<!-- ##### FUNCTION gnet_pack_strdup ##### -->
+<para>
+
+</para>
+
+@format: 
+@buffer: 
+@Varargs: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@str: 
+
+
+<!-- ##### FUNCTION gnet_vpack ##### -->
+<para>
+
+</para>
+
+@format: 
+@buffer: 
+@len: 
+@args: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@str: 
+
+
+<!-- ##### FUNCTION gnet_unpack ##### -->
+<para>
+
+</para>
+
+@format: 
+@buffer: 
+@len: 
+@Varargs: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@str: 
+
+
+<!-- ##### FUNCTION gnet_vunpack ##### -->
+<para>
+
+</para>
+
+@format: 
+@buffer: 
+@len: 
+@args: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@str: 
+
+

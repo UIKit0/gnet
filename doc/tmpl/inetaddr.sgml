@@ -1,8 +1,8 @@
 <!-- ##### SECTION Title ##### -->
-Internet address module
+Internet address
 
 <!-- ##### SECTION Short_Description ##### -->
-Internet address functions.
+Internet address.
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
@@ -15,6 +15,12 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 </para>
 
+<!-- ##### STRUCT GInetAddr ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION gnet_inetaddr_new ##### -->
 <para>
 
@@ -23,6 +29,19 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @name: 
 @port: 
 @Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@func: 
+@data: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_new_async ##### -->
@@ -172,6 +191,69 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @port: 
 
 
+<!-- ##### FUNCTION gnet_inetaddr_is_canonical ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_internet ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_private ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_reserved ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_loopback ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_multicast ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_broadcast ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_gethostname ##### -->
 <para>
 
@@ -181,6 +263,50 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 
 <!-- ##### FUNCTION gnet_inetaddr_gethostaddr ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_autodetect_internet_interface ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_interface_to ##### -->
+<para>
+
+</para>
+
+@addr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_internet_interface ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_internet_domainname ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@domainname: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_list_interfaces ##### -->
 <para>
 
 </para>

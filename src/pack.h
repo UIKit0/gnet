@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000, 2001  David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -25,14 +25,12 @@
 
 #include "glib.h"
 
-gint gnet_pack (const gchar* format, gchar* str, const guint len, ...);
-gint gnet_vpack (const gchar* format, gchar* str, const guint len, va_list args);
-gint gnet_pack_strdup (const gchar* format, gchar** str, ...); /* NOT DONE */
+gint gnet_pack (const gchar* format, gchar* buffer, const guint len, ...);
+gint gnet_pack_strdup (const gchar* format, gchar** buffer, ...);
+gint gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args);
      
-gint gnet_calcsize (const gchar* format); /* UNTESTED */
-     
-gint gnet_unpack (const gchar* format, gchar* str, gint len, ...);
-gint gnet_vunpack (const gchar* format, gchar* str, gint len, va_list args);
+gint gnet_unpack (const gchar* format, gchar* buffer, gint len, ...);
+gint gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args);
 
 #endif /* GNET_EXPERIMENTAL */
 

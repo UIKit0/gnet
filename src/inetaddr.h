@@ -145,7 +145,7 @@ void gnet_inetaddr_unref (GInetAddr* ia);
 
 /* ********** */
 
-gchar* gnet_inetaddr_get_name (GInetAddr* ia);
+  gchar* gnet_inetaddr_get_name (/* const */ GInetAddr* ia);
 
 GInetAddrGetNameAsyncID
 gnet_inetaddr_get_name_async (GInetAddr* ia, 
@@ -154,7 +154,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 
 void gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
 
-gchar* gnet_inetaddr_get_canonical_name (GInetAddr* ia);
+gchar* gnet_inetaddr_get_canonical_name (const GInetAddr* ia);
 
 gint gnet_inetaddr_get_port (const GInetAddr* ia);
 
@@ -192,10 +192,10 @@ GInetAddr* gnet_inetaddr_gethostaddr (void);
 /* ********** */
 
 GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
-GInetAddr* gnet_inetaddr_get_interface_to (GInetAddr* addr);
+GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* addr);
 GInetAddr* gnet_inetaddr_get_internet_interface (void);
 
-gboolean   gnet_inetaddr_is_internet_domainname (gchar* domainname);
+gboolean   gnet_inetaddr_is_internet_domainname (const gchar* name);
 
 
 /* ********** */

@@ -1,9 +1,16 @@
 <!doctype book PUBLIC "-//Davenport//DTD DocBook V3.0//EN" [
 <!entity gnet SYSTEM "sgml/gnet.sgml">
 <!entity inetaddr SYSTEM "sgml/inetaddr.sgml">
-<!entity mcast SYSTEM "sgml/mcast.sgml">
 <!entity tcp SYSTEM "sgml/tcp.sgml">
 <!entity udp SYSTEM "sgml/udp.sgml">
+<!entity mcast SYSTEM "sgml/mcast.sgml">
+<!entity iochannel SYSTEM "sgml/iochannel.sgml">
+<!entity url SYSTEM "sgml/url.sgml">
+<!entity conn SYSTEM "sgml/conn.sgml">
+<!entity server SYSTEM "sgml/server.sgml">
+<!entity pack SYSTEM "sgml/pack.sgml">
+<!entity md5 SYSTEM "sgml/md5.sgml">
+<!entity sha SYSTEM "sgml/sha.sgml">
 ]>
 
 <book>
@@ -128,7 +135,7 @@ AM_PATH_GNET(&lt;version number&gt;,
 	</programlisting>
 
 	Where &lt;version number&gt; is the version of GNet you're
-	using (e.g. 0.1.8).  You can get the version number by doing
+	using (e.g. 1.0.4).  You can get the version number by doing
 	<userinput>gnet-config --version</userinput>.
 
       </para>
@@ -213,6 +220,11 @@ AM_PATH_GNET(&lt;version number&gt;,
 	code and I will include it.
       </para>
 
+      <para>
+	There are also UDP versions of the echoclient and echoserver
+	included.
+      </para>
+
     </sect1>
 
     <sect1 id="hfetch">
@@ -242,72 +254,22 @@ AM_PATH_GNET(&lt;version number&gt;,
 
       <para>
 	Programming wise, it demonstrates how to create a mcast_socket
-	for receiving.  It would be neat if someone wrote a good SDR
-	program - the only ok one I know of is written in TCL (and I
-	wrote one in Java, but it's barely ok, though usable - see the
-	<ulink url="http://www.eecs.umich.edu/~dhelder/jsd"> JSD
-	homepage</ulink>).  No, wait, don't - Jungle Monkey could
-	easily be improved to do everything SDR does.
+	for receiving.
       </para>
     </sect1>
 
 
     <sect1 id="ljoust">
-      <title>ljoust</title>
+      <title>Llama Joust</title>
 
       <para>
 	ljoust is Networked Llama Joust.  You control a flying llama
-	and can fly around the screen and bounce off things.  It's
-	networked, so you can play with your friends.  The game in
-	incomplete - there is no llama-to-llama collision detection
-	and no scoring.
+	and can fly around the screen and bounce off things.  It uses
+	GNet's multicast for the networking and GTK for the GUI.  The
+	game in incomplete - there is no llama-to-llama collision
+	detection and no scoring.
       </para>
 
-      <para>
-	To compile ljoust, type <userinput>make ljoust</userinput> in
-	the example directory.  You will need GTK to compile it.  It
-	is very incomplete and there is probably a better way to do
-	the graphics.  Really it needs some sort of variable frame
-	rate (right now it tries to update.  Feel free to use it as a
-	base for your own game.
-      </para>
-    </sect1>
-
-    <sect1 id="dnstest">
-      <title>dnstest</title>
-
-      <para>
-	dnstest demonstrates how to use
-	<function>gnet_inetaddr_new_nonblock</function> and
-	<function>gnet_inetaddr_get_name_nonblock</function>.
-      </para>
-    </sect1>
-
-
-    <sect1 id="jmtransfer">
-      <title>jmtransfer programs</title>
-
-      <para>
-	jmtransfer is used for sending and receiving a stream reliably
-	using IP Multicast.  jmtransfer is made up of two programs:
-	jmsend and jmreceive.  They demonstrate how to use
-	mcast_sockets.  jmtransfer used to be used by Jungle Monkey.
-	Warning: These programs will require a lot of tuning before
-	they should be used by real programs.  They are basically a
-	naive implementation of Scalable Reliable Multicast.
-      </para>
-    </sect1>
-
-    <sect1 id="hostinfo">
-      <title>hostinfo</title>
-
-      <para>
-	hostinfo prints information about the host such as the host's
-	address and interfaces.  This requires
-	inetaddr_list_interfaces, which is static in inetaddr.  If you
-	want to play with this, you'll need to make it global and then
-	recompile.
-      </para>
     </sect1>
 
   </chapter>
@@ -325,9 +287,16 @@ AM_PATH_GNET(&lt;version number&gt;,
 
     &gnet;
     &inetaddr;
-    &mcast;
     &tcp;
     &udp;
+    &mcast;
+    &iochannel;
+    &url;
+    &conn;
+    &server;
+    &pack;
+    &md5;
+    &sha;
     
   </chapter>
 </book>

@@ -56,7 +56,7 @@ main(int argc, char** argv)
   /* Print interfaces */
   g_print ("interfaces:\n");
 
-  interfaces = gnet_private_inetaddr_list_interfaces();
+  interfaces = gnet_inetaddr_list_interfaces();
 
   for (i = interfaces; i != NULL; i = g_list_next(i))
     {

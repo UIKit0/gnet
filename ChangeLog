@@ -1,3 +1,17 @@
+Wed Feb 14 20:57:07 2001  David Helder  <dhelder@umich.edu>
+
+	* src/pack.c: Implemented pack_strdup.  Removed calcsize - not
+	   useful.
+
+	* src/inetaddr.c (gnet_gethostbyaddr): Fix locking.  We did not
+	   hold the lock when we accessed the hostent struct.  This only
+	   affects software that uses threads on systems without
+	   gethostby{name,addr}_r
+
+	* tests/: Moved some examples here 
+
+	* doc/: Rebuilt, cleaned up
+
 Tue Jan 23 13:11:03 2001  David Helder  <dhelder@umich.edu>
 
 	* configure.in: Fixed --enable-debug macro

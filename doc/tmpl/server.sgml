@@ -1,0 +1,61 @@
+<!-- ##### SECTION Title ##### -->
+Server
+
+<!-- ##### SECTION Short_Description ##### -->
+TCP Server
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Server represents a TCP server.  A callback is called when there's
+a new connection.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GServer ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GServerStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GServerFunc ##### -->
+<para>
+
+</para>
+
+@server: 
+@status: 
+@conn: 
+@user_data: 
+
+
+<!-- ##### FUNCTION gnet_server_new ##### -->
+<para>
+
+</para>
+
+@interface: 
+@port: 
+@force_port: 
+@func: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_server_delete ##### -->
+<para>
+
+</para>
+
+@server: 
+
+

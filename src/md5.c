@@ -315,7 +315,7 @@ struct _GMD5
 
 
 GMD5*           
-gnet_md5_new (guint8 const* buffer, guint length)
+gnet_md5_new (const guint8* buffer, guint length)
 {
   GMD5* gmd5;
 

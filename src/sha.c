@@ -435,7 +435,7 @@ struct _GSHA
 
 
 GSHA*           
-gnet_sha_new (guchar const* buffer, guint length)
+gnet_sha_new (const guint8* buffer, guint length)
 {
   GSHA* gsha;
 

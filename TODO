@@ -120,6 +120,8 @@ Undecided (things discussed, but not decided on)
     You shouldn't have to bind a connecting socket, so this may not be
     needed.  (Well, sometimes you do for UDP.)
 
+    GConn does this, so it may not be necessary.
+
 - Support out-of-band data.  How useful is this?  How portable is
     this?
 

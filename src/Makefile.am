@@ -41,11 +41,11 @@ gnetinclude_HEADERS = 		\
 	conn.h			\
 	server.h
 
-#EXTRA_PROGRAMS = pack unpack
+EXTRA_PROGRAMS = pack
 
-#pack_SOURCES =		\
-#	pack.c		\
-#	packtest.c
+pack_SOURCES =		\
+	pack.c		\
+	packtest.c
 
 #unpack_SOURCES =	\
 #	pack.c		\

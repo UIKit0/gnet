@@ -1,0 +1,102 @@
+<!-- ##### SECTION Title ##### -->
+SHA
+
+<!-- ##### SECTION Short_Description ##### -->
+SHA Hash
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GSHA ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GNET_SHA_HASH_LENGTH ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gnet_sha_new ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@length: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_new_string ##### -->
+<para>
+
+</para>
+
+@str: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_delete ##### -->
+<para>
+
+</para>
+
+@gsha: 
+
+
+<!-- ##### FUNCTION gnet_sha_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_hash ##### -->
+<para>
+
+</para>
+
+@gsha: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_get_digest ##### -->
+<para>
+
+</para>
+
+@gsha: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_get_string ##### -->
+<para>
+
+</para>
+
+@gsha: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_copy_string ##### -->
+<para>
+
+</para>
+
+@gsha: 
+@buffer: 
+
+

@@ -1,8 +1,8 @@
 <!-- ##### SECTION Title ##### -->
-TCP module
+TCP
 
 <!-- ##### SECTION Short_Description ##### -->
-Tcp socket (stream) functions.
+Tcp socket (stream).
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
@@ -14,6 +14,12 @@ by calling tcp_socket_new or tcp_socket_port_new.
 <para>
 
 </para>
+
+<!-- ##### STRUCT GTcpSocket ##### -->
+<para>
+
+</para>
+
 
 <!-- ##### FUNCTION gnet_tcp_socket_connect ##### -->
 <para>
@@ -169,11 +175,36 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @Returns: 
 
 
+<!-- ##### ENUM GNetTOS ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_set_tos ##### -->
+<para>
+
+</para>
+
+@socket: 
+@tos: 
+
+
 <!-- ##### FUNCTION gnet_tcp_socket_server_new ##### -->
 <para>
 
 </para>
 
+@port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_new2 ##### -->
+<para>
+
+</para>
+
+@iface: 
 @port: 
 @Returns: 
 

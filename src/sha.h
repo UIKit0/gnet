@@ -30,7 +30,7 @@ typedef void (*GSHAAsyncFunc)(GSHA* sha, gpointer user_data);
 /* if sha is NULL, there is an error. */
 
 
-GSHA*           gnet_sha_new (guint8 const* buffer, guint length);
+GSHA*           gnet_sha_new (const guint8* buffer, guint length);
 /* TODO: GSHA*  gnet_sha_new_file (gchar* pathname); */
 GSHA*		gnet_sha_new_string (gchar* str);
 void            gnet_sha_delete (GSHA* gsha);

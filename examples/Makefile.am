@@ -2,13 +2,13 @@
 
 @SET_MAKE@
 
-EXTRA_PROGRAMS = sdr jmsend jmreceive hfetch echoserver echoclient \
-		 hostinfo dnstest ljoust pack unpack hash \
-		 echoserver-udp echoclient-udp
+EXTRA_PROGRAMS = echoserver echoclient 		\
+		 echoserver-udp echoclient-udp	\
+		 hfetch sdr ljoust 	
 
-CLEANFILES = sdr jmsend jmreceive hfetch echoserver echoclient \
-	     hostinfo dnstest ljoust pack hash \
-	     echoserver-udp echoclient-udp
+CLEANFILES = 	 echoserver echoclient 		\
+		 echoserver-udp echoclient-udp	\
+		 hfetch sdr ljoust 	
 
 INCLUDES += `gnet-config --cflags`
 LDFLAGS += `gnet-config --libs`
@@ -16,12 +16,6 @@ LDFLAGS += `gnet-config --libs`
 
 ##########
 # Main examples
-
-sdr_SOURCES = \
-	sdr.c
-
-hfetch_SOURCES = 	\
-	hfetch.c
 
 echoserver_SOURCES = 	\
 	echoserver.c
@@ -35,51 +29,21 @@ echoserver_udp_SOURCES = \
 echoclient_udp_SOURCES = \
 	echoclient-udp.c
 
-dnstest_SOURCES =	\
-	dnstest.c
+sdr_SOURCES = \
+	sdr.c
 
-hash_SOURCES =		\
-	hash.c
-
-pack_SOURCES =		\
-	pack.c
-
-unpack_SOURCES =	\
-	unpack.c
-
-
-##########
-# jmtransfer examples
-
-jmsend_SOURCES = 	\
-	jmsend.c 	\
-	jmtransfer.c	\
-	jmtransfer.h
-
-jmreceive_SOURCES = 	\
-	jmreceive.c	\
-	jmtransfer.c	\
-	jmtransfer.h
-
-
-##########
-# ljoust requires gtk
+hfetch_SOURCES = 	\
+	hfetch.c
 
 ljoust:
 	$(CC) ljoust.c -o ljoust `gtk-config --cflags --libs` `gnet-config --cflags --libs`
 
 
-##########
-# hostinfo is out-of-date
-
-hostinfo_SOURCES = 	\
-	hostinfo.c
 
 
 ########################################
 
-examples: echoserver echoclient echoserver-udp echoclient-udp \
-	 hfetch sdr dnstest
-
-jmtransfer: jmreceive jmsend
-
+examples: echoserver echoclient 	\
+	  echoserver-udp echoclient-udp \
+	  hfetch sdr			\
+	  dnstest hostinfo

@@ -27,7 +27,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#include <gnet.h>
+#include <gnet/gnet.h>
 
 
 static void sha_cb (GSHA* sha, gpointer user_data);

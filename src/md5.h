@@ -24,7 +24,7 @@ extern "C" {
 typedef struct _GMD5 GMD5;
 #define GNET_MD5_HASH_LENGTH	16	/* in bytes */
 
-GMD5*           gnet_md5_new (guchar const* buffer, guint length);
+GMD5*           gnet_md5_new (const guchar* buffer, guint length);
 GMD5*		gnet_md5_new_string (gchar* str);
 void            gnet_md5_delete (GMD5* gmd5);
 

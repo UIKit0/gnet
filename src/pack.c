@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000, 2001  David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -20,17 +20,11 @@
 #include "pack.h"
 #include <string.h>
 
+
+static gint vcalcsize (const gchar* format, va_list args);
+
+static int strlenn(char* str, int n);
 static void flipmemcpy(char* dst, char* src, int n);
-
-static int
-strlenn(char* str, int n)
-{
-  int len = 0;
-
-  while (*str++ && len < n) ++len;
-
-  return len;
-}
 
 
 #define MEMCPY(D,S,N)				\
@@ -79,6 +73,17 @@ strlenn(char* str, int n)
   } while(0)
 
 
+static int
+strlenn(char* str, int n)
+{
+  int len = 0;
+
+  while (*str++ && len < n) ++len;
+
+  return len;
+}
+
+
 static void 
 flipmemcpy(char* dst, char* src, int n)
 {
@@ -100,7 +105,21 @@ flipmemcpy(char* dst, char* src, int n)
 
 /* **************************************** */
 
+/* SIZE of type */
+/* TYPE is actual data type, VTYPE is type according to vargs, TYPESTD
+   is the standard type (in endian or standard mode) */
+#define SIZE(TYPENATIVE, VTYPE, TYPESTD)				\
+  do {									\
+    if (mult == 0) mult = 1;						\
+    n += mult * (!sizemode ? sizeof(TYPENATIVE) : sizeof(TYPESTD));	\
+    for (; mult != 0; mult--) { TYPENATIVE t = (TYPENATIVE) va_arg (args, VTYPE); t=t;} 	\
+    /* mult = 0; */							\
+  } while(0)
+
+
+
 /* PACK does MEMCPY regardless of endian */
+/* TYPE is actual data type, VTYPE is type according to vargs */
 #define PACK(TYPE, VTYPE)					\
   do {								\
     for (mult=(mult?mult:1); mult; --mult)			\
@@ -117,7 +136,7 @@ flipmemcpy(char* dst, char* src, int n)
 
 
 /* PACK2 does memcpy based on endian */
-#define PACK2(TYPENATIVE, VTYPE, TYPESTD, SIZESTD)			\
+#define PACK2(TYPENATIVE, VTYPE, TYPESTD)				\
   do {									\
     for (mult=(mult?mult:1); mult; --mult)				\
       {									\
@@ -158,9 +177,10 @@ flipmemcpy(char* dst, char* src, int n)
 
 /**
  *  gnet_pack:
- *  @format: Pack format (see below)
+ *  @format: Pack format
  *  @buffer: Buffer to pack to
  *  @len: Length of buffer
+ *  @Varargs: Variables to pack from
  *
  *  The pack format string is a list of types.  Each type is
  *  represented by a character.  Most types can be prefixed by an
@@ -229,14 +249,44 @@ gnet_pack (const gchar* format, gchar* buffer, const guint len, ...)
 }
 
 
+/**
+ *  gnet_pack_strdup
+ *  @format: Pack format (see gnet_pack)
+ *  @buffer: Pointer to buffer to allocate and pack to
+ *  @Varargs: Variables to pack from
+ *
+ *  Packs the arguments into an allocated buffer.  Caller is
+ *  responsible for deallocating the buffer.
+ *
+ *  Returns: bytes packed; -1 if error.
+ *
+ **/
 gint
 gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
 {
   va_list args;
+  gint size;
   gint rv;
   
+  g_return_val_if_fail (format, -1);
+  g_return_val_if_fail (buffer, -1);
+
+  /* Get size */
   va_start (args, buffer);
-  rv = gnet_vpack (format, *buffer, 0 /* FIX */, args);
+  size = vcalcsize (format, args);
+  va_end (args);
+  g_return_val_if_fail (size >= 0, -1);
+  if (size == 0)
+    {
+      *buffer = NULL;
+      return 0;
+    }
+
+  *buffer = g_new (gchar, size);
+
+  /* Pack */
+  va_start (args, buffer);
+  rv = gnet_vpack (format, *buffer, size, args);
   va_end (args);
 
   return rv;
@@ -245,6 +295,161 @@ gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
 
 /* **************************************** */
 
+static gint
+vcalcsize (const gchar* format, va_list args)
+{
+  guint n = 0;
+  gchar* p = (gchar*) format;
+  gint mult = 0;
+  gint sizemode = 0;	/* 1 = little, 2 = big */
+
+  if (!format)
+    return 0;
+
+  switch (*p)
+    {
+    case '@':					++p;	break;
+    case '<':	sizemode = 1;			++p;	break;
+    case '>':	
+    case '!':	sizemode = 2;			++p;	break;
+    }
+
+  for (; *p; ++p)
+    {
+      switch (*p)
+	{
+	case 'x':  { n += mult?mult:1;   mult = 0;  		break;  }
+	case 'b':  { SIZE(gint8, int, gint8); 			break;	}
+	case 'B':  { SIZE(guint8, unsigned int, guint8);	break;	}
+
+	case 'h':  { SIZE(short, int, gint16); 			break;  }
+	case 'H':  { SIZE(unsigned short, unsigned int, guint16); break;  }
+
+	case 'i':  { SIZE(int, int, gint32); 			break;  }
+	case 'I':  { SIZE(unsigned int, unsigned int, guint32); break;  }
+
+	case 'l':  { SIZE(long, int, gint32); 			break;  }
+	case 'L':  { SIZE(unsigned long, unsigned int, guint32); break;  }
+
+	case 'f':  { SIZE(float, double, float);		break;  }
+	case 'd':  { SIZE(double, double, double);		break;  }
+
+	case 'v':  { SIZE(void*, void*, void*); 		break;	}
+
+	case 's':
+	  { 
+	    for (mult=(mult?mult:1); mult; --mult)
+	      {
+		char* s; 
+
+		s = va_arg (args, char*);
+		g_return_val_if_fail (s, -1);
+
+		n += strlen(s) + 1;
+	      }
+
+	    mult = 0; 
+	    break;
+	  }
+
+	case 'S':  
+	  { 
+	    if (mult != 0)
+	      n += mult;
+	    else
+	      {
+		char* s; 
+		s = va_arg (args, char*);
+		n += strlen(s);
+	      }
+
+	    mult = 0; 
+	    break; 
+	  }
+
+	case 'r':  
+	  { 
+	    for (mult=(mult?mult:1); mult; --mult)
+	      {
+		char* s; 
+		int ln;
+
+		s = va_arg (args, char*);
+		g_return_val_if_fail (s, -1);
+
+		ln = va_arg (args, int);
+		n += ln;
+	      }
+
+	    mult = 0; 
+	    break;
+	  }
+
+	case 'R':
+	  {
+	    char* s; 
+	    s = va_arg (args, char*);
+
+	    g_return_val_if_fail (s, -1);
+	    g_return_val_if_fail (mult, -1);
+
+	    n += mult;
+	    mult = 0;
+	    break;
+	  }
+
+	case 'p': 
+	  {
+	    for (mult=(mult?mult:1); mult; --mult)
+	      {
+		char* s;
+		int slen;
+
+		s = va_arg (args, char*);
+		g_return_val_if_fail (s, -1);
+
+		slen = strlen(s);
+		n += slen + 1;
+	      }
+
+	    mult = 0;
+	    break;
+	  }
+
+	case '0':case '1':case '2':case '3':case '4':
+	case '5':case '6':case '7':case '8':case '9':
+	  {
+	    mult *= 10;
+	    mult += (*p - '0');
+
+	    break;
+	  }
+
+	case ' ':case '\t':case '\n':  break;
+
+	default:  
+	  g_return_val_if_fail (FALSE, -1);
+	}
+    }
+
+  return n;
+}
+
+
+
+/**
+ *  gnet_vpack:
+ *  @format: Pack format (see gnet_pack)
+ *  @buffer: Buffer to pack to
+ *  @len: Length of buffer
+ *  @args: var args
+ *
+ *  Var arg interface to gnet_pack().  See gnet_pack() for format
+ *  information.
+ *
+ *  Returns: bytes packed; -1 if error.
+ *
+ **/
 gint
 gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 {
@@ -282,22 +487,22 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	  }
 
 
-	case 'b':  { PACK(gint8, int); 				break;	}
+	case 'b':  { PACK(gint8, int); 				 break;	}
 	case 'B':  { PACK(guint8, unsigned int);		break;	}
 
-	case 'h':  { PACK2(short, int, gint16, 2); 		break;  }
-	case 'H':  { PACK2(unsigned short, unsigned int, guint16, 2); break;  }
+	case 'h':  { PACK2(short, int, gint16); 		break;  }
+	case 'H':  { PACK2(unsigned short, unsigned int, guint16); break;  }
 
-	case 'i':  { PACK2(int, int, gint32, 4); 		break;  }
-	case 'I':  { PACK2(unsigned int, unsigned int, guint32, 4); break;  }
+	case 'i':  { PACK2(int, int, gint32); 			break;  }
+	case 'I':  { PACK2(unsigned int, unsigned int, guint32); break;  }
 
-	case 'l':  { PACK2(long, int, gint32, 4); 		break;  }
-	case 'L':  { PACK2(unsigned long, unsigned int, guint32, 4); break;  }
+	case 'l':  { PACK2(long, int, gint32); 			break;  }
+	case 'L':  { PACK2(unsigned long, unsigned int, guint32); break;  }
 
 	case 'f':  { PACK(float, double);			break;  }
 	case 'd':  { PACK(double, double);			break;  }
 
-	case 'v':  { PACK2(void*, void*, void*, 4); 		break;	}
+	case 'v':  { PACK2(void*, void*, void*); 		break;	}
 
 	case 's':
 	  { 
@@ -440,79 +645,6 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 
 /* **************************************** */
 
-gint
-gnet_calcsize (const gchar* format)
-{
-  guint n = 0;
-  gchar* p = (gchar*) format;
-  gint mult = 0;
-  gint sizemode = 0;	/* 1 = little, 2 = big */
-
-  if (!format)
-    return 0;
-
-  switch (*p)
-    {
-    case '@':					++p;	break;
-    case '<':	sizemode = 1;			++p;	break;
-    case '>':	
-    case '!':	sizemode = 2;			++p;	break;
-    }
-
-  for (; *p; ++p)
-    {
-      int size = 0;
-
-      switch (*p)
-	{
-	case 'b':case 'B':case 'x':	{ size = 1; break; }
-	case 'h':case 'H': { size = (sizemode?2:sizeof(short));	break; }
-	case 'i':case 'I': { size = (sizemode?4:sizeof(int));	break; }
-	case 'l':case 'L': { size = (sizemode?4:sizeof(long));	break; }
-	case 'f':  { size = sizeof(float); break; }
-	case 'd':  { size = sizeof(double); break;}
-	case 'v':  { size = sizeof(void*); break;}
-
-	  /* string: size = 1 * mult */
-	case 's':  { size = 1; break; }
-
-	  /* null-padded string: size = mult ? mult : 0 */
-	case 'S':  { size = mult; mult = 1; break; }
-
-	  /* raw: size = 0 */
-	case 'r':  { size = 0; break; }
-	case 'R':  { size = 0; break; }
-
-	  /* pascal: size = 1 * mult */
-	case 'p':  { size = 1; break; }
-
-	case '0':case '1':case '2':case '3':case '4':
-	case '5':case '6':case '7':case '8':case '9':
-	  {
-	    mult *= 10;
-	    mult += (*p - '0');
-
-	    break;
-	  }
-
-	case ' ':case '\t':case '\n':  break;
-
-	default:  g_return_val_if_fail (FALSE, -1);
-	}
-
-      if (size)
-	{
-	  n += size * (mult?mult:1);
-	  mult = 0;  
-	}
-    }
-
-  return n;
-}
-
-
-/* **************************************** */
-
 #define UNPACK(TYPE)						\
   do {								\
     for (mult=(mult?mult:1); mult; --mult)			\
@@ -528,7 +660,7 @@ gnet_calcsize (const gchar* format)
    } while(0)
 
 
-#define UNPACK2(TYPENATIVE, TYPESTD, SIZESTD)				\
+#define UNPACK2(TYPENATIVE, TYPESTD)					\
   do {									\
     for (mult=(mult?mult:1); mult; --mult)				\
       {									\
@@ -568,9 +700,10 @@ gnet_calcsize (const gchar* format)
 
 /**
  *  gnet_unpack:
- *  @format: Unpack format (see below)
+ *  @format: Unpack format
  *  @buffer: Buffer to unpack from
  *  @len: Length of buffer
+ *  @Varargs: Addresses of variables to unpack to
  *
  *  The unpack format string is a list of types.  Each type is
  *  represented by a character.  Most types can be prefixed by an
@@ -636,6 +769,19 @@ gnet_unpack (const gchar* format, gchar* buffer, gint len, ...)
 }
 
 
+/**
+ *  gnet_vunpack:
+ *  @format: Unpack format (see below)
+ *  @buffer: Buffer to unpack from
+ *  @len: Length of buffer
+ *  @args: var args
+ *
+ *  Var arg interface to gnet_unpack().  See gnet_unpack() for format
+ *  information.
+ *
+ *  Returns: bytes packed; -1 if error.
+ *
+ **/
 gint 
 gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 {
@@ -674,19 +820,19 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 	case 'b':  { UNPACK(gint8); 			break;	}
 	case 'B':  { UNPACK(guint8);			break;	}
 
-	case 'h':  { UNPACK2(short, gint16, 2); 	break;  }
-	case 'H':  { UNPACK2(unsigned short, guint16, 2);break;  }
+	case 'h':  { UNPACK2(short, gint16); 		break;  }
+	case 'H':  { UNPACK2(unsigned short, guint16);	break;  }
 
-	case 'i':  { UNPACK2(int, gint32, 4); 		break;  }
-	case 'I':  { UNPACK2(unsigned int, guint32, 4); break;  }
+	case 'i':  { UNPACK2(int, gint32); 		break;  }
+	case 'I':  { UNPACK2(unsigned int, guint32); 	break;  }
 
-	case 'l':  { UNPACK2(long, gint32, 4); 		break;  }
-	case 'L':  { UNPACK2(unsigned long, guint32, 4);break;  }
+	case 'l':  { UNPACK2(long, gint32); 		break;  }
+	case 'L':  { UNPACK2(unsigned long, guint32);	break;  }
 
 	case 'f':  { UNPACK(float);			break;  }
 	case 'd':  { UNPACK(double);			break;  }
 
-	case 'v':  { UNPACK2(void*, void*, 4); 		break;	}
+	case 'v':  { UNPACK2(void*, void*); 		break;	}
 
 	case 's':
 	  { 

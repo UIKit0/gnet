@@ -630,7 +630,7 @@ gnet_tcp_socket_get_port(const GTcpSocket* socket)
 /* **************************************** */
 
 /**
- *  gnet_tcp_socket_get_port:
+ *  gnet_tcp_socket_set_tos:
  *  @socket: GTcpSocket to set the type-of-service of
  *  @tos: Type of service (in tcp.h)
  *

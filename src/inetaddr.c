@@ -148,7 +148,6 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 
     G_LOCK (gethostbyname);
     he = gethostbyname(hostname);
-    G_UNLOCK (gethostbyname);
 
     if (he != NULL && he->h_addr_list[0] != NULL)
       {
@@ -163,6 +162,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 
 	rv = TRUE;
       }
+    G_UNLOCK (gethostbyname);
   }
 #else
 #ifdef GNET_WIN32
@@ -304,9 +304,9 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 
     G_LOCK (gethostbyname);
     he = gethostbyaddr(addr, length, type);
-    G_UNLOCK (gethostbyname);
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
+    G_UNLOCK (gethostbyname);
   }
 #else
 #ifdef GNET_WIN32
@@ -925,7 +925,7 @@ gnet_inetaddr_unref(GInetAddr* ia)
  *
  **/
 gchar* 
-gnet_inetaddr_get_name(GInetAddr* ia)
+gnet_inetaddr_get_name(/* const */ GInetAddr* ia)
 {
   g_return_val_if_fail (ia != NULL, NULL);
 
@@ -1289,7 +1289,7 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
  *
  **/
 gchar* 
-gnet_inetaddr_get_canonical_name(GInetAddr* ia)
+gnet_inetaddr_get_canonical_name(const GInetAddr* ia)
 {
   gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
   guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
@@ -1347,7 +1347,7 @@ gnet_inetaddr_set_port(const GInetAddr* ia, guint port)
  *  Check if the domain name is canonical.  For IPv4, a canonical name
  *  is a dotted decimal name (eg, 141.213.8.59).
  *
- *  Return: TRUE if @name is canonical; FALSE otherwise.
+ *  Returns: TRUE if @name is canonical; FALSE otherwise.
  *
  **/
 gboolean
@@ -1784,7 +1784,7 @@ gnet_inetaddr_autodetect_internet_interface (void)
  *
  **/
 GInetAddr* 
-gnet_inetaddr_get_interface_to (GInetAddr* addr)
+gnet_inetaddr_get_interface_to (const GInetAddr* addr)
 {
   int sockfd;
   struct sockaddr_in myaddr;
@@ -1821,7 +1821,6 @@ gnet_inetaddr_get_interface_to (GInetAddr* addr)
 
 /**
  *  gnet_inetaddr_get_internet_interface:
- *  @addr: address
  *
  *  Find an Internet interface.  This just calls
  *  gnet_inetaddr_list_interfaces() and returns the first one that
@@ -1877,7 +1876,7 @@ gnet_inetaddr_get_internet_interface (void)
 
 
 /**
- *  gnet_inetaddr_is_internet_domainname
+ *  gnet_inetaddr_is_internet_domainname:
  *  @name: Domain name to check
  *
  *  Check if the domain name is a sensible Internet domain name.  This
@@ -1891,7 +1890,7 @@ gnet_inetaddr_get_internet_interface (void)
  *
  **/
 gboolean
-gnet_inetaddr_is_internet_domainname (gchar* name)
+gnet_inetaddr_is_internet_domainname (const gchar* name)
 {
   GInetAddr* addr;
 

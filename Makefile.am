@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src examples doc
+SUBDIRS = src examples tests doc 
 
 @SET_MAKE@
 
