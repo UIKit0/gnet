@@ -875,7 +875,7 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
   if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
     goto error;
   
-  /* Get the socket name - don't care if it fails */
+  /* Get the socket name */
   socklen = sizeof(s->sa);
   if (getsockname(s->sockfd, &s->sa, &socklen) != 0)
     goto error;

@@ -64,11 +64,9 @@ main(int argc, char** argv)
   switch (server_type)
     {
     case NORMAL:
-      g_print ("Normal echo server running\n");
       normal_echoserver(port);
       break;
     case ASYNC:
-      g_print ("Asynchronous echo server running\n");
       async_echoserver(port);
       break;
     case OBJECT:
@@ -86,25 +84,57 @@ main(int argc, char** argv)
 
 /* ************************************************************ */
 
-void
-normal_echoserver(gint port)
+static void normal_sig_int (int signum);
+
+static GTcpSocket* normal_server = NULL;
+
+static void
+normal_echoserver (gint p)
 {
   GTcpSocket* server;
+  GInetAddr*  addr;
+  gchar*      name;
+  gint	      port;
   GTcpSocket* client = NULL;
-  gchar buffer[1024];
-  guint n;
+  gchar       buffer[1024];
+  guint       n;
   GIOChannel* ioclient = NULL;
-  GIOError error;
+  GIOError    error;
 
   /* Create the server */
-  server = gnet_tcp_socket_server_new(port);
-  g_assert (server != NULL);
+  server = gnet_tcp_socket_server_new(p);
+  if (server == NULL)
+    {
+      fprintf (stderr, "Could not create server on port %d\n", p);
+      exit (EXIT_FAILURE);
+    }
+
+  normal_server = server;
+  signal (SIGINT, normal_sig_int);
+
+  /* Print the address */
+  addr = gnet_tcp_socket_get_inetaddr(server);
+  g_assert (addr);
+  name = gnet_inetaddr_get_canonical_name (addr);
+  g_assert (name);
+  port = gnet_inetaddr_get_port (addr);
+  g_print ("Normal echoserver running on %s:%d\n", name, port);
+  gnet_inetaddr_delete (addr);
+  g_free (name);
 
   while ((client = gnet_tcp_socket_server_accept (server)) != NULL)
     {
+      /* Get IOChannel */
       ioclient = gnet_tcp_socket_get_iochannel(client);
-      g_assert (ioclient != NULL);
+      g_assert (ioclient);
 
+      /* Print the address */
+      addr = gnet_tcp_socket_get_inetaddr(client);
+      g_assert (addr);
+      name = gnet_inetaddr_get_canonical_name (addr);
+      g_assert (name);
+      port = gnet_inetaddr_get_port (addr);
+      g_print ("Accepted connection from %s:%d\n", name, port);
 
       while ((error = gnet_io_channel_readline(ioclient, buffer, sizeof(buffer), &n)) 
 	     == G_IO_ERROR_NONE && (n > 0))
@@ -117,9 +147,22 @@ normal_echoserver(gint port)
       if (error != G_IO_ERROR_NONE)
 	fprintf (stderr, "\nReceived error %d (closing socket).\n", error);
 
-      g_io_channel_unref(ioclient);
-      gnet_tcp_socket_delete(client);
+      g_io_channel_unref (ioclient);
+      gnet_tcp_socket_delete (client);
+
+      g_print ("Connection from %s:%d closed\n", name, port);
+
+      gnet_inetaddr_delete (addr);
+      g_free (name);
     }
+}
+
+
+static void 
+normal_sig_int (int signum)
+{
+  gnet_tcp_socket_delete (normal_server);
+  exit (EXIT_FAILURE);
 }
 
 
@@ -128,8 +171,11 @@ normal_echoserver(gint port)
 typedef struct
 {
   GTcpSocket* socket;
+  gchar* name;
+  gint port;
   GIOChannel* iochannel;
-  guint out_watch;
+  guint watch_flags;
+  guint watch;
   gchar buffer[1024];
   guint n;
 
@@ -143,28 +189,51 @@ static void async_accept (GTcpSocket* server_socket,
 static gboolean async_client_iofunc (GIOChannel* client, 
 				     GIOCondition condition, gpointer data);
 
+static void async_sig_int (int signum);
+
+static GTcpSocket* async_server = NULL;
 
 
 static void
 clientstate_delete (ClientState* state)
 {
-  if (state->out_watch)
-    g_source_remove (state->out_watch);
+  g_source_remove (state->watch);
   g_io_channel_unref (state->iochannel);
   gnet_tcp_socket_delete (state->socket);
-  g_free(state);
+  g_free (state->name);
+  g_free (state);
 }
 
 
 static void 
-async_echoserver(gint port)
+async_echoserver(gint p)
 {
   GTcpSocket* server;
-  GMainLoop* main_loop = NULL;
+  GInetAddr*  addr;
+  gchar*      name;
+  gint	      port;
+  GMainLoop*  main_loop = NULL;
 
   /* Create the server */
-  server = gnet_tcp_socket_server_new(port);
-  g_assert (server != NULL);
+  server = gnet_tcp_socket_server_new(p);
+  if (server == NULL)
+    {
+      fprintf (stderr, "Could not create server on port %d\n", p);
+      exit (EXIT_FAILURE);
+    }
+
+  async_server = server;
+  signal (SIGINT, async_sig_int);
+
+  /* Print the address */
+  addr = gnet_tcp_socket_get_inetaddr(server);
+  g_assert (addr);
+  name = gnet_inetaddr_get_canonical_name (addr);
+  g_assert (name);
+  port = gnet_inetaddr_get_port (addr);
+  g_print ("Async echoserver running on %s:%d\n", name, port);
+  gnet_inetaddr_delete (addr);
+  g_free (name);
 
   /* Create the main loop */
   main_loop = g_main_new(FALSE);
@@ -182,21 +251,33 @@ async_accept (GTcpSocket* server, GTcpSocket* client, gpointer data)
 {
   if (client)
     {
+      GInetAddr*  addr;
+      gchar*      name;
+      gint	  port;
       GIOChannel* client_iochannel;
       ClientState* client_state;
+
+      /* Print the address */
+      addr = gnet_tcp_socket_get_inetaddr(client);
+      g_assert (addr);
+      name = gnet_inetaddr_get_canonical_name (addr);
+      g_assert (name);
+      port = gnet_inetaddr_get_port (addr);
+      g_print ("Accepted connection from %s:%d\n", name, port);
+      gnet_inetaddr_delete (addr);
 
       client_iochannel = gnet_tcp_socket_get_iochannel (client);
       g_assert (client_iochannel != NULL);
 
       client_state = g_new0(ClientState, 1);
       client_state->socket = client;
+      client_state->name = name;
+      client_state->port = port;
       client_state->iochannel = client_iochannel;
-
-      g_io_add_watch (client_iochannel, 
-		      G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
-		      async_client_iofunc, client_state);
-
-      g_io_channel_unref (client_iochannel);
+      client_state->watch_flags = G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL;
+      client_state->watch = 
+	g_io_add_watch (client_iochannel, client_state->watch_flags,
+			async_client_iofunc, client_state);
     }
   else
     {
@@ -208,38 +289,27 @@ async_accept (GTcpSocket* server, GTcpSocket* client, gpointer data)
 
 /*
 
-  This callback is called for (IN|ERR) or OUT.  
-
-  We add the watch for (IN|ERR) when the client connects in
-  async_server_iofunc().  We remove it if the connection is closed
-  (i.e. we read 0 bytes) or if there's an error.
-
-  We add the watch for OUT when we have something to write and remove
-  it when we're done writing or when the connection is closed.
-
-  On some systems GLib has problems if you use more than one watch on
-  a file descriptor.  The problem is GLib assumes descriptors can
-  appear twice in the array passed to poll(), which is true on some
-  systems but not others (Linux).
-
-  See GLib bug 11059 on http://bugs.gnome.org.
-  Look at Jungle Monkey for an example of how to work around the bug.
-
+  Client IO callback.  Called for errors, input, or output.  When
+  there is input, we reset the watch with the output flag (if we
+  haven't already).  When there is no more data, the watch is reset
+  without the output flag.
+  
  */
 gboolean
 async_client_iofunc (GIOChannel* iochannel, GIOCondition condition, 
 		     gpointer data)
 {
   ClientState* client_state = (ClientState*) data;
+  gboolean rv = TRUE;
 
   g_assert (client_state != NULL);
-
-/*    fprintf (stderr, "async_client_iofunc %d (in = %d, out = %d, err = %d, hup = %d, pri = %d\n", condition, G_IO_IN, G_IO_OUT, G_IO_ERR, G_IO_HUP, G_IO_PRI); */
+  
 
   /* Check for socket error */
-  if (condition & G_IO_ERR)
+  if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
     {
-      fprintf (stderr, "Client socket error\n");
+      fprintf (stderr, "Client socket error (%s:%d)\n", 
+	       client_state->name, client_state->port);
       goto error;
     }
 
@@ -259,7 +329,8 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Check for socket error */
       if (error != G_IO_ERROR_NONE)
 	{
-	  fprintf (stderr, "Client read error: %d\n", error);
+	  fprintf (stderr, "Client read error (%s:%d): %d\n", 
+		   client_state->name, client_state->port, error);
 	  goto error;
 	}
 
@@ -267,6 +338,8 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
          closed */
       else if (bytes_read == 0)
 	{
+	  g_print ("Connection from %s:%d closed\n", 
+		   client_state->name, client_state->port);
 	  goto error;
 	}
 
@@ -275,12 +348,15 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	{
 	  g_assert (bytes_read > 0);
 
-	  /* If there isn't an out_watch, add one. */
-	  if (client_state->out_watch == 0)
+	  /* If there isn't an OUT watch, add one. */
+	  if (!(client_state->watch_flags & G_IO_OUT))
 	    {
-	      client_state->out_watch = 
-		g_io_add_watch(iochannel, G_IO_OUT, 
+	      g_source_remove (client_state->watch);
+	      client_state->watch_flags |= G_IO_OUT;
+	      client_state->watch = 
+		g_io_add_watch(iochannel, client_state->watch_flags,
 			       async_client_iofunc, client_state);
+	      rv = FALSE;
 	    }
 
 	  client_state->n += bytes_read;
@@ -299,9 +375,9 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
 
      if (error != G_IO_ERROR_NONE) 
        {
-	 fprintf (stderr, "Client write error: %d\n", error);
-	 clientstate_delete (client_state);
-	 return FALSE;
+	 fprintf (stderr, "Client write error (%s:%d): %d\n", 
+		  client_state->name, client_state->port, error);
+	 goto error;
        }
 
      else if (bytes_written > 0)
@@ -315,19 +391,31 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	 client_state->n -= bytes_written;
        }
 
-     /* Check if done */
+     /* Remove OUT watch if done */
      if (client_state->n == 0)
        {
-	 client_state->out_watch = 0;
-	 return FALSE;
+	 client_state->watch_flags &= ~G_IO_OUT;
+	 g_source_remove (client_state->watch);
+	 client_state->watch = 
+	   g_io_add_watch(iochannel, client_state->watch_flags,
+			  async_client_iofunc, client_state);
+	 rv = FALSE;
        }
    }
 
-  return TRUE;
+  return rv;
 
  error:
   clientstate_delete (client_state);
   return FALSE;
+}
+
+
+static void 
+async_sig_int (int signum)
+{
+  gnet_tcp_socket_delete (async_server);
+  exit (EXIT_FAILURE);
 }
 
 

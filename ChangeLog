@@ -1,3 +1,19 @@
+Sun Feb 10 15:27:36 2002  David Helder  <dhelder@umich.edu>
+
+	* examples/echoserver.c: Print more.
+	* examples/echoserver.c (async_accept): Don't unref iochannel
+	   since we're saving it.
+	* examples/echoserver.c: Clean up watch logic for async
+	   server so that there's only a single watch on a socket. (This
+	   works around the GLib poll bug.)
+
+	* src/socks-private.h: Fix dport size.
+
+	* src/socks-private.c (gnet_private_socks_tcp_socket_server_accept): 
+	   Recreate server socket with same port.  If the programmer
+	   specified 0 initially (for an ephemeral port) and cannot
+	   get the same port, this fails.  
+
 Mon Feb  4 16:52:58 2002  David Helder  <dhelder@umich.edu>
 
 	* src/tcp.c: Doc updates

@@ -36,7 +36,7 @@ struct socks5_h {
 	guint8  rsv;
 	guint8  atyp;	
 	guint32 dip;
-	guint32 dport;
+	guint16 dport;
 };
 
 #define GNET_DEFAULT_SOCKS_VERSION 5

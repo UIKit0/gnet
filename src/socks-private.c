@@ -295,7 +295,6 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
   GIOChannel *ioc;
   unsigned char s5r[3];
   struct socks5_h s5h;
-/*    struct sockaddr_in *sa_in; */
   int len;
 
   ioc = gnet_tcp_socket_get_iochannel(socket);
@@ -311,15 +310,13 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
   if ((s5r[0] != 5) || (s5r[1] != 0))
     goto error;
 	
-  /* FIX  sa_in = (struct sockaddr_in*)&bnd->sa;*/
-  
   /* fill in SOCKS5 request */
   s5h.vn = 5;
   s5h.cd = 2;  /* bind */
   s5h.rsv = 0;
   s5h.atyp = 1;
-  s5h.dip = 0; /* FIX: INADDR_ANY? */
-  s5h.dport = g_htons(port);	/* FIX: IS THIS RIGHT? */
+  s5h.dip = 0; /* FIX: this works with nylon; i will check on rfc */
+  s5h.dport = g_htons(port);   
 
   if (gnet_io_channel_writen(ioc, (gchar*)&s5h, 10, &len) != G_IO_ERROR_NONE)
     goto error;
@@ -330,6 +327,10 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
   if (s5h.cd != 0)
     goto error;
 
+  /* Copy the address */
+  GNET_SOCKADDR_IN(socket->sa).sin_addr.s_addr = s5h.dip;
+  GNET_SOCKADDR_IN(socket->sa).sin_port = s5h.dport;
+
   return 0;
 
  error:
@@ -338,11 +339,13 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
 }
 
 
-
+/* XXX 0 server SOCKS compliant? */
+ 
 GTcpSocket*
 gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
 {
-  struct socks5_h s5h;	/* FIX: Server does not reply with a socks5_h, does it? */
+  gint server_port;
+  struct socks5_h s5h;
   int len;
   GIOChannel* iochannel;
   GIOError error;
@@ -351,6 +354,8 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
 
   g_return_val_if_fail (socket, NULL);
 
+  /* Save server port */
+  server_port = g_ntohs(GNET_SOCKADDR_IN(socket->sa).sin_port);
 
   /* this reply reveals the connecting hosts ip and port */
   iochannel = gnet_tcp_socket_get_iochannel(socket);
@@ -362,20 +367,21 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
   /* The client socket is the server socket */
   s = g_new0(GTcpSocket, 1);
   s->sockfd = socket->sockfd;
-  /* FIX: Set s->sa from the server response */
+  GNET_SOCKADDR_IN(s->sa).sin_addr.s_addr = s5h.dip;
+  GNET_SOCKADDR_IN(s->sa).sin_port = s5h.dport;
   s->ref_count = 1;
 
   /* Create a new server socket (we just use the sockfd) */
-  new_socket = gnet_private_socks_tcp_socket_server_new (0 /* FIX */);
+  new_socket = gnet_private_socks_tcp_socket_server_new (server_port);
   if (new_socket == NULL)
     {
-      g_free (s);
+      g_free (s); /* ok, we copied sockfd */
       return NULL;
     }
   
   /* Copy the fd over and delete the new socket */
   socket->sockfd = new_socket->sockfd;
-  g_free (new_socket);
+  g_free (new_socket); /* ok, we copied sockfd */
 
   /* Hand over IOChannel */
   if (socket->accept_watch)

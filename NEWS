@@ -16,6 +16,7 @@ Changes in Gnet
 * MacOSX port
 * read_async and write_async performance fixes
 * Various small compile and configuration fixes
+* Updated best-current-practice examples
 
 
 1.1.0 ("Oatmeal" release)

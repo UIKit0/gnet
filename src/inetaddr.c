@@ -1357,7 +1357,7 @@ gnet_inetaddr_get_port(const GInetAddr* ia)
 {
   g_return_val_if_fail(ia != NULL, -1);
 
-  return (gint) g_ntohs(((struct sockaddr_in*) &ia->sa)->sin_port);
+  return (gint) g_ntohs(GNET_SOCKADDR_IN(ia->sa).sin_port);
 }
 
 
@@ -1374,7 +1374,7 @@ gnet_inetaddr_set_port(const GInetAddr* ia, guint port)
 {
   g_return_if_fail(ia != NULL);
 
-  ((struct sockaddr_in*) &ia->sa)->sin_port = g_htons(port);
+  GNET_SOCKADDR_IN(ia->sa).sin_port = g_htons(port);
 }
 
 
