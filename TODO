@@ -7,6 +7,10 @@ you can help.
 
 
 Features
+- UDP cleanup
+    Packet should copy/delete address
+
+
 - Write a manpage for gnet-config (start with the one for glib).
 
 - Include more protocols

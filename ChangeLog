@@ -1,3 +1,8 @@
+Mon Nov 13 19:49:32 2000  David Helder  <dhelder@umich.edu>
+
+	* examples/echoclient-udp.c: Added
+	* examples/echoserver-udp.c: "
+
 Thu Nov  2 19:26:47 2000  Andrew Lanoix  <alanoix@umich.edu>
 
 	* src/tcp.c: gnet_tcp_socket_new_async_cancel() Win32 version

@@ -3,10 +3,12 @@
 @SET_MAKE@
 
 EXTRA_PROGRAMS = sdr jmsend jmreceive hfetch echoserver echoclient \
-		 hostinfo dnstest ljoust pack unpack hash
+		 hostinfo dnstest ljoust pack unpack hash \
+		 echoserver-udp echoclient-udp
 
 CLEANFILES = sdr jmsend jmreceive hfetch echoserver echoclient \
-	     hostinfo dnstest ljoust pack hash
+	     hostinfo dnstest ljoust pack hash \
+	     echoserver-udp echoclient-udp
 
 INCLUDES += `gnet-config --cflags`
 LDFLAGS += `gnet-config --libs`
@@ -26,6 +28,12 @@ echoserver_SOURCES = 	\
 
 echoclient_SOURCES =	\
 	echoclient.c
+
+echoserver_udp_SOURCES = \
+	echoserver-udp.c
+
+echoclient_udp_SOURCES = \
+	echoclient-udp.c
 
 dnstest_SOURCES =	\
 	dnstest.c
@@ -70,7 +78,8 @@ hostinfo_SOURCES = 	\
 
 ########################################
 
-examples: echoserver echoclient hfetch sdr dnstest
+examples: echoserver echoclient echoserver-udp echoclient-udp \
+	 hfetch sdr dnstest
 
 jmtransfer: jmreceive jmsend
 
