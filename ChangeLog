@@ -1,3 +1,9 @@
+Tue May  6 11:44:33 2003  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): 
+	   Don't delete the addresses in state.  The get deleted
+	   when we call cancel.
+
 Tue Apr 29 13:57:43 2003  David Helder  <dhelder@umich.edu>
 
 	* README (Features): Remove GnomeICU

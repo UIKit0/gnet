@@ -119,8 +119,6 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 
   if (ia_list != NULL) /* Success */
     {
-      GList* i;
-
       g_assert (ia_list);
 
       state->inetaddr_id = NULL;
@@ -147,10 +145,6 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 
       /* Failure: We could not async connect to any address.
          In practice, new_async() rarely fails immediately.  */
-      for (i = state->ia_list; i != NULL; i = i->next)
-	gnet_inetaddr_delete ((GInetAddr*) i->data);
-      g_list_free (state->ia_list);
-
       state->in_callback = TRUE;
       (*state->func)(NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR, 
 		     state->data);

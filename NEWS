@@ -20,6 +20,7 @@ Changes in Gnet
 * Stable release of 1.3 series
 
 
+
 1.3.2 ("Sacrilicious" DEVELOPERS release)
 -----
 * DNS bug fixes
@@ -45,6 +46,18 @@ Changes in Gnet
 * Many API changes
 * gnet_server_new() changed, but the prototype is the same.  Make sure
 	you are using the new version correctly.
+
+
+
+1.1.9 (UNRELEASED)
+-----
+* RPM compile fix
+* Minor leak fixed in the server module
+
+
+1.1.8 ("Square meal 3" release)
+-----
+* Compile fixes
 
 
 1.1.7 ("Square meal 2" release)
