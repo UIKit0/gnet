@@ -21,26 +21,27 @@
 #include "tcp.h"
 
 
-static gboolean gnet_tcp_socket_new_nonblock_cb (GIOChannel* iochannel, 
-						 GIOCondition condition, 
-						 gpointer data);
+static gboolean gnet_tcp_socket_new_async_cb (GIOChannel* iochannel, 
+					      GIOCondition condition, 
+					      gpointer data);
 
-typedef struct _GTcpSocketNonblockState 
+typedef struct _GTcpSocketAsyncState 
 {
   GTcpSocket* socket;
-  GTcpSocketNonblockFunc func;
+  GTcpSocketAsyncFunc func;
   gpointer data;
   gint flags;
+  guint connect_watch;
 
-} GTcpSocketNonblockState;
+} GTcpSocketAsyncState;
 
 
 static void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
-						GInetAddrNonblockStatus status, 
+						GInetAddrAsyncStatus status, 
 						gpointer data);
 
 static void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
-					   GTcpSocketNonblockStatus status, 
+					   GTcpSocketAsyncStatus status, 
 					   gpointer data);
 
 typedef struct _GTcpSocketConnectState 
@@ -48,6 +49,9 @@ typedef struct _GTcpSocketConnectState
   GInetAddr* ia;
   GTcpSocketConnectFunc func;
   gpointer data;
+
+  gpointer inetaddr_id;
+  gpointer tcp_id;
 
 } GTcpSocketConnectState;
 
@@ -60,12 +64,12 @@ typedef struct _GTcpSocketConnectState
  *
  *  A quick and easy GTcpSocket constructor.  This connects to the
  *  specified address and port.  This function does block -
- *  gnet_tcp_socket_connect_nonblock() does not.  Use this function
+ *  gnet_tcp_socket_connect_async() does not.  Use this function
  *  when you're a client connecting to a server and you don't mind
  *  blocking and don't want to mess with GInetAddr's.  You can get the
  *  InetAddr of the socket by calling gnet_tcp_socket_get_inetaddr().
  *
- *  Returns a new TcpSocket, or NULL if there was a failure.
+ *  Returns: A new GTcpSocket, or NULL if there was a failure.
  *
  **/
 GTcpSocket*
@@ -86,7 +90,7 @@ gnet_tcp_socket_connect(gchar* hostname, gint port)
 
 
 /**
- *  gnet_tcp_socket_connect_nonblock:
+ *  gnet_tcp_socket_connect_async:
  *  @hostname: Name of host to connect to
  *  @port: Port to connect to
  *  @func: Callback function
@@ -96,41 +100,63 @@ gnet_tcp_socket_connect(gchar* hostname, gint port)
  *  connects to the specified address and port and then calls the
  *  callback with the data.  Use this function when you're a client
  *  connecting to a server and you don't want to block and don't want
- *  to mess with GInetAddr's.
+ *  to mess with GInetAddr's.  It may call the callback before the
+ *  function returns.  It will call the callback if there is a
+ *  failure.
+ *
+ *  Returns: ID of the connection which can be used with
+ *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
+ *  failure.
  *
  **/
-void
-gnet_tcp_socket_connect_nonblock(gchar* hostname, gint port, 
-				 GTcpSocketConnectFunc func, gpointer data)
+gpointer
+gnet_tcp_socket_connect_async(gchar* hostname, gint port, 
+			      GTcpSocketConnectFunc func, gpointer data)
 {
   GTcpSocketConnectState* state;
+  gpointer id;
 
-  g_return_if_fail(hostname != NULL);
-  g_return_if_fail(func != NULL);
+  g_return_val_if_fail(hostname != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
 
   state = g_new0(GTcpSocketConnectState, 1);
   state->func = func;
   state->data = data;
 
-  gnet_inetaddr_new_nonblock(hostname, port,  
-			     gnet_tcp_socket_connect_inetaddr_cb, state);
+  id = gnet_inetaddr_new_async(hostname, port,  
+			       gnet_tcp_socket_connect_inetaddr_cb, 
+			       state);
+
+  /* Note that gnet_inetaddr_new_async can fail immediately and call
+     our callback which will delete the state.  The users callback
+     would be called in the process. */
+
+  if (id == NULL)
+    return NULL;
+
+  state->inetaddr_id = id;
+
+  return state;
 }
 
 
 
 static void
 gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr, 
-				     GInetAddrNonblockStatus status, 
+				     GInetAddrAsyncStatus status, 
 				     gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
-  if (status == GINETADDR_NONBLOCK_STATUS_OK)
+  if (status == GINETADDR_ASYNC_STATUS_OK)
     {
       state->ia = inetaddr;
 
-      gnet_tcp_socket_new_nonblock(inetaddr, gnet_tcp_socket_connect_tcp_cb, 
-				   state);
+      state->inetaddr_id = NULL;
+      state->tcp_id = gnet_tcp_socket_new_async(inetaddr, 
+						gnet_tcp_socket_connect_tcp_cb, 
+						state);
+      /* Note that this call may delete the state. */
     }
   else
     {
@@ -142,17 +168,44 @@ gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr,
 
 static void 
 gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
-			       GTcpSocketNonblockStatus status, 
+			       GTcpSocketAsyncStatus status, 
 			       gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
-  if (status == GTCP_SOCKET_NONBLOCK_STATUS_OK)
+  if (status == GTCP_SOCKET_ASYNC_STATUS_OK)
     (*state->func)(socket, state->ia, GTCP_CONNECT_STATUS_OK, state->data);
   else
     (*state->func)(NULL, NULL, GTCP_CONNECT_STATUS_TCP_ERROR, state->data);
 
   g_free(state);
+}
+
+
+/**
+ *  gnet_tcp_socket_connect_async_cancel:
+ *  @id: ID of the connection.
+ *
+ *  Cancel an asynchronous connection that started with
+ *  gnet_tcp_socket_connect_async().
+ *
+ */
+void
+gnet_tcp_socket_connect_async_cancel(gpointer id)
+{
+  GTcpSocketConnectState* state = (GTcpSocketConnectState*) id;
+
+  g_return_if_fail (state != NULL);
+
+  if (state->inetaddr_id)
+    {
+      gnet_inetaddr_new_async_cancel(state->inetaddr_id);
+    }
+  else if (state->tcp_id)
+    {
+      gnet_inetaddr_delete(state->ia);
+      gnet_tcp_socket_new_async_cancel(state->tcp_id);
+    }
 }
 
 
@@ -167,7 +220,7 @@ gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket,
  *
  *  Returns a new TcpSocket, or NULL if there was a failure.
  *
- **/
+ */
 GTcpSocket* 
 gnet_tcp_socket_new(const GInetAddr* addr)
 {
@@ -177,6 +230,7 @@ gnet_tcp_socket_new(const GInetAddr* addr)
   g_return_val_if_fail (addr != NULL, NULL);
 
   /* Create socket */
+  s->ref_count = 1;
   s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (s->sockfd < 0)
     {
@@ -200,33 +254,31 @@ gnet_tcp_socket_new(const GInetAddr* addr)
 
 
 /**
- *  gnet_tcp_socket_new_nonblock:
+ *  gnet_tcp_socket_new_async:
  *  @addr: Address to connect to.
  *  @func: Callback function.
  *  @data: User data passed when callback function is called.
  *
- *  Connect to a specifed address and don't blcok.  Use this when you
- *  want to connect to something, but need to do it asynchronously or
- *  with a timeout.  When the connection is complete or there is an
- *  error, it will call the callback.
+ *  Connect to a specifed address asynchronously.  When the connection
+ *  is complete or there is an error, it will call the callback.  It
+ *  may call the callback before the function returns.  It will call
+ *  the callback if there is a failure.
  *
- *  WARNING: Future versions will probably return something else.  It
- *  doesn't make sense to return the socket since it's not valid yet.
- *  (Or maybe it does if we can ask it its status.)
- *
- *  Returns: A non-valid TcpSocket, or NULL if there was a failure.
+ *  Returns: ID of the connection which can be used with
+ *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
+ *  failure.
  *
  **/
-GTcpSocket* 
-gnet_tcp_socket_new_nonblock(const GInetAddr* addr, 
-			     GTcpSocketNonblockFunc func,
-			     gpointer data)
+gpointer
+gnet_tcp_socket_new_async(const GInetAddr* addr, 
+			  GTcpSocketAsyncFunc func,
+			  gpointer data)
 {
   gint sockfd;
   gint flags;
   GTcpSocket* s;
   struct sockaddr_in* sa_in;
-  GTcpSocketNonblockState* state;
+  GTcpSocketAsyncState* state;
 
   g_return_val_if_fail(addr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
@@ -234,18 +286,28 @@ gnet_tcp_socket_new_nonblock(const GInetAddr* addr,
   /* Create socket */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
-    return NULL;
+    {
+      (func)(NULL, GTCP_SOCKET_ASYNC_STATUS_ERROR, data);
+      return NULL;
+    }
 
   /* Get the flags (should all be 0?) */
   flags = fcntl(sockfd, F_GETFL, 0);
   if (flags == -1)
-    return NULL;
+    {
+      (func)(NULL, GTCP_SOCKET_ASYNC_STATUS_ERROR, data);
+      return NULL;
+    }
 
   if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-    return NULL;
+    {
+      (func)(NULL, GTCP_SOCKET_ASYNC_STATUS_ERROR, data);
+      return NULL;
+    }
 
   /* Create our structure */
   s = g_new0(GTcpSocket, 1);
+  s->ref_count = 1;
   s->sockfd = sockfd;
 
   /* Set up address and port for connection */
@@ -259,6 +321,7 @@ gnet_tcp_socket_new_nonblock(const GInetAddr* addr,
       if (errno != EINPROGRESS)
 	{
 	  g_free(s);
+	  (func)(NULL, GTCP_SOCKET_ASYNC_STATUS_ERROR, data);
 	  return NULL;
 	}
     }
@@ -269,27 +332,27 @@ gnet_tcp_socket_new_nonblock(const GInetAddr* addr,
      callback before we returned from this function.  */
 
   /* Wait for the connection */
-  state = g_new0(GTcpSocketNonblockState, 1);
+  state = g_new0(GTcpSocketAsyncState, 1);
   state->socket = s;
   state->func = func;
   state->data = data;
   state->flags = flags;
-  g_io_add_watch(g_io_channel_unix_new(s->sockfd), 		/* FIX for WIN! */
-		 GNET_ANY_IO_CONDITION,
-		 gnet_tcp_socket_new_nonblock_cb, 
-		 state);
+  state->connect_watch = g_io_add_watch(g_io_channel_unix_new(s->sockfd),
+					GNET_ANY_IO_CONDITION,
+					gnet_tcp_socket_new_async_cb, 
+					state);
 
-  return s;
+  return state;
 }
 
 
 static gboolean 
-gnet_tcp_socket_new_nonblock_cb (GIOChannel* iochannel, 
-				 GIOCondition condition, 
-				 gpointer data)
+gnet_tcp_socket_new_async_cb (GIOChannel* iochannel, 
+			      GIOCondition condition, 
+			      gpointer data)
 {
-  GTcpSocketNonblockState* state = (GTcpSocketNonblockState*) data;
-  GTcpSocketNonblockStatus status = GTCP_SOCKET_NONBLOCK_STATUS_ERROR;
+  GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
+  GTcpSocketAsyncStatus status = GTCP_SOCKET_ASYNC_STATUS_ERROR;
 
 
   errno = 0;
@@ -310,14 +373,14 @@ gnet_tcp_socket_new_nonblock_cb (GIOChannel* iochannel,
 	      /* Reset the flags */
 	      if (fcntl(state->socket->sockfd, F_SETFL, state->flags) == 0)
 		{
-		  status = GTCP_SOCKET_NONBLOCK_STATUS_OK;
+		  status = GTCP_SOCKET_ASYNC_STATUS_OK;
 		}
 	    }
 	}
     }
 
 /*    if (errno) */
-/*        g_warning("tcp_socket_new_nonblock_cb: %s\n", g_strerror(errno)); */
+/*        g_warning("tcp_socket_new_async_cb: %s\n", g_strerror(errno)); */
 
 
   /* Call back */
@@ -326,6 +389,24 @@ gnet_tcp_socket_new_nonblock_cb (GIOChannel* iochannel,
   g_free(state);
 
   return FALSE;
+}
+
+
+/**
+ *  gnet_tcp_socket_new_async_cancel:
+ *  @id: ID of the connection.
+ *
+ *  Cancel an asynchronous connection that started with
+ *  gnet_tcp_socket_new_async().
+ *
+ */
+void
+gnet_tcp_socket_new_async_cancel(gpointer id)
+{
+  GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
+
+  g_source_remove(state->connect_watch);
+  gnet_tcp_socket_delete(state->socket);
 }
 
 
@@ -341,6 +422,43 @@ void
 gnet_tcp_socket_delete(GTcpSocket* s)
 {
   if (s != NULL)
+    gnet_tcp_socket_unref(s);
+}
+
+
+
+/**
+ *  gnet_tcp_socket_ref
+ *  @ia: GTcpSocket to reference
+ *
+ *  Increment the reference counter of the GTcpSocket.
+ *
+ **/
+void
+gnet_tcp_socket_ref(GTcpSocket* s)
+{
+  g_return_if_fail(s != NULL);
+
+  ++s->ref_count;
+}
+
+
+/**
+ *  gnet_tcp_socket_unref
+ *  @ia: GTcpSocket to unreference
+ *
+ *  Remove a reference from the GTcpSocket.  When reference count
+ *  reaches 0, the socket is deleted.
+ *
+ **/
+void
+gnet_tcp_socket_unref(GTcpSocket* s)
+{
+  g_return_if_fail(s != NULL);
+
+  --s->ref_count;
+
+  if (s->ref_count == 0)
     {
       close(s->sockfd);	/* Don't care if this fails... */
 
@@ -462,6 +580,7 @@ gnet_tcp_socket_server_new(const gint port)
 
 
   /* Create socket */
+  s->ref_count = 1;
   s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (s->sockfd < 0)
     {
@@ -560,6 +679,7 @@ gnet_tcp_socket_server_accept(GTcpSocket* socket)
     }
 
   s = g_new0(GTcpSocket, 1);
+  s->ref_count = 1;
   s->sockfd = sockfd;
   memcpy(&s->sa, &sa, sizeof(s->sa));
 

@@ -50,11 +50,15 @@ GMcastSocket* gnet_mcast_socket_inetaddr_new(GInetAddr* ia);
 
 void gnet_mcast_socket_delete(GMcastSocket* ms);
 
+void gnet_mcast_socket_ref(GMcastSocket* s);
+
+void gnet_mcast_socket_unref(GMcastSocket* s);
+
+/* ********** */
+
 gint gnet_mcast_socket_join_group(GMcastSocket* ms, GInetAddr* ia);
 
 gint gnet_mcast_socket_leave_group (GMcastSocket* ms, GInetAddr* ia);
-
-/* ********** */
 
 gint gnet_mcast_socket_send(const GMcastSocket* ms, const GUdpPacket* packet);
 

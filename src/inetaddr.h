@@ -42,51 +42,51 @@ typedef struct _GInetAddr GInetAddr;
 /* ********** */
 
 /**
- *   GInetAddrNonblockStatus:
+ *   GInetAddrAsyncStatus:
  * 
- *   Status of a nonblocking lookup (from gnet_inetaddr_new_nonblock()
- *   or gnet_inetaddr_get_name_nonblock()), passed by
- *   GInetAddrNonblockFunc.  More errors may be added in the future,
- *   so it's best to compare against %GINETADDR_NONBLOCK_STATUS_OK.
+ *   Status of a asynchronous lookup (from gnet_inetaddr_new_async()
+ *   or gnet_inetaddr_get_name_async()), passed by GInetAddrAsyncFunc.
+ *   More errors may be added in the future, so it's best to compare
+ *   against %GINETADDR_ASYNC_STATUS_OK.
  *
  **/
 typedef enum {
-  GINETADDR_NONBLOCK_STATUS_ERROR,
-  GINETADDR_NONBLOCK_STATUS_OK
-} GInetAddrNonblockStatus;
+  GINETADDR_ASYNC_STATUS_ERROR,
+  GINETADDR_ASYNC_STATUS_OK
+} GInetAddrAsyncStatus;
 
 
 
 /**
- *   GInetAddrNonblockFunc:
+ *   GInetAddrAsyncFunc:
  *   @inetaddr: InetAddr that was looked up
  *   @status: Status of the lookup
  *   @data: User data
  *   
- *   Callback for gnet_inetaddr_new_nonblock.
+ *   Callback for gnet_inetaddr_new_async.
  *
  **/
-typedef void (*GInetAddrNonblockFunc)(GInetAddr* inetaddr, 
-				      GInetAddrNonblockStatus status, 
-				      gpointer data);
+typedef void (*GInetAddrAsyncFunc)(GInetAddr* inetaddr, 
+				   GInetAddrAsyncStatus status, 
+				   gpointer data);
 
 
 
 /**
- *   GInetAddrReverseNonblockFunc:
+ *   GInetAddrReverseAsyncFunc:
  *   @inetaddr: InetAddr whose was looked up
  *   @status: Status of the lookup
  *   @name: Nice name of the address
  *   @data: User data
  *   
- *   Callback for gnet_inetaddr_new_nonblock.  Delete the name when
+ *   Callback for gnet_inetaddr_new_async.  Delete the name when
  *   you're done with it.
  *
  **/
-typedef void (*GInetAddrReverseNonblockFunc)(GInetAddr* inetaddr, 
-					     GInetAddrNonblockStatus status, 
-					     gchar* name,
-					     gpointer data);
+typedef void (*GInetAddrReverseAsyncFunc)(GInetAddr* inetaddr, 
+					  GInetAddrAsyncStatus status, 
+					  gchar* name,
+					  gpointer data);
 
 
 
@@ -95,20 +95,29 @@ typedef void (*GInetAddrReverseNonblockFunc)(GInetAddr* inetaddr,
 
 GInetAddr* gnet_inetaddr_new(const gchar* name, const gint port);
 
-void gnet_inetaddr_new_nonblock(const gchar* name, const gint port, 
-				GInetAddrNonblockFunc func, gpointer data);
+gpointer gnet_inetaddr_new_async(const gchar* name, const gint port, 
+				 GInetAddrAsyncFunc func, gpointer data);
+
+void gnet_inetaddr_new_async_cancel(gpointer id);
 
 GInetAddr* gnet_inetaddr_clone(const GInetAddr* ia);
 
 void gnet_inetaddr_delete(GInetAddr* ia);
 
+void gnet_inetaddr_ref(GInetAddr* ia);
+
+void gnet_inetaddr_unref(GInetAddr* ia);
+
+
 /* ********** */
 
 gchar* gnet_inetaddr_get_name(GInetAddr* ia);
 
-void gnet_inetaddr_get_name_nonblock(GInetAddr* ia, 
-				     GInetAddrReverseNonblockFunc func,
-				     gpointer data);
+gpointer gnet_inetaddr_get_name_async(GInetAddr* ia, 
+				      GInetAddrReverseAsyncFunc func,
+				      gpointer data);
+
+void gnet_inetaddr_get_name_async_cancel(gpointer id);
 
 gchar* gnet_inetaddr_get_canonical_name(GInetAddr* ia);
 

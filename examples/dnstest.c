@@ -27,9 +27,9 @@
 #define VERBOSE 0
 
 void lookup_block(void);
-void lookup_nonblock(void);
-void inetaddr_cb(GInetAddr* inetaddr, GInetAddrNonblockStatus status, gpointer data);
-void reverse_inetaddr_cb(GInetAddr* inetaddr, GInetAddrNonblockStatus status, 
+void lookup_async(void);
+void inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, gpointer data);
+void reverse_inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, 
 			 gchar* name, gpointer data);
 
 
@@ -72,7 +72,7 @@ main(int argc, char** argv)
   if (block)
     lookup_block();
   else
-    lookup_nonblock();
+    lookup_async();
 
   exit(EXIT_SUCCESS);
 }
@@ -108,12 +108,12 @@ lookup_block(void)
 
 
 void
-lookup_nonblock(void)
+lookup_async(void)
 {
   int i;
   GMainLoop* main_loop = NULL;
 
-/*    g_print ("lookup_nonblock\n"); */
+/*    g_print ("lookup_async\n"); */
 
   main_loop = g_main_new(FALSE);
 
@@ -122,7 +122,7 @@ lookup_nonblock(void)
 
 #if (!DO_REVERSE)
 
-      gnet_inetaddr_new_nonblock(host, 0, inetaddr_cb, GINT_TO_POINTER(i));
+      gnet_inetaddr_new_async(host, 0, inetaddr_cb, GINT_TO_POINTER(i));
       
 #else
 
@@ -131,7 +131,7 @@ lookup_nonblock(void)
       ia = gnet_inetaddr_new(host, 0);
       g_assert (ia != NULL);
 
-      gnet_inetaddr_get_name_nonblock(ia, reverse_inetaddr_cb, GINT_TO_POINTER(i));
+      gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, GINT_TO_POINTER(i));
 
 #endif
 
@@ -143,11 +143,11 @@ lookup_nonblock(void)
 
 
 void
-inetaddr_cb(GInetAddr* ia, GInetAddrNonblockStatus status, gpointer data)
+inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 {
   int i = GPOINTER_TO_INT(data);
 
-  if (status == GINETADDR_NONBLOCK_STATUS_OK)
+  if (status == GINETADDR_ASYNC_STATUS_OK)
     {
       gchar* cname;
 
@@ -173,12 +173,12 @@ inetaddr_cb(GInetAddr* ia, GInetAddrNonblockStatus status, gpointer data)
 
 
 void
-reverse_inetaddr_cb(GInetAddr* ia, GInetAddrNonblockStatus status, 
+reverse_inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, 
 		    gchar* name, gpointer data)
 {
   int i = GPOINTER_TO_INT(data);
 
-  if (status == GINETADDR_NONBLOCK_STATUS_OK)
+  if (status == GINETADDR_ASYNC_STATUS_OK)
     {
       gchar* cname;
 
@@ -208,6 +208,6 @@ reverse_inetaddr_cb(GInetAddr* ia, GInetAddrNonblockStatus status,
 void
 usage(void)
 {
-  g_print ("dnstest <host> [block|nonblock] [num-runs]\n");
+  g_print ("dnstest <host> [block|async] [num-runs]\n");
   exit (EXIT_FAILURE);
 }

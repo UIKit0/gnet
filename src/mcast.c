@@ -100,6 +100,7 @@ gnet_mcast_socket_inetaddr_new(GInetAddr* ia)
   ms = g_new0(GMcastSocket, 1);
 
   /* Create socket */
+  ms->ref_count = 1;
   ms->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (ms->sockfd < 0)
     return NULL;
@@ -132,9 +133,50 @@ void
 gnet_mcast_socket_delete(GMcastSocket* ms)
 {
   if (ms != NULL)
+    gnet_mcast_socket_unref(ms);
+}
+
+
+
+/**
+ *  gnet_mcast_socket_ref
+ *  @ia: GMcastSocket to reference
+ *
+ *  Increment the reference counter of the GMcastSocket.
+ *
+ **/
+void
+gnet_mcast_socket_ref(GMcastSocket* s)
+{
+  g_return_if_fail(s != NULL);
+
+  ++s->ref_count;
+}
+
+
+/**
+ *  gnet_mcast_socket_unref
+ *  @ia: GMcastSocket to unreference
+ *
+ *  Remove a reference from the GMcastSocket.  When reference count
+ *  reaches 0, the socket is deleted.
+ *
+ **/
+void
+gnet_mcast_socket_unref(GMcastSocket* s)
+{
+  g_return_if_fail(s != NULL);
+
+  --s->ref_count;
+
+  if (s->ref_count == 0)
     {
-      close(ms->sockfd);
-      free(ms);
+      close(s->sockfd);	/* Don't care if this fails... */
+
+      if (s->iochannel)
+	g_io_channel_unref(s->iochannel);
+
+      g_free(s);
     }
 }
 

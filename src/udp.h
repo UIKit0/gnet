@@ -65,6 +65,11 @@ GUdpSocket* gnet_udp_socket_port_new(const gint port);
 
 void gnet_udp_socket_delete(GUdpSocket* s);
 
+void gnet_udp_socket_ref(GUdpSocket* s);
+
+void gnet_udp_socket_unref(GUdpSocket* s);
+
+
 /* ********** */
 
 gint gnet_udp_socket_send(const GUdpSocket* s, const GUdpPacket* packet);

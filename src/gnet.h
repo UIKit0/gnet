@@ -74,6 +74,10 @@ GIOError gnet_io_channel_readline (GIOChannel    *channel,
 				   guint          len,
 				   guint         *bytes_read);
 
+GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel, 
+					  gchar         **buf_ptr, 
+					  guint         *bytes_read);
+
 
 #ifdef __cplusplus
 }

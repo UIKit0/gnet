@@ -52,6 +52,7 @@ gnet_udp_socket_port_new(gint port)
   struct sockaddr_in* sa_in;
 
   /* Create socket */
+  s->ref_count = 1;
   s->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (s->sockfd < 0)
     return NULL;
@@ -82,8 +83,45 @@ void
 gnet_udp_socket_delete(GUdpSocket* s)
 {
   if (s != NULL)
+    gnet_udp_socket_unref(s);
+}
+
+
+
+/**
+ *  gnet_udp_socket_ref
+ *  @ia: GUdpSocket to reference
+ *
+ *  Increment the reference counter of the GUdpSocket.
+ *
+ **/
+void
+gnet_udp_socket_ref(GUdpSocket* s)
+{
+  g_return_if_fail(s != NULL);
+
+  ++s->ref_count;
+}
+
+
+/**
+ *  gnet_udp_socket_unref
+ *  @ia: GUdpSocket to unreference
+ *
+ *  Remove a reference from the GUdpSocket.  When reference count
+ *  reaches 0, the socket is deleted.
+ *
+ **/
+void
+gnet_udp_socket_unref(GUdpSocket* s)
+{
+  g_return_if_fail(s != NULL);
+
+  --s->ref_count;
+
+  if (s->ref_count == 0)
     {
-      close(s->sockfd);
+      close(s->sockfd);	/* Don't care if this fails... */
 
       if (s->iochannel)
 	g_io_channel_unref(s->iochannel);

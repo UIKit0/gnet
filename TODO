@@ -15,6 +15,7 @@ Before 0.2 (first major release):
 
   Documentation
    - Write a manpage for gnet-config (start with the one for glib).
+   - Go over the docs again and make sure everything is ok.
 
   Other
 
@@ -26,9 +27,6 @@ Long term:
     - Build Debian docs package?
 
     - Add more error types
-
-    - All non-blocking calls should be cancelable.  They should
-	return a gpointer to the state object.
 
     - Perl-style pack and unpack functions
 

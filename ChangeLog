@@ -1,3 +1,34 @@
+
+Sun Feb  6 13:18:03 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/*: Renamed "nonblock" to "async" because we're really
+	    asynchronous.  Nonblock usually means the function will return
+	    if it would block, which we don't do.
+	* src/tcp.c: 
+	    - Added gnet_tcp_socket_new_async_cancel() and
+	        gnet_tcp_socket_connect_async_cancel().
+	    - gnet_tcp_socket_new_async() and 
+	        gnet_tcp_socket_connect_async() now return ID's
+		of connections which can be used for cancels.
+	    - gnet_tcp_socket_new_async() now calls callback if
+	        there is a failure.
+	* src/inetaddr.c:
+	    - Added gnet_inetaddr_new_sync_cancel() and
+	        gnet_inetaddr_get_name_async_cancel().
+	    - gnet_inetaddr_new_sync() and gnet_inetaddr_get_name_async()
+	        now return ID's of connections which can be used for
+	        cancels.
+	* src/gnet-private.h: Added signal.h
+	* examples/dnstest.c: Updated for this stuff
+	
+	* src/*: Added _ref and _unref functions to GInetAddr, GTcpSocket,
+	   GUdpSocket, and GMcastSocket.  _delete now uses these.  (Also,
+	   GMcastSocket now unrefs the iochannel - it didn't before.  
+	   Oops).
+
+	* src/gnet.[hc]: Added Jacques' gnet_iochannel_readline_strdup
+	* AUTHORS: Add Jacques Fortier
+	
 Wed Feb  2 13:58:10 2000  David A Helder  <dhelder@umich.edu>
 
 	* Makefile.am (copyweb): Fixed copy to debian server

@@ -176,7 +176,8 @@ gnet_io_channel_readn (GIOChannel    *channel,
  * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes read by modifying the
  * integer pointed to by @bytes_read (this number includes the
- * newline).
+ * newline).  If an error is returned, the contents of @buf and
+ * @bytes_read are undefined.
  * 
  **/
 GIOError
@@ -222,6 +223,106 @@ gnet_io_channel_readline (GIOChannel    *channel,
     }
 
   *ptr = 0;
+  *bytes_read = n;
+
+  return error;
+}
+
+
+
+/**
+ * gnet_io_channel_readline_strdup:
+ * @channel: the channel to read from
+ * @buf: pointer to gchar* for the functin to store the new buffer
+ * @bytes_read: pointer to integer for the function to store the 
+ *   number of of bytes read.
+ *
+ * Read a line from the channel.  The line will be null-terminated and
+ * include the newline character.  Similarly to g_strdup_printf, a
+ * buffer large enough to hold the string will be allocated.
+ * 
+ * Warnings: (in the gotcha sense, not the bug sense)
+ * 
+ * 1. If the last character of the buffer is not a newline, the line
+ * was truncated by EOF.  So, do not assume the buffer ends with a
+ * newline.
+ *
+ * 2. @bytes_read is actually the number of bytes put in the buffer.
+ * That is, it includes the terminating null character.
+ * 
+ * 3. Null characters can appear in the line before the terminating
+ * null (I could send the string "Hello world\0\n").  If this matters
+ * in your program, check the string length of the buffer against the
+ * bytes read.
+ *
+ * Returns: %G_IO_ERROR_NONE if everything is ok; something else
+ * otherwise.  Also, returns the number of bytes read by modifying the
+ * integer pointed to by @bytes_read (this number includes the
+ * newline), and the data through the pointer pointed to by @buf_ptr.
+ * This data should be freed with g_free().  If an error is returned,
+ * the contents of @buf_ptr and @bytes_read are undefined.
+ *
+ **/
+GIOError
+gnet_io_channel_readline_strdup (GIOChannel    *channel, 
+				 gchar         **buf_ptr, 
+				 guint         *bytes_read)
+{
+  guint rc, n, len;
+  gchar c, *ptr, *buf;
+  GIOError error = G_IO_ERROR_NONE;
+
+  len = 100;
+  buf = (gchar *)g_malloc(len);
+  ptr = buf;
+  n = 1;
+
+  while (1)
+    {
+    try_again:
+      error = gnet_io_channel_readn(channel, &c, 1, &rc);
+
+      if (error == G_IO_ERROR_NONE && rc == 1)          /* read 1 char */
+        {
+          *ptr++ = c;
+          if (c == '\n')
+            break;
+        }
+      else if (error == G_IO_ERROR_NONE && rc == 0)     /* read EOF */
+        {
+          if (n == 1)   /* no data read */
+            {
+              *bytes_read = 0;
+	      *buf_ptr = NULL;
+	      g_free(buf);
+
+              return G_IO_ERROR_NONE;
+            }
+          else          /* some data read */
+            break;
+        }
+      else
+        {
+          if (error == G_IO_ERROR_AGAIN)
+            goto try_again;
+
+          g_free(buf);
+
+          return error;
+        }
+
+      ++n;
+
+      if (len >= n)
+        {
+          len *= 2;
+          buf = g_realloc(buf, len);
+          ptr = buf + n;
+        }
+    }
+
+  *ptr = 0;
+  *buf_ptr = buf;
   *bytes_read = n;
 
   return error;

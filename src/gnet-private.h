@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -86,6 +87,7 @@ struct _GUdpSocket
 {
   gint sockfd;			/* private */
   struct sockaddr sa;		/* private (Why not an InetAddr?) */
+  guint ref_count;
   GIOChannel* iochannel;
 };
 
@@ -93,6 +95,7 @@ struct _GTcpSocket
 {
   gint sockfd;
   struct sockaddr sa;		/* Why not an InetAddr? */
+  guint ref_count;
   GIOChannel* iochannel;
 };
 
@@ -100,6 +103,7 @@ struct _GMcastSocket
 {
   gint sockfd;
   struct sockaddr sa;
+  guint ref_count;
   GIOChannel* iochannel;
 };
 
@@ -107,6 +111,7 @@ struct _GInetAddr
 {
   gchar* name;
   struct sockaddr sa;
+  guint ref_count;
 };
 
 

@@ -23,39 +23,41 @@
 #include <config.h>
 
 
-static gboolean gnet_inetaddr_new_nonblock_cb (GIOChannel* iochannel, 
-					       GIOCondition condition, 
-					       gpointer data);
+static gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel, 
+					    GIOCondition condition, 
+					    gpointer data);
 
-typedef struct _GInetAddrNonblockState 
+typedef struct _GInetAddrAsyncState 
 {
   GInetAddr* ia;
-  GInetAddrNonblockFunc func;
+  GInetAddrAsyncFunc func;
   gpointer data;
   pid_t pid;
   int fd;
+  guint watch;
   guchar buffer[16];
   int len;
 
-} GInetAddrNonblockState;
+} GInetAddrAsyncState;
 
 
 
-static gboolean gnet_inetaddr_get_name_nonblock_cb (GIOChannel* iochannel, 
-						    GIOCondition condition, 
-						    gpointer data);
+static gboolean gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
+						 GIOCondition condition, 
+						 gpointer data);
 
-typedef struct _GInetAddrReverseNonblockState 
+typedef struct _GInetAddrReverseAsyncState 
 {
   GInetAddr* ia;
-  GInetAddrReverseNonblockFunc func;
+  GInetAddrReverseAsyncFunc func;
   gpointer data;
   pid_t pid;
   int fd;
+  guint watch;
   guchar buffer[256 + 1];	/* I think a domain name can only be 256 characters... */
   int len;
 
-} GInetAddrReverseNonblockState;
+} GInetAddrReverseAsyncState;
 
 
 /* **************************************** */
@@ -383,6 +385,7 @@ gnet_inetaddr_new(const gchar* name, const gint port)
     {
       ia = g_new0(GInetAddr, 1);
 
+      ia->ref_count = 1;
       sa_in = (struct sockaddr_in*) &ia->sa;
       sa_in->sin_family = AF_INET;
       sa_in->sin_port = g_htons(port);
@@ -398,6 +401,7 @@ gnet_inetaddr_new(const gchar* name, const gint port)
 	{
 	  ia = g_new0(GInetAddr, 1);
 	  ia->name = g_strdup(name);
+	  ia->ref_count = 1;
 	  
 	  sa_in = (struct sockaddr_in*) &ia->sa;
 	  sa_in->sin_family = AF_INET;
@@ -412,19 +416,22 @@ gnet_inetaddr_new(const gchar* name, const gint port)
 
 
 /**
- *  gnet_inetaddr_new_nonblock:
+ *  gnet_inetaddr_new_async:
  *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal name
  *    (eg, 141.213.8.59).  You can delete the after the function is called.
  *  @port: port number (0 if the port doesn't matter)
  *  @func: Callback function.
  *  @data: User data passed when callback function is called.
  * 
- *  Create an internet address from a name and port without blocking
- *  (ie, asynchronously).  This is EXPERIMENTAL.  It is based on
- *  forking, which can cause some problems.  In general, this will
- *  work ok for most programs most of the time.  It will be slow or
- *  even fail when using operating systems that copy the entire
- *  process when forking.
+ *  Create a GInetAddr from a name and port asynchronously.  Once the
+ *  structure is created, it will call the callback.  It may call the
+ *  callback before the function returns.  It will call the callback
+ *  if there is a failure.
+ *
+ *  This is EXPERIMENTAL.  It is based on forking, which can cause
+ *  some problems.  In general, this will work ok for most programs
+ *  most of the time.  It will be slow or even fail when using
+ *  operating systems that copy the entire process when forking.
  *
  *  If you need to lookup a lot of addresses, I recommend calling
  *  g_main_iteration(FALSE) between calls.  This will help prevent an
@@ -434,34 +441,38 @@ gnet_inetaddr_new(const gchar* name, const gint port)
  *  url="http://www.gnu.org/software/adns/adns.html">GNU ADNS</ulink>.
  *  GNU ADNS is under the GNU GPL.
  *
+ *  Returns: ID of the lookup which can be used with
+ *  gnet_inetaddr_new_async_cancel() to cancel it; NULL on immediate
+ *  success or failure.
+ *
  **/
-void
-gnet_inetaddr_new_nonblock(const gchar* name, const gint port, 
-			   GInetAddrNonblockFunc func, gpointer data)
+gpointer
+gnet_inetaddr_new_async(const gchar* name, const gint port, 
+			GInetAddrAsyncFunc func, gpointer data)
 {
-  GInetAddr* ia = NULL;
   pid_t pid = -1;
   int pipes[2];
   struct in_addr inaddr;
 
-  g_return_if_fail(name != NULL);
-  g_return_if_fail(func != NULL);
+  g_return_val_if_fail(name != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
 
   /* Try to read the name as if were dotted decimal */
   if (inet_aton(name, &inaddr) != 0)
     {
+      GInetAddr* ia = NULL;
       struct sockaddr_in* sa_in;
 
       ia = g_new0(GInetAddr, 1);
+      ia->ref_count = 1;
 
       sa_in = (struct sockaddr_in*) &ia->sa;
       sa_in->sin_family = AF_INET;
       sa_in->sin_port = g_htons(port);
       memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
 
-      (*func)(ia, GINETADDR_NONBLOCK_STATUS_OK, data);
-
-      return;
+      (*func)(ia, GINETADDR_ASYNC_STATUS_OK, data);
+      return NULL;
     }
 
   /* That didn't work - we need to fork */
@@ -469,8 +480,8 @@ gnet_inetaddr_new_nonblock(const gchar* name, const gint port,
   /* Open a pipe */
   if (pipe(pipes) == -1)
     {
-      (*func)(ia, GINETADDR_NONBLOCK_STATUS_ERROR, data);
-      return;
+      (*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
+      return NULL;
     }
 
   /* Fork to do the look up. */
@@ -508,19 +519,21 @@ gnet_inetaddr_new_nonblock(const gchar* name, const gint port,
   /* Set up an IOChannel to read from the pipe */
   else if (pid > 0)
     {
+      GInetAddr* ia;
       struct sockaddr_in* sa_in;
-      GInetAddrNonblockState* state;
+      GInetAddrAsyncState* state;
 
       /* Create a new InetAddr */
       ia = g_new0(GInetAddr, 1);
       ia->name = g_strdup(name);
+      ia->ref_count = 1;
 
       sa_in = (struct sockaddr_in*) &ia->sa;
       sa_in->sin_family = AF_INET;
       sa_in->sin_port = g_htons(port);
 
       /* Create a structure for the call back */
-      state = g_new0(GInetAddrNonblockState, 1);
+      state = g_new0(GInetAddrAsyncState, 1);
       state->ia = ia;
       state->func = func;
       state->data = data;
@@ -528,10 +541,12 @@ gnet_inetaddr_new_nonblock(const gchar* name, const gint port,
       state->fd = pipes[0];
 
       /* Add a watch */
-      g_io_add_watch(g_io_channel_unix_new(pipes[0]),
-		     GNET_ANY_IO_CONDITION,
-		     gnet_inetaddr_new_nonblock_cb, 
-		     state);
+      state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
+				    GNET_ANY_IO_CONDITION,
+				    gnet_inetaddr_new_async_cb, 
+				    state);
+
+      return state;
     }
 
   /* Try again */
@@ -545,20 +560,21 @@ gnet_inetaddr_new_nonblock(const gchar* name, const gint port,
   else
     {
       g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
-      (*func)(ia, GINETADDR_NONBLOCK_STATUS_ERROR, data);
+      (*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
     }
 
+  return NULL;
 }
 
 
 
 static gboolean 
-gnet_inetaddr_new_nonblock_cb (GIOChannel* iochannel, 
-			       GIOCondition condition, 
-			       gpointer data)
+gnet_inetaddr_new_async_cb (GIOChannel* iochannel, 
+			    GIOCondition condition, 
+			    gpointer data)
 {
-  GInetAddrNonblockState* state = (GInetAddrNonblockState*) data;
-  GInetAddrNonblockStatus status = GINETADDR_NONBLOCK_STATUS_ERROR;
+  GInetAddrAsyncState* state = (GInetAddrAsyncState*) data;
+  GInetAddrAsyncStatus status = GINETADDR_ASYNC_STATUS_ERROR;
 
   /* Read from the pipe */
   if (condition | G_IO_IN)
@@ -585,7 +601,7 @@ gnet_inetaddr_new_nonblock_cb (GIOChannel* iochannel,
 	  /* We are done! */
 	  memcpy(&sa_in->sin_addr, &state->buffer[1], state->len);
 
-	  status = GINETADDR_NONBLOCK_STATUS_OK;
+	  status = GINETADDR_ASYNC_STATUS_OK;
 
 	  close(state->fd);
 	  waitpid(state->pid, NULL, 0);
@@ -598,6 +614,33 @@ gnet_inetaddr_new_nonblock_cb (GIOChannel* iochannel,
   g_free(state);
 
   return FALSE;
+}
+
+
+
+/**
+ *  gnet_inetaddr_new_async_cancel:
+ *  @id: ID of the lookup
+ *
+ *  Cancel an asynchronous GInetAddr creation that was started with
+ *  gnet_inetaddr_new().
+ * 
+ */
+void
+gnet_inetaddr_new_async_cancel(gpointer id)
+{
+  GInetAddrAsyncState* state = (GInetAddrAsyncState*) id;
+
+  g_return_if_fail(state != NULL);
+
+  gnet_inetaddr_delete (state->ia);
+  g_source_remove (state->watch);
+
+  close (state->fd);
+  kill (state->pid, SIGKILL);
+  waitpid (state->pid, NULL, 0);
+
+  g_free(state);
 }
 
 
@@ -619,6 +662,7 @@ gnet_inetaddr_clone(const GInetAddr* ia)
   g_return_val_if_fail (ia != NULL, NULL);
 
   cia = g_new0(GInetAddr, 1);
+  cia->ref_count = 1;
   cia->sa = ia->sa;
   if (ia->name != NULL) 
     cia->name = g_strdup(ia->name);
@@ -629,17 +673,54 @@ gnet_inetaddr_clone(const GInetAddr* ia)
 
 /** 
  *  gnet_inetaddr_delete:
- *  @ia: Address to delete
+ *  @ia: GInetAddr to delete
  *
- *  Delete a GInetAddr
+ *  Delete a GInetAddr.
  *
  **/
 void
 gnet_inetaddr_delete(GInetAddr* ia)
 {
   if (ia != NULL)
+    gnet_inetaddr_unref(ia);
+}
+
+
+/**
+ *  gnet_inetaddr_ref
+ *  @ia: GInetAddr to reference
+ *
+ *  Increment the reference counter of the GInetAddr.
+ *
+ **/
+void
+gnet_inetaddr_ref(GInetAddr* ia)
+{
+  g_return_if_fail(ia != NULL);
+
+  ++ia->ref_count;
+}
+
+
+/**
+ *  gnet_inetaddr_unref
+ *  @ia: GInetAddr to unreference
+ *
+ *  Remove a reference from the GInetAddr.  When reference count
+ *  reaches 0, the address is deleted.
+ *
+ **/
+void
+gnet_inetaddr_unref(GInetAddr* ia)
+{
+  g_return_if_fail(ia != NULL);
+
+  --ia->ref_count;
+
+  if (ia->ref_count == 0)
     {
-      if (ia->name != NULL) g_free (ia->name);
+      if (ia->name != NULL) 
+	g_free (ia->name);
       g_free (ia);
     }
 }
@@ -681,28 +762,36 @@ gnet_inetaddr_get_name(GInetAddr* ia)
 
 
 /**
- *  gnet_inetaddr_get_name_nonblock:
+ *  gnet_inetaddr_get_name_async:
  *  @ia: Address to get the name of.
  *  @func: Callback function.
  *  @data: User data passed when callback function is called.
  *
  *  Get the nice name of the address (eg, "mofo.eecs.umich.edu").
  *  This function will use the callback once it knows the nice name.
- *  It may even call the callback before it returns.
+ *  It may even call the callback before it returns.  The callback
+ *  will be called if there is an error.
+ *
+ *  This is EXPERIMENTAL.  It uses the same mechanism as
+ *  gnet_inetaddr_new_async() - see the notes for that function.
+ *
+ *  Returns: ID of the lookup which can be used with
+ *  gnet_inetaddrr_get_name_async_cancel() to cancel it; NULL on
+ *  immediate success or failure.
  *
  **/
-void
-gnet_inetaddr_get_name_nonblock(GInetAddr* ia, 
-				GInetAddrReverseNonblockFunc func,
-				gpointer data)
+gpointer
+gnet_inetaddr_get_name_async(GInetAddr* ia, 
+			     GInetAddrReverseAsyncFunc func,
+			     gpointer data)
 {
-  g_return_if_fail(ia != NULL);
-  g_return_if_fail(func != NULL);
+  g_return_val_if_fail(ia != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
 
   /* If we already know the name, just copy that */
   if (ia->name != NULL)
     {
-      (func)(ia, GINETADDR_NONBLOCK_STATUS_OK, g_strdup(ia->name), data);
+      (func)(ia, GINETADDR_ASYNC_STATUS_OK, g_strdup(ia->name), data);
     }
   
   /* Otherwise, fork and look it up */
@@ -715,8 +804,8 @@ gnet_inetaddr_get_name_nonblock(GInetAddr* ia,
       /* Open a pipe */
       if (pipe(pipes) == -1)
 	{
-	  (func)(ia, GINETADDR_NONBLOCK_STATUS_ERROR, NULL, data);
-	  return;
+	  (func)(ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, data);
+	  return NULL;
 	}
 
 
@@ -774,10 +863,10 @@ gnet_inetaddr_get_name_nonblock(GInetAddr* ia,
       /* Set up an IOChannel to read from the pipe */
       else if (pid > 0)
 	{
-	  GInetAddrReverseNonblockState* state;
+	  GInetAddrReverseAsyncState* state;
 
 	  /* Create a structure for the call back */
-	  state = g_new0(GInetAddrReverseNonblockState, 1);
+	  state = g_new0(GInetAddrReverseAsyncState, 1);
 	  state->ia = ia;
 	  state->func = func;
 	  state->data = data;
@@ -785,10 +874,11 @@ gnet_inetaddr_get_name_nonblock(GInetAddr* ia,
 	  state->fd = pipes[0];
 
 	  /* Add a watch */
-	  g_io_add_watch(g_io_channel_unix_new(pipes[0]),
-			 GNET_ANY_IO_CONDITION,
-			 gnet_inetaddr_get_name_nonblock_cb, 
-			 state);
+	  state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
+					GNET_ANY_IO_CONDITION,
+					gnet_inetaddr_get_name_async_cb, 
+					state);
+	  return state;
 	}
 
       /* Try again */
@@ -802,21 +892,49 @@ gnet_inetaddr_get_name_nonblock(GInetAddr* ia,
       else
 	{
 	  g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
-	  (*func)(ia, GINETADDR_NONBLOCK_STATUS_ERROR, NULL, data);
+	  (*func)(ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, data);
 	}
     }
 
+  return NULL;
+}
+
+
+
+/**
+ *  gnet_inetaddr_get_name_async_cancel:
+ *  @id: ID of the lookup
+ *
+ *  Cancel an asynchronous nice name lookup that was started with
+ *  gnet_inetaddr_get_name_async().
+ * 
+ */
+void
+gnet_inetaddr_get_name_async_cancel(gpointer id)
+{
+  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
+
+  g_return_if_fail(state != NULL);
+
+  gnet_inetaddr_delete (state->ia);
+  g_source_remove (state->watch);
+
+  close (state->fd);
+  kill (state->pid, SIGKILL);
+  waitpid (state->pid, NULL, 0);
+
+  g_free(state);
 }
 
 
 
 static gboolean 
-gnet_inetaddr_get_name_nonblock_cb (GIOChannel* iochannel, 
-				    GIOCondition condition, 
-				    gpointer data)
+gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
+				 GIOCondition condition, 
+				 gpointer data)
 {
-  GInetAddrReverseNonblockState* state = (GInetAddrReverseNonblockState*) data;
-  GInetAddrNonblockStatus status = GINETADDR_NONBLOCK_STATUS_ERROR;
+  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) data;
+  GInetAddrAsyncStatus status = GINETADDR_ASYNC_STATUS_ERROR;
   gchar* name = NULL;
 
   /* Read from the pipe */
@@ -842,7 +960,7 @@ gnet_inetaddr_get_name_nonblock_cb (GIOChannel* iochannel,
 	  strncpy(name, &state->buffer[1], state->buffer[0]);
 	  state->ia->name = name;
 
-	  status = GINETADDR_NONBLOCK_STATUS_OK;
+	  status = GINETADDR_ASYNC_STATUS_OK;
 
 	  close(state->fd);
 	  waitpid(state->pid, NULL, 0);
@@ -1055,6 +1173,3 @@ gnet_inetaddr_gethostaddr(void)
 
   return ia;
 }
-
-
-
