@@ -1,3 +1,7 @@
+Wed May 19 21:58:46 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* *http*: Apply Tim Müller's first HTTP Conn patch.
+
 Wed May 19 21:38:38 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* src/gnet-private.h: Add Win32 and Unix macros for

@@ -5,6 +5,7 @@
 <!ENTITY gnet-tcp SYSTEM "xml/tcp.xml">
 <!ENTITY gnet-udp SYSTEM "xml/udp.xml">
 <!ENTITY gnet-conn SYSTEM "xml/conn.xml">
+<!ENTITY gnet-conn-http SYSTEM "xml/conn-http.xml">
 <!ENTITY gnet-iochannel SYSTEM "xml/iochannel.xml">
 <!ENTITY gnet-md5 SYSTEM "xml/md5.xml">
 <!ENTITY gnet-pack SYSTEM "xml/pack.xml">
@@ -96,6 +97,7 @@
         <listitem><para>UDP and IP Multicast sockets</para></listitem>
 	<listitem><para>High-level TCP connection and server objects</para></listitem>
         <listitem><para>Asynchronous socket IO</para></listitem>
+        <listitem><para>HTTP client object</para></listitem>
 
         <listitem><para>Internet address abstraction</para></listitem>
 	<listitem><para>Asynchronous DNS lookup</para></listitem>
@@ -336,6 +338,7 @@ PKG_CHECK_MODULES(GNET, gnet &gt; 2.0.0,
     &gnet-tcp;
     &gnet-udp;
     &gnet-mcast;
+    &gnet-conn-http;
     &gnet-conn;
     &gnet-server;
     &gnet-iochannel;

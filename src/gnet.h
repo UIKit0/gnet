@@ -32,6 +32,7 @@
 #include "socks.h"
 #include "pack.h"
 #include "uri.h"
+#include "conn-http.h"
 #include "conn.h"
 #include "server.h"
 #include "md5.h"

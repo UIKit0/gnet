@@ -36,6 +36,7 @@ libgnet_2_0_la_SOURCES = 	\
 	pack.c			\
 	uri.c			\
 	conn.c			\
+	conn-http.c             \
 	server.c		\
 	usagi_ifaddrs.c		\
 	base64.c
@@ -55,5 +56,6 @@ gnetinclude_HEADERS = 		\
 	pack.h			\
 	uri.h			\
 	conn.h			\
+	conn-http.h             \
 	server.h		\
 	base64.h
