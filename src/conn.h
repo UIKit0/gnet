@@ -43,12 +43,9 @@ typedef enum {
 } GConnStatus;
 
 /* rv only affects reads... */
-typedef
-gboolean (*GConnFunc)(GConn* conn,
-		      GConnStatus status, 
-		      gchar* buffer,  /* gnet owns on read, you do if write */
-		      gint length,
-		      gpointer user_data);
+typedef gboolean (*GConnFunc)(GConn* conn, GConnStatus status, 
+			      gchar* buffer, gint length,
+			      gpointer user_data);
 
 
 struct _GConn

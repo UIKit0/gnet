@@ -119,8 +119,9 @@ gint (*GNetIOChannelReadAsyncCheckFunc)(gchar* buffer, guint length,
 
 /* 
 
-   Set buffer to NULL if you want the buffer created dynamicly (length
-   will be the maximum length of the buffer.
+   Set buffer to NULL if you want the buffer created dynamicly.
+   Length will be the maximum length of the buffer.  GNet owns the
+   buffer if you do this.
 
    If read_one_byte_at_a_time is TRUE, it will read one byte at a time
    and call the check function.  This is really used for the readline
@@ -130,6 +131,8 @@ gint (*GNetIOChannelReadAsyncCheckFunc)(gchar* buffer, guint length,
 
    If you call read_async once and always return TRUE, then don't set
    read_one_byte_at_a_time.
+
+   \0 is appended if there is room.
 
 */
 

@@ -44,7 +44,7 @@ typedef enum
 
 typedef void (*GServerFunc)(GServer* server,
 			    GServerStatus status, 
-			    struct _GConn* conn,
+			    GConn* conn,
 			    gpointer user_data);
 
 

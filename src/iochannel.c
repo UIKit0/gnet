@@ -741,17 +741,14 @@ gnet_io_channel_readany_check_func (gchar* buffer, guint length,
 
 gint
 gnet_io_channel_readline_check_func (gchar* buffer, guint length, 
-				    gpointer user_data)
+				     gpointer user_data)
 {
   guint i;
 
   for (i = 0; i < length; ++i)
     {
       if (buffer[i] == '\n')
-	{
-	  buffer[i] = '\0';
-	  return i + 1;
-	}
+	return i + 1;
     }
 
   return 0;

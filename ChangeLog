@@ -1,3 +1,19 @@
+Sun Oct 29 22:44:22 2000  David Helder  <dhelder@umich.edu>
+
+	* examples/echo*.c: s/--nonblocking/--async/ since it's
+	    asynchronous, not nonblocking.
+	
+	* examples/echoclient.c: Added example showing GConn way.  Started
+	   showing asynchronous example.  UNFINISHED.
+
+	* src/iochannel.c (gnet_io_channel_readline_check_func): 
+	    Don't replace \n with \0.  This is what readline
+	    does.
+
+	* examples/echoserver.c: Added example showing GServer way
+	* src/server.h (GServerFunc): s/struct _GConn/GConn/
+	* examples/echoserver.c: Clean-ups
+
 Sun Oct 29 17:50:46 2000  David Helder  <dhelder@umich.edu>
 
 	* examples/echoserver.c: Fixed non-blocking server example.  It
