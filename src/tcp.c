@@ -731,7 +731,6 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
 {
   GTcpSocket* s;
   struct sockaddr_in* sa_in;
-  const int on = 1;
   socklen_t socklen;
 
   /* Create socket */
@@ -760,7 +759,7 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
 #ifndef GNET_WIN32
   {
     gint flags;
-
+    const int on = 1;
     /* Set REUSEADDR so we can reuse the port */
     if (setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
 		   (void*) &on, sizeof(on)) != 0)
@@ -935,7 +934,6 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
-  gint n;
   fd_set fdset;
   GTcpSocket* s;
 

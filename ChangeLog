@@ -2,6 +2,9 @@ Tue May 22 22:21:31 2001  Andrw Lanoix  <alanoix@umich.edu>
 
 	*server.h: #include "gnetconfig.h"
 
+	*tcp.h: removed 2 unused vars in windows code
+	*gnet-private.c: removed 2 unused vars in windows code
+
 Tue May 22 09:59:57 2001  David Helder  <dhelder@umich.edu>
 
 	* src/pack.[hc]: Made int types unsigned where

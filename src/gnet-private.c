@@ -160,15 +160,13 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
   gpointer data;
   GInetAddrAsyncState *IAstate;
   GInetAddrReverseAsyncState *IARstate;
-  GTcpSocketAsyncState *TCPNEWstate;
-  SocketWatchAsyncState *WatchState;
 
-	int i;
+  int i;
 
   /*Take the msg off the message queue */
   i = PeekMessage (&msg, gnet_hWnd, 0, 0, PM_REMOVE); 
-	if (!i)
-		return 1; /* you have a buggy version of glib that is calling this func when it shouldn't*/
+  if (!i)
+    return 1; /* you have a buggy version of glib that is calling this func when it shouldn't*/
 
   switch (msg.message) 
     {
