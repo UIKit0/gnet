@@ -49,23 +49,57 @@ gnet_udp_socket_new (void)
 GUdpSocket* 
 gnet_udp_socket_port_new (gint port)
 {
-  GUdpSocket* s = g_new0(GUdpSocket, 1);
+  GInetAddr inetaddr;
   struct sockaddr_in* sa_in;
 
+  /* Set up address and port (any address, any port) */
+  memset (&inetaddr, 0, sizeof(inetaddr));
+  sa_in = (struct sockaddr_in*) &inetaddr.sa;
+  sa_in->sin_family = AF_INET;
+  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+  sa_in->sin_port = g_htons(port);
+
+  return gnet_udp_socket_new_interface (&inetaddr);
+}
+
+
+/**
+ *  gnet_udp_socket_port_new:
+ *  @iface: Interface to bind to
+ * 
+ *  Create and open a new UDP socket bound to the specified interface.
+ *  If the interface address's port number is 0, the OS will choose
+ *  the port.
+ *
+ *  Returns: a new #GUdpSocket, or NULL if there was a failure.
+ *
+ **/
+GUdpSocket* 
+gnet_udp_socket_new_interface (const GInetAddr* iface)
+{
+  GUdpSocket* s;
+  const int on = 1;
+
+  g_return_val_if_fail (iface, NULL);
+
   /* Create socket */
+  s = g_new0 (GUdpSocket, 1);
   s->ref_count = 1;
   s->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (s->sockfd < 0)
     return NULL;
 
-  /* Set up address and port (any address, any port) */
-  sa_in = (struct sockaddr_in*) &s->sa;
-  sa_in->sin_family = AF_INET;
-  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-  sa_in->sin_port = g_htons(port);
+  /* Set broadcast option.  This allows the user to broadcast packets.
+     It has not affect otherwise. */
+  if (setsockopt(s->sockfd, SOL_SOCKET, SO_BROADCAST, 
+		 (void*) &on, sizeof(on)) != 0)
+    {
+      close (s->sockfd);
+      return NULL;
+    }
 
   /* Bind to the socket to some local address and port */
-  if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
+  if (bind(s->sockfd, &iface->sa, sizeof(iface->sa)) != 0)
     return NULL;
 
   return s;

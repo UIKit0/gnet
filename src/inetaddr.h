@@ -145,7 +145,7 @@ void gnet_inetaddr_unref (GInetAddr* ia);
 
 /* ********** */
 
-  gchar* gnet_inetaddr_get_name (/* const */ GInetAddr* ia);
+gchar* gnet_inetaddr_get_name (/* const */ GInetAddr* ia);
 
 GInetAddrGetNameAsyncID
 gnet_inetaddr_get_name_async (GInetAddr* ia, 

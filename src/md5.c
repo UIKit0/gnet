@@ -542,7 +542,7 @@ gnet_md5_get_digest (const GMD5* gmd5)
 {
   g_return_val_if_fail (gmd5, NULL);
   
-  return gmd5->digest;
+  return (guint8*) gmd5->digest;
 }
 
 

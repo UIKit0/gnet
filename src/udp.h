@@ -63,6 +63,8 @@ GUdpSocket* gnet_udp_socket_new (void);
 
 GUdpSocket* gnet_udp_socket_port_new (gint port);
 
+GUdpSocket* gnet_udp_socket_new_interface (const GInetAddr* iface);
+
 void gnet_udp_socket_delete (GUdpSocket* s);
 
 void gnet_udp_socket_ref (GUdpSocket* s);

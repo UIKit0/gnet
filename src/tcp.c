@@ -697,9 +697,19 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new(gint port)
+gnet_tcp_socket_server_new (gint port)
 {
-  return gnet_tcp_socket_server_new2 (NULL, port);
+  GInetAddr iface;
+  struct sockaddr_in* sa_in;
+
+  /* Set up address and port (any address, any port) */
+  memset (&iface, 0, sizeof(iface));
+  sa_in = (struct sockaddr_in*) &iface.sa;
+  sa_in->sin_family = AF_INET;
+  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+  sa_in->sin_port = g_htons(port);
+
+  return gnet_tcp_socket_server_new_interface (&iface);
 }
 
 
@@ -715,9 +725,8 @@ gnet_tcp_socket_server_new(gint port)
  *  socket when your are a server and you know what the port number
  *  should be (or pass 0 if you don't care what the port is).
  *
- *  WARNING: gnet_tcp_socket_server_new2() will become
- *  gnet_tcp_socket_server_new() and the old
- *  gnet_tcp_socket_server_new() will be eliminated in GNet 1.2.
+ *  WARNING: gnet_tcp_socket_server_new2() will eliminated in GNet
+ *  1.2.  Use gnet_tcp_socket_server_interface_new instead.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -745,6 +754,84 @@ gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port)
   else
     sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
   sa_in->sin_port = g_htons(port);
+
+  /* The socket is set to non-blocking mode later in the Windows
+     version.*/
+#ifndef GNET_WIN32
+  {
+    gint flags;
+
+    /* Set REUSEADDR so we can reuse the port */
+    if (setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
+		   (void*) &on, sizeof(on)) != 0)
+      g_warning("Can't set reuse on tcp socket\n");
+
+    /* Get the flags (should all be 0?) */
+    flags = fcntl(s->sockfd, F_GETFL, 0);
+    if (flags == -1)
+      goto error;
+
+    /* Make the socket non-blocking */
+    if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
+      goto error;
+  }
+#endif
+
+  /* Bind */
+  if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
+    goto error;
+
+  /* Get the socket name - don't care if it fails */
+  socklen = sizeof(s->sa);
+  if (getsockname(s->sockfd, &s->sa, &socklen) != 0)
+    goto error;
+
+  /* Listen */
+  if (listen(s->sockfd, 10) != 0)
+    goto error;
+
+  return s;
+
+ error:
+  if (s)    		g_free(s);
+  return NULL;
+}
+
+
+/**
+ *  gnet_tcp_socket_server_interface_new:
+ *  @iface: Interface to bind to
+ *
+ *  Create and open a new #GTcpSocket bound to the specified
+ *  interface.  Use this sort of socket when your are a server and
+ *  have a specific address the server must be bound to.  If the
+ *  interface address's port number is 0, the OS will choose the port.
+ *
+ *  Returns: a new #GTcpSocket, or NULL if there was a failure.
+ *
+ **/
+GTcpSocket* 
+gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
+{
+  GTcpSocket* s;
+  struct sockaddr_in* sa_in;
+  const int on = 1;
+  socklen_t socklen;
+
+  g_return_val_if_fail (iface, NULL);
+
+  /* Create socket */
+  s = g_new0(GTcpSocket, 1);
+  s->ref_count = 1;
+  s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (s->sockfd < 0)
+    goto error;
+
+  /* Set up address and port for connection */
+  sa_in = (struct sockaddr_in*) &s->sa;
+  sa_in->sin_family = AF_INET;
+  sa_in->sin_addr.s_addr = GNET_SOCKADDR_IN(iface->sa).sin_addr.s_addr;
+  sa_in->sin_port = GNET_SOCKADDR_IN(iface->sa).sin_port;
 
   /* The socket is set to non-blocking mode later in the Windows
      version.*/

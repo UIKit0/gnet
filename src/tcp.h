@@ -193,7 +193,10 @@ void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
 
 GTcpSocket* gnet_tcp_socket_server_new (gint port);
 
+/* DEPRICATED: Use gnet_tcp_socket_interface_new */
 GTcpSocket* gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port);
+
+GTcpSocket* gnet_tcp_socket_server_new_interface (const GInetAddr* iface);
 
 GTcpSocket* gnet_tcp_socket_server_accept (const GTcpSocket* socket);
 
