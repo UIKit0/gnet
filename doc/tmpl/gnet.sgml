@@ -9,19 +9,10 @@ gnet
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
-
-<!-- ##### MACRO GNET_EXPORT ##### -->
-<para>
-
-</para>
-
-
 
 <!-- ##### MACRO GNET_CHECK_VERSION ##### -->
 <para>
@@ -31,5 +22,12 @@ gnet
 @major: 
 @minor: 
 @micro: 
+
+
+<!-- ##### FUNCTION gnet_init ##### -->
+<para>
+
+</para>
+
 
 

@@ -9,12 +9,10 @@ server
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GServer ##### -->
 <para>
@@ -27,21 +25,12 @@ server
 @func: 
 @user_data: 
 
-<!-- ##### ENUM GServerStatus ##### -->
-<para>
-
-</para>
-
-@GNET_SERVER_STATUS_CONNECT: 
-@GNET_SERVER_STATUS_ERROR: 
-
 <!-- ##### USER_FUNCTION GServerFunc ##### -->
 <para>
 
 </para>
 
 @server: 
-@status: 
 @conn: 
 @user_data: 
 
@@ -52,7 +41,7 @@ server
 </para>
 
 @iface: 
-@force_port: 
+@port: 
 @func: 
 @user_data: 
 @Returns: 

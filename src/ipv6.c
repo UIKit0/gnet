@@ -23,6 +23,13 @@ G_LOCK_DEFINE_STATIC (ipv6);
 static GIPv6Policy   ipv6_policy = GIPV6_POLICY_IPV4_ONLY;
 
 
+/**
+ *  gnet_ipv6_get_policy
+ *
+ *  Get the IPv6 policy.
+ *
+ *  Returns: IPv6 policy.
+ **/
 GIPv6Policy
 gnet_ipv6_get_policy (void)
 {
@@ -38,6 +45,13 @@ gnet_ipv6_get_policy (void)
 }
 
 
+/**
+ *  gnet_ipv6_set_policy
+ *  @policy: IPv6 policy
+ *
+ *  Set the IPv6 policy.
+ *
+ **/
 void
 gnet_ipv6_set_policy (GIPv6Policy policy)
 {

@@ -18,6 +18,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ *  GSHA
+ *
+ *  GSHA is a SHA hash.
+ *
+ **/
 typedef struct _GSHA GSHA;
 
 /**

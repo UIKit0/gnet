@@ -9,12 +9,10 @@ mcast
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GMcastSocket ##### -->
 <para>
@@ -30,7 +28,7 @@ mcast
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_mcast_socket_port_new ##### -->
+<!-- ##### FUNCTION gnet_mcast_socket_new_with_port ##### -->
 <para>
 
 </para>
@@ -39,13 +37,16 @@ mcast
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_mcast_socket_inetaddr_new ##### -->
+<!-- ##### FUNCTION gnet_mcast_socket_new_full ##### -->
 <para>
 
 </para>
 
-@ia: 
+@iface: 
+@port: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_delete ##### -->
@@ -72,6 +73,15 @@ mcast
 @s: 
 
 
+<!-- ##### FUNCTION gnet_mcast_socket_get_io_channel ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_mcast_socket_join_group ##### -->
 <para>
 
@@ -92,13 +102,36 @@ mcast
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_mcast_socket_get_ttl ##### -->
+<para>
+
+</para>
+
+@ms: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@us: 
+
+
+<!-- ##### FUNCTION gnet_mcast_socket_set_ttl ##### -->
+<para>
+
+</para>
+
+@ms: 
+@val: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_mcast_socket_send ##### -->
 <para>
 
 </para>
 
 @ms: 
-@packet: 
+@data: 
+@length: 
+@dst: 
 @Returns: 
 
 
@@ -108,7 +141,9 @@ mcast
 </para>
 
 @ms: 
-@packet: 
+@data: 
+@length: 
+@src: 
 @Returns: 
 
 

@@ -30,12 +30,14 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/*
-
-  All fields in GUdpSocket are private and should be accessed only by
-  using the functions below.
-
- */
+/**
+ *  GUdpSocket
+ *
+ *  GUdpSocket is a UDP socket.  UDP data transfer is unordered and
+ *  unreliable.  Use TCP if your protocol requires data transfered
+ *  reliably and in order - most do.
+ *
+ **/
 typedef struct _GUdpSocket GUdpSocket;
 
 

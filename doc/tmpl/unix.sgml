@@ -9,12 +9,10 @@ unix
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GUnixSocket ##### -->
 <para>
@@ -64,7 +62,7 @@ unix
 @s: 
 
 
-<!-- ##### FUNCTION gnet_unix_socket_get_iochannel ##### -->
+<!-- ##### FUNCTION gnet_unix_socket_get_io_channel ##### -->
 <para>
 
 </para>

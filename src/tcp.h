@@ -30,12 +30,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*
-
-  All fields in GTcpSocket are private and should be accessed only by
-  using the functions below.
-
- */
+/**
+ *  GTcpSocket
+ *
+ *  GTcpSocket is a TCP socket.  TCP transfers data reliably and in
+ *  order.
+ *
+ **/
 typedef struct _GTcpSocket GTcpSocket;
 
 
@@ -44,11 +45,11 @@ typedef struct _GTcpSocket GTcpSocket;
 
 
 /**
- *   GTcpSocketConnectAsyncID:
- * 
- *   ID of an asynchronous connection started with
- *   gnet_tcp_socket_connect_async().  The connection can be canceled
- *   by calling gnet_tcp_socket_connect_async_cancel() with the ID.
+ *  GTcpSocketConnectAsyncID
+ *  
+ *  ID of an asynchronous connection started with
+ *  gnet_tcp_socket_connect_async().  The connection can be canceled
+ *  by calling gnet_tcp_socket_connect_async_cancel() with the ID.
  *
  **/
 typedef gpointer GTcpSocketConnectAsyncID;
@@ -56,12 +57,15 @@ typedef gpointer GTcpSocketConnectAsyncID;
 
 
 /**
- *   GTcpSocketConnectAsyncStatus:
- * 
- *   Status for connecting via gnet_tcp_socket_connect_async(), passed
- *   by GTcpSocketConnectAsyncFunc.  More errors may be added in the
- *   future, so it's best to compare against
- *   %GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK.
+ *  GTcpSocketConnectAsyncStatus
+ *  @GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK: Connection succeeded
+ *  @GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR: Error, address lookup failed
+ *  @GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR: Error, could not connect
+ *  
+ *  Status for connecting via gnet_tcp_socket_connect_async(), passed
+ *  by GTcpSocketConnectAsyncFunc.  More errors may be added in the
+ *  future, so it's best to compare against
+ *  %GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK.
  *
  **/
 typedef enum {
@@ -73,12 +77,12 @@ typedef enum {
 
 
 /**
- *   GTcpSocketConnectAsyncFunc:
- *   @socket: TcpSocket that was connecting (callee owned)
- *   @status: Status of the connection
- *   @data: User data
- *   
- *   Callback for gnet_tcp_socket_connect_async().
+ *  GTcpSocketConnectAsyncFunc:
+ *  @socket: TcpSocket that was connecting (callee owned)
+ *  @status: Status of the connection
+ *  @data: User data
+ *  
+ *  Callback for gnet_tcp_socket_connect_async().
  *
  **/
 typedef void (*GTcpSocketConnectAsyncFunc)(GTcpSocket* socket, 
@@ -87,11 +91,11 @@ typedef void (*GTcpSocketConnectAsyncFunc)(GTcpSocket* socket,
 
 
 /**
- *   GTcpSocketNewAsyncID:
- * 
- *   ID of an asynchronous tcp socket creation started with
- *   gnet_tcp_socket_new_async().  The creation can be canceled by
- *   calling gnet_tcp_socket_new_async_cancel() with the ID.
+ *  GTcpSocketNewAsyncID:
+ *  
+ *  ID of an asynchronous tcp socket creation started with
+ *  gnet_tcp_socket_new_async().  The creation can be canceled by
+ *  calling gnet_tcp_socket_new_async_cancel() with the ID.
  *
  **/
 typedef gpointer GTcpSocketNewAsyncID;
@@ -99,12 +103,12 @@ typedef gpointer GTcpSocketNewAsyncID;
 
 
 /**
- *   GTcpSocketNewAsyncFunc:
- *   @socket: Socket that was connecting
- *   @data: User data
- *   
- *   Callback for gnet_tcp_socket_new_async().  The socket will be
- *   NULL if the connection failed.
+ *  GTcpSocketNewAsyncFunc:
+ *  @socket: Socket that was connecting
+ *  @data: User data
+ *  
+ *  Callback for gnet_tcp_socket_new_async().  The socket will be
+ *  NULL if the connection failed.
  *
  **/
 typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket, 
@@ -126,7 +130,7 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
 			       gpointer data);
 
 /* Cancel quick and easy asynchronous constructor */
-void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID async_id);
+void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
 
 /* Blocking constructor */
 GTcpSocket* gnet_tcp_socket_new (const GInetAddr* addr);
@@ -138,7 +142,7 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 			   gpointer data);
 
 /* Cancel asynchronous constructor */
-void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID async_id);
+void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
 
 void gnet_tcp_socket_delete (GTcpSocket* s);
 
@@ -155,6 +159,17 @@ gint        gnet_tcp_socket_get_port (const GTcpSocket* socket);
 
 /* ********** */
 
+/**
+ *  GNetTOS
+ *  @GNET_TOS_NONE: Unspecified
+ *  @GNET_TOS_LOWDELAY: Low delay
+ *  @GNET_TOS_THROUGHPUT: High throughput
+ *  @GNET_TOS_RELIABILITY: High reliability
+ *  @GNET_TOS_LOWCOST: Low cost
+ *
+ *  Type-of-service.
+ *
+ **/
 typedef enum
 {
   GNET_TOS_NONE,
@@ -179,8 +194,8 @@ GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
 
 /**
  *   GTcpSocketAcceptFunc:
- *   @server_socket: Server socket
- *   @client_socket: Client socket
+ *   @server: Server socket
+ *   @client: Client socket
  *   @data: User data
  *   
  *   Callback for gnet_tcp_socket_server_accept_async().  The socket

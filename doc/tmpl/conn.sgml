@@ -1,20 +1,19 @@
 <!-- ##### SECTION Title ##### -->
-conn
+GConn
 
 <!-- ##### SECTION Short_Description ##### -->
-
+conn short description
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
+conn long description
 
 </para>
-
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GConn ##### -->
 <para>
@@ -23,33 +22,42 @@ conn
 
 @hostname: 
 @port: 
-@ref_count: 
-@connect_id: 
-@new_id: 
+@iochannel: 
 @socket: 
 @inetaddr: 
-@iochannel: 
-@read_watch: 
-@write_watch: 
-@err_watch: 
-@write_id: 
-@queued_writes: 
-@read_id: 
+@ref_count: 
+@ref_count_internal: 
+@connect_id: 
+@new_id: 
+@write_queue: 
+@bytes_written: 
+@buffer: 
+@length: 
+@bytes_read: 
+@read_eof: 
+@read_queue: 
+@process_buffer_timeout: 
+@watch_readable: 
+@watch_writable: 
+@watch_flags: 
+@watch: 
 @timer: 
 @func: 
 @user_data: 
 
-<!-- ##### ENUM GConnStatus ##### -->
+<!-- ##### ENUM GConnEventType ##### -->
 <para>
 
 </para>
 
-@GNET_CONN_STATUS_CONNECT: 
-@GNET_CONN_STATUS_CLOSE: 
-@GNET_CONN_STATUS_READ: 
-@GNET_CONN_STATUS_WRITE: 
-@GNET_CONN_STATUS_TIMEOUT: 
-@GNET_CONN_STATUS_ERROR: 
+@GNET_CONN_ERROR: 
+@GNET_CONN_CONNECT: 
+@GNET_CONN_CLOSE: 
+@GNET_CONN_TIMEOUT: 
+@GNET_CONN_READ: 
+@GNET_CONN_WRITE: 
+@GNET_CONN_READABLE: 
+@GNET_CONN_WRITABLE: 
 
 <!-- ##### USER_FUNCTION GConnFunc ##### -->
 <para>
@@ -57,11 +65,8 @@ conn
 </para>
 
 @conn: 
-@status: 
-@buffer: 
-@length: 
+@event: 
 @user_data: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gnet_conn_new ##### -->
@@ -87,13 +92,23 @@ conn
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_conn_new_socket ##### -->
+<para>
+
+</para>
+
+@socket: 
+@func: 
+@user_data: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_conn_delete ##### -->
 <para>
 
 </para>
 
 @conn: 
-@delete_buffers: 
 
 
 <!-- ##### FUNCTION gnet_conn_ref ##### -->
@@ -110,7 +125,16 @@ conn
 </para>
 
 @conn: 
-@delete_buffers: 
+
+
+<!-- ##### FUNCTION gnet_conn_set_callback ##### -->
+<para>
+
+</para>
+
+@conn: 
+@func: 
+@user_data: 
 
 
 <!-- ##### FUNCTION gnet_conn_connect ##### -->
@@ -119,7 +143,6 @@ conn
 </para>
 
 @conn: 
-@timeout: 
 
 
 <!-- ##### FUNCTION gnet_conn_disconnect ##### -->
@@ -128,7 +151,6 @@ conn
 </para>
 
 @conn: 
-@delete_buffers: 
 
 
 <!-- ##### FUNCTION gnet_conn_is_connected ##### -->
@@ -146,23 +168,15 @@ conn
 </para>
 
 @conn: 
-@buffer: 
-@length: 
-@timeout: 
-@read_one_byte_at_a_time: 
-@check_func: 
-@check_user_data: 
 
 
-<!-- ##### FUNCTION gnet_conn_readany ##### -->
+<!-- ##### FUNCTION gnet_conn_readn ##### -->
 <para>
 
 </para>
 
 @conn: 
-@buffer: 
 @length: 
-@timeout: 
 
 
 <!-- ##### FUNCTION gnet_conn_readline ##### -->
@@ -171,9 +185,6 @@ conn
 </para>
 
 @conn: 
-@buffer: 
-@length: 
-@timeout: 
 
 
 <!-- ##### FUNCTION gnet_conn_write ##### -->
@@ -184,7 +195,24 @@ conn
 @conn: 
 @buffer: 
 @length: 
-@timeout: 
+
+
+<!-- ##### FUNCTION gnet_conn_set_watch_readable ##### -->
+<para>
+
+</para>
+
+@conn: 
+@enable: 
+
+
+<!-- ##### FUNCTION gnet_conn_set_watch_writable ##### -->
+<para>
+
+</para>
+
+@conn: 
+@enable: 
 
 
 <!-- ##### FUNCTION gnet_conn_timeout ##### -->

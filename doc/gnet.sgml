@@ -7,7 +7,7 @@
 <!entity udp SYSTEM "sgml/udp.sgml">
 <!entity mcast SYSTEM "sgml/mcast.sgml">
 <!entity iochannel SYSTEM "sgml/iochannel.sgml">
-<!entity url SYSTEM "sgml/url.sgml">
+<!entity uri SYSTEM "sgml/uri.sgml">
 <!entity conn SYSTEM "sgml/conn.sgml">
 <!entity server SYSTEM "sgml/server.sgml">
 <!entity pack SYSTEM "sgml/pack.sgml">
@@ -93,6 +93,7 @@
 	<listitem><para>Asynchronous DNS lookup</para></listitem>
 	<listitem><para>SHA and MD5 hashes</para></listitem>
 	<listitem><para>Byte packing and unpacking</para></listitem>
+	<listitem><para>IPv4 and IPv6 support</para></listitem>
       </itemizedlist>
     </para>
 
@@ -148,7 +149,7 @@ AM_PATH_GNET(&lt;version number&gt;,
 	GNet was designed so that most of the implementation is hidden
 	from the programmer.  You should not have to include any
 	network header files other than
-	<filename>gnet/gnet.h</filename>.
+	<filename>gnet.h</filename>.
       </para>
       
       <para>
@@ -309,7 +310,7 @@ AM_PATH_GNET(&lt;version number&gt;,
     &pack;
     &md5;
     &sha;
-    &url;
+    &uri;
     &conn;
     &server;
     

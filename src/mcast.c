@@ -39,7 +39,7 @@ gnet_mcast_socket_new (void)
 
 
 /**
- *  gnet_mcast_socket_port_new:
+ *  gnet_mcast_socket_new_with_port:
  *  @port: Port for the #GMcastSocket.
  *
  *  Create a #GMcastSocket bound to all interfaces and port @port.  If
@@ -58,7 +58,7 @@ gnet_mcast_socket_new_with_port (gint port)
 
 
 /**
- *  gnet_mcast_socket_inetaddr_new:
+ *  gnet_mcast_socket_new_full:
  *  @iface: Interface to bind to (NULL for all interfaces)
  *  @port: Port to bind to (0 for an arbitrary port)
  *
@@ -209,7 +209,7 @@ gnet_mcast_socket_unref (GMcastSocket* s)
 gint
 gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
 {
-  gint rv;
+  gint rv = -1;
 
   if (GNET_INETADDR_FAMILY(ia) == AF_INET)
     {
@@ -257,7 +257,7 @@ gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
 gint
 gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
 {
-  gint rv;
+  gint rv = -1;
 
   if (GNET_INETADDR_FAMILY(ia) == AF_INET)
     {
@@ -296,7 +296,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
 
 /**
  *  gnet_mcast_socket_get_ttl:
- *  @us: GMcastSocket to get TTL from.
+ *  @ms: GMcastSocket to get TTL from.
  *
  *  Get the TTL for outgoing multicast packets.  TTL is the Time To
  *  Live - the maximum number of hops outgoing multicast packets can
@@ -353,7 +353,7 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* ms)
 {
   guchar ttl;
   socklen_t ttl_size;
-  int rv;
+  int rv = -1;
 
   ttl_size = sizeof(ttl);
 
@@ -435,7 +435,6 @@ gnet_mcast_socket_set_ttl (GMcastSocket* ms, int val)
 /**
  *  gnet_mcast_socket_send:
  *  @ms: #GMcastSocket to use to send.
- *  @packet: Packet to send.
  *  @data: Data to send
  *  @length: Length of data
  *  @dst: Destination address
@@ -505,7 +504,7 @@ gint
 gnet_mcast_socket_is_loopback (const GMcastSocket* ms)
 {
   socklen_t flag_size;
-  int rv;
+  int rv = -1;
   gint is_loopback = 0;
 
   /* Get IPv4 loopback if it's bound to a IPv4 address */

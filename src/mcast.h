@@ -30,12 +30,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/*
-
-  All fields in GMcastSocket are private and should be accessed only
-  by using the functions below.
-
- */
+/**
+ *  GMcastSocket
+ *
+ *  All fields in GMcastSocket are private and should be accessed only
+ *  by using the functions below.
+ *
+ **/
 typedef struct _GMcastSocket GMcastSocket;
 
 
@@ -44,7 +45,7 @@ typedef struct _GMcastSocket GMcastSocket;
 
 GMcastSocket* gnet_mcast_socket_new(void);
 GMcastSocket* gnet_mcast_socket_new_with_port (gint port);
-GMcastSocket* gnet_mcast_socket_new_full (const GInetAddr* ia, gint port);
+GMcastSocket* gnet_mcast_socket_new_full (const GInetAddr* iface, gint port);
 
 void          gnet_mcast_socket_delete (GMcastSocket* ms);
 
@@ -59,8 +60,8 @@ GIOChannel*   gnet_mcast_socket_get_io_channel (GMcastSocket* socket);
 gint 	 gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia);
 gint 	 gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia);
 
-gint 	 gnet_mcast_socket_get_ttl (const GMcastSocket* us);
-gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* us, gint val);
+gint 	 gnet_mcast_socket_get_ttl (const GMcastSocket* ms);
+gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint val);
 
 gint     gnet_mcast_socket_send (GMcastSocket* ms, const gint8* data, 
 				 guint length, const GInetAddr* dst);

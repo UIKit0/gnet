@@ -567,6 +567,13 @@ gnet_uri_set_fragment (GURI* uri, const gchar* fragment)
 }
 
 
+/**
+ *  gnet_uri_escape
+ *  @uri: #GURI to escape
+ *
+ *  Escape the fields in the URI.  gnet_uri_get_nice
+ *
+ **/
 void
 gnet_uri_escape (GURI* uri)
 {
@@ -578,6 +585,14 @@ gnet_uri_escape (GURI* uri)
   uri->fragment = field_escape (uri->fragment, FRAGMENT_ESCAPE_MASK);
 }
 
+
+/**
+ *  gnet_uri_unescape
+ *  @uri: #GURI to unescape
+ *
+ *  Unescape the fields in the URI.
+ *
+ **/
 void
 gnet_uri_unescape (GURI* uri)
 {
@@ -706,22 +721,18 @@ field_unescape (gchar* s)
 
 
 
-
-
-
-
 /**
- *  gnet_uri_get_nice_string:
+ *  gnet_uri_get_string:
  *  @uri: URI
  *
- *  Convert the URI to a human-readable string.  Currently, no
- *  escaping or unescaping is done.
+ *  Convert the URI to a string.  The string is not escaped.  Call
+ *  gnet_uri_escape() first if the string should be escaped.
  *
- *  Returns: Nice, caller-owned string.
+ *  Returns: string.
  *
  **/
 gchar*
-gnet_uri_get_nice_string (const GURI* uri)
+gnet_uri_get_string (const GURI* uri)
 {
   gchar* rv = NULL;
   GString* buffer = NULL;

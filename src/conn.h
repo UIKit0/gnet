@@ -31,11 +31,17 @@ extern "C" {
 
 
 
-typedef struct _GConn GConn;
-
 /**
  *   GConnEventType
- * 
+ *   @GNET_CONN_ERROR: Error
+ *   @GNET_CONN_CONNECT: Connect
+ *   @GNET_CONN_CLOSE: Close
+ *   @GNET_CONN_TIMEOUT: Timeout
+ *   @GNET_CONN_READ: Read
+ *   @GNET_CONN_WRITE: Write
+ *   @GNET_CONN_READABLE: Readable
+ *   @GNET_CONN_WRITABLE: Writable
+ *
  *   Event type.  Used by #GConnEvent
  *
  **/
@@ -47,7 +53,7 @@ typedef enum {
   GNET_CONN_READ,
   GNET_CONN_WRITE,
   GNET_CONN_READABLE,
-  GNET_CONN_WRITABLE,
+  GNET_CONN_WRITABLE
 } GConnEventType;
 
 
@@ -64,6 +70,41 @@ typedef struct _GConnEvent
   gint		 length;
 } GConnEvent;
 
+
+
+/**
+ *  GConn
+ *  @hostname: host name
+ *  @port: port
+ *  @iochannel: IO channel
+ *  @socket: socket
+ *  @inetaddr: address
+ *  @ref_count: private
+ *  @ref_count_internal: private
+ *  @connect_id: private
+ *  @new_id: private
+ *  @write_queue: private
+ *  @bytes_written: private
+ *  @buffer: private
+ *  @length: private
+ *  @bytes_read: private
+ *  @read_eof: private
+ *  @read_queue: private
+ *  @process_buffer_timeout: private
+ *  @watch_readable: private
+ *  @watch_writable: private
+ *  @watch_flags: private
+ *  @watch: private
+ *  @timer: private
+ *  @func: private
+ *  @user_data: private
+ *
+ *  TCP Connection.  This is an easier to use interface than
+ *  GTcpSocket.  Some of the fields are public and can be read but
+ *  should not be written to.
+ *
+ **/
+typedef struct _GConn GConn;
 
 
 /**
@@ -188,7 +229,7 @@ void	   gnet_conn_readline (GConn* conn);
 void	   gnet_conn_write (GConn* conn, gchar* buffer, gint length);
 
 void	   gnet_conn_set_watch_readable (GConn* conn, gboolean enable);
-void	   gnet_conn_set_watch_writeable (GConn* conn, gboolean enable);
+void	   gnet_conn_set_watch_writable (GConn* conn, gboolean enable);
 
 void	   gnet_conn_timeout (GConn* conn, guint timeout);
 

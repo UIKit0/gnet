@@ -23,21 +23,16 @@
 
 #include <glib.h>
 
-/* 
-   This module is experimental, buggy, and unstable.  Use at your own
-   risk.  To use this module, define GNET_EXPERIMENTAL before
-   including gnet.h.
-*/
-#ifdef GNET_EXPERIMENTAL 
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/*
-   All fields in GUnixSocket are private and should be accessed only by
-   using the functions below.
- */
+/**
+ *  GUnixSocket
+ *
+ *  Unix socket.
+ *
+ **/
 typedef struct _GUnixSocket GUnixSocket;
 
 /* Quick and easy blocking constructor */
@@ -64,7 +59,5 @@ GUnixSocket* gnet_unix_socket_server_accept_nonblock (const GUnixSocket *socket)
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* GNET_EXPERMENTAL */
 
 #endif /* _GNET_UNIX_H */

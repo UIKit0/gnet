@@ -387,6 +387,8 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 /**
  *  gnet_tcp_socket_new_async_direct:
  *  @addr: Address to connect to.
+ *  @func: Callback function
+ *  @data: Data to pass to call back
  *
  *  Connect directly to a specified address asynchronously and do not
  *  use SOCKS even if SOCKS is enabled.  Most users should use

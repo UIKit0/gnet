@@ -131,7 +131,7 @@ gnet_conn_new (const gchar* hostname, gint port,
  *  gnet_conn_new_inetaddr
  *  @inetaddr: address of host
  *  @func: Function to call on connection, I/O, or error
- *  @user_data: Data to pass to func
+ *  @user_data: Data to pass to @func
  *
  *  Create a connection object representing a connection to a host.
  *  This function is similar to gnet_conn_new().
@@ -160,6 +160,19 @@ gnet_conn_new_inetaddr (const GInetAddr* inetaddr,
 
 
 
+/**
+ *  gnet_conn_new_socket
+ *  @socket: TCP Socket
+ *  @func: Function to call on GConn events
+ *  @user_data: Data to pass to @func
+ *
+ *  Create a connection object representing a connection to a host.
+ *  The #GConn is created from the @socket.  The callback is called
+ *  when events occur.
+ *
+ *  Returns: A #GConn.
+ *
+ **/
 GConn*
 gnet_conn_new_socket (GTcpSocket* socket, 
 		      GConnFunc func, gpointer user_data)
@@ -275,6 +288,15 @@ unref_internal (GConn* conn)
 
 
 
+/**
+ *  gnet_conn_set_callback
+ *  @conn: #GConn
+ *  @func: Function to call on connection, I/O, or error
+ *  @user_data: Data to pass to @func
+ *
+ *  Set the event callback for the GConn.
+ *
+ **/
 void	
 gnet_conn_set_callback (GConn* conn, GConnFunc func, gpointer user_data)
 {
@@ -597,7 +619,7 @@ gnet_conn_read (GConn* conn)
 
 
 /**
- *  gnet_conn_read:
+ *  gnet_conn_readn:
  *  @conn: Connection to read from
  *  @length: Number of bytes to read
  *
@@ -1173,6 +1195,18 @@ conn_write_async_cb (GConn* conn)
 
 /* **************************************** */
 
+/**
+ * gnet_conn_set_watch_readable
+ * @conn: #GConn
+ * @enable: Enable the #GNET_CONN_READABLE event
+ *
+ * Enable (or disable) the #GNET_CONN_READABLE event.  If enabled,
+ * when data can be read from the socket, the #GNET_CONN_READABLE
+ * event is passed to the callback.  Do not enable this while using
+ * gnet_conn_read(), gnet_conn_readn(), or gnet_conn_readline().
+ * Read from the iochannel member of the @conn.
+ *
+ **/
 void
 gnet_conn_set_watch_readable (GConn* conn, gboolean enable)
 {
@@ -1186,8 +1220,19 @@ gnet_conn_set_watch_readable (GConn* conn, gboolean enable)
 }
 
 
+/**
+ * gnet_conn_set_watch_writable
+ * @conn: #GConn
+ * @enable: Enable the #GNET_CONN_WRITABLE event
+ *
+ * Enable (or disable) the #GNET_CONN_WRITABLE event.  If enabled,
+ * when data can be written to the socket, the #GNET_CONN_WRITABLE
+ * event is passed to the callback.  Do not enable this while using
+ * gnet_conn_write().  Write to the iochannel member of the @conn.
+ *
+ **/
 void
-gnet_conn_set_watch_writeable (GConn* conn, gboolean enable)
+gnet_conn_set_watch_writable (GConn* conn, gboolean enable)
 {
   g_return_if_fail (conn);
 

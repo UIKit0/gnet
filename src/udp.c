@@ -204,7 +204,6 @@ gnet_udp_socket_unref (GUdpSocket* s)
 /**
  *  gnet_udp_socket_send:
  *  @s: #GUdpSocket to use to send.
- *  @packet: Packet to send.
  *  @data: Data to send
  *  @length: Length of data
  *  @dst: Destination address

@@ -9,27 +9,16 @@ udp
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GUdpSocket ##### -->
 <para>
 
 </para>
 
-
-<!-- ##### STRUCT GUdpPacket ##### -->
-<para>
-
-</para>
-
-@data: 
-@length: 
-@addr: 
 
 <!-- ##### FUNCTION gnet_udp_socket_new ##### -->
 <para>
@@ -39,7 +28,7 @@ udp
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_udp_socket_port_new ##### -->
+<!-- ##### FUNCTION gnet_udp_socket_new_with_port ##### -->
 <para>
 
 </para>
@@ -48,12 +37,13 @@ udp
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_udp_socket_new_interface ##### -->
+<!-- ##### FUNCTION gnet_udp_socket_new_full ##### -->
 <para>
 
 </para>
 
 @iface: 
+@port: 
 @Returns: 
 
 
@@ -87,7 +77,9 @@ udp
 </para>
 
 @s: 
-@packet: 
+@data: 
+@length: 
+@dst: 
 @Returns: 
 
 
@@ -97,7 +89,9 @@ udp
 </para>
 
 @s: 
-@packet: 
+@data: 
+@length: 
+@src: 
 @Returns: 
 
 
@@ -110,7 +104,7 @@ udp
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_udp_socket_get_iochannel ##### -->
+<!-- ##### FUNCTION gnet_udp_socket_get_io_channel ##### -->
 <para>
 
 </para>
@@ -136,53 +130,5 @@ udp
 @us: 
 @val: 
 @Returns: 
-
-
-<!-- ##### FUNCTION gnet_udp_socket_get_mcast_ttl ##### -->
-<para>
-
-</para>
-
-@us: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_udp_socket_set_mcast_ttl ##### -->
-<para>
-
-</para>
-
-@us: 
-@val: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_udp_packet_receive_new ##### -->
-<para>
-
-</para>
-
-@data: 
-@length: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_udp_packet_send_new ##### -->
-<para>
-
-</para>
-
-@data: 
-@length: 
-@addr: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_udp_packet_delete ##### -->
-<para>
-
-</para>
-
-@packet: 
 
 

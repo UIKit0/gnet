@@ -9,12 +9,10 @@ inetaddr
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GInetAddr ##### -->
 <para>
@@ -22,13 +20,15 @@ inetaddr
 </para>
 
 
-<!-- ##### ENUM GInetAddrAsyncStatus ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_new ##### -->
 <para>
 
 </para>
 
-@GINETADDR_ASYNC_STATUS_OK: 
-@GINETADDR_ASYNC_STATUS_ERROR: 
+@name: 
+@port: 
+@Returns: 
+
 
 <!-- ##### TYPEDEF GInetAddrNewAsyncID ##### -->
 <para>
@@ -42,35 +42,7 @@ inetaddr
 </para>
 
 @inetaddr: 
-@status: 
 @data: 
-
-
-<!-- ##### TYPEDEF GInetAddrGetNameAsyncID ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### USER_FUNCTION GInetAddrGetNameAsyncFunc ##### -->
-<para>
-
-</para>
-
-@inetaddr: 
-@status: 
-@name: 
-@data: 
-
-
-<!-- ##### FUNCTION gnet_inetaddr_new ##### -->
-<para>
-
-</para>
-
-@name: 
-@port: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_new_async ##### -->
@@ -90,6 +62,67 @@ inetaddr
 
 </para>
 
+@id: 
+<!-- # Unused Parameters # -->
+@async_id: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_list ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_delete_list ##### -->
+<para>
+
+</para>
+
+@list: 
+<!-- # Unused Parameters # -->
+@ia_list: 
+
+
+<!-- ##### TYPEDEF GInetAddrNewListAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GInetAddrNewListAsyncFunc ##### -->
+<para>
+
+</para>
+
+@list: 
+@data: 
+<!-- # Unused Parameters # -->
+@ialist: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_list_async ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@func: 
+@data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_list_async_cancel ##### -->
+<para>
+
+</para>
+
+@id: 
+<!-- # Unused Parameters # -->
 @async_id: 
 
 
@@ -100,6 +133,16 @@ inetaddr
 
 @name: 
 @port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_bytes ##### -->
+<para>
+
+</para>
+
+@addr: 
+@length: 
 @Returns: 
 
 
@@ -154,6 +197,21 @@ inetaddr
 @Returns: 
 
 
+<!-- ##### TYPEDEF GInetAddrGetNameAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GInetAddrGetNameAsyncFunc ##### -->
+<para>
+
+</para>
+
+@name: 
+@data: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_get_name_async ##### -->
 <para>
 
@@ -170,6 +228,8 @@ inetaddr
 
 </para>
 
+@id: 
+<!-- # Unused Parameters # -->
 @async_id: 
 
 
@@ -255,6 +315,24 @@ inetaddr
 
 
 <!-- ##### FUNCTION gnet_inetaddr_is_broadcast ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_ipv4 ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_is_ipv6 ##### -->
 <para>
 
 </para>

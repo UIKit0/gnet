@@ -18,6 +18,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ *  GMD5
+ *
+ *  GMD5 is a MD5 hash.
+ *
+ **/
 typedef struct _GMD5 GMD5;
 
 /**

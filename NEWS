@@ -5,7 +5,16 @@ GNet NEWS
 Changes in Gnet
 
 
-1.1.7 (Square meal 2" release)
+1.3.0 ("Tomacco" DEVELOPERS release)
+-----
+* IPv6 support
+* Server, Conn, URI, and Unix modules are no longer "experimental"
+* Header files are now in gnet-1.3
+* gnet-config removed.  Use pkg-config.
+* Many API changes
+
+
+1.1.7 ("Square meal 2" release)
 -----
 * Fixed major bug in IO channel code from 1.1.6
 

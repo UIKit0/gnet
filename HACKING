@@ -100,6 +100,34 @@ easier. For each file, just do:
 and just send us the patch: /tmp/file.c.patch.
 
 
+Testing GNet
+------------
+
+Before submitting a patch, run the regression tests and make sure they
+pass.  It's easy:
+
+  > cd tests
+  > make check
+  [tests will compile and you will see something like this:]
+  PASS: hash
+  PASS: pack
+  PASS: unpack
+  PASS: inetaddr_test
+  PASS: uri_test
+  PASS: ipv6_test
+  ==================
+  All 6 tests passed
+  ==================
+
+
+Please run the client/server test also.  It's a perl script call
+tests/client_server_test.pl.  Run it from the tests directory.
+
+Please write automated tests for new modules when appropriate.  Place
+the test in the tests directory and add it to the Makefile.am.  Test
+programs should exit(0) if successful and exit(1) otherwise.
+
+
 
 Fork vs. Pthread in asynchronous DNS lookup
 -------------------------------------------

@@ -33,12 +33,12 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/*
-
-  All fields in GInetAddr are private and should be accessed only by
-  using the functions below.
-
- */
+/**
+ *  GInetAddr
+ *
+ *  GInetAddr is an internet address.
+ *
+ **/
 typedef struct _GInetAddr GInetAddr;
 
 
@@ -88,15 +88,13 @@ typedef gpointer GInetAddrNewListAsyncID;
 /**
  *   GInetAddrNewListAsyncFunc:
  *   @list: List of GInetAddr's (callee owned)
- *   @status: Status of the lookup
  *   @data: User data
  *   
  *   Callback for gnet_inetaddr_new_list_async().  Callee owns the
- *   list of GInetAddr's.  The list is NULL if the lookup failed.
+ *   list of GInetAddrs.  The list is NULL if the lookup failed.
  *
  **/
-typedef void (*GInetAddrNewListAsyncFunc)(GList* ialist, 
-					  gpointer data);
+typedef void (*GInetAddrNewListAsyncFunc)(GList* list, gpointer data);
 
 
 
@@ -110,17 +108,17 @@ GInetAddrNewAsyncID
            gnet_inetaddr_new_async (const gchar* name, gint port, 
 				    GInetAddrNewAsyncFunc func, 
 				    gpointer data);
-void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id);
+void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
 
 
 GList*     gnet_inetaddr_new_list (const gchar* name, gint port);
-void	   gnet_inetaddr_delete_list (GList* ia_list);
+void	   gnet_inetaddr_delete_list (GList* list);
 
 GInetAddrNewListAsyncID 
            gnet_inetaddr_new_list_async (const gchar* name, gint port, 
 					 GInetAddrNewListAsyncFunc func, 
 					 gpointer data);
-void       gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID async_id);
+void       gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
 
 
 GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
@@ -173,7 +171,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 			      GInetAddrGetNameAsyncFunc func,
 			      gpointer data);
 
-void    gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID async_id);
+void    gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
 
 
 gchar*  gnet_inetaddr_get_canonical_name (const GInetAddr* ia);

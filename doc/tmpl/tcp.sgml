@@ -9,12 +9,10 @@ tcp
 
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### STRUCT GTcpSocket ##### -->
 <para>
@@ -43,7 +41,6 @@ tcp
 </para>
 
 @socket: 
-@ia: 
 @status: 
 @data: 
 
@@ -54,21 +51,12 @@ tcp
 </para>
 
 
-<!-- ##### ENUM GTcpSocketNewAsyncStatus ##### -->
-<para>
-
-</para>
-
-@GTCP_SOCKET_NEW_ASYNC_STATUS_OK: 
-@GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR: 
-
 <!-- ##### USER_FUNCTION GTcpSocketNewAsyncFunc ##### -->
 <para>
 
 </para>
 
 @socket: 
-@status: 
 @data: 
 
 
@@ -99,6 +87,8 @@ tcp
 
 </para>
 
+@id: 
+<!-- # Unused Parameters # -->
 @async_id: 
 
 
@@ -127,6 +117,8 @@ tcp
 
 </para>
 
+@id: 
+<!-- # Unused Parameters # -->
 @async_id: 
 
 
@@ -154,7 +146,7 @@ tcp
 @s: 
 
 
-<!-- ##### FUNCTION gnet_tcp_socket_get_iochannel ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_get_io_channel ##### -->
 <para>
 
 </para>
@@ -216,6 +208,7 @@ tcp
 </para>
 
 @iface: 
+@port: 
 @Returns: 
 
 

@@ -201,8 +201,8 @@ main (int argc, char* argv[])
       TEST (i, "gnet_uri_new", uri != NULL);
       if (!uri) continue;
 
-      pretty = gnet_uri_get_nice_string (uri);
-      TEST (i, "gnet_uri_get_nice_string", pretty);
+      pretty = gnet_uri_get_string (uri);
+      TEST (i, "gnet_uri_get_string", pretty);
       if (!pretty) continue;
 
       if (tests[i].pretty)
@@ -219,12 +219,12 @@ main (int argc, char* argv[])
       TEST (i, "fragment", !SAFESTRCMP(uri->fragment, tests[i].uri.fragment));
 
       gnet_uri_escape (uri);
-      escape = gnet_uri_get_nice_string (uri);
+      escape = gnet_uri_get_string (uri);
       TEST (i, "gnet_uri_escape", escape != NULL);
 /*        g_print ("%s -e-> %s\n", pretty, escape); */
 
       gnet_uri_unescape (uri);
-      unescape = gnet_uri_get_nice_string (uri);
+      unescape = gnet_uri_get_string (uri);
       TEST (i, "gnet_uri_unescape", unescape != NULL);
 /*        g_print ("%s -u-> %s\n", escape, unescape); */
       
@@ -248,7 +248,7 @@ main (int argc, char* argv[])
       if (!uri) continue;
 
       gnet_uri_unescape (uri);
-      unescape = gnet_uri_get_nice_string (uri);
+      unescape = gnet_uri_get_string (uri);
       TEST (i, "gnet_uri_unescape", unescape != NULL);
 /*        g_print ("unescape = %s\n", unescape); */
 
@@ -257,7 +257,7 @@ main (int argc, char* argv[])
       g_free (unescape);
 
       gnet_uri_escape (uri);
-      escape = gnet_uri_get_nice_string (uri);
+      escape = gnet_uri_get_string (uri);
       TEST (i, "gnet_uri_escape", escape != NULL);
 /*        g_print ("escape = %s\n", escape); */
 

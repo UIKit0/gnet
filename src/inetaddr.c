@@ -614,6 +614,25 @@ gnet_inetaddr_new_list (const gchar* name, gint port)
 }
 
 
+/**
+ *  gnet_inetaddr_delete_list
+ *  @list: List of GInetAddrs
+ *
+ *  Delete a list of GInetAddrs
+ *
+ **/
+void
+gnet_inetaddr_delete_list (GList* list)
+{
+  GList* i;
+
+  for (i = list; i != NULL; i = i->next)
+    gnet_inetaddr_delete ((GInetAddr*) i->data);
+  g_list_free (list);
+}
+
+
+
 /* **************************************** */
 /* gnet_inetaddr_new_async()		    */
 
@@ -663,6 +682,14 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 }
 
 
+/**
+ *  gnet_inetaddr_new_async_cancel
+ *  @id: ID of the lookup
+ *
+ *  Cancel an asynchronous GInetAddr creation that was started with
+ *  gnet_inetaddr_new_async().
+ *
+ **/
 void
 gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id)
 {
@@ -1056,13 +1083,13 @@ inetaddr_new_list_async_pthread_dispatch (gpointer data)
 
 
 /**
- *  gnet_inetaddr_new_async_cancel:
+ *  gnet_inetaddr_new_list_async_cancel
  *  @id: ID of the lookup
  *
- *  Cancel an asynchronous GInetAddr creation that was started with
- *  gnet_inetaddr_new_async().
+ *  Cancel an asynchronous GInetAddr list creation that was started
+ *  with gnet_inetaddr_new_list_async().
  * 
- */
+ **/
 void
 gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 {

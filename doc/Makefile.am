@@ -14,7 +14,7 @@ HTML_DIR=$(prefix)/share/doc/libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)-
 TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
 
 scan:
-	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR)/src --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="acconfig.h config.h gnetconfig.h gnet-private.h socks-private.h scheduler.h"
+	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR)/src --ignore-headers="acconfig.h config.h gnetconfig.h gnet-private.h socks-private.h scheduler.h usagi_ifaddrs.h"
 
 templates: scan
 	gtkdoc-mktmpl --module=$(DOC_MODULE)
