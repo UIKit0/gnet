@@ -34,6 +34,41 @@
 #endif
 
 
+#ifdef GNET_WIN32
+
+/* TODO: Use Window's inet_pton/inet_ntop if they ever implement it. */
+int
+inet_pton(int af, const char* src, void* dst)
+{
+  in_addr_t addr;
+
+  addr = inet_addr(src);
+  if (addr == INADDR_NONE && strcmp(src, "255.255.255.255"))
+    return 0;
+
+  *((in_addr_t*) dst) = addr;
+  return 1;
+}
+
+const char* 
+inet_ntop(int af, const void *src, char *dst, size_t size)
+{
+  struct in_addr addr = *(struct in_addr*) dst;
+  char* buf;
+
+  buf = inet_ntoa(addr);
+  if (buf == NULL)
+    return NULL;
+
+  strcpy(dst, buf);
+
+  return dst;
+}
+
+
+#endif /* GNET_WIN32 */
+
+
 /* **************************************** */
 
 static GList* gnet_gethostbyname(const char* hostname);
@@ -534,22 +569,6 @@ gnet_gethostbyaddr(const struct sockaddr_storage* sa)
 
   return rv;
 }
-
-
-
-#ifdef GNET_WIN32
-
-/* TODO: Use Window's inet_aton if they ever implement it. */
-static int
-inet_aton (const char *cp, struct in_addr *inp)
-{
-  inp->s_addr = inet_addr(cp);
-  if (inp->s_addr == INADDR_NONE && strcmp (cp, "255.255.255.255"))
-    return 0;
-  return 1;
-}
-
-#endif /* GNET_WIN32 */
 
 
 
@@ -1317,16 +1336,19 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
 
   /* Create a structure for the call back */
   state = g_new0(GInetAddrNewListState, 1);
-  state->ias = g_list_new();
+  state->ias = NULL;
   state->ias = g_list_prepend(state->ias, ia);
   state->func = func;
   state->data = data;
 
-  state->WSAhandle = (int) WSAAsyncGetHostByName(gnet_hWnd, IA_NEW_MSG, name, state->hostentBuffer, sizeof(state->hostentBuffer));
+  state->WSAhandle = (int) WSAAsyncGetHostByName(gnet_hWnd, IA_NEW_MSG, hostname, 
+						 state->hostentBuffer, 
+						 sizeof(state->hostentBuffer));
 
   if (!state->WSAhandle)
     {
       gnet_inetaddr_delete (ia);
+      g_list_free(state->ias);
       g_free (state);
       return NULL;
     }
@@ -1360,9 +1382,9 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
       return FALSE;
     }
 
-  result = (struct hostent*)state->hostentBuffer;
+  result = (struct hostent*) state->hostentBuffer;
 
-  sa_in = (struct sockaddr_in*) ia->sa;
+  sa_in = (struct sockaddr_in*) &ia->sa;
   memcpy(&sa_in->sin_addr, result->h_addr_list[0], result->h_length);
 
   ia->name = g_strdup(result->h_name);
@@ -2228,6 +2250,8 @@ gnet_inetaddr_set_bytes (GInetAddr* inetaddr,
 gchar* 
 gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
 {
+#ifndef GNET_WIN32
+
   gchar buffer[INET6_ADDRSTRLEN];	/* defined in netinet/in.h */
   
   g_return_val_if_fail (inetaddr != NULL, NULL);
@@ -2236,8 +2260,19 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
 		GNET_INETADDR_ADDRP(inetaddr),
 		buffer, sizeof(buffer)) == NULL)
     return NULL;
+  return g_strdup(buffer);
+
+#else
+
+  char* buffer;
+
+  buffer = inet_ntoa(GNET_INETADDR_SA4(inetaddr).sin_addr);
+  if (buffer == NULL)
+    return NULL;
 
   return g_strdup(buffer);
+
+#endif
 }
 
 
@@ -2295,7 +2330,7 @@ gnet_inetaddr_is_canonical (const gchar* name)
 
   g_return_val_if_fail (name, FALSE);
 
-  if (inet_pton(AF_INET,  name, buf) == 1)
+  if (inet_pton(AF_INET, name, buf) == 1)
     return TRUE;
 
 #ifdef HAVE_IPV6

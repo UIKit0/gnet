@@ -178,7 +178,7 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
   MSG msg;
 
   gpointer data;
-  GInetAddrAsyncState *IAstate;
+  GInetAddrNewListState* IAstate;
   GInetAddrReverseAsyncState *IARstate;
 
   int i;
@@ -197,11 +197,11 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 	g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
 	ReleaseMutex(gnet_Mutex);
 		
-	IAstate = (GInetAddrAsyncState*) data;
+	IAstate = (GInetAddrNewListState*) data;
 	IAstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
 
 	/* Now call the callback function */
-	gnet_inetaddr_new_async_cb(NULL, G_IO_IN, (gpointer)IAstate);
+	gnet_inetaddr_new_list_async_cb(NULL, G_IO_IN, (gpointer)IAstate);
 
 	break;
       }
@@ -390,7 +390,9 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
       {
 	g_source_remove(gnet_io_watch_ID);
 	g_free(gnet_iochannel);
-	DestroyWindow(gnet_hWnd);
+/* 	DestroyWindow(gnet_hWnd); */
+/* FIX DestroyWindow causes problems according to DanielKO.  It works
+   if removed.  Andy - take a look at this.  -DAH */
 
 	/*CleanUp WinSock 2 */
 	WSACleanup();

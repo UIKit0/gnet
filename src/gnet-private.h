@@ -119,6 +119,11 @@ struct sockaddr_storage {
 #define INET6_ADDRSTRLEN 46
 #endif
 
+#ifndef IN_LOOPBACKNET /* not defined in Win32 */
+#define IN_LOOPBACKNET 127
+#endif
+
+
 #define GNET_SOCKADDR_IN(s)    	(*((struct sockaddr_in*) &s))
 #define GNET_SOCKADDR_SA(s)	(*((struct sockaddr*) &s))
 #define GNET_SOCKADDR_SA4(s)	(*((struct sockaddr_in*) &s))
@@ -156,6 +161,7 @@ struct sockaddr_storage {
 #define GNET_SOCKADDR_ADDRLEN(s) sizeof(struct in_addr)
 #define GNET_SOCKADDR_PORT(s)	((struct sockaddr_in*)&s)->sin_port
 #define GNET_SOCKADDR_LEN(s)	sizeof(struct sockaddr_in)
+#define GNET_SOCKADDR_PORT_SET(s, p) ((struct sockaddr_in*)&(s))->sin_port = p;
 
 #endif
 

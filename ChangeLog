@@ -1,3 +1,22 @@
+Tue May 13 01:25:12 2003  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (inet_ntop): Add Win32 inet_pton and inet_aton.
+
+	* src/gnet-private.c (DllMain): Comment out DestroyWindow.  This
+	   causes problems.  Andy will take a look at it.
+
+	* src/gnet-private.h: Define IN_LOOPBACKNET if not defined
+	   (like in Windows?)
+
+	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): Add a &
+	   (was bad cast).
+	
+	* src/inetaddr.c (gnet_inetaddr_new_list_async): s/name/hostname,
+	   Fix list code.  Delete list.
+
+	* src/gnet-private.c (gnet_MainCallBack): Use
+	   GInetAddrNewListState (a rename)
+
 Sun May 11 22:31:59 2003  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c: Use ias, not ia (Win32).  Clean-up list code.
