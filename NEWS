@@ -4,6 +4,12 @@ GNet NEWS
 
 Changes in Gnet
 
+2.0.6 (Unreleased)
+-----
+* New experimental HTTP Conn module (Tim Müller)
+* Misc bug fixes (pthread detection
+(Unreleased)
+
 2.0.5
 -----
 * Many Win32 fixes (thanks Andy Lanoix, Hans Petter Jansson, Tor 
@@ -15,6 +21,7 @@ Changes in Gnet
 * New echoserver-partyline example (thanks Andy!)
 * Miscellaneous clean-ups (thanks Michael Alger, Tim Muller, 
 		Stephane Loeuillet!)
+(Released March 1, 2004)
 
 2.0.4
 -----
@@ -22,6 +29,7 @@ Changes in Gnet
 * Win32 fixes
 * Compile and regression test fixes for 64-bit systems
 * Compile fix for Solaris
+(Released July 28, 2003)
 
 2.0.3
 -----
@@ -33,16 +41,15 @@ Changes in Gnet
 * RPM fixes (thanks Bas Mevissen!)
 * Compile fixes for Sun compiler (thanks Ives Aerts!)
 
-
 2.0.1
 -----
 * Compile fixes for Solaris and systems with no IPv6 support
-
+(Released April 21, 2003)
 
 2.0.0
 -----
 * Stable release of 1.3 series
-
+(Released April 13, 2003)
 
 
 1.3.2 ("Sacrilicious" DEVELOPERS release)

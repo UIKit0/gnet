@@ -3,10 +3,10 @@
 # $Id$
 
 # autoconf requirement
-AC_PREREQ([2.52])
+AC_PREREQ([2.53])
 
 # Init autoconf and automake
-AC_INIT([gnet], [2.0.5], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [2.0.6], [gnet@gnetlibrary.org])
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_MAINTAINER_MODE
@@ -22,9 +22,9 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=2
 GNET_MINOR_VERSION=0
-GNET_MICRO_VERSION=5
-GNET_INTERFACE_AGE=5
-GNET_BINARY_AGE=5
+GNET_MICRO_VERSION=6
+GNET_INTERFACE_AGE=0
+GNET_BINARY_AGE=6
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
@@ -162,18 +162,28 @@ AC_ARG_ENABLE(pthreads,
 if test "x${enable_pthreads}" = "xyes"; then
   PTHREAD_LIBS=""
 
+  # Check for pthreads with -pthread
   AC_MSG_CHECKING([for -pthread])
   gnet_save_LIBS=$LIBS
   LIBS="$LIBS -pthread"
   dash_pthread=""
-  AC_LINK_IFELSE([int main() { return 0; }], 
+  PTHREAD_PROGRAM="
+#include <pthread.h>
+int main(void)
+{  
+   pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+   return 0;
+}
+"
+  AC_TRY_RUN($PTHREAD_PROGRAM,
 	[dash_pthread="-pthread"
 	 AC_MSG_RESULT(yes)],
 	[dash_pthread=""
+         # Otherwise, check for pthreads with -pthreads
 	 AC_MSG_RESULT(no)
          AC_MSG_CHECKING([for -pthreads])
          LIBS="$gnet_save_LIBS -pthreads"
-	 AC_LINK_IFELSE([int main() { return 0; }], 
+	 AC_TRY_RUN($PTHREAD_PROGRAM,
 	   [dash_pthread="-pthreads"
 	   AC_MSG_RESULT(yes)],
 	   [dash_pthread=""
@@ -181,6 +191,7 @@ if test "x${enable_pthreads}" = "xyes"; then
 	])
   LIBS="$gnet_save_LIBS $dash_pthread"
 
+  # Otherwise, check for -lpthread and -lc_r
   if test "x$dash_pthread" == "x"; then
     AC_CHECK_LIB([pthread],
             [pthread_create],
@@ -189,6 +200,7 @@ if test "x${enable_pthreads}" = "xyes"; then
             [pthread_create],
             [PTHREAD_LIBS="-lc_r $PTHREAD_LIBS"])
   fi    
+  # If either -pthread[s] or -lpthread works, we have pthreads
   if test "x$PTHREAD_LIBS" != "x" -o "x$dash_pthread" != "x"; then
           AC_DEFINE(HAVE_LIBPTHREAD, 1,
                   [Define if pthreads library is available])

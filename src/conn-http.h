@@ -22,6 +22,13 @@
 #ifndef _GNET_CONN_HTTP_H
 #define _GNET_CONN_HTTP_H
 
+/*
+   This module is experimental, buggy, and unstable.  Use at your own
+   risk.  To use this module, define GNET_EXPERIMENTAL before
+   including gnet.h.
+*/
+#ifdef GNET_EXPERIMENTAL
+
 #include <glib.h>
 
 #include "conn.h"
@@ -380,6 +387,6 @@ gboolean         gnet_http_get                     (const gchar      *url,
 }
 #endif /* __cplusplus */
 
+#endif /* GNET_EXPERIMENTAL */
+
 #endif /* _GNET_CONN_HTTP_H */
-
-

@@ -20,6 +20,7 @@
  *
  ***************************************************************************/
 
+#define GNET_EXPERIMENTAL 1
 #include "conn-http.h"
 
 #include <stdlib.h>
