@@ -2392,7 +2392,7 @@ gnet_inetaddr_list_interfaces (void)
   gchar* ptr;
   gint sockfd;
   struct ifconf ifc;
-
+  struct ifreq* ifr;
 
   /* Create a dummy socket */
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -2432,20 +2432,21 @@ gnet_inetaddr_list_interfaces (void)
       g_free(buf);
     }
 
-
   /* Create the list.  Stevens has a much more complex way of doing
      this, but his is probably much more correct portable.  */
-  for (ptr = buf; ptr < (buf + ifc.ifc_len); )
+  for (ptr = buf; ptr < (buf + ifc.ifc_len); 
+#ifdef HAVE_SOCKADDR_SA_LEN      
+      ptr += sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len
+#else
+      ptr += sizeof(struct ifreq)
+#endif
+)
     {
-      struct ifreq* ifr = (struct ifreq*) ptr;
       struct sockaddr addr;
+      int rv;
       GInetAddr* ia;
 
-#ifdef HAVE_SOCKADDR_SA_LEN      
-      ptr += sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len;
-#else
-      ptr += sizeof(struct ifreq);
-#endif
+      ifr = (struct ifreq*) ptr;
 
       /* Ignore non-AF_INET */
       if (ifr->ifr_addr.sa_family != AF_INET)
@@ -2457,7 +2458,9 @@ gnet_inetaddr_list_interfaces (void)
       memcpy(&addr, &ifr->ifr_addr, sizeof(addr));
       
       /* Get the flags */
-      ioctl(sockfd, SIOCGIFFLAGS, ifr);
+      rv = ioctl(sockfd, SIOCGIFFLAGS, ifr);
+      if (rv == -1)
+	continue;
 
       /* Ignore entries that aren't up or loopback.  Someday we'll
 	 write an interface structure and include this stuff. */

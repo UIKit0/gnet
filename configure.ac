@@ -163,7 +163,7 @@ AC_CHECK_HEADERS([sys/sockio.h sys/param.h])
 ###############################
 # Check for structures
 AC_CHECK_MEMBER([struct sockaddr.sa_len],
-		,
+		AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1),
 		,
 		[#include <sys/types.h>
 		 #include <sys/socket.h>])

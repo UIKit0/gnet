@@ -8,6 +8,8 @@ INCLUDES = \
 	-I$(top_srcdir)/src \
 	$(GLIB_CFLAGS)
 
+LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS)
+
 # Automatic tests
 TESTS = hash pack unpack url_test
 

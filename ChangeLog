@@ -1,3 +1,16 @@
+Thu Sep 12 16:13:37 2002  David Helder  <dhelder@umich.edu>
+
+	* tests/Makefile.am (LDADD): Add glib_libs and gthread_libs
+
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces): Increment
+	   pointer in header.  We were missing the first interface.
+	   Check return value of ioctl for flags.
+	* configure.ac (pthread_libs): Explicitly define
+ 	   HAVE_SOCKADDR_SA_LEN since autoconf no longer does it,
+	   it seems.
+
+	* Makefile.am (EXTRA_DIST): Include depcomp
+
 Tue Sep 10 20:35:27:39 2002 Andrew Lanoix <alanoix@umich.edu>
 
 	* README.win32: Update
