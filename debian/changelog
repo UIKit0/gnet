@@ -1,3 +1,17 @@
+gnet (1.0.0-2) unstable; urgency=low
+
+  * Added "Replaces: libgnet0.1 
+  * Fixed control file
+
+ -- David Helder <dhelder@umich.edu>  Mon, 28 Feb 2000 13:25:01 -0500
+
+gnet (1.0.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Cleaned up control file, added 1.0 files
+
+ -- David Helder <dhelder@umich.edu>  Mon, 28 Feb 2000 12:41:22 -0500
+
 gnet (0.1.9-1) unstable; urgency=low
 
   * New upstream release

@@ -35,7 +35,7 @@ have a system with packages (eg, Red Hat or Debian), look for the
 latest glib package.
 
 Comments, questions, and bug reports should be sent to
-gnet-dev@umich.edu.
+gnet-dev@eecs.umich.edu.
 
 The Gnet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet
 
@@ -87,14 +87,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc README COPYING ChangeLog NEWS TODO AUTHORS INSTALL HACKING
 %{prefix}/bin/gnet-config
 %{prefix}/share/aclocal/gnet.m4
-#%doc %{prefix}/share/doc/libgnet0.1-dev
 %doc doc/html
-%{prefix}/lib/libgnet-0.1.so.*
-#%{prefix}/lib/libgnet-0.1.so.2
-#%{prefix}/lib/libgnet-0.1.so.2.1.0
-#%{prefix}/lib/libgnet.a
-#%{prefix}/lib/libgnet.la
-#%{prefix}/lib/libgnet.so
+%{prefix}/lib/libgnet-1.0.so.*
 
 %files devel
 %defattr(-, root, root)
@@ -103,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/lib/lib*.so
 
 %changelog
+* Mon Feb 28 2000 David Helder <dhelder@umich.edu>
+- Updated for version 1.0
+
 * Sat Jan 15 2000 Xavier Nicolovici <nicolovi@club-internet.fr>
 - Moved lib*.so and lib*a to the devel package
 - Creation of a gnet.spec.in for autoconf process

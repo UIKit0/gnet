@@ -1,5 +1,8 @@
-Wed Feb 23 13:27:41 2000  David Helder  <dhelder@umich.edu>
+Mon Feb 28 12:38:31 2000  David Helder  <dhelder@umich.edu>
 
+	* NEWS, etc: Version 1.0.0
+	* debian/*: Upped version to 1.0.0-2, cleaned up control.in
+	* gnet.spec.in: Upped version to 1.0
 
 Wed Feb 23 10:49:39 2000  David Helder  <dhelder@umich.edu>
 

@@ -4,12 +4,11 @@ GNet NEWS
 
 Changes in Gnet
 
-???
+1.0.0
 -----
 * Some renaming
 * Upgrade to libtool 1.3.4
-* Binary compatable with 0.1.9, but not compile compatable
-
+* First stable release
 
 0.1.9
 -----
