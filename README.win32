@@ -1,0 +1,49 @@
+
+GNet README for Win32
+---------------------
+
+This document contains
+ - General Win32 Specific Information
+ - How to link your project to the Gnet DLL
+ - How to compile GNet with MSVC 6.0
+ - HACKING/TODO on Win32
+
+
+General Win32 Specific Information
+----------------------------------
+
+gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
+gnet_private_inetaddr_list_interfaces() does not support more than 10
+interfaces.
+
+
+How to link your project to the Gnet DLL
+----------------------------------------
+
+Download the latest version of Glib for Win32 and copy the header
+files and glib-X.Y.dll and glib-X.Y.lib to the gnet project folder. Do
+the same for GNet. Remember change your project settings to include
+glib-X.Y.lib gnet-X.Y.lib in the link tab.
+
+
+How to compile GNet with MSVC 6.0
+---------------------------------
+
+Download the latest version of Glib for Win32 and copy the header
+files and glib-X.Y.dll and glib-X.Y.lib to the gnet project folder. A
+.dsp file is provided to build the project.
+
+
+HACKING/TODO on Win32
+---------------------
+
+For a general description on how GNet for Win32 was implemented see
+halfway down gnet.c.
+
+FIX: gnet_inetaddr_gethostname() so it can handle hostnames over 256 chars.
+
+FIX: gnet_private_inetaddr_list_interfaces() so it support more than
+10 Interfaces.
+
+TODO: Create a makefile so you can compile GNet with gcc under
+windows. See the gtk for Win32 site for more info and links.
