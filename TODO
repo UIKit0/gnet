@@ -71,6 +71,15 @@ API Fixes
 
 - Remove "localhost" check from gnet_inetaddr_new_nonblock().
 
+- Change "iochannel" to "io_channel" in functions to be consistent
+    with GLib.
+
+- URL cleanups (see header)
+
+- Don't ref iochannels before returning them.  This is annoying.
+
+- Header files should go into gnet-MAJOR-MINOR, so different versions
+    can co-exist.
 
 
 Internal Improvements
@@ -85,6 +94,7 @@ Internal Improvements
     do a return-on-fail when we get an empty string.
 
 - Use getnameinfo when available (for IPv6?)
+
 
 
 

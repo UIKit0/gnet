@@ -324,14 +324,6 @@ struct sockaddr gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia);
 /* gtk-doc doesn't like this function...  (but it will be fixed.) */
 
 
-/* TODO: Need to port this to Solaris and Windows.  This also assumes
-   eth0 (we need to get the name of the interface of the socket) */
-
-/*gint gnet_udp_socket_get_MTU(GUdpSocket* us);*/
-
-
-
-
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */

@@ -92,37 +92,6 @@ gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia)
 
 
 
-/* TODO: Need to port this to Solaris, Windows */
-
-#if 0
-
-/**
- *  gnet_udp_socket_get_MTU:
- *  @us: GUdpSocket to get MTU from.
- *
- *  Get the MTU for outgoing packets.  
- *
- *  Returns: MTU; -1 if unknown.
- *
- **/
-gint
-gnet_udp_socket_get_MTU(GUdpSocket* us)
-{
-  struct ifreq ifr;
-
-  /* FIX: Not everyone has ethernet, right? */
-  strncpy (ifr.ifr_name, "eth0", sizeof (ifr.ifr_name));
-  if (!ioctl(us->sockfd, SIOCGIFMTU, &ifr)) 
-    return ifr.ifr_mtu;
-
-  return -1;
-}
-
-#endif
-
-
-
-
 /* 
 
    Below is the Windows specific code and a general idea of how
