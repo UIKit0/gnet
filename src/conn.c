@@ -193,7 +193,6 @@ gnet_conn_new_socket (GTcpSocket* socket,
   conn->port = gnet_inetaddr_get_port (conn->inetaddr);
   conn->func = func;
   conn->user_data = user_data;
-  ADD_WATCH(conn, G_IO_ERR | G_IO_HUP | G_IO_NVAL);
 
   return conn;
 
@@ -532,7 +531,8 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 
       /* Upcall ERROR */
       gnet_conn_disconnect (conn);
-      (conn->func) (conn, &event, conn->user_data);
+      if (conn->func)
+	(conn->func) (conn, &event, conn->user_data);
 
       unref_internal (conn);
       return FALSE;
@@ -551,6 +551,7 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 	  event.buffer = NULL;
 	  event.length = 0;
 
+	  g_return_val_if_fail (conn->func, FALSE);
 	  (conn->func) (conn, &event, conn->user_data);
 	}
       else
@@ -579,6 +580,7 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 	  event.buffer = NULL;
 	  event.length = 0;
 
+	  g_return_val_if_fail (conn->func, FALSE);
 	  (conn->func) (conn, &event, conn->user_data);
 	}
       else				/* WRITE? */

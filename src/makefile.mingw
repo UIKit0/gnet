@@ -1,7 +1,7 @@
 CC = gcc
 FLAGS = -g -Wall -mno-cygwin -mcpu=pentium -DGNET_EXPERIMENTAL=1
-INCLUDE = -I../glib -I. -L../glib -L.
-LIBS = -lglib-2.0-0 -lws2_32
+INCLUDE = -I./ `pkg-config --cflags glib-2.0`
+LIBS = `pkg-config --libs glib-2.0` -lws2_32
 OFILES = udp.o tcp.o iochannel.o inetaddr.o mcast.o gnet.o gnet-private.o sha.o md5.o url.o pack.o conn.o server.o socks.o socks-private.o
 
 all:
