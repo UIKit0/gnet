@@ -265,7 +265,7 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
   gint bytes_received;
   gchar data[1];
   guint packetlength;
-  gint arg;
+  u_long arg;
   gint error;
 
   arg = 1;
