@@ -2111,7 +2111,7 @@ gnet_inetaddr_list_interfaces (void)
 }
 
 
-#else GNET_WIN32		/* Windows specific version */
+#else /* GNET_WIN32 Windows specific version */
 
 GList* 
 gnet_inetaddr_list_interfaces (void)

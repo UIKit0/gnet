@@ -19,6 +19,8 @@
 #include <glib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #define GNET_EXPERIMENTAL 1
 #include <gnet.h>
 

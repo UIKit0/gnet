@@ -1,3 +1,16 @@
+Sat Nov 10 18:37:01 2001  Ross Golder  <ross@golder.org>
+
+	* configure.in: Switched to using PKG_CHECK_MODULES to
+	    pick up glib flags (now glib2 friendly).
+	* Makefile.am: Added glib flags. Reinstated distribution of
+	    gnet.spec file for 'rpm -t[ab] gnet-x.y.z.tar.gz'.
+	* src/Makefile.am: Added glib flags.
+	* src/gnet.h: Replaced depracated GUTILS_C_VAR definition
+	* src/inetaddr.h: Commented out argument to #endif.
+	* gnet-config.in: Removed unnecessary conditional. Ensured
+	    glib flags were being presented in output.
+	* tests/url_test.c: Added headers to get rid of compiler warnings.
+
 Fri Nov  9 14:44:09 2001  David Helder  <dhelder@umich.edu>
 
 	* configure.in: Check for lib socket (Needed in SunOS 5.8?)

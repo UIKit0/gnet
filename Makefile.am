@@ -6,7 +6,7 @@ SUBDIRS = src examples tests doc
 
 EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
 	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4 \
-	gnet.spec.in \
+	gnet.spec gnet.spec.in gnet.pc.in \
 	debian/README.Debian debian/changelog debian/control.in \
 	debian/copyright debian/dirs debian/docs debian/libgnet1.1* \
 	debian/rules.in
@@ -17,6 +17,11 @@ gnet-config: gnet-config.in
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet.m4
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = gnet.pc
+
+$(pkgconfig_DATA): config.status
 
 configincludedir = $(pkglibdir)/include
 configinclude_DATA = gnetconfig.h

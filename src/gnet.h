@@ -48,7 +48,7 @@ extern "C" {
 #ifdef GNET_WIN32
 #  define GNET_EXPORT extern __declspec(dllimport)
 #else
-#  define GNET_EXPORT GUTILS_C_VAR
+#  define GNET_EXPORT extern
 #endif
 
 GNET_EXPORT const guint gnet_major_version;

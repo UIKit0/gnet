@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: Gnet
+Description: A network compatibility layer library
+Version: @VERSION@
+Libs: -L${libdir} -lgnet @GLIB_LIB@ @GMODULE_LIB@ @GTHREAD_LIB@
+Cflags: -I${includedir}/gnet @GLIB_CFLAGS@ @GMODULE_CFLAGS@ @GTHREAD_CFLAGS@

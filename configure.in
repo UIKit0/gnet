@@ -143,13 +143,41 @@ CFLAGS="$CFLAGS -DGNET_EXPERIMENTAL"
 # Check for libraries
 
 # Need GLIB
-AM_PATH_GLIB(1.2.0,
-            [LIBS="$LIBS $GLIB_LIBS" CFLAGS="$CFLAGS $GLIB_CFLAGS"],
-            AC_MSG_ERROR(Cannot find GLIB: Is glib-config in path?))
+AC_CHECK_PROG(PKGCONFIG, pkgconfig, yes)
+if test "x${PKGCONFIG}" = "xyes"; then
+	# Check for 2.0 first, or 1.2 if not found
+	PKG_CHECK_MODULES(GLIB, glib-2.0, ,[
+		PKG_CHECK_MODULES(GLIB, glib)
+	])
+	PKG_CHECK_MODULES(GMODULE, gmodule-2.0, ,[
+		PKG_CHECK_MODULES(GMODULE, gmodule)
+	])
+	PKG_CHECK_MODULES(GTHREAD, gthread-2.0, ,[
+		PKG_CHECK_MODULES(GTHREAD, gthread)
+	])
 
-glib_cflags=`$GLIB_CONFIG --cflags glib`
-glib_libs=`$GLIB_CONFIG --libs glib`
+	# Export flags	
+	AC_SUBST(GLIB_CFLAGS)
+	AC_SUBST(GLIB_LIBS)
+	AC_SUBST(GMODULE_CFLAGS)
+	AC_SUBST(GMODULE_LIBS)
+	AC_SUBST(GTHREAD_CFLAGS)
+	AC_SUBST(GTHREAD_LIBS)
+fi
 
+# If pkgconfig wasn't found, or didn't work
+if test "x${GLIB_CFLAGS}" = "x"; then
+	# Check for 2.0 first, or 1.2 if not found
+	dnl AM_PATH_GLIB_2_0([1.3.9],,
+		AM_PATH_GLIB([1.2.10],,[
+			AC_MSG_ERROR(glib could not be found)
+		],[gmodule gthread])
+	dnl ],[gmodule gthread])
+
+	# Export flags	
+	AC_SUBST(GLIB_CFLAGS)
+	AC_SUBST(GLIB_LIBS)
+fi
 
 # Need network libraries
 AC_CHECK_LIB(socket, main)
@@ -308,5 +336,6 @@ AC_OUTPUT([
 	gnetconfig.h
 	debian/rules
 	debian/control
-	gnet.spec ],
+	gnet.spec
+	gnet.pc ],
     [chmod -f +x gnet-config debian/rules])

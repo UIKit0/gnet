@@ -4,7 +4,9 @@
 
 EXTRA_DIST = makefile.mingw
 
-INCLUDES = -I$(top_srcdir)/src
+INCLUDES = \
+	-I$(top_srcdir)/src \
+	$(GLIB_CFLAGS)
 
 # Automatic tests
 TESTS = url_test
