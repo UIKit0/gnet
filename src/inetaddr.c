@@ -1,6 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000-2002  David Helder
- * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2000-2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -121,6 +121,8 @@ hostent2ialist (const struct hostent* he)
 
 /* Thread safe gethostbyname.  Maps hostname to list of
    sockaddr_storage pointers. */
+
+#ifndef GNET_WIN32
 GList*
 gnet_gethostbyname(const char* hostname)
 {
@@ -324,15 +326,7 @@ gnet_gethostbyname(const char* hostname)
 #else 
 #ifdef GNET_WIN32
   {
-    struct hostent* result;
-
-    WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
-
-    result = gethostbyname(hostname);
-    if (result != NULL)
-      list = hostent2ialist(result);
-
-    ReleaseMutex(gnet_hostent_Mutex);
+/* moved to own func */
   }
 #else
   {
@@ -362,6 +356,92 @@ gnet_gethostbyname(const char* hostname)
   return list;
 
 }
+#else /* GNET_WIN32 */
+GList*
+gnet_gethostbyname(const char* hostname)
+{
+	GList* list = NULL;
+
+	if (pfn_getaddrinfo)
+	{
+		struct addrinfo hints;
+		struct addrinfo* res;
+		int rv;
+		GIPv6Policy policy;
+
+		/*  printf("Using pfn_getaddrinfo in gnet_gethostbyname\n"); */
+
+		policy = gnet_ipv6_get_policy();
+
+		memset (&hints, 0, sizeof(hints));
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_family = PF_UNSPEC;
+		rv = pfn_getaddrinfo(hostname, NULL, &hints, &res);
+
+		if (rv == 0)
+		{
+			struct addrinfo* i;
+			GList* ipv4_list = NULL;
+			GList* ipv6_list = NULL;
+	
+			for (i = res; i != NULL; i = i->ai_next)
+			{
+				GInetAddr* ia;
+
+				ia = g_new0(GInetAddr, 1);
+				ia->ref_count = 1;
+				memcpy (&ia->sa, i->ai_addr, i->ai_addrlen);
+
+				if (i->ai_family == PF_INET)
+					ipv4_list = g_list_prepend (ipv4_list, ia);
+				else if (i->ai_family == PF_INET6)
+					ipv6_list = g_list_prepend (ipv6_list, ia);
+				else
+					g_free (ia);
+			} /* for */
+
+			if (policy == GIPV6_POLICY_IPV4_ONLY)
+			{
+				list = ipv4_list;
+				g_list_free (ipv6_list);
+			}
+			else if (policy == GIPV6_POLICY_IPV4_THEN_IPV6)
+			{
+				list = g_list_concat (ipv6_list, ipv4_list);
+				/* list will be reversed below */
+			}
+			else if (policy == GIPV6_POLICY_IPV6_ONLY)
+			{
+				list = ipv6_list;
+				g_list_free (ipv4_list);
+			}
+			else if (policy == GIPV6_POLICY_IPV6_THEN_IPV4)
+			{
+				list = g_list_concat (ipv4_list, ipv6_list);
+				/* list will be reversed below */
+			}
+
+			pfn_freeaddrinfo(res);
+		} /* if (rv == 0) */
+	}
+	else
+	{
+		struct hostent* result;
+
+		WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
+
+		result = gethostbyname(hostname);
+		if (result != NULL)
+			list = hostent2ialist(result);
+
+		ReleaseMutex(gnet_hostent_Mutex);\
+	} /* if (pfn_getaddrinfo) */
+
+	if (list)
+		list = g_list_reverse (list);
+	return list;
+}
+#endif
 
 
 /* Free list of GInetAddr's.  We assume name hasn't been allocated. */
@@ -535,17 +615,34 @@ gnet_gethostbyaddr(const struct sockaddr_storage* sa)
 #else
 #ifdef GNET_WIN32
   {
-    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
-    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
-    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+	if (pfn_getnameinfo)
+	{
+		int gnirv;
+		char host[NI_MAXHOST];
 
-    struct hostent* he;
+		/* printf("Using pfn_getnameinfo in gnet_gethostbyaddr\n"); */
+		gnirv = pfn_getnameinfo((const struct sockaddr*) sa, 
+			GNET_SOCKADDR_LEN(*sa),
+			host, sizeof(host),
+			NULL, 0, NI_NAMEREQD);
 
-    WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
-    he = gethostbyaddr(sa_addr, sa_len, sa_type);
-    if (he != NULL && he->h_name != NULL)
-      rv = g_strdup(he->h_name);
-    ReleaseMutex(gnet_hostent_Mutex);
+		if (gnirv == 0)
+			rv = g_strdup(host);
+	}
+	else
+	{
+		const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+		int			sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+		int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
+		struct hostent* he;
+
+		WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
+		he = gethostbyaddr(sa_addr, sa_len, sa_type);
+		if (he != NULL && he->h_name != NULL)
+			rv = g_strdup(he->h_name);
+		ReleaseMutex(gnet_hostent_Mutex);
+	}
   }
 #else
   {
@@ -1333,6 +1430,7 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   sa_in = (struct sockaddr_in*) &ia->sa;	  /* WINFIX */
   sa_in->sin_family = AF_INET;
   sa_in->sin_port = g_htons(port);
+  //GNET_INETADDR_PORT_SET(ia, g_htons(port));
 
   /* Create a structure for the call back */
   state = g_new0(GInetAddrNewListState, 1);
@@ -1386,6 +1484,8 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 
   sa_in = (struct sockaddr_in*) &ia->sa;
   memcpy(&sa_in->sin_addr, result->h_addr_list[0], result->h_length);
+  //ia->sa.ss_family = (result->h_length == 4)? AF_INET : AF_INET6;
+  //memcpy(GNET_INETADDR_ADDRP(ia), result->h_addr_list[0], result->h_length);
 
   ia->name = g_strdup(result->h_name);
 
@@ -2254,10 +2354,27 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
   
   g_return_val_if_fail (inetaddr != NULL, NULL);
 
+#ifndef GNET_WIN32
   if (inet_ntop(GNET_INETADDR_FAMILY(inetaddr), 
 		GNET_INETADDR_ADDRP(inetaddr),
 		buffer, sizeof(buffer)) == NULL)
     return NULL;
+#else
+  if (pfn_getnameinfo)
+  {
+	int rv = pfn_getnameinfo((const struct sockaddr FAR *)&inetaddr->sa,
+		(socklen_t)GNET_INETADDR_LEN(inetaddr), buffer, sizeof(buffer), NULL, 0, 
+		NI_NUMERICHOST);
+	if (rv != 0)
+		return NULL;
+  }
+  else
+  {
+    guchar* p = (guchar*) GNET_INETADDR_ADDRP(inetaddr);
+	g_snprintf(buffer, sizeof(buffer), 
+	     "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
+  }
+#endif
   return g_strdup(buffer);
 }
 
@@ -3367,7 +3484,89 @@ gnet_inetaddr_list_interfaces (void)
   GInetAddr *ia;
   /*SOCKADDR_IN* pAddrInet2; */	/* For testing */
 
+  PIP_ADAPTER_ADDRESSES_GNET gaa_struct, p_aa;
+  PIP_ADAPTER_UNICAST_ADDRESS_GNET p_ua;
+  ULONG out_len;
+  DWORD gaa_rv;
+  void*  src;
+  size_t len;
+  struct sockaddr* sa;
+
   list = NULL;
+
+  /* IPv6 codepath begin */
+  if (pfn_getaddaptersaddresses)
+  {
+    /* first call fails but returns needed buffer size */
+	out_len = 0;
+	gaa_struct = NULL;
+    pfn_getaddaptersaddresses(
+	AF_UNSPEC, 
+	GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_FRIENDLY_NAME | GAA_FLAG_SKIP_MULTICAST,  
+	NULL,
+	gaa_struct,
+	&out_len);
+
+	gaa_struct = (PIP_ADAPTER_ADDRESSES_GNET)malloc(out_len);
+	gaa_rv = pfn_getaddaptersaddresses(
+	AF_UNSPEC, 
+	GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_FRIENDLY_NAME |GAA_FLAG_SKIP_MULTICAST,  
+	NULL,
+	gaa_struct,
+	&out_len);
+
+	if (gaa_rv != ERROR_SUCCESS)
+		return NULL;
+
+	p_aa = gaa_struct;
+	while (p_aa)
+	{
+		p_ua = p_aa->FirstUnicastAddress;
+		while (p_ua)
+		{
+			if (p_ua->Address.lpSockaddr)
+			{
+				sa = (struct sockaddr*) p_ua->Address.lpSockaddr;
+				if (sa->sa_family == AF_INET)
+				{
+					src = (void*) &((struct sockaddr_in*) sa)->sin_addr;
+					len = sizeof(struct in_addr);
+				}
+				else if (sa->sa_family == AF_INET6)
+				{
+					src = (char*) &((struct sockaddr_in6*) sa)->sin6_addr;
+					len = sizeof(struct in6_addr);
+				}
+				else
+				{
+					p_ua = p_ua->Next;
+					continue;
+				}
+
+				ia = g_new0 (GInetAddr, 1);
+				ia->ref_count = 1;
+				GNET_INETADDR_FAMILY(ia) = sa->sa_family;
+				GNET_INETADDR_SET_SS_LEN(ia);
+				memcpy(GNET_INETADDR_ADDRP(ia), src, len);
+				if  (gnet_inetaddr_is_loopback(ia))
+				{
+					g_free(ia);
+				}
+				else
+				{
+					list = g_list_prepend (list, ia);
+				}
+			}
+			p_ua = p_ua->Next;
+		}
+		p_aa = p_aa->Next;
+	}
+
+	free(gaa_struct);
+	return list;
+  } /* IPv6 codepath end */
+
+
   if((s = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, 0)) == INVALID_SOCKET)
     {
       return NULL;

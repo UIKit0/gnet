@@ -82,6 +82,10 @@ struct sockaddr_storage {
 };
 #endif
 
+#ifndef SOCKET
+#define SOCKET gint
+#endif
+
 #ifndef socklen_t
 #  ifdef GNET_APPLE_DARWIN
 #    define socklen_t int	/* socklen_t is int in Darwin */
@@ -132,6 +136,15 @@ struct sockaddr_storage {
 #define GNET_SOCKADDR_FAMILY(s) ((s).ss_family)
 
 #ifdef HAVE_IPV6
+
+#ifndef IN6_ARE_ADDR_EQUAL
+#define IN6_ARE_ADDR_EQUAL(a,b) \
+        ((((unsigned int *) (a))[0] == ((unsigned int *) (b))[0]) && \
+         (((unsigned int *) (a))[1] == ((unsigned int *) (b))[1]) && \
+         (((unsigned int *) (a))[2] == ((unsigned int *) (b))[2]) && \
+         (((unsigned int *) (a))[3] == ((unsigned int *) (b))[3]))
+#endif
+
 #define GNET_SOCKADDR_SA6(s)	(*((struct sockaddr_in6*) &s))
 #define GNET_SOCKADDR_ADDRP(s)	(((s).ss_family == AF_INET)?\
                                   (void*)&((struct sockaddr_in*)&s)->sin_addr:\
@@ -189,7 +202,6 @@ struct sockaddr_storage {
 
 
 #define GNET_ANY_IO_CONDITION   (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -407,14 +419,241 @@ typedef struct _GTcpSocketConnectState
 #ifdef GNET_WIN32
 
 extern HWND  gnet_hWnd; 
-	
 extern GHashTable *gnet_hash;
-
 extern HANDLE gnet_Mutex; 
 extern HANDLE gnet_hostent_Mutex;
-	
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
 #define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
+
+/* Name-mangled IPv6 structures for primarily Mingw and a few VC .NET 2002 */
+#ifndef MAX_ADAPTER_ADDRESS_LENGTH
+#define MAX_ADAPTER_ADDRESS_LENGTH 8
+#endif 
+
+#ifndef GAA_FLAG_SKIP_UNICAST
+#define GAA_FLAG_SKIP_UNICAST      0x0001
+#endif
+
+#ifndef GAA_FLAG_SKIP_ANYCAST
+#define GAA_FLAG_SKIP_ANYCAST      0x0002
+#endif
+
+#ifndef GAA_FLAG_SKIP_MULTICAST
+#define GAA_FLAG_SKIP_MULTICAST    0x0004
+#endif
+
+#ifndef GAA_FLAG_SKIP_DNS_SERVER
+#define GAA_FLAG_SKIP_DNS_SERVER   0x0008
+#endif
+
+/* VC .NET 2002 is missing this too. */
+#ifndef GAA_FLAG_INCLUDE_PREFIX
+#define GAA_FLAG_INCLUDE_PREFIX     0x0010
+#endif
+
+/* VC .NET 2002 is missing this too. */
+#ifndef GAA_FLAG_SKIP_FRIENDLY_NAME
+#define GAA_FLAG_SKIP_FRIENDLY_NAME 0x0020
+#endif
+
+#ifndef IPV6_UNICAST_HOPS
+#define IPV6_UNICAST_HOPS			4
+#endif
+
+#ifndef IPV6_MULTICAST_LOOP
+#define IPV6_MULTICAST_LOOP			11
+#endif
+
+#ifndef IPV6_ADD_MEMBERSHIP
+#define IPV6_ADD_MEMBERSHIP			12
+#endif
+
+#ifndef IPV6_DROP_MEMBERSHIP
+#define IPV6_DROP_MEMBERSHIP		13
+#endif
+
+#ifndef IPV6_JOIN_GROUP
+#define IPV6_JOIN_GROUP				IPV6_ADD_MEMBERSHIP
+#endif
+
+#ifndef IPV6_LEAVE_GROUP
+#define IPV6_LEAVE_GROUP			IPV6_DROP_MEMBERSHIP
+#endif
+
+#ifndef IPV6_MULTICAST_HOPS
+#define IPV6_MULTICAST_HOPS			10 
+#endif
+
+typedef enum 
+{
+  IpDadStateInvalid_GNET = 0, 
+  IpDadStateTentative_GNET, 
+  IpDadStateDuplicate_GNET, 
+  IpDadStateDeprecated_GNET, 
+  IpDadStatePreferred_GNET
+} IP_DAD_STATE_GNET;
+
+typedef enum 
+{
+  IpPrefixOriginOther_GNET = 0, 
+  IpPrefixOriginManual_GNET, 
+  IpPrefixOriginWellKnown_GNET, 
+  IpPrefixOriginDhcp_GNET, 
+  IpPrefixOriginRouterAdvertisement_GNET
+} IP_PREFIX_ORIGIN_GNET;
+
+typedef enum 
+{
+  IpSuffixOriginOther_GNET = 0, 
+  IpSuffixOriginManual_GNET, 
+  IpSuffixOriginWellKnown_GNET, 
+  IpSuffixOriginDhcp_GNET, 
+  IpSuffixOriginLinkLayerAddress_GNET, 
+  IpSuffixOriginRandom_GNET
+} IP_SUFFIX_ORIGIN_GNET;
+
+typedef enum 
+{
+  IfOperStatusUp_GNET = 1, 
+  IfOperStatusDown_GNET, 
+  IfOperStatusTesting_GNET, 
+  IfOperStatusUnknown_GNET, 
+  IfOperStatusDormant_GNET, 
+  IfOperStatusNotPresent_GNET, 
+  IfOperStatusLowerLayerDown_GNET
+} IF_OPER_STATUS_GNET;
+
+typedef struct _IP_ADAPTER_UNICAST_ADDRESS_GNET 
+{  
+	union 
+	{    
+		struct 
+		{      
+			ULONG Length;      
+			DWORD Flags;    
+		};  
+	};  
+	struct _IP_ADAPTER_UNICAST_ADDRESS_GNET* Next;  
+	SOCKET_ADDRESS Address;  
+	IP_PREFIX_ORIGIN_GNET PrefixOrigin;  
+	IP_SUFFIX_ORIGIN_GNET SuffixOrigin;  
+	IP_DAD_STATE_GNET DadState;  
+	ULONG ValidLifetime;  
+	ULONG PreferredLifetime;  
+	ULONG LeaseLifetime;
+} IP_ADAPTER_UNICAST_ADDRESS_GNET, *PIP_ADAPTER_UNICAST_ADDRESS_GNET;
+
+typedef struct _IP_ADAPTER_ANYCAST_ADDRESS_GNET 
+{  
+	union 
+	{    
+		ULONGLONG Alignment;    
+		struct 
+		{      
+			ULONG Length;      
+			DWORD Flags;    
+		};  
+	};  
+	struct _IP_ADAPTER_ANYCAST_ADDRESS_GNET* Next;  
+	SOCKET_ADDRESS Address;
+} IP_ADAPTER_ANYCAST_ADDRESS_GNET, *PIP_ADAPTER_ANYCAST_ADDRESS_GNET;
+
+typedef struct _IP_ADAPTER_DNS_SERVER_ADDRESS_GNET
+{  
+	union 
+	{    
+		ULONGLONG Alignment;    
+		struct 
+		{      
+			ULONG Length;      
+			DWORD Reserved;    
+		};  
+	};  
+	struct _IP_ADAPTER_DNS_SERVER_ADDRESS_GNET* Next;  
+	SOCKET_ADDRESS Address;
+} IP_ADAPTER_DNS_SERVER_ADDRESS_GNET, *PIP_ADAPTER_DNS_SERVER_ADDRESS_GNET;
+
+typedef struct _IP_ADAPTER_PREFIX_GNET 
+{  
+	union 
+	{    
+		ULONGLONG Alignment;    
+		struct 
+		{      
+			ULONG Length;      
+			DWORD Flags;    
+		};  
+	};  
+	struct _IP_ADAPTER_PREFIX_GNET* Next;  
+	SOCKET_ADDRESS Address;  ULONG PrefixLength;
+} IP_ADAPTER_PREFIX_GNET, *PIP_ADAPTER_PREFIX_GNET;
+
+typedef struct _IP_ADAPTER_MULTICAST_ADDRESS_GNET {
+  union {
+    ULONGLONG  _temp;
+    struct {
+      ULONG Length;
+      DWORD Flags;
+    };
+  };
+  struct _IP_ADAPTER_MULTICAST_ADDRESS_GNET* Next;
+  SOCKET_ADDRESS Address;
+} IP_ADAPTER_MULTICAST_ADDRESS_GNET, *PIP_ADAPTER_MULTICAST_ADDRESS_GNET;
+
+typedef struct _IP_ADAPTER_ADDRESSES_GNET 
+{  
+	union 
+	{    
+		ULONGLONG Alignment;    
+		struct 
+		{      
+			ULONG Length;      
+			DWORD IfIndex;    
+		};  
+	};  
+	struct _IP_ADAPTER_ADDRESSES_GNET* Next;  
+	PCHAR AdapterName;  
+	PIP_ADAPTER_UNICAST_ADDRESS_GNET FirstUnicastAddress;  
+	PIP_ADAPTER_ANYCAST_ADDRESS_GNET FirstAnycastAddress;  
+	PIP_ADAPTER_MULTICAST_ADDRESS_GNET FirstMulticastAddress;  
+	PIP_ADAPTER_DNS_SERVER_ADDRESS_GNET FirstDnsServerAddress;  
+	PWCHAR DnsSuffix;  
+	PWCHAR Description;  
+	PWCHAR FriendlyName;  
+	BYTE PhysicalAddress[MAX_ADAPTER_ADDRESS_LENGTH];  
+	DWORD PhysicalAddressLength;  
+	DWORD Flags;  
+	DWORD Mtu;  
+	DWORD IfType;  
+	IF_OPER_STATUS_GNET OperStatus;  
+	DWORD Ipv6IfIndex;  
+	DWORD ZoneIndices[16];  
+	PIP_ADAPTER_PREFIX_GNET FirstPrefix;
+} IP_ADAPTER_ADDRESSES_GNET, *PIP_ADAPTER_ADDRESSES_GNET;
+/* Name-mangled IPv6 structures */
+
+/* Function Pointers to the new IPv6 functions */
+HANDLE hLibrary_ws2_32; /* WinSock 2 dll */
+HANDLE hLibrary_Iphlpapi; /* for GetAdaptersAddresses() */
+
+typedef int (WINAPI * PFN_GETADDRINFO) (const char*, const char*, 
+										const struct addrinfo FAR *, 
+										struct addrinfo FAR *FAR *);
+PFN_GETADDRINFO pfn_getaddrinfo;
+
+typedef int (WINAPI * PFN_GETNAMEINFO) (const struct sockaddr FAR *, 
+										socklen_t, char FAR *, DWORD, 
+										char FAR *, DWORD, int);
+PFN_GETNAMEINFO pfn_getnameinfo;
+
+typedef void (WINAPI * PFN_FREEADDRINFO) (struct addrinfo FAR *);
+PFN_FREEADDRINFO pfn_freeaddrinfo;
+
+typedef DWORD (WINAPI * PFN_GETADAPTERSADDRESSES) (ULONG, DWORD, PVOID,
+											   PIP_ADAPTER_ADDRESSES_GNET,
+											   PULONG);
+PFN_GETADAPTERSADDRESSES pfn_getaddaptersaddresses;
+
 
 #endif
 

@@ -13,4 +13,8 @@
 #define GNET_WIN32
 #endif
 
+#ifndef HAVE_IPV6
+#define HAVE_IPV6
+#endif
+
 #endif /* GNETCONFIG_H */

@@ -1,3 +1,19 @@
+Sat Oct 4 2003 Andrew Lanoix <alanoix@umich.edu>
+
+	* src/gnet-private.h: Define SOCKET as guint for non-windows platforms,
+		Add Name-mangled versions of needed IPv6 structs for Mingw & VC,
+		Add typedefs of necessary IPv6 func pointers,
+		Define IN6_ARE_ADDR_EQUAL for Windows.
+	* src/gnet.c (gnet_win32_at_exit): Add
+	* src/gnet.c (gnet_init): Query OS for IPv6 support on Windows and set
+		necessary func pointers at runtime.
+	* gnetconfig.h: Define HAVE_IPV6 for Win32 version, check at runtime
+		on Windows.
+	* src/inetaddr.c (gnet_gethostbyname): Updated for IPv6 on Windows
+	* src/inetaddr.c (gnet_gethostbyaddr): "
+	* src/inetaddr.c (gnet_inetaddr_get_canonical_name): "
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces): "
+
 Sun Aug 24 20:52:52 2003  Andrew Lanoix <alanoix@umich.edu>
 
 	* examples/echoserver-partyline.c: Added

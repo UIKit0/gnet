@@ -1,5 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
+ * Copyright (C) 2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -33,6 +34,18 @@ static gboolean ipv6_detect_envvar (void);
 static gboolean ipv6_detect_iface (void);
 #endif
 
+#ifdef GNET_WIN32
+void gnet_win32_at_exit( void ); /* Here to keep Visual Studio happy. */
+void gnet_win32_at_exit()
+{
+	/* printf("Calling gnet_win32_atexit\n"); */
+
+	if (hLibrary_ws2_32)
+		FreeLibrary(hLibrary_ws2_32);
+	if (hLibrary_Iphlpapi)
+		FreeLibrary(hLibrary_Iphlpapi);
+}
+#endif
 
 /**
  *  gnet_init
@@ -52,6 +65,7 @@ gnet_init (void)
 #endif /* G_THREADS_ENABLED */
 
 
+#ifndef GNET_WIN32
   /* Auto-detect IPv6 policy.  Set it to IPv4 if auto-detection fails. */
 #ifdef HAVE_IPV6
   if (!ipv6_detect_envvar())
@@ -61,6 +75,40 @@ gnet_init (void)
 
 /*    g_print ("ipv6 policy is %d\n", gnet_ipv6_get_policy()); */
 
+#else /* Windows */
+	GIPv6Policy policy;
+
+	hLibrary_ws2_32 = LoadLibrary("ws2_32.dll");
+	hLibrary_Iphlpapi = LoadLibrary("Iphlpapi.dll");
+	if (hLibrary_ws2_32)
+	{
+		pfn_getaddrinfo = (PFN_GETADDRINFO) GetProcAddress(hLibrary_ws2_32, "getaddrinfo");
+		pfn_getnameinfo = (PFN_GETNAMEINFO) GetProcAddress(hLibrary_ws2_32, "getnameinfo");
+		pfn_freeaddrinfo = (PFN_FREEADDRINFO) GetProcAddress(hLibrary_ws2_32, "freeaddrinfo");
+	}
+	if (hLibrary_Iphlpapi)
+	{
+		pfn_getaddaptersaddresses = (PFN_GETADAPTERSADDRESSES) GetProcAddress(hLibrary_Iphlpapi, 
+			"GetAdaptersAddresses");
+	}
+
+	if ((!pfn_getaddrinfo) || (!pfn_getnameinfo) || (!pfn_freeaddrinfo) || (!pfn_getaddaptersaddresses))
+	{
+		policy = GIPV6_POLICY_IPV4_ONLY;
+		/* printf("This computer CAN NOT support IPv6!\n"); */
+	}
+	else
+	{
+		policy = GIPV6_POLICY_IPV4_THEN_IPV6;
+		/* printf("This computer CAN support IPv6!\n"); */
+	}
+
+	/* Should I check to see if IPv6 interfaces exist? */
+
+	gnet_ipv6_set_policy (policy);
+
+	atexit(gnet_win32_at_exit);
+#endif
 }
 
 
