@@ -1,3 +1,9 @@
+gnet (0.1.6-1) unstable; urgency=low
+    
+  * New upstream release
+  
+ -- David Helder <dhelder@umich.edu>  Sun, 23 Jan 2000 14:19:58 -0500
+  
 gnet (0.1.5-2) unstable; urgency=low
     
   * Removed libgnet0.1.shlibs.  I don't understand it... 
