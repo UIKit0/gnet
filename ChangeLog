@@ -1,3 +1,8 @@
+Mon May 14 11:13:22 2001  David Helder  <dhelder@umich.edu>
+
+	* src/url.c, inetaddr.c, md5.c (*_hash, *_equal): 
+	     s/const gpointer/gconstpointer/
+
 Fri May 11 14:58:24 2001  David Helder  <dhelder@umich.edu>
 
 	* tests/unpack.c (main): Fixed the warnings :-)

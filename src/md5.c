@@ -489,7 +489,7 @@ gnet_md5_final (GMD5* gmd5)
  *
  **/
 gint
-gnet_md5_equal (const gpointer p1, const gpointer p2)
+gnet_md5_equal (gconstpointer p1, gconstpointer p2)
 {
   GMD5* gmd5a = (GMD5*) p1;
   GMD5* gmd5b = (GMD5*) p2;
@@ -505,7 +505,7 @@ gnet_md5_equal (const gpointer p1, const gpointer p2)
 
 /**
  *  gnet_md5_hash
- *  @gmd5: GMD5 to get hash value of
+ *  @p: GMD5 to get hash value of
  *
  *  Hash the GMD5 hash value.  This is not the actual MD5 hash, but a
  *  hash of this hash.
@@ -514,15 +514,16 @@ gnet_md5_equal (const gpointer p1, const gpointer p2)
  *
  **/
 guint
-gnet_md5_hash (const GMD5* gmd5)
+gnet_md5_hash (gconstpointer p)
 {
-  guint* p;
+  const GMD5* gmd5 = (const GMD5*) p;
+  const guint* q;
 
   g_return_val_if_fail (gmd5, 0);
 
-  p = (guint*) gmd5->digest;
+  q = (const guint*) gmd5->digest;
 
-  return (p[0] ^ p[1] ^ p[2] ^ p[3]);
+  return (q[0] ^ q[1] ^ q[2] ^ q[3]);
 }
 
 

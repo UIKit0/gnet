@@ -129,7 +129,7 @@ gnet_url_delete (GURL* url)
 
 
 guint
-gnet_url_hash (const gpointer p)
+gnet_url_hash (gconstpointer p)
 {
   const GURL* url = (const GURL*) p;
   guint h = 0;
@@ -148,7 +148,7 @@ gnet_url_hash (const gpointer p)
 #define SAFESTRCMP(A,B) ((!(A) && !(B)) || ((A) && (B) && !strcmp((A),(B))))
 
 gint
-gnet_url_equal (const gpointer p1, const gpointer p2)
+gnet_url_equal (gconstpointer p1, gconstpointer p2)
 {
   const GURL* url1 = (const GURL*) p1;
   const GURL* url2 = (const GURL*) p2;

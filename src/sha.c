@@ -615,7 +615,7 @@ gnet_sha_final (GSHA* gsha)
  *
  **/
 gint
-gnet_sha_equal (const gpointer p1, const gpointer p2)
+gnet_sha_equal (gconstpointer p1, gconstpointer p2)
 {
   GSHA* gshaa = (GSHA*) p1;
   GSHA* gshab = (GSHA*) p2;
@@ -640,15 +640,16 @@ gnet_sha_equal (const gpointer p1, const gpointer p2)
  *
  **/
 guint
-gnet_sha_hash (const GSHA* gsha)
+gnet_sha_hash (gconstpointer p)
 {
-  guint* p;
+  const GSHA* gsha = (const GSHA*) p;
+  const guint* q;
 
   g_return_val_if_fail (gsha, 0);
 
-  p = (guint*) gsha->digest;
+  q = (const guint*) gsha->digest;
 
-  return (p[0] ^ p[1] ^ p[2] ^ p[3] ^ p[4]);
+  return (q[0] ^ q[1] ^ q[2] ^ q[3] ^ q[4]);
 }
 
 

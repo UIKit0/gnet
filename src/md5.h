@@ -33,8 +33,8 @@ GMD5*	gnet_md5_new_incremental (void);
 void	gnet_md5_update (GMD5* gmd5, const guchar* buffer, guint length);
 void	gnet_md5_final (GMD5* gmd5);
 	
-gint 	gnet_md5_equal (const gpointer p1, const gpointer p2);
-guint	gnet_md5_hash (const GMD5* gmd5);
+gint 	gnet_md5_equal (gconstpointer p1, gconstpointer p2);
+guint	gnet_md5_hash (gconstpointer p);
 	
 guint8* gnet_md5_get_digest (const GMD5* gmd5);
 gchar*  gnet_md5_get_string (const GMD5* gmd5);

@@ -57,8 +57,8 @@ GURL*     gnet_url_new_fields (const gchar* protocol, const gchar* hostname,
 GURL*     gnet_url_clone (const GURL* url);
 void      gnet_url_delete (GURL* url);
 	       
-guint     gnet_url_hash (const gpointer p);
-gint 	  gnet_url_equal (const gpointer p1, const gpointer p2);
+guint     gnet_url_hash (gconstpointer p);
+gint 	  gnet_url_equal (gconstpointer p1, gconstpointer p2);
 
 void 	  gnet_url_set_protocol (GURL* url, const gchar* protocol);
 void 	  gnet_url_set_hostname (GURL* url, const gchar* hostname);

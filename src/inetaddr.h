@@ -174,9 +174,9 @@ gboolean gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr);
 
 /* ********** */
 
-guint gnet_inetaddr_hash (const gpointer p);
-gint  gnet_inetaddr_equal (const gpointer p1, const gpointer p2);
-gint  gnet_inetaddr_noport_equal (const gpointer p1, const gpointer p2);
+guint gnet_inetaddr_hash (gconstpointer p);
+gint  gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2);
+gint  gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2);
 
 
 /* ********** */

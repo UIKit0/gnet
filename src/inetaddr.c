@@ -1574,7 +1574,7 @@ gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr)
  *
  **/
 guint 
-gnet_inetaddr_hash(const gpointer p)
+gnet_inetaddr_hash (gconstpointer p)
 {
   const GInetAddr* ia;
   guint32 port;
@@ -1604,7 +1604,7 @@ gnet_inetaddr_hash(const gpointer p)
  *
  **/
 gint 
-gnet_inetaddr_equal(const gpointer p1, const gpointer p2)
+gnet_inetaddr_equal(gconstpointer p1, gconstpointer p2)
 {
   const GInetAddr* ia1 = (const GInetAddr*) p1;
   const GInetAddr* ia2 = (const GInetAddr*) p2;
@@ -1630,7 +1630,7 @@ gnet_inetaddr_equal(const gpointer p1, const gpointer p2)
  *
  **/
 gint 
-gnet_inetaddr_noport_equal(const gpointer p1, const gpointer p2)
+gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
 {
   const GInetAddr* ia1 = (const GInetAddr*) p1;
   const GInetAddr* ia2 = (const GInetAddr*) p2;
