@@ -1,12 +1,13 @@
-test
+
 GNet NEWS
 ---------
 
 Changes in Gnet
 
-1.0.4 (unreleased)
+1.0.4
 -----
-* Windows port
+* Small bug fixes
+* Partial Windows port
 
 1.0.3
 -----

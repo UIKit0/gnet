@@ -12,8 +12,11 @@ This document contains
 General Win32 Specific Information
 ----------------------------------
 
-There is a know issue with trying to do a callback on a socket giochannel.
-Echoserver with --nonblocking is an example. We are looking into this.
+The Windows port requires either Windows 95 or better with the
+Winsock2 patch or Windows NT with Service Pack 4.
+
+The asynchronous IO functions do _not_ work.  We are working on this.
+The asynchronous DNS functions do work though.
 
 gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
 gnet_private_inetaddr_list_interfaces() does not support more than 10

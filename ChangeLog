@@ -1,5 +1,11 @@
-test
+Thu Oct 19 22:48:21 2000  David Helder  <dhelder@umich.edu>
 
+	* *: Release 1.0.4 on GNET_1_0_4_STABLE_BRANCH branch
+
+	* README.win32: Updates
+
+	* gnet-config.in (lib_gnet): Fix gnet-config.in
+	
 Tue Oct  3 13:26:45 2000  Andrew Lanoix <alanoix@umich.edu>
 
 	* Added: Gnet.dsp (MS VC 6.0 Project File, builds with
