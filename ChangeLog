@@ -18,6 +18,7 @@ Mon Dec 8 2003 Andrew Lanoix <alanoix@umich.edu>
 	* src/inetaddr.c(gnet_inetaddr_list_interfaces): Update
 		note so that 10 interface limit only applies to IPv4
 		only systems on Windows, not IPv6 systems.
+	* doc/tmpl/ipv6.sgml: Document how IPv6 policy is set on Windows.
 
 Tue Oct 28 19:02:40 2003  David Helder  <dhelder@gizmolabs.org>
 

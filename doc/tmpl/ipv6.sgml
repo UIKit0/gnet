@@ -54,6 +54,13 @@ the policy is set to %GIPV6_POLICY_IPV6_ONLY.  If there are both, the
 policy is set to %GIPV6_POLICY_IPV4_THEN_IPV6.
 </para>
 
+<para>
+At runtime on Windows, GNet will check to see the computer can support
+IPv6. If so it will set the policy to %GIPV6_POLICY_IPV4_THEN_IPV6. If
+not it will set the policy to %GIPV6_POLICY_IPV4_ONLY. Environment 
+variables are not checked on Windows.
+</para>
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
