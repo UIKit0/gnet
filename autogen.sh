@@ -74,7 +74,10 @@ do
     echo processing $dr
     macrodirs=`sed -n -e 's,AM_ACLOCAL_INCLUDE(\(.*\)),\1,gp' < $coin`
     ( cd $dr
-      aclocalinclude="$ACLOCAL_FLAGS -I ./macros"
+      aclocalinclude="$ACLOCAL_FLAGS"
+      if test -d ./macros; then
+	aclocalinclude="$aclocalinclude -I ./macros"
+      fi
       for k in $macrodirs; do
   	if test -d $k; then
           aclocalinclude="$aclocalinclude -I $k"

@@ -1,3 +1,8 @@
+Mon Sep 23 14:43:21 2002  David Helder  <dhelder@umich.edu>
+
+	* autogen.sh: Don't include macros dir if there isn't one.
+	* aclocal.h: Remove this.  No longer required.
+
 Sat Sep 21 21:11:41 2002  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Fixes for autoconf 1.6.
