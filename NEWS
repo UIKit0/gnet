@@ -5,11 +5,11 @@ GNet NEWS
 Changes in Gnet
 
 
-1.3.1 (UNRELEASED DEVELOPERS release)
+1.3.1 ("Tomacco 2" DEVELOPERS release)
 -----
 * New Base64 module (by Alfred Reibenschuh)
+* Major documentation improvements
 * Some minor API renaming in Inetaddr and TcpSocket
-* Super documentation clean-up
 
 
 1.3.0 ("Tomacco" DEVELOPERS release)

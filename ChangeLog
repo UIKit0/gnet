@@ -1,3 +1,11 @@
+Tue Feb 11 16:14:31 2003  David Helder  <dhelder@umich.edu>
+
+	* *: Release 1.3.1
+
+Fri Feb  7 14:00:18 2003  David Helder  <dhelder@umich.edu>
+
+	* README: Added PAN to "Applications that use GNet"
+
 Wed Feb  5 18:29:40 2003  David Helder  <dhelder@umich.edu>
 
 	* examples/echoserver-gserver.c (ob_server_func): Watch
