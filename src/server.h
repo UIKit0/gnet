@@ -21,6 +21,9 @@
 #ifndef _GNET_SERVER_H
 #define _GNET_SERVER_H
 
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
+
 #include <glib.h>
 #include "tcp.h"
 #include "conn.h"
@@ -75,5 +78,7 @@ void      gnet_server_delete (GServer* server);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
+
+#endif /* GNET_EXPERIMENTAL */
 
 #endif /* _GNET_SERVER_H */

@@ -94,6 +94,9 @@ fi
 
 AC_SUBST(GNET_DEBUG_FLAGS)
 
+# Compile experimental stuff
+CFLAGS="$CFLAGS -DGNET_EXPERIMENTAL"
+
 
 # ****************************************
 # Check for programs

@@ -50,6 +50,9 @@ GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel,
 
 /* **************************************** */
 
+/* This section is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
+
 
 /*
   Notes
@@ -162,6 +165,8 @@ gint gnet_io_channel_readline_check_func (gchar* buffer, guint length,
   gnet_io_channel_read_async (IO, BUF, LEN, TO, TRUE, 			\
 		     gnet_io_channel_readline_check_func, NULL, FUNC, UD)
 
+
+#endif /* GNET_EXPERIMENTAL */
 
 
 #ifdef __cplusplus

@@ -106,13 +106,10 @@ gnet_url_clone (const GURL* url)
   g_return_val_if_fail (url, NULL);
 
   url2 = g_new0 (GURL, 1);
-  if (url->protocol)
-    url2->protocol = g_strdup (url->protocol);
-  if (url->hostname)
-    url2->hostname = g_strdup (url->hostname);
+  url2->protocol = g_strdup (url->protocol);
+  url2->hostname = g_strdup (url->hostname);
   url2->port = url->port;
-  if (url->resource)
-    url2->resource = g_strdup (url->resource);
+  url2->resource = g_strdup (url->resource);
 
   return url2;
 }
@@ -148,6 +145,8 @@ gnet_url_hash (const gpointer p)
 }
 
 
+#define SAFESTRCMP(A,B) ((!(A) && !(B)) || ((A) && (B) && !strcmp((A),(B))))
+
 gint
 gnet_url_equal (const gpointer p1, const gpointer p2)
 {
@@ -158,18 +157,9 @@ gnet_url_equal (const gpointer p1, const gpointer p2)
   g_return_val_if_fail (url2, 0);
 
   if (url1->port == url2->port &&
-
-      ( (!url1->protocol && !url2->protocol) ||
-	 (url1->protocol &&  url2->protocol &&
-	  !strcmp (url1->protocol, url2->protocol)) ) &&
-
-      ( (!url1->hostname && !url2->hostname) ||
-	 (url1->hostname &&  url2->hostname &&
-	  !strcmp (url1->hostname, url2->hostname)) ) &&
-
-      ( (!url1->resource && !url2->resource) ||
-	 (url1->resource &&  url2->resource &&
-	  !strcmp (url1->resource, url2->resource)) ) )
+      SAFESTRCMP(url1->protocol, url2->protocol) &&
+      SAFESTRCMP(url1->hostname, url2->hostname) &&
+      SAFESTRCMP(url1->resource, url2->resource))
     return 1;
 
   return 0;

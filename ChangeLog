@@ -1,3 +1,11 @@
+Thu Nov  2 15:24:04 2000  David Helder  <dhelder@umich.edu>
+
+	* src/*.h: Added #ifdef GNET_EXPERIMENTAL around experimental
+	   stuff.
+	
+	* src/url.c (gnet_url_clone): g_strdup will return NULL if str is
+	   NULL - don't check.
+
 Mon Oct 30 20:34:29 2000  David Helder  <dhelder@umich.edu>
 
 	* examples/echoserver.c (async_echoserver): Code cleanups

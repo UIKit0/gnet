@@ -12,6 +12,9 @@
 #ifndef _GNET_MD5_H
 #define _GNET_MD5_H
 
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
+
 #include <glib.h>
 
 #ifdef __cplusplus
@@ -35,5 +38,7 @@ gchar*          gnet_md5_get_string (GMD5* gmd5);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
+
+#endif /* GNET_EXPERIMENTAL */
 
 #endif /* _GNET_MD5_H */

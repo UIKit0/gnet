@@ -20,6 +20,9 @@
 #ifndef _GNET_PACK_H
 #define _GNET_PACK_H
 
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
+
 #include "glib.h"
 
 gint gnet_pack (const gchar* format, gchar* str, const guint len, ...);
@@ -31,5 +34,6 @@ gint gnet_calcsize (const gchar* format); /* UNTESTED */
 gint gnet_unpack (const gchar* format, gchar* str, gint len, ...);
 gint gnet_vunpack (const gchar* format, gchar* str, gint len, va_list args);
 
+#endif /* GNET_EXPERIMENTAL */
 
 #endif _GNET_PACK_H

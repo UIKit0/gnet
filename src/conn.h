@@ -21,6 +21,9 @@
 #ifndef _GNET_CONN_H
 #define _GNET_CONN_H
 
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
+
 #include <glib.h>
 #include "tcp.h"
 #include "iochannel.h"
@@ -134,5 +137,7 @@ void	   gnet_conn_watch_remove_error (GConn* conn);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
+
+#endif /* GNET_EXPERIMENTAL */
 
 #endif /* _GNET_CONN_H */

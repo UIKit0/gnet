@@ -12,6 +12,9 @@
 #ifndef _GNET_SHA_H
 #define _GNET_SHA_H
 
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL
+
 #include <glib.h>
 
 #ifdef __cplusplus
@@ -50,5 +53,7 @@ void	        gnet_sha_copy_string (GSHA* gsha, guint8* buffer);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
+
+#endif /* GNET_EXPERIMENTAL */
 
 #endif /* _GNET_SHA_H */
