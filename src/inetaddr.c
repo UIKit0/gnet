@@ -57,7 +57,7 @@ static const char*
 inet_ntop(int af, const void* src, char* dst, size_t size)
 {
   struct in_addr addr = *(struct in_addr*) src;
-  char* buf;
+  const char* buf;
 
   buf = inet_ntoa(addr);
   if (buf == NULL)

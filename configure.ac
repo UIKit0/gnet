@@ -138,6 +138,7 @@ if test "x${enable_pthreads}" = "xyes"; then
   AC_MSG_CHECKING([for -pthread])
   gnet_save_LIBS=$LIBS
   LIBS="$LIBS -pthread"
+  dash_pthread=""
   AC_LINK_IFELSE([int main() { return 0; }], 
 	[dash_pthread="-pthread"
 	 AC_MSG_RESULT(yes)],
@@ -153,13 +154,15 @@ if test "x${enable_pthreads}" = "xyes"; then
 	])
   LIBS="$gnet_save_LIBS $dash_pthread"
 
-  AC_CHECK_LIB([pthread],
-          [pthread_create],
-          [PTHREAD_LIBS="-lpthread"])
-  AC_CHECK_LIB([c_r],
-          [pthread_create],
-          [PTHREAD_LIBS="-lc_r $PTHREAD_LIBS"])
-  if test "x$PTHREAD_LIBS" != "x"; then
+  if test "x$dash_pthread" == "x"; then
+    AC_CHECK_LIB([pthread],
+            [pthread_create],
+            [PTHREAD_LIBS="-lpthread"])
+    AC_CHECK_LIB([c_r],
+            [pthread_create],
+            [PTHREAD_LIBS="-lc_r $PTHREAD_LIBS"])
+  fi    
+  if test "x$PTHREAD_LIBS" != "x" -o "x$dash_pthread" != "x"; then
           AC_DEFINE(HAVE_LIBPTHREAD, 1,
                   [Define if pthreads library is available])
           LIBS="$PTHREAD_LIBS $LIBS"
