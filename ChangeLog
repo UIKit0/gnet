@@ -1,3 +1,10 @@
+Sat Apr 20 17:04:04 2002  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces): Delete buffer.
+	(gethostbyaddr_async_child): 
+
+	* tests/hostinfo.c: Delete addresses.
+
 Thu Apr 18 14:13:30 2002  David Helder  <dhelder@umich.edu>
 
 	* src/socks-private.c (gnet_private_socks_tcp_socket_new): Delete

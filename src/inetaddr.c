@@ -635,7 +635,7 @@ gethostbyname_async_child (void* arg) /* pthread_create friendly */
   g_free (name);
   g_free (args[1]);
   g_free (args);
-  close(outfd);
+  close (outfd);
 
   return NULL;
 }
@@ -1223,7 +1223,7 @@ gethostbyaddr_async_child (void* arg) /* pthread_create friendly */
   gnet_inetaddr_delete (ia);
   g_free (args[1]);
   g_free (args);
-  close(outfd);
+  close (outfd);
 
   return NULL;
 }
@@ -2204,6 +2204,8 @@ gnet_inetaddr_list_interfaces (void)
       memcpy(&ia->sa, &addr, sizeof(addr));
       list = g_list_prepend (list, ia);
     }
+
+  g_free (buf);
 
   list = g_list_reverse (list);
 

@@ -44,6 +44,7 @@ main(int argc, char** argv)
   g_assert (cname != NULL);
 
   g_print ("hostname is %s (%s)\n", name, cname);
+  gnet_inetaddr_delete (ia);
   g_free(name);
   g_free(cname);
 
@@ -65,6 +66,7 @@ main(int argc, char** argv)
       g_assert (cname != NULL);
 
       g_print ("%s (%s)\n", name, cname);
+      gnet_inetaddr_delete (ia);
       g_free(name);
     }
 
