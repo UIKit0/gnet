@@ -6,11 +6,13 @@ Changes in Gnet
 
 1.1.1 ("Cornmeal" release, UNRELEASED)
 -----
+* Experimental SOCKS support
 * URLs support username, password, query, and fragment 
 * gnet_inetaddr_new_async has pthread implemention,
     no longer succeeds immediately
 * New gnet_{sha,md5}_clone functions
 * MacOSX port
+* Various small compile and configuration fixes
 
 
 1.1.0 ("Oatmeal" release)

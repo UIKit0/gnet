@@ -1,3 +1,7 @@
+Sun Oct  7 23:04:29 2001  David Helder  <dhelder@umich.edu>
+
+	* NEWS: Added SOCKS
+
 Sun Oct  7 18:42:05 2001  David Helder  <dhelder@umich.edu>
 
 	* src/socks.[hc]: Added.  Not integrated with TCP yet.
