@@ -311,7 +311,7 @@ gnet_io_channel_readline_strdup (GIOChannel    *channel,
         {
           len *= 2;
           buf = g_realloc(buf, len);
-          ptr = buf + n;
+          ptr = buf + n - 1;
         }
     }
 
