@@ -1,3 +1,11 @@
+Sat Jun  6 17:07:19.73    Andrew Lanoix <alanoix@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): 
+		&state->ias->data should be state->ias->data.
+	* src/tcp.c (gnet_tcp_socket_new_async_direct)
+		Do not call back on a failure in GNet 2.0.
+		Both issues found by Hans Petter Jansson <hpj@ximian.com>.
+
 Tue Jun  3 12:11:44 2003  David Helder  <dhelder@umich.edu>
 
 	* AUTHORS: Change my email address

@@ -1371,7 +1371,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 {
 
   GInetAddrNewListState* state = (GInetAddrNewListState*) data;
-  GInetAddr* ia = (GInetAddr*) &state->ias->data;
+  GInetAddr* ia = (GInetAddr*) state->ias->data;
   struct hostent *result;
   struct sockaddr_in *sa_in;
 

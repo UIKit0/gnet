@@ -541,10 +541,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   /* Create socket */
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd == INVALID_SOCKET)
-    {
-      (func)(NULL, data);
       return NULL;
-    }
 	
   /* Create our structure */
   s = g_new0(GTcpSocket, 1);
@@ -583,12 +580,8 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 		   gnet_tcp_socket_new_async_cb, 
 		   state);
 
-
   if (state->connect_watch <= 0)
-    {
-      (func)(NULL, data);
       return NULL;
-    }
 
   return state;
 }
