@@ -260,7 +260,8 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
   sa_in->sin_family = AF_INET;
 
   /* Connect */
-  rv = connect(sockfd, &s->sa, sizeof(s->sa));
+  rv = connect(sockfd, 
+	       &GNET_SOCKADDR_SA(s->sa), GNET_SOCKADDR_LEN(s->sa));
   if (rv != 0)
     {
       GNET_CLOSE_SOCKET(s->sockfd);
@@ -709,9 +710,15 @@ gnet_tcp_socket_get_io_channel (GTcpSocket* socket)
 GInetAddr* 
 gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket)
 {
+  GInetAddr* ia;
+
   g_return_val_if_fail (socket != NULL, NULL);
 
-  return gnet_private_inetaddr_sockaddr_new(socket->sa);
+  ia = g_new0(GInetAddr, 1);
+  memcpy (&ia->sa, &socket->sa, sizeof(socket->sa));
+  ia->ref_count = 1;
+
+  return ia;
 }
 
 
@@ -896,12 +903,13 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
 #endif
 
   /* Bind */
-  if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
+  if (bind(s->sockfd, &GNET_SOCKADDR_SA(s->sa), 
+	   GNET_SOCKADDR_LEN(s->sa)) != 0)
     goto error;
   
   /* Get the socket name */
-  socklen = sizeof(s->sa);
-  if (getsockname(s->sockfd, &s->sa, &socklen) != 0)
+  socklen = GNET_SOCKADDR_LEN(s->sa);
+  if (getsockname(s->sockfd, &GNET_SOCKADDR_SA(s->sa), &socklen) != 0)
     goto error;
   
   /* Listen */

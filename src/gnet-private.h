@@ -97,11 +97,34 @@
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16
+#endif
+
+#ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 46
 #endif
 
-#define GNET_SOCKADDR_IN(s) (*((struct sockaddr_in*) &s))
-#define GNET_ANY_IO_CONDITION  (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
+#define GNET_SOCKADDR_IN(s)    	(*((struct sockaddr_in*) &s))
+
+#define GNET_SOCKADDR_SA(s)	(*((struct sockaddr*) &s))
+#define GNET_SOCKADDR_FAMILY(s) ((s).ss_family)
+#define GNET_SOCKADDR_ADDRP(s)	(((s).ss_family == AF_INET)?\
+                                  (void*)&((struct sockaddr_in*)&s)->sin_addr:\
+                                  (void*)&((struct sockaddr_in6*)&s)->sin6_addr)
+#define GNET_SOCKADDR_PORT(s)	(((s).ss_family == AF_INET)?\
+                                  ((struct sockaddr_in*)&s)->sin_port:\
+                                  ((struct sockaddr_in6*)&s)->sin6_port)
+#define GNET_SOCKADDR_LEN(s)	(((s).ss_family == AF_INET)?\
+                                  sizeof(struct sockaddr_in):\
+                                  sizeof(struct sockaddr_in6))
+
+#define GNET_INETADDR_SA(i)     (*((struct sockaddr*) &i->sa))
+#define GNET_INETADDR_FAMILY(i) GNET_SOCKADDR_FAMILY(i->sa)
+#define GNET_INETADDR_ADDRP(i)  GNET_SOCKADDR_ADDRP(i->sa)
+#define GNET_INETADDR_PORT(i)   GNET_SOCKADDR_PORT(i->sa)
+#define GNET_INETADDR_LEN(i)    GNET_SOCKADDR_LEN(i->sa)
+
+
+#define GNET_ANY_IO_CONDITION   (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
 
 
 #ifdef __cplusplus
@@ -121,18 +144,26 @@ extern "C" {
 
 struct _GUdpSocket
 {
-  gint sockfd;			/* private */
-  struct sockaddr sa;		/* private (Why not an InetAddr?) */
+  gint sockfd;
   guint ref_count;
   GIOChannel* iochannel;
+  struct sockaddr_storage sa;
+};
+
+struct _GMcastSocket
+{
+  gint sockfd;
+  guint ref_count;
+  GIOChannel* iochannel;
+  struct sockaddr_storage sa;
 };
 
 struct _GTcpSocket
 {
   gint sockfd;
-  struct sockaddr sa;		/* Why not an InetAddr? */
   guint ref_count;
   GIOChannel* iochannel;
+  struct sockaddr_storage sa;
 
   GTcpSocketAcceptFunc accept_func;
   gpointer accept_data;
@@ -142,25 +173,18 @@ struct _GTcpSocket
 struct _GUnixSocket
 {
   gint sockfd;
-  struct sockaddr sa;
   guint ref_count;
-  gboolean server;
   GIOChannel *iochannel;
-};
+  struct sockaddr sa;	/* FIX?  sockaddr_un? */
 
-struct _GMcastSocket
-{
-  gint sockfd;
-  struct sockaddr sa;
-  guint ref_count;
-  GIOChannel* iochannel;
+  gboolean server;
 };
 
 struct _GInetAddr
 {
   gchar* name;
-  struct sockaddr sa;
   guint ref_count;
+  struct sockaddr_storage sa;
 };
 
 
@@ -317,11 +341,6 @@ extern HANDLE gnet_hostent_Mutex;
 
 
 GIOChannel* gnet_private_io_channel_new (int sockfd);
-
-GInetAddr* gnet_private_inetaddr_sockaddr_new(const struct sockaddr sa);
-
-struct sockaddr gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia);
-/* gtk-doc doesn't like this function...  (but it will be fixed.) */
 
 
 #ifdef __cplusplus

@@ -54,7 +54,7 @@ gnet_udp_socket_port_new (gint port)
 
   /* Set up address and port (any address, any port) */
   memset (&inetaddr, 0, sizeof(inetaddr));
-  sa_in = (struct sockaddr_in*) &inetaddr.sa;
+  sa_in = (struct sockaddr_in*) &inetaddr.sa;	/* FIX */
   sa_in->sin_family = AF_INET;
   sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
   sa_in->sin_port = g_htons(port);
@@ -103,7 +103,8 @@ gnet_udp_socket_new_interface (const GInetAddr* iface)
     }
 
   /* Bind to the socket to some local address and port */
-  if (bind(s->sockfd, &iface->sa, sizeof(iface->sa)) != 0)
+  if (bind(s->sockfd, 
+	   &GNET_INETADDR_SA(iface), GNET_INETADDR_LEN(iface)) != 0)
     {
       GNET_CLOSE_SOCKET(s->sockfd);
       g_free (s);
@@ -189,12 +190,10 @@ gint
 gnet_udp_socket_send (GUdpSocket* s, const GUdpPacket* packet)
 {
   gint bytes_sent;
-  struct sockaddr to_sa;
 
-  to_sa = gnet_private_inetaddr_get_sockaddr(packet->addr);
-
-  bytes_sent = sendto(s->sockfd, (void*) packet->data, packet->length, 
-		      0, &to_sa, sizeof(to_sa));
+  bytes_sent = sendto(s->sockfd, 
+		      (void*) packet->data, packet->length, 0, 
+		      &GNET_SOCKADDR_SA(s->sa), GNET_SOCKADDR_LEN(s->sa));
 
   return (bytes_sent != (signed) packet->length);  /* Return 0 if ok, return 1 otherwise */
 }
@@ -215,17 +214,22 @@ gint
 gnet_udp_socket_receive (GUdpSocket* s, GUdpPacket* packet)
 {
   gint bytes_received;
-  struct sockaddr from_sa;
-  gint length = sizeof(struct sockaddr);
+  struct sockaddr_storage from_sa;
+  gint length = sizeof(struct sockaddr_storage);
+  GInetAddr* from_ia;
 
-  bytes_received = recvfrom(s->sockfd, (void*) packet->data, packet->length, 
-			    0, &from_sa, &length);
+  bytes_received = recvfrom(s->sockfd, 
+			    (void*) packet->data, packet->length, 
+			    0, (struct sockaddr*) &from_sa, &length);
 
   /* Set the address from where this is from */
   if (packet->addr != NULL)	
     gnet_inetaddr_delete(packet->addr);
 
-  packet->addr = gnet_private_inetaddr_sockaddr_new(from_sa);
+  from_ia = g_new0(GInetAddr, 1);
+  memcpy (&from_ia->sa, &from_sa, length);
+  from_ia->ref_count = 1;
+  packet->addr = from_ia;
 
   return bytes_received;
 }

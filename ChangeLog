@@ -1,3 +1,19 @@
+Tue Oct 22 14:23:13 2002  David Helder  <dhelder@umich.edu>
+
+	* *: First pass at IPv6-ization.  Some builds may
+	    fail.  The main change is to use (struct sockaddr_storage)
+	    everywhere.  Some macros have been added to aid
+	    the conversion.  Network addresses should work, DNS
+	    addresses are next.
+	  
+	      TODO:
+	      	- how should binding work?
+		- fix mcast join
+		- set sa_len?
+		- fix gnet_inetaddr_is_*()
+		- check storage format for in6_addr
+		- fix everything marked FIX  :-)
+
 Mon Oct 21 23:24:30 2002  David Helder  <dhelder@umich.edu>
 
 	* *: HEAD is now GNet 1.3, to become GNet 1.4.  GNet 1.1 

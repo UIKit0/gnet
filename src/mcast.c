@@ -59,20 +59,17 @@ gnet_mcast_socket_new(void)
 GMcastSocket* 
 gnet_mcast_socket_port_new(gint port)
 {
-  struct sockaddr sa;
-  struct sockaddr_in* saip;
-  GInetAddr* ia;
+  struct sockaddr_in* saip;			/* FIX */
+  GInetAddr ia;
   GMcastSocket* ms;
 
-  saip = (struct sockaddr_in*) &sa;
+  saip = (struct sockaddr_in*) &ia.sa;
 
   saip->sin_family = AF_INET;
   saip->sin_addr.s_addr = g_htonl(INADDR_ANY);
   saip->sin_port = g_htons(port);
 
-  ia = gnet_private_inetaddr_sockaddr_new(sa);
-  ms = gnet_mcast_socket_inetaddr_new(ia);
-  gnet_inetaddr_delete(ia);
+  ms = gnet_mcast_socket_inetaddr_new(&ia);
   
   return ms;
 }
@@ -114,7 +111,9 @@ gnet_mcast_socket_inetaddr_new (const GInetAddr* ia)
     g_warning("Can't reuse mcast socket\n");
 
   /* Bind to the socket to some local address and port */
-  if (bind(ms->sockfd, &ms->sa, sizeof(ms->sa)) != 0)
+  if (bind(ms->sockfd, 
+	   &GNET_SOCKADDR_SA(ms->sa), 
+	   GNET_SOCKADDR_LEN(ms->sa)) != 0)
     return NULL;
 
   return ms;
@@ -200,7 +199,7 @@ gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
 
   /* Create the multicast request structure */
   memcpy(&mreq.imr_multiaddr, 
-	 &((struct sockaddr_in*) &ia->sa)->sin_addr,
+	 &((struct sockaddr_in*) &ia->sa)->sin_addr,	/* FIX */
 	 sizeof(struct in_addr));
   mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
 
@@ -227,7 +226,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
 
   /* Create the multicast request structure */
   memcpy(&mreq.imr_multiaddr,
-	 &((struct sockaddr_in*) &ia->sa)->sin_addr,
+	 &((struct sockaddr_in*) &ia->sa)->sin_addr,	/* FIX */
 	 sizeof(struct in_addr));
   mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
 

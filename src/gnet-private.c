@@ -51,48 +51,6 @@ gnet_private_io_channel_new (int sockfd)
 
 
 
-/**
- *  gnet_private_inetaddr_sockaddr_new:
- *  @sa: sockaddr struct to create InetAddr from.
- *
- *  Create an internet address from a sockaddr struct.  WARNING: This
- *  may go away or be hidden in a future version.
- *
- *  Returns: a new InetAddr, or NULL if there was a failure.  
- *
- **/
-GInetAddr* 
-gnet_private_inetaddr_sockaddr_new(const struct sockaddr sa)
-{
-  GInetAddr* ia = g_new0(GInetAddr, 1);
-
-  ia->sa = sa;
-  ia->ref_count = 1;
-
-  return ia;
-}
-
-
-
-/**
- *  gnet_private_inetaddr_get_sockaddr:
- *  @ia: Address to get the sockaddr of.
- *
- *  Get the sockaddr struct.  WARNING: This may go away or be hidden
- *  in a future version.
- *
- *  Returns: the sockaddr struct
- **/
-struct sockaddr 
-gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia)
-{
-  g_assert(ia != NULL);
-
-  return ia->sa;
-}
-
-
-
 /* 
 
    Below is the Windows specific code and a general idea of how

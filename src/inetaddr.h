@@ -172,6 +172,9 @@ gboolean gnet_inetaddr_is_loopback  (const GInetAddr* inetaddr);
 gboolean gnet_inetaddr_is_multicast (const GInetAddr* inetaddr);
 gboolean gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr);
 
+gboolean gnet_inetaddr_is_ipv4      (const GInetAddr* inetaddr);
+gboolean gnet_inetaddr_is_ipv6      (const GInetAddr* inetaddr);
+
 
 /* ********** */
 

@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define GNET_EXPERIMENTAL 1
 #include <gnet.h>
 
 static int failed = 0;
