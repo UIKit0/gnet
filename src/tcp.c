@@ -972,7 +972,7 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
  *
  *  Accept a connection from the socket without blocking.  The socket
  *  must have been created using gnet_tcp_socket_server_new().  This
- *  function is best used with the sockets #GIOChannel.  If the
+ *  function is best used with the socket's #GIOChannel.  If the
  *  channel is readable, then you PROBABLY have a connection.  It is
  *  possible for the connection to close by the time you call this, so
  *  it may return NULL even if the channel was readable.

@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <signal.h>
 #include <glib.h>
@@ -36,14 +35,13 @@ static void usage(int status);
 static void normal_echoserver(gchar *path);
 static void async_echoserver(gchar *path);
 
-gchar *socket_path;
+GUnixSocket *server;
 
 int
 main(int argc, char** argv)
 {
   gchar *path = NULL;
   ServerType server_type = NORMAL;
-  struct stat stbuf;
 	
   if (argc !=  2 && argc != 3) {
     usage(EXIT_FAILURE);
@@ -58,16 +56,6 @@ main(int argc, char** argv)
 	
   path = g_new0(gchar, strlen(argv[argc - 1]));
   path = memcpy(path, argv[argc - 1], strlen(argv[argc - 1]));
-
-  if (stat(path, &stbuf) == 0) {
-    if (S_ISSOCK(stbuf.st_mode)) {
-      unlink(path);
-    } else {
-      g_print("%s is not a socket!\n", path);
-      exit(EXIT_FAILURE);
-    }
-  }
-  socket_path = path;
 
   signal(SIGINT, cleanup_on_sig);
   signal(SIGTERM, cleanup_on_sig);
@@ -97,19 +85,13 @@ usage(int status)
 void
 cleanup_on_sig(int signum)
 {
-  struct stat stbuf;
-  if (stat(socket_path, &stbuf) == 0) {
-    if (S_ISSOCK(stbuf.st_mode)) {
-      unlink(socket_path);
-    }
-  }
+  gnet_unix_socket_delete(server);
   exit(EXIT_SUCCESS);
 }
 
 static void
 normal_echoserver(gchar *path)
 {
-  GUnixSocket *server;
   GUnixSocket *client = NULL;
   gchar buffer[1024];
   guint n;
@@ -172,7 +154,6 @@ clientstate_delete(client_state *state)
 static void
 async_echoserver(gchar *path)
 {
-  GUnixSocket *server;
   GIOChannel *iochannel = NULL;
   GMainLoop *main_loop = NULL;
 
