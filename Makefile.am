@@ -5,7 +5,11 @@ SUBDIRS = src examples tests doc
 @SET_MAKE@
 
 EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
-	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4
+	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4 \
+	gnet.spec.in \
+	debian/README.Debian debian/changelog debian/control.in \
+	debian/copyright debian/dirs debian/docs debian/libgnet1.1* \
+	debian/rules.in
 
 bin_SCRIPTS=gnet-config
 BUILT_SOURCES=gnet-config

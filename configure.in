@@ -292,16 +292,6 @@ fi
 
 # ########################################
 
-debian_output=""
-if test -d debian ; then
-  debian_output="debian/rules debian/control"
-fi
-
-rpm_output=""
-if test -f gnet.spec.in ; then
-  rpm_output="gnet.spec"
-fi
-
 AC_OUTPUT([
 	gnet-config 
 	Makefile 
@@ -311,6 +301,7 @@ AC_OUTPUT([
 	doc/Makefile 
 	doc/gnet-config.1
 	gnetconfig.h
-	$debian_output
-	$rpm_output ],
+	debian/rules
+	debian/control
+	gnet.spec ],
     [chmod -f +x gnet-config debian/rules])

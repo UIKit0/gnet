@@ -1,3 +1,7 @@
+Thu Oct 25 10:48:51 2001  David Helder  <dhelder@umich.edu>
+
+	* configure.in, Makefile.am: Include deb/rpm stuff
+
 Wed Oct 24 17:35:51 2001  David Helder  <dhelder@umich.edu>
 
 	* configure.in: Check if debian or RPM files are 
