@@ -512,26 +512,41 @@ gnet_tcp_socket_server_new(const gint port)
 GTcpSocket* 
 gnet_tcp_socket_server_accept(GTcpSocket* socket)
 {
-  GTcpSocket* s;
+  gint sockfd;
+  struct sockaddr sa;
   socklen_t n;
+  fd_set fdset;
+  GTcpSocket* s;
 
   g_return_val_if_fail (socket != NULL, NULL);
 
-  s = g_new0(GTcpSocket, 1);
+ try_again:
+
+  FD_ZERO(&fdset);
+  FD_SET(socket->sockfd, &fdset);
+
+  if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
+    {
+      if (errno == EINTR)
+	goto try_again;
+
+      return NULL;
+    }
 
   n = sizeof(s->sa);
 
- try_again:
-  errno = 0;
-  if ((s->sockfd = accept(socket->sockfd, &s->sa, &n)) == -1)
+  if ((sockfd = accept(socket->sockfd, &sa, &n)) == -1)
     {
       if (errno == EWOULDBLOCK || errno == ECONNABORTED ||
 	  errno == EPROTO || errno == EINTR)
 	goto try_again;
 
-      g_free(s);
       return NULL;
     }
+
+  s = g_new0(GTcpSocket, 1);
+  s->sockfd = sockfd;
+  memcpy(&s->sa, &sa, sizeof(s->sa));
 
   return s;
 }

@@ -121,7 +121,7 @@ normal_echoserver(GTcpSocket* server)
 
 
       while ((error = gnet_io_channel_readline(ioclient, buffer, sizeof(buffer), &n)) 
-	     == G_IO_ERROR_NONE && (n > 1))
+	     == G_IO_ERROR_NONE && (n > 0))
 	{
 	  error = gnet_io_channel_writen(ioclient, buffer, n, &n);
 	  if (error != G_IO_ERROR_NONE) break;
@@ -129,8 +129,10 @@ normal_echoserver(GTcpSocket* server)
 	}
 
       if (error != G_IO_ERROR_NONE)
-	g_print ("\nerror = %d (none = %d)\n", error, G_IO_ERROR_NONE);
+	g_print ("\nReceived error %d (closing socket).\n", error);
 
+      g_io_channel_close(ioclient);
+      g_io_channel_unref(ioclient);
       gnet_tcp_socket_delete(client);
     }
 }

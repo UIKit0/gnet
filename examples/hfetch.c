@@ -152,6 +152,8 @@ hfetch(gchar* server, gint port, gchar* filename)
       fwrite(buffer, n, 1, stdout);
     }
   
+  g_io_channel_close(iochannel);
+  g_io_channel_unref(iochannel);
   gnet_tcp_socket_delete(socket);
 }
 

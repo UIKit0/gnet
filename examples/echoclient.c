@@ -57,7 +57,7 @@ main(int argc, char** argv)
 
   while (fgets(buffer, sizeof(buffer), stdin) != 0)
     {
-      n = strlen(buffer) + 1;
+      n = strlen(buffer);
       error = gnet_io_channel_writen(iochannel, buffer, n, &n);
       if (error != G_IO_ERROR_NONE) break;
 
