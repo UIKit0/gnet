@@ -55,9 +55,9 @@ GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel,
 /*
   Notes
 
-  _Do_not_ call cancel if the callback has been called.  For example, if
-  you receive a callback with the status of TIMEOUT, _do_not_ cancel
-  the read or write.
+  _Do_not_ call cancel in the callback.  For example, if you receive a
+  callback with the status of TIMEOUT, _do_not_ cancel the read or
+  write.
 
   A timeout of 0 means there is no timeout.  If you are writing a
   server, you should use a timeout.  2 minutes is reasonable for most

@@ -1,3 +1,31 @@
+Wed Feb 13 20:47:51 2002  David Helder  <dhelder@umich.edu>
+
+        * src,doc: Doc improvements.
+	
+	* src/inetaddr.c: NOTE: The no-immediate-callbacks for async
+	    functions is finally implemented (in inetaddr).
+	
+	* src/inetaddr.c (gnet_inetaddr_get_name_nonblock): Added.  Like
+	    gnet_inetaddr_new_nonblock.
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): Don't callback on
+	   error.  Don't callback on immediate success.
+
+	* src/inetaddr.c (gnet_gethostbyname): Do a non-blocking lookup.
+	* src/inetaddr.c (gnet_inetaddr_new_async): Don't call callback
+	   on error.
+
+	* src/iochannel.c (gnet_io_channel_read_async_cancel): 
+	   Remove timer only if set
+
+	* src/socks-private.h: Move SOCKS_PORT here.
+
+	* src/conn.[hc]: Removed add/remove watch functions.  For
+	   binary compatibility, the members are still in the struct.
+	* src/conn.c (conn_timeout_cb): Zero out the timeout before call
+	
+	* src/conn.c: Added docs
+
 Sun Feb 10 15:27:36 2002  David Helder  <dhelder@umich.edu>
 
 	* examples/echoserver.c: Print more.

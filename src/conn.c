@@ -53,6 +53,23 @@ static gboolean conn_read_cb (GIOChannel* iochannel,
 static gboolean conn_timeout_cb (gpointer data);
 
 
+/**
+ *  gnet_conn_new
+ *  @hostname: Hostname of host
+ *  @port: Port of host
+ *  @func: Function to call on connection, I/O, or error
+ *  @user_data: Data to pass to func
+ *
+ *  Create a connection object representing a connection to a host.
+ *  The actual connection is not made until gnet_conn_connect() is
+ *  called.  The callback is called when events occur.  The events are
+ *  connect, read, write, error, and timeout.  These only occur if the
+ *  appropriate function is called first.  For example, use
+ *  gnet_conn_read() to have the callback called when data is read.
+ *
+ *  Returns: A #GConn.
+ *
+ **/
 GConn*
 gnet_conn_new (const gchar* hostname, gint port, GConnFunc func, gpointer user_data)
 {
@@ -72,6 +89,19 @@ gnet_conn_new (const gchar* hostname, gint port, GConnFunc func, gpointer user_d
 }
 
 
+/**
+ *  gnet_conn_new_inetaddr
+ *  @inetaddr: address of host
+ *  @func: Function to call on connection, I/O, or error
+ *  @user_data: Data to pass to func
+ *
+ *  Create a connection object representing a connection to a host.
+ *  This function is similar to gnet_conn_new() but has different
+ *  arguments.
+ *
+ *  Returns: A #GConn.
+ *
+ **/
 GConn*   
 gnet_conn_new_inetaddr (const GInetAddr* inetaddr, 
 			GConnFunc func, gpointer user_data)
@@ -93,6 +123,15 @@ gnet_conn_new_inetaddr (const GInetAddr* inetaddr,
 
 
 
+/**
+ *  gnet_conn_delete
+ *  @conn: Connection to delete
+ *  @delete_buffers: True if write buffers should be deleted.
+ *
+ *  Delete the connection.  If delete_buffers is set, any write
+ *  buffers are deleted.
+ *
+ **/
 void
 gnet_conn_delete (GConn* conn, gboolean delete_buffers)
 {
@@ -114,6 +153,13 @@ gnet_conn_delete (GConn* conn, gboolean delete_buffers)
 }
 
 
+/**
+ *  gnet_conn_ref
+ *  @conn: #GConn to reference
+ *
+ *  Increment the reference counter of the GConn.
+ *
+ **/
 void
 gnet_conn_ref (GConn* conn)
 {
@@ -123,6 +169,14 @@ gnet_conn_ref (GConn* conn)
 }
 
 
+/**
+ *  gnet_conn_unref
+ *  @conn: #GConn to unreference
+ *
+ *  Remove a reference from the #GConn.  When reference count reaches
+ *  0, the connection is deleted.
+ *
+ **/
 void
 gnet_conn_unref (GConn* conn, gboolean delete_buffers)
 {
@@ -135,6 +189,17 @@ gnet_conn_unref (GConn* conn, gboolean delete_buffers)
 }
 
 
+/**
+ *  gnet_conn_connect
+ *  @conn: Conn to connect to
+ *  @timeout: Timeout for connection.
+ *
+ *  Establish the connection.  If the connection is pending or already
+ *  established, this function does nothing.  The callback is called
+ *  when the connection is established or an error occurs.  THE
+ *  TIMEOUT IS NOT CURRENTLY USED (FIX).
+ *
+ **/
 void
 gnet_conn_connect (GConn* conn, guint timeout)
 {
@@ -213,6 +278,17 @@ conn_new_cb (GTcpSocket* socket,
 
 
 
+/**
+ *  gnet_conn_disconnect
+ *  @conn: Conn to disconnect
+ *  @delete_buffers: True if write buffers should be deleted.
+ *
+ *  End the connection.  The connection can later be reestablished by
+ *  calling gnet_conn_connect() again.  If there the connection was
+ *  not establish, this function does nothing.  If delete_buffers is
+ *  set, any write buffers are deleted.
+ *
+ **/
 void
 gnet_conn_disconnect (GConn* conn, gboolean delete_buffers)
 {
@@ -231,10 +307,6 @@ gnet_conn_disconnect (GConn* conn, gboolean delete_buffers)
       gnet_tcp_socket_new_async_cancel (conn->new_id);
       conn->new_id = NULL;
     }
-
-  gnet_conn_watch_remove_read  (conn);
-  gnet_conn_watch_remove_write (conn);
-  gnet_conn_watch_remove_error (conn);
 
   for (i = conn->queued_writes; i != NULL; i = i->next)
     {
@@ -274,6 +346,15 @@ gnet_conn_disconnect (GConn* conn, gboolean delete_buffers)
 }
 
 
+/**
+ *  gnet_conn_is_connected
+ *  @conn: Connection to check
+ *
+ *  Check if the connection is established.
+ *
+ *  Returns: TRUE if the connection is established, FALSE otherwise.
+ *
+ **/
 gboolean
 gnet_conn_is_connected (const GConn* conn)
 {
@@ -283,82 +364,22 @@ gnet_conn_is_connected (const GConn* conn)
 }
 
 
-void
-gnet_conn_watch_add_read (GConn* conn, GIOFunc func, gpointer user_data)
-{
-  g_return_if_fail (conn);
-  g_return_if_fail (conn->iochannel);
-  g_return_if_fail (!conn->read_id);
-
-  if (!conn->read_watch)
-    conn->read_watch = g_io_add_watch (conn->iochannel, G_IO_IN, func, user_data);
-}
-
-
-void
-gnet_conn_watch_add_write (GConn* conn, GIOFunc func, gpointer user_data)
-{
-  g_return_if_fail (conn);
-  g_return_if_fail (conn->iochannel);
-  g_return_if_fail (!conn->write_id);
-
-  if (!conn->write_watch)
-    conn->write_watch = g_io_add_watch (conn->iochannel, G_IO_OUT, func, user_data);
-}
-
-
-void
-gnet_conn_watch_add_error (GConn* conn, GIOFunc func, gpointer user_data)
-{
-  g_return_if_fail (conn);
-  g_return_if_fail (conn->iochannel);
-
-  if (!conn->err_watch)
-    conn->err_watch  = 
-      g_io_add_watch (conn->iochannel, 
-		      G_IO_ERR | G_IO_HUP | G_IO_NVAL, func, user_data);
-}
-
-
-void
-gnet_conn_watch_remove_read (GConn* conn)
-{
-  g_return_if_fail (conn);
-
-  if (conn->read_watch)
-    {
-      g_source_remove (conn->read_watch);
-      conn->read_watch = 0;
-    }
-}
-
-
-void
-gnet_conn_watch_remove_write (GConn* conn)
-{
-  g_return_if_fail (conn);
-
-  if (conn->write_watch)
-    {
-      g_source_remove (conn->write_watch);
-      conn->write_watch = 0;
-    }
-}
-
-
-void
-gnet_conn_watch_remove_error (GConn* conn)
-{
-  g_return_if_fail (conn);
-
-  if (conn->err_watch)
-    {
-      g_source_remove (conn->err_watch);
-      conn->err_watch = 0;
-    }
-}
-
-
+/**
+ *  gnet_conn_read:
+ *  @conn: Connection to read from
+ *  @buffer: Buffer to read to (NULL if to be allocated)
+ *  @length: Length of the buffer (maximum size if buffer is to be allocated)
+ *  @read_one_byte_at_a_time: TRUE if bytes should be read one-at-a-time
+ *  @timeout: Timeout for read (0 if no timeout)
+ *  @check_func: Function to check if read is complete
+ *  @check_user_data: User data for check_func
+ *
+ *  Set up an asynchronous read from the connection to the buffer.
+ *  This is a wrapper around gnet_io_channel_read_async(), which reads
+ *  data until the check function stops it.  The callback for this
+ *  #GConn is called when the read is complete or there is an error.
+ *
+ **/
 void
 gnet_conn_read (GConn* conn, gchar* buffer, guint length, guint timeout,
 		gboolean read_one_byte_at_a_time,
@@ -378,6 +399,18 @@ gnet_conn_read (GConn* conn, gchar* buffer, guint length, guint timeout,
 }
 
 
+/**
+ *  gnet_conn_readany:
+ *  @conn: Connection to read from
+ *  @buffer: Buffer to read to (NULL if to be allocated)
+ *  @length: Length of the buffer (maximum size if buffer is to be allocated)
+ *  @timeout: Timeout for read (0 if not timeout)
+ *
+ *  Set up an asynchronous read from the connection to the buffer.
+ *  This is a wrapper around gnet_io_channel_readany(), which will
+ *  read any amount of data.
+ *
+ **/
 void
 gnet_conn_readany (GConn* conn, gchar* buffer, guint length, guint timeout)
 {
@@ -393,6 +426,18 @@ gnet_conn_readany (GConn* conn, gchar* buffer, guint length, guint timeout)
 }
 
 
+/**
+ *  gnet_conn_readline:
+ *  @conn: Connection to read from
+ *  @buffer: Buffer to read to (NULL if to be allocated)
+ *  @length: Length of the buffer (maximum size if buffer is to be allocated)
+ *  @timeout: Timeout for read (0 if not timeout)
+ *
+ *  Set up an asynchronous read from the connection to the buffer.
+ *  This is a wrapper around gnet_io_channel_readline(), which will
+ *  read data until a newline.
+ *
+ **/
 void
 gnet_conn_readline (GConn* conn, gchar* buffer, guint length, guint timeout)
 {
@@ -449,6 +494,19 @@ conn_read_cb (GIOChannel* iochannel, GNetIOChannelReadAsyncStatus status,
 }
 
 
+/**
+ *  gnet_conn_write
+ *  @conn: Connection to write to
+ *  @buffer: Buffer to write
+ *  @length: Length of buffer
+ *  @timeout: Timeout for write (0 if no timeout)
+ *
+ *  Set up an asynchronous write to the connection from the buffer.
+ *  This is a wrapper around gnet_io_channel_write_async().  This
+ *  function may be called again before another asynchronous write
+ *  completes.
+ *
+ **/
 void
 gnet_conn_write (GConn* conn, gchar* buffer, gint length, guint timeout)
 {
@@ -500,6 +558,16 @@ conn_write_cb (GIOChannel* iochannel, gchar* buffer, guint length,
 }
 
 
+/**
+ *  gnet_conn_timeout
+ *  @conn: Connection to set timeout on
+ *  @timeout: Timeout (in milliseconds)
+ * 
+ *  Set a timeout on the connection.  When the time expires, the
+ *  #GConn's callback is called.  If there already is a timeout, the
+ *  old timeout is canceled.
+ *
+ **/
 void
 gnet_conn_timeout (GConn* conn, guint timeout)
 {
@@ -526,6 +594,7 @@ conn_timeout_cb (gpointer data)
 
   g_return_val_if_fail (conn, FALSE);
 
+  conn->timer = 0;
   (conn->func)(conn, GNET_CONN_STATUS_TIMEOUT, NULL, 0, conn->user_data);
 
   return FALSE;

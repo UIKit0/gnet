@@ -19,7 +19,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct _GMD5 GMD5;
-#define GNET_MD5_HASH_LENGTH	16	/* in bytes */
+
+/**
+ *  GNET_MD5_HASH_LENGTH
+ *
+ *  Length of the MD5 hash in bytes.
+ **/
+#define GNET_MD5_HASH_LENGTH	16
 
 
 GMD5*   gnet_md5_new (const guchar* buffer, guint length);

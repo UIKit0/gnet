@@ -14,17 +14,6 @@ Unix Sockets are only available on Unix systems.
 
 </para>
 
-<!-- ##### STRUCT GUnixSocket ##### -->
-<para>
-
-</para>
-
-@sockfd: 
-@sa: 
-@ref_count: 
-@server: 
-@iochannel: 
-
 <!-- ##### FUNCTION gnet_unix_socket_connect ##### -->
 <para>
 

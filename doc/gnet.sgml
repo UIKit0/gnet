@@ -3,6 +3,7 @@
 <!entity inetaddr SYSTEM "sgml/inetaddr.sgml">
 <!entity tcp SYSTEM "sgml/tcp.sgml">
 <!entity unix SYSTEM "sgml/unix.sgml">
+<!entity socks SYSTEM "sgml/socks.sgml">
 <!entity udp SYSTEM "sgml/udp.sgml">
 <!entity mcast SYSTEM "sgml/mcast.sgml">
 <!entity iochannel SYSTEM "sgml/iochannel.sgml">
@@ -33,7 +34,7 @@
     </authorgroup>
 
     <copyright>
-      <year>2000-2001</year>
+      <year>2000-2002</year>
       <holder>David Helder</holder>
     </copyright>	
 

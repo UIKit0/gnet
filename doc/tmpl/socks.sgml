@@ -2,11 +2,11 @@
 socks
 
 <!-- ##### SECTION Short_Description ##### -->
-
+SOCKS protocol interface.
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-
+SOCKS is a protocol for interfacing with a SOCKS TCP proxy.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->

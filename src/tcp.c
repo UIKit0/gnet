@@ -299,7 +299,7 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 
 
 /**
- *  gnet_tcp_socket_new_direct:
+ *  gnet_tcp_socket_new_async_direct:
  *  @addr: Address to connect to.
  *
  *  Connect directly to a specified address asynchronously and do not
@@ -591,7 +591,7 @@ gnet_tcp_socket_delete(GTcpSocket* s)
 
 /**
  *  gnet_tcp_socket_ref
- *  @s: GTcpSocket to reference
+ *  @s: #GTcpSocket to reference
  *
  *  Increment the reference counter of the GTcpSocket.
  *
@@ -809,10 +809,14 @@ gnet_tcp_socket_server_new (gint port)
  *
  *  Create and open a new #GTcpSocket bound to the specified
  *  interface.  Use this sort of socket when your are a server and
- *  have a specific address the server must be bound to.  If the
- *  interface address's port number is 0, the OS will choose the port.
- *  If iface is NULL, the OS will choose the address and port.  SOCKS
- *  is used if SOCKS is enabled and the interface is NULL.
+ *  have a specific address the server must be bound to.  If the port
+ *  number of the interface address is 0, the OS will use the
+ *  interface specified but choose the port itself.  If the interface
+ *  address is NULL, the OS will choose both the interface and port.
+ *  If the interface address was created by gnet_inetaddr_new_any(),
+ *  the OS will use all interfaces.  If the port number is also set,
+ *  it will use that port number.  SOCKS is used if SOCKS is enabled
+ *  and the interface is NULL.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -1127,7 +1131,7 @@ static gboolean tcp_socket_server_accept_async_cb (GIOChannel* iochannel,
  *  gnet_tcp_socket_server_accept_async:
  *  @socket: #GTcpSocket to accept connections from.
  *  @accept_func: Callback function.
- *  @data: User data passed when callback function is called.
+ *  @user_data: User data passed when callback function is called.
  *
  *  Accept a connection from the socket asynchronously.  The callback
  *  is called when a client has connection or the socket has an error.

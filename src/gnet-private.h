@@ -105,7 +105,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/**
+/*
 
    This is the private declaration and definition file.  The things in
    here are to be used by GNet ONLY.  Use at your own risk.  If this

@@ -19,6 +19,15 @@ Interfaces for internal use
 Internal interfaces
 
 
+<!-- ##### STRUCT GInetAddr ##### -->
+<para>
+
+</para>
+
+@name: 
+@sa: 
+@ref_count: 
+
 <!-- ##### USER_FUNCTION GInetAddrAsyncFunc ##### -->
 <para>
 
@@ -62,6 +71,68 @@ Internal interfaces
 @status: 
 @name: 
 @data: 
+
+<!-- ##### STRUCT GMcastSocket ##### -->
+<para>
+
+</para>
+
+@sockfd: 
+@sa: 
+@ref_count: 
+@iochannel: 
+
+<!-- ##### MACRO GNET_BINARY_AGE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GNET_CHECK_VERSION ##### -->
+<para>
+
+</para>
+
+@major: 
+@minor: 
+@micro: 
+
+<!-- ##### MACRO GNET_INTERFACE_AGE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GNET_MAJOR_VERSION ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GNET_MICRO_VERSION ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GNET_MINOR_VERSION ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GTcpSocket ##### -->
+<para>
+
+</para>
+
+@sockfd: 
+@sa: 
+@ref_count: 
+@iochannel: 
+@accept_func: 
+@accept_data: 
+@accept_watch: 
 
 <!-- ##### USER_FUNCTION GTcpSocketAsyncFunc ##### -->
 <para>
@@ -109,6 +180,27 @@ Internal interfaces
 </para>
 
 
+<!-- ##### STRUCT GUdpSocket ##### -->
+<para>
+
+</para>
+
+@sockfd: 
+@sa: 
+@ref_count: 
+@iochannel: 
+
+<!-- ##### STRUCT GUnixSocket ##### -->
+<para>
+
+</para>
+
+@sockfd: 
+@sa: 
+@ref_count: 
+@server: 
+@iochannel: 
+
 <!-- ##### USER_FUNCTION TcpSocketNonblockFunc ##### -->
 <para>
 
@@ -123,6 +215,54 @@ Internal interfaces
 
 </para>
 
+
+<!-- ##### FUNCTION gnet_conn_watch_add_error ##### -->
+<para>
+
+</para>
+
+@conn: 
+@func: 
+@user_data: 
+
+<!-- ##### FUNCTION gnet_conn_watch_add_read ##### -->
+<para>
+
+</para>
+
+@conn: 
+@func: 
+@user_data: 
+
+<!-- ##### FUNCTION gnet_conn_watch_add_write ##### -->
+<para>
+
+</para>
+
+@conn: 
+@func: 
+@user_data: 
+
+<!-- ##### FUNCTION gnet_conn_watch_remove_error ##### -->
+<para>
+
+</para>
+
+@conn: 
+
+<!-- ##### FUNCTION gnet_conn_watch_remove_read ##### -->
+<para>
+
+</para>
+
+@conn: 
+
+<!-- ##### FUNCTION gnet_conn_watch_remove_write ##### -->
+<para>
+
+</para>
+
+@conn: 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
 <para>

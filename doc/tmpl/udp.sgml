@@ -27,16 +27,6 @@ UDP.
 
 </para>
 
-<!-- ##### STRUCT GUdpSocket ##### -->
-<para>
-
-</para>
-
-@sockfd: 
-@sa: 
-@ref_count: 
-@iochannel: 
-
 <!-- ##### FUNCTION gnet_udp_socket_new ##### -->
 <para>
 

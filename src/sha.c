@@ -464,8 +464,7 @@ gnet_sha_new (const guint8* buffer, guint length)
 
 /**
  *  gnet_sha_new_string:
- *  @buffer: Buffer to hash
- *  @length: Length of that buffer
+ *  @str: Hexidecimal string
  * 
  *  Create an SHA hash from a hexidecimal string.  The string must be
  *  of length greater than or equal to %GNET_SHA_HASH_LENGTH * 2.

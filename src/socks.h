@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000, 2001  David Helder
+ * Copyright (C) 2001-2002  David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -29,6 +29,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ *  GNET_SOCKS_PORT
+ *
+ *  Default port for SOCKS protocol.
+ **/
 #define GNET_SOCKS_PORT 1080
 
 gboolean   gnet_socks_get_enabled (void);

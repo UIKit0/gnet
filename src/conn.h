@@ -36,6 +36,12 @@ extern "C" {
 
 typedef struct _GConn GConn;
 
+/**
+ *   GConnStatus
+ * 
+ *   Status of #GConn, passed by #GConnFunc.
+ *
+ **/
 typedef enum {
   GNET_CONN_STATUS_CONNECT,
   GNET_CONN_STATUS_CLOSE,
@@ -45,7 +51,34 @@ typedef enum {
   GNET_CONN_STATUS_ERROR
 } GConnStatus;
 
-/* rv only affects reads... */
+/**
+ *  GConnFunc
+ *  @conn: Connection
+ *  @status: Connection status
+ *  @buffer: Buffer (if a read or write)
+ *  @length: Length of the buffer
+ *  @user_data: User data specified in gnet_conn_new()
+ * 
+ *  Callback for gnet_conn_new().  When g_conn_connect() completes,
+ *  the callback is called with status CONNECT.  If the connection
+ *  closes during a read, the callback is called with status CLOSE
+ *  (and a NULL buffer).  If gnet_conn_read() or another read function
+ *  has data available, the callback is called with status READ and
+ *  the buffer is set.  If gnet_conn_read() was called with a NULL
+ *  buffer, that buffer was allocated by GNet but is callee owned.  If
+ *  gnet_conn_read() was called with a non-NULL buffer, the buffer was
+ *  allocated by the gnet_conn_read() caller (so is GConnFunc callee
+ *  owned).  The callee should return TRUE if they want to continue
+ *  reading data.  If gnet_conn_write() completes, the callback is
+ *  called with status WRITE and the buffer is set the the buffer
+ *  passed to gnet_conn_write().  If the gnet_conn_timeout() timer
+ *  expires, the callback is called with status TIMEOUT.  If an error
+ *  ever occurs, the callback is called with status ERROR.
+ *
+ *  Returns: Callee should return TRUE if the status is READ and they
+ *  want to continue reading data.  FALSE otherwise.
+ *
+ **/
 typedef gboolean (*GConnFunc)(GConn* conn, GConnStatus status, 
 			      gchar* buffer, gint length,
 			      gpointer user_data);
@@ -65,9 +98,9 @@ struct _GConn
   GInetAddr*			inetaddr;
   GIOChannel* 			iochannel;
 
-  guint				read_watch;
-  guint				write_watch;
-  guint				err_watch;
+  guint				read_watch;	/* DEPRICATED */
+  guint				write_watch;	/* DEPRICATED */
+  guint				err_watch;	/* DEPRICATED */
 
   GNetIOChannelWriteAsyncID 	write_id;
   GList*			queued_writes;
@@ -117,21 +150,6 @@ void	   gnet_conn_readline (GConn* conn, gchar* buffer,
 void	   gnet_conn_write (GConn* conn, gchar* buffer, 
 			    gint length, guint timeout);
 void	   gnet_conn_timeout (GConn* conn, guint timeout);
-
-
-/* ********** */
-
-void	   gnet_conn_watch_add_read (GConn* conn, GIOFunc func, 
-				     gpointer user_data);
-void	   gnet_conn_watch_add_write (GConn* conn, GIOFunc func, 
-				      gpointer user_data);
-void	   gnet_conn_watch_add_error (GConn* conn, GIOFunc func, 
-				      gpointer user_data);
-
-void	   gnet_conn_watch_remove_read (GConn* conn);
-void	   gnet_conn_watch_remove_write (GConn* conn);
-void	   gnet_conn_watch_remove_error (GConn* conn);
-
 
 
 #ifdef __cplusplus

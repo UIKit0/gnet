@@ -572,7 +572,8 @@ gnet_io_channel_read_async_cancel (GNetIOChannelReadAsyncID id)
   state = (GNetIOChannelReadAsyncState*) id;
 
   g_source_remove (state->watch);
-  g_source_remove (state->timer);
+  if (state->timer)
+    g_source_remove (state->timer);
 
   if (state->my_buffer)
     g_free(state->buffer);

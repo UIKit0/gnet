@@ -64,16 +64,18 @@ extern "C" {
 
 typedef struct _GURL
 {
-  gchar* protocol;	/* TODO: rename "scheme"? */
+  gchar* protocol;
   gchar* hostname;
   gint   port;
-  gchar* resource;	/* TODO: rename "path" */
+  gchar* resource;
   gchar* user;
   gchar* password;
   gchar* query;
   gchar* fragment;
-  /* TODO: Put fields in order.  Don't for now to preserve binary compat. */
 } GURL;
+  /* TODO: rename "protocol" -> "scheme"? */
+  /* TODO: rename "resource" -> "path" */
+  /* TODO: Put fields in order.  Don't for now to preserve binary compat. */
 
 
 GURL*     gnet_url_new (const gchar* url);

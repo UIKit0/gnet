@@ -24,7 +24,7 @@
 #include <gnet.h>
 
 
-#define DO_REVERSE 0
+#define DO_REVERSE 1
 #define VERBOSE 1
 
 void lookup_block(void);
@@ -89,7 +89,11 @@ lookup_block(void)
       gchar* cname;
 
       ia = gnet_inetaddr_new(host, 0);
-      g_assert(ia != NULL);
+      if (ia == NULL)
+	{
+	  g_print ("DNS lookup for %s failed\n", host);
+	  exit (EXIT_FAILURE);
+	}
 
       cname = gnet_inetaddr_get_canonical_name(ia);
       g_assert(cname != NULL);
@@ -127,7 +131,11 @@ lookup_async(void)
       GInetAddr* ia;
 
       ia = gnet_inetaddr_new(host, 0);
-      g_assert (ia != NULL);
+      if (ia == NULL)
+	{
+	  g_print ("DNS lookup for %s failed\n", host);
+	  exit (EXIT_FAILURE);
+	}
 
       gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, GINT_TO_POINTER(i));
 
@@ -150,7 +158,11 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
       gchar* cname;
 
       cname = gnet_inetaddr_get_canonical_name(ia);
-      g_assert(cname != NULL);
+      if (cname == NULL)
+	{
+	  g_print ("Reverse DNS lookup failed\n");
+	  exit (EXIT_FAILURE);
+	}
 
 #if VERBOSE
       g_print ("%d: %s -> %s\n", i, host, cname);
@@ -160,7 +172,7 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
     }
 #if VERBOSE
   else
-    g_print("%d: error\n", i);
+    g_print("%d: DNS lookup failed\n", i);
 #endif
 
   runs_done++;
@@ -181,10 +193,14 @@ reverse_inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status,
       gchar* cname;
 
       cname = gnet_inetaddr_get_canonical_name(ia);
-      g_assert(cname != NULL);
+      if (cname == NULL)
+	{
+	  g_print ("Reverse DNS lookup for %s failed\n", name);
+	  exit (EXIT_FAILURE);
+	}
 
 #if VERBOSE
-      g_print ("%d: %s -> %s\n", i, cname, name);
+      g_print ("%d: %s -> %s (reverse)\n", i, cname, name);
 #endif
 
       g_free(cname);

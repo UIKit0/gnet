@@ -341,8 +341,7 @@ gnet_md5_new (const guint8* buffer, guint length)
 
 /**
  *  gnet_md5_new_string:
- *  @buffer: Buffer to hash
- *  @length: Length of that buffer
+ *  @str: Hexidecimal string
  * 
  *  Create an MD5 hash from a hexidecimal string.  The string must be
  *  of length greater than or equal to %GNET_MD5_HASH_LENGTH * 2.

@@ -38,6 +38,13 @@ extern "C" {
 
 typedef struct _GServer GServer;
 
+
+/**
+ *   GServerStatus:
+ * 
+ *   Status of #GServer, passed by #GServerFunc.
+ *
+ **/
 typedef enum
 {
   GNET_SERVER_STATUS_CONNECT,
@@ -46,6 +53,20 @@ typedef enum
 } GServerStatus;
 
 
+/**
+ *   GServerFunc:
+ *   @server: Server
+ *   @status: Server status
+ *   @conn: New connection (or NULL if error)
+ *   @user_data: User data specified in gnet_server_new()
+ *   
+ *   Callback for gnet_server_new().  When a new client connects the
+ *   function is called with status CONNECT and conn is the new
+ *   connection.  The conn is owned by the callee.  If an error
+ *   occurs, the function is called with status ERROR and conn is
+ *   NULL.
+ *
+ **/
 typedef void (*GServerFunc)(GServer* server,
 			    GServerStatus status, 
 			    GConn* conn,
@@ -69,7 +90,6 @@ GServer*  gnet_server_new (const GInetAddr* iface, gboolean force_port,
 			   GServerFunc func, gpointer user_data);
 
 void      gnet_server_delete (GServer* server);
-
 
 
 

@@ -1,4 +1,4 @@
-/**
+/*
 
    This code is free (LGPL compatible).  See the top of sha.c for
    details.
@@ -19,7 +19,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct _GSHA GSHA;
-#define GNET_SHA_HASH_LENGTH	20	/* in bytes */
+
+/**
+ *  GNET_SHA_HASH_LENGTH
+ *
+ *  Length of the SHA hash in bytes.
+ **/
+#define GNET_SHA_HASH_LENGTH	20
 
 
 GSHA*   gnet_sha_new (const guint8* buffer, guint length);

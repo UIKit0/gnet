@@ -10,3 +10,4 @@ csh/tcsh:
 sh/bash:
   % CFLAGS=-traditional-cpp ./configure
 
+(This may not be required in 10.1 and later version.)

@@ -26,7 +26,31 @@
 static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpointer data);
 
 
-GServer*  
+/**
+ *  gnet_server_new:
+ *  @iface: Interface to bind to (NULL if any)
+ *  @force_port: Fail if can't get requested port
+ *  @func: Callback to call when a connection is accepted
+ *  @user_data: Data to pass to callback.
+ *
+ *  Create a new #GServer object representing a server.  The interface
+ *  is specified as in gnet_tcp_socket_server_new_interface().
+ *  Usually, iface is NULL or the iface is created by
+ *  gnet_inetaddr_new_any() and the port is set to a specific port.
+ *  The callback is called whenever a new connection arrives or if the
+ *  socket fails.
+ *
+ *  FIX: Remove force_port.  It's easier for someone to call
+ *  gnet_server_new again than for me to explain how force port works.
+ *  (If force_port is TRUE, and the socket with the specified port
+ *  cannot be created, this function fails.  If force_port is FALSE,
+ *  the function reattempts to create a socket but lets the OS choose
+ *  the port.
+ *
+ *  Returns: A new #GServer.
+ *
+ **/
+GServer*
 gnet_server_new (const GInetAddr* iface, gboolean force_port, 
 		 GServerFunc func, gpointer user_data)
 {
@@ -76,6 +100,13 @@ gnet_server_new (const GInetAddr* iface, gboolean force_port,
 
 
 
+/**
+ *  gnet_server_delete:
+ *  @server: Server to delete.
+ *
+ *  Close and delete a #GServer.
+ *
+ **/
 void
 gnet_server_delete (GServer* server)
 {

@@ -15,19 +15,6 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
-<!-- ##### STRUCT GTcpSocket ##### -->
-<para>
-
-</para>
-
-@sockfd: 
-@sa: 
-@ref_count: 
-@iochannel: 
-@accept_func: 
-@accept_data: 
-@accept_watch: 
-
 <!-- ##### FUNCTION gnet_tcp_socket_connect ##### -->
 <para>
 

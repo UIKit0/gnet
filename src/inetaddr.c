@@ -50,6 +50,17 @@ gboolean
 gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicename)
 {
   gboolean rv = FALSE;
+  struct in_addr inaddr;
+
+  /* Attempt non-blocking lookup */
+  if (inet_aton(hostname, &inaddr) != 0)
+    {
+      sa->sin_family = AF_INET;
+      memcpy(&sa->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
+      if (nicename)
+	*nicename = g_strdup (hostname);
+      return TRUE;
+    }
 
 #ifdef HAVE_GETHOSTBYNAME_R_GLIBC
   {
@@ -452,9 +463,10 @@ static void* gethostbyname_async_child (void* arg);
  *  @func: Callback function.
  *  @data: User data passed when callback function is called.
  * 
- *  Create a GInetAddr from a name and port asynchronously.  Once the
- *  structure is created, it will call the callback.  It may call the
- *  callback if there is a failure.
+ *  Create a GInetAddr from a name and port asynchronously.  The
+ *  callback is called once the structure is created or an error
+ *  occurs during lookup.  The callback will not be called during the
+ *  call to gnet_inetaddr_new_async().
  *
  *  The Unix version creates a pthread thread which does the lookup.
  *  If pthreads aren't available, it forks and does the lookup.
@@ -491,10 +503,7 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 
   /* Open a pipe */
   if (pipe(pipes) == -1)
-    {
-      (*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
-      return NULL;
-    }
+    return NULL;
 
 # ifdef HAVE_LIBPTHREAD			/* Pthread */
   {
@@ -555,7 +564,6 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
     else
       {
 	g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
-	(*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
 	return NULL;
       }
   }
@@ -830,11 +838,12 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
  *  @port: port number (0 if the port doesn't matter)
  * 
  *  Create an internet address from a name and port, but don't block
- *  and fail if success would require blocking.  This is, if the name
- *  is a canonical name or "localhost", it returns the address.
- *  Otherwise, it returns NULL.
+ *  and fail if it would require blocking.  This is, if the name is a
+ *  canonical name or "localhost", it returns the address.  Otherwise,
+ *  it returns NULL.
  *
- *  Returns: a new #GInetAddr, or NULL if there was a failure.
+ *  Returns: a new #GInetAddr, or NULL if there was a failure or it
+ *  would require blocking.
  *
  **/
 GInetAddr* 
@@ -958,16 +967,17 @@ gnet_inetaddr_unref(GInetAddr* ia)
  *  gnet_inetaddr_get_name:
  *  @ia: Address to get the name of.
  *
- *  Get the nice name of the address (eg, "mofo.eecs.umich.edu").  Be
- *  warned that this call may block since it may need to do a reverse
- *  DNS lookup.
+ *  Get the nice name of the address (eg, "mofo.eecs.umich.edu").  The
+ *  "nice name" is the domain name if it has one or the canonical name
+ *  if it does not.  Be warned that this call may block since it may
+ *  need to do a reverse DNS lookup.
  *
- *  Returns: NULL if there was an error.  The caller is responsible
- *  for deleting the returned string.
+ *  Returns: the nice name of the host, or NULL if there was an error.
+ *  The caller is responsible for deleting the returned string.
  *
  **/
 gchar* 
-gnet_inetaddr_get_name(/* const */ GInetAddr* ia)
+gnet_inetaddr_get_name (/* const */ GInetAddr* ia)
 {
   g_return_val_if_fail (ia != NULL, NULL);
 
@@ -985,6 +995,30 @@ gnet_inetaddr_get_name(/* const */ GInetAddr* ia)
   g_assert (ia->name != NULL);
   return g_strdup(ia->name);
 }
+
+
+
+/**
+ *  gnet_inetaddr_get_name_nonblock:
+ *  @ia: Address to get the name of.
+ *
+ *  Get the nice name of the address, but don't block and fail if it
+ *  would require blocking.
+ *
+ *  Returns: the nice name of the host, or NULL if there was an error
+ *  or it would require blocking.  The caller is responsible for
+ *  deleting the returned string.
+ *
+ **/
+gchar* 
+gnet_inetaddr_get_name_nonblock (GInetAddr* ia)
+{
+  if (ia->name)
+    return g_strdup(ia->name);
+
+  return NULL;
+}
+
 
 
 #ifndef GNET_WIN32  /*********** Unix code ***********/
@@ -1007,7 +1041,7 @@ gnet_inetaddr_get_name(/* const */ GInetAddr* ia)
  *
  *  Returns: ID of the lookup which can be used with
  *  gnet_inetaddrr_get_name_async_cancel() to cancel it; NULL on
- *  immediate success or failure.
+ *  failure.
  *
  **/
 GInetAddrGetNameAsyncID
@@ -1015,115 +1049,105 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 			      GInetAddrGetNameAsyncFunc func,
 			      gpointer data)
 {
+  pid_t pid = -1;
+  int pipes[2];
+
   g_return_val_if_fail(ia != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-  /* If we already know the name, just copy that */
-  if (ia->name != NULL)
+  /* Open a pipe */
+  if (pipe(pipes) == -1)
+    return NULL;
+
+  /* Fork to do the look up. */
+ fork_again:
+  if ((pid = fork()) == 0)
     {
-      (func)(ia, GINETADDR_ASYNC_STATUS_OK, g_strdup(ia->name), data);
-    }
-  
-  /* Otherwise, fork and look it up */
-  else
-    {
-      pid_t pid = -1;
-      int pipes[2];
+      gchar* name;
+      guchar len;
 
+      if (ia->name)
+	name = ia->name;
+      else
+	name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&ia->sa)->sin_addr, 
+				  sizeof(struct in_addr), AF_INET);
 
-      /* Open a pipe */
-      if (pipe(pipes) == -1)
+      /* Write the name to the pipe.  If we didn't get a name, we
+	 just write the canonical name. */
+      if (name)
 	{
-	  (func)(ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, data);
-	  return NULL;
-	}
+	  guint lenint = strlen(name);
 
-
-      /* Fork to do the look up. */
-    fork_again:
-      if ((pid = fork()) == 0)
-	{
-	  gchar* name;
-	  guchar len;
-
-	  /* Write the name to the pipe.  If we didn't get a name, we
-             just write the canonical name. */
-	  if ((name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&ia->sa)->sin_addr, 
-					sizeof(struct in_addr), AF_INET)) != NULL)
+	  if (lenint > 255)
 	    {
-	      guint lenint = strlen(name);
-
-	      if (lenint > 255)
-		{
-		  g_warning ("Truncating domain name: %s\n", name);
-		  name[256] = '\0';
-		  lenint = 255;
-		}
-
-	      len = lenint;
-
-	      if ((write(pipes[1], &len, sizeof(len)) == -1) ||
-		  (write(pipes[1], name, len) == -1) )
-		g_warning ("Problem writing to pipe\n");
-
-	      g_free(name);
-	    }
-	  else
-	    {
-	      gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-	      guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
-
-	      g_snprintf(buffer, sizeof(buffer), 
-			 "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
-	      len = strlen(buffer);
-
-	      if ((write(pipes[1], &len, sizeof(len)) == -1) ||
-		  (write(pipes[1], buffer, len) == -1))
-		g_warning ("Problem writing to pipe\n");
+	      g_warning ("Truncating domain name: %s\n", name);
+	      name[256] = '\0';
+	      lenint = 255;
 	    }
 
-	  /* Close the socket */
-	  close(pipes[1]);
+	  len = lenint;
 
-	  /* Exit (we don't want atexit called, so do _exit instead) */
-	  _exit(EXIT_SUCCESS);
+	  if ((write(pipes[1], &len, sizeof(len)) == -1) ||
+	      (write(pipes[1], name, len) == -1) )
+	    g_warning ("Problem writing to pipe\n");
 
+	  g_free(name);
 	}
-
-      /* Set up an IOChannel to read from the pipe */
-      else if (pid > 0)
-	{
-	  GInetAddrReverseAsyncState* state;
-
-	  /* Create a structure for the call back */
-	  state = g_new0(GInetAddrReverseAsyncState, 1);
-	  state->ia = ia;
-	  state->func = func;
-	  state->data = data;
-	  state->pid = pid;
-	  state->fd = pipes[0];
-
-	  /* Add a watch */
-	  state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
-					(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
-					gnet_inetaddr_get_name_async_cb, 
-					state);
-	  return state;
-	}
-
-      /* Try again */
-      else if (errno == EAGAIN)
-	{
-	  sleep(0);	/* Yield the processor */
-	  goto fork_again;
-	}
-
-      /* Else there was a goofy error */
       else
 	{
-	  g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
-	  (*func)(ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, data);
+	  gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
+	  guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
+
+	  g_snprintf(buffer, sizeof(buffer), 
+		     "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
+	  len = strlen(buffer);
+
+	  if ((write(pipes[1], &len, sizeof(len)) == -1) ||
+	      (write(pipes[1], buffer, len) == -1))
+	    g_warning ("Problem writing to pipe\n");
 	}
+
+      /* Close the socket */
+      close(pipes[1]);
+
+      /* Exit (we don't want atexit called, so do _exit instead) */
+      _exit(EXIT_SUCCESS);
+
+    }
+
+  /* Set up an IOChannel to read from the pipe */
+  else if (pid > 0)
+    {
+      GInetAddrReverseAsyncState* state;
+
+      /* Create a structure for the call back */
+      state = g_new0(GInetAddrReverseAsyncState, 1);
+      state->ia = ia;
+      state->func = func;
+      state->data = data;
+      state->pid = pid;
+      state->fd = pipes[0];
+
+      /* Add a watch */
+      state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
+				    (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
+				    gnet_inetaddr_get_name_async_cb, 
+				    state);
+      return state;
+    }
+
+  /* Try again */
+  else if (errno == EAGAIN)
+    {
+      sleep(0);	/* Yield the processor */
+      goto fork_again;
+    }
+
+  /* Else there was a goofy error */
+  else
+    {
+      g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
+      return NULL;
     }
 
   return NULL;
@@ -1232,12 +1256,6 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
   g_return_val_if_fail(ia != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-  /* If we already know the name, just copy that */
-  if (ia->name != NULL)
-    {
-      (func)(ia, GINETADDR_ASYNC_STATUS_OK, g_strdup(ia->name), data);
-    }
-
   /* Create a structure for the call back */
   state = g_new0(GInetAddrReverseAsyncState, 1);
   state->ia = ia;
@@ -1256,7 +1274,6 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
   if (!state->WSAhandle)
     {
       g_free(state);
-      (func)(ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, data);
       return NULL;
     }
 	
@@ -1315,7 +1332,6 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 }
 
 #endif		/*********** End Windows code ***********/
-
 
 
 
