@@ -12,7 +12,7 @@ dnl
 AC_ARG_ENABLE(gnettest, [  --disable-gnettest      do not try to compile and run a test GNET program],
 		    , enable_gnettest=yes)
 
-  pkg_config_args=gnet-1.3
+  pkg_config_args=gnet-2.0
 
   AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 
@@ -30,7 +30,7 @@ AC_ARG_ENABLE(gnettest, [  --disable-gnettest      do not try to compile and run
     no_gnet=yes
   fi
 
-  min_gnet_version=ifelse([$1], , 1.3.0, $1)
+  min_gnet_version=ifelse([$1], , 2.0.0, $1)
   AC_MSG_CHECKING(for GNET - version >= $min_gnet_version)
 
   if test x$PKG_CONFIG != xno ; then
@@ -50,11 +50,11 @@ AC_ARG_ENABLE(gnettest, [  --disable-gnettest      do not try to compile and run
   if test x"$no_gnet" = x ; then
     GNET_CFLAGS=`$PKG_CONFIG --cflags $pkg_config_args`
     GNET_LIBS=`$PKG_CONFIG --libs $pkg_config_args`
-    gnet_config_major_version=`$PKG_CONFIG --modversion gnet-1.3 | \
+    gnet_config_major_version=`$PKG_CONFIG --modversion gnet-2.0 | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    gnet_config_minor_version=`$PKG_CONFIG --modversion gnet-1.3 | \
+    gnet_config_minor_version=`$PKG_CONFIG --modversion gnet-2.0 | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    gnet_config_micro_version=`$PKG_CONFIG --modversion gnet-1.3 | \
+    gnet_config_micro_version=`$PKG_CONFIG --modversion gnet-2.0 | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
     if test "x$enable_gnettest" = "xyes" ; then
       ac_save_CFLAGS="$CFLAGS"
@@ -90,7 +90,7 @@ main ()
       (gnet_minor_version != $gnet_config_minor_version) ||
       (gnet_micro_version != $gnet_config_micro_version))
     {
-      printf("\n*** 'pkg-config --modversion gnet-1.3' returned %d.%d.%d, but GNET (%d.%d.%d)\n", 
+      printf("\n*** 'pkg-config --modversion gnet-2.0' returned %d.%d.%d, but GNET (%d.%d.%d)\n", 
              $gnet_config_major_version, $gnet_config_minor_version, $gnet_config_micro_version,
              gnet_major_version, gnet_minor_version, gnet_micro_version);
       printf ("*** was found! If pkg-config was correct, then it is best\n");

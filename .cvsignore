@@ -24,3 +24,6 @@ gnetconfig.h
 gnet.pc
 autom4te.cache
 gnet-1.3.pc
+gnet-2.0.pc
+configure.lineno
+stamp-h1

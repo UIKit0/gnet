@@ -4,6 +4,11 @@ GNet NEWS
 
 Changes in Gnet
 
+2.0 (Unreleased)
+---
+* Stable release of 1.3 series
+
+
 1.3.2 ("Sacrilicious" DEVELOPERS release)
 -----
 * DNS bug fixes

@@ -8,5 +8,6 @@ inetaddr_test
 hash_test
 pack_test
 unpack_test
+base64_test
 .client*
 .server*

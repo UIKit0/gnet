@@ -6,7 +6,7 @@
 AC_PREREQ([2.52])
 
 # Init autoconf and automake
-AC_INIT([gnet], [1.3.2], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [2.0.0], [gnet@gnetlibrary.org])
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_MAINTAINER_MODE
@@ -20,9 +20,9 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # if any functions have been added, set GNET_INTERFACE_AGE to 0.
 # if backwards compatibility has been broken,
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
-GNET_MAJOR_VERSION=1
-GNET_MINOR_VERSION=3
-GNET_MICRO_VERSION=2
+GNET_MAJOR_VERSION=2
+GNET_MINOR_VERSION=0
+GNET_MICRO_VERSION=0
 GNET_INTERFACE_AGE=0
 GNET_BINARY_AGE=0
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
@@ -461,5 +461,5 @@ AC_CONFIG_FILES([
 	doc/Makefile
 	gnetconfig.h
 	gnet.spec
-	gnet-1.3.pc])
+	gnet-2.0.pc])
 AC_OUTPUT

@@ -9,6 +9,7 @@ my $bin_dir = '../examples';
 my $port = 8174;
 my $debug = 0;
 my $testfile = 'testfile';
+my $pause = 3;
 
 my @pids = ();
 
@@ -111,6 +112,7 @@ sub test
 
     system ("rm -f core*");
 
+    sleep($pause);
 
     # Launch server
     server ($server, $tempfile);
