@@ -740,7 +740,7 @@ conn_read_async_cb (GConn* conn)
   guint  bytes_to_read;
   gchar* buffer_start;
   GIOError error;
-  guint  bytes_read;
+  gsize  bytes_read;
   
   /* Resize the buffer if it's full. */
   if (conn->length == conn->bytes_read)
@@ -1135,7 +1135,7 @@ conn_write_async_cb (GConn* conn)
   GIOError   error;
   guint      bytes_to_write;
   gchar*     buffer_start;
-  guint      bytes_written;
+  gsize      bytes_written;
   GConnEvent event = {GNET_CONN_ERROR, NULL, 0};
 
   write = (Write*) conn->write_queue->data;

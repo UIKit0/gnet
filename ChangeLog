@@ -1,3 +1,17 @@
+Tue Dec  9 21:10:46 2003  David Helder  <dhelder@gizmolabs.org>
+
+	* src/inetaddr.c: Check return value of inet_pton 
+	    with > 0 for success.  Negative values can indicate
+	    error.  FreeBSD and OpenBSD return 1 on success, but
+	    Linux return a "postive number" (so don't do == 1).
+	* src/gnet-private.h: Fix comment typos.
+	    (Thanks Michael Alger)
+
+	* TODO: Update note on readv(). (Thanks Stephane LOEUILLET)
+
+	* src/gnet-private.c: Apply Tim Muller's patch to use
+	    gsize.  Fixes warnings.
+
 Mon Dec 8 2003 Andrew Lanoix <alanoix@umich.edu>
 
 	* src/gnet-private.c(gnet_private_create_listen_socket):

@@ -160,7 +160,7 @@ socks4_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst)
 {
   struct socks4_h s4h;
   struct sockaddr_in *sa_in;
-  int len;
+  gsize len;
 
   sa_in = (struct sockaddr_in*)&dst->sa;
 
@@ -188,7 +188,7 @@ socks5_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst)
   unsigned char s5r[3];
   struct socks5_h s5h;
   struct sockaddr_in *sa_in;
-  int len;
+  gsize len;
 
   s5r[0] = 5;
   s5r[1] = 1;	/* XXX no authentication yet */
@@ -271,7 +271,7 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
   GIOChannel *ioc;
   unsigned char s5r[3];
   struct socks5_h s5h;
-  int len;
+  gsize len;
 
   ioc = gnet_tcp_socket_get_io_channel(socket);
 
@@ -321,7 +321,7 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
 {
   gint server_port;
   struct socks5_h s5h;
-  int len;
+  gsize len;
   GIOChannel* iochannel;
   GIOError error;
   GTcpSocket* s;

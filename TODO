@@ -42,9 +42,8 @@ Features
     available on Linux and Windows, but I'm sure the semantics are
     different (that's why having this function would be handy).
 
-- Consider adding gnet_io_channel_{readv/writev}.  Stevens says this
-    isn't Posix (yet?) - check how available it is.  We can always
-    fake it if we don't have it.
+- Consider adding gnet_io_channel_{readv/writev}.  This is on most
+    systems, but should support systems without.
 
 
 Internal Improvements

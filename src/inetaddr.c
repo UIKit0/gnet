@@ -137,7 +137,7 @@ gnet_gethostbyname(const char* hostname)
   struct in6_addr in6addr;
 #endif
 
-  if (inet_pton(AF_INET, hostname, &inaddr) != 0)
+  if (inet_pton(AF_INET, hostname, &inaddr) > 0)
     {
       GInetAddr* ia;
       struct sockaddr_in* sa;
@@ -154,7 +154,7 @@ gnet_gethostbyname(const char* hostname)
       return list;
     }
 #ifdef HAVE_IPV6
-  else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
+  else if (inet_pton(AF_INET6, hostname, &in6addr) > 0)
     {
       GInetAddr* ia;
       struct sockaddr_in6* sa;
@@ -1625,7 +1625,7 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
 
   g_return_val_if_fail (hostname, NULL);
 
-  if (inet_pton(AF_INET, hostname, &inaddr) != 0)
+  if (inet_pton(AF_INET, hostname, &inaddr) > 0)
     {
       struct sockaddr_in* sa_inp;
 
@@ -1639,7 +1639,7 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
       sa_inp->sin_port = g_htons(port);
     }
 #ifdef HAVE_IPV6
-  else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
+  else if (inet_pton(AF_INET6, hostname, &in6addr) > 0)
     {
       struct sockaddr_in6* sa_inp;
 
@@ -2579,12 +2579,12 @@ gnet_inetaddr_is_canonical (const gchar* name)
 
   g_return_val_if_fail (name, FALSE);
 
-  if (inet_pton(AF_INET, name, buf) == 1)
+  if (inet_pton(AF_INET, name, buf) > 0)
     return TRUE;
 
 #ifdef HAVE_IPV6
  {
-   if (inet_pton(AF_INET6, name, buf) == 1)
+   if (inet_pton(AF_INET6, name, buf) > 0)
      return TRUE;
  }
 #endif

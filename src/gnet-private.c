@@ -34,7 +34,7 @@
 int
 gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
 {
-  int family;
+  int family = 0;
   SOCKET sockfd;
 
   if (iface)

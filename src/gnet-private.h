@@ -386,7 +386,7 @@ typedef struct _GTcpSocketAsyncState
 /*
 Used for:
 -gnet_inetaddr_new_async
--gnet_inetaddr_get_name_asymc
+-gnet_inetaddr_get_name_async
 */
 typedef struct _SocketWatchAsyncState 
 {
@@ -427,7 +427,7 @@ typedef struct _GTcpSocketConnectState
 extern HWND  gnet_hWnd; 
 extern GHashTable *gnet_hash;
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
-#define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
+#define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_async */
 
 /* Name-mangled IPv6 structures for primarily Mingw and a few VC .NET 2002 */
 #ifndef MAX_ADAPTER_ADDRESS_LENGTH
