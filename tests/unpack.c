@@ -26,7 +26,7 @@ void print_bytes(char* s, int len);
 
 
 int
-main()
+main(int argc, char* argv[])
 {
   char buf[12] =  {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 
 		   0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b};
@@ -135,24 +135,24 @@ main()
 
   lgint32 = 0x2a2a;
   gnet_unpack ("l", &buf[1], 4, &lgint32);
-  printf ("\noutput:    %x\n", lgint32);
+  printf ("\noutput:    %x\n", (unsigned) lgint32);
   printf ("should be: 4030201\n");
 
   lgint32 = 0x2a2a;
   gnet_unpack ("l", &bufh[1], 4, &lgint32);
-  printf ("\noutput:    %x\n", lgint32);
+  printf ("\noutput:    %x\n", (unsigned) lgint32);
   printf ("should be: f4f3f2f1\n");
 
   /* ********** */
 
   lguint32 = 0x2a2a;
   gnet_unpack ("L", &buf[1], 4, &lguint32);
-  printf ("\noutput:    %x\n", lguint32);
+  printf ("\noutput:    %x\n", (unsigned int) lguint32);
   printf ("should be: 4030201\n");
 
   lguint32 = 0x2a2a;
   gnet_unpack ("L", &bufh[1], 4, &lguint32);
-  printf ("\noutput:    %x\n", lguint32);
+  printf ("\noutput:    %x\n", (unsigned int) lguint32);
   printf ("should be: f4f3f2f1\n");
 
 
@@ -173,12 +173,12 @@ main()
 
   voidp = (void*) 0xaaaaaaaa;
   gnet_unpack ("v", &buf[1], sizeof(void*), &voidp);
-  printf ("\noutput:    %x\n", voidp);
+  printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: 4030201\n");
 
   voidp = (void*) 0xaaaaaaaa;
   gnet_unpack ("v", &bufh[1], sizeof(void*), &voidp);
-  printf ("\noutput:    %x\n", voidp);
+  printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: f4f3f2f1\n");
 
 
@@ -268,24 +268,24 @@ main()
 
   lgint32 = 0x2a2a;
   gnet_unpack ("<l", &buf[1], 4, &lgint32);
-  printf ("\noutput:    %x\n", lgint32);
+  printf ("\noutput:    %x\n", (unsigned int) lgint32);
   printf ("should be: 4030201\n");
 
   lgint32 = 0x2a2a;
   gnet_unpack ("<l", &bufh[1], 4, &lgint32);
-  printf ("\noutput:    %x\n", lgint32);
+  printf ("\noutput:    %x\n", (unsigned int) lgint32);
   printf ("should be: f4f3f2f1\n");
 
   /* ********** */
 
   lguint32 = 0x2a2a;
   gnet_unpack ("<L", &buf[1], 4, &lguint32);
-  printf ("\noutput:    %x\n", lguint32);
+  printf ("\noutput:    %x\n", (unsigned int) lguint32);
   printf ("should be: 4030201\n");
 
   lguint32 = 0x2a2a;
   gnet_unpack ("<L", &bufh[1], 4, &lguint32);
-  printf ("\noutput:    %x\n", lguint32);
+  printf ("\noutput:    %x\n", (unsigned int) lguint32);
   printf ("should be: f4f3f2f1\n");
 
 
@@ -293,12 +293,12 @@ main()
 
   voidp = (void*) 0xaaaaaaaa;
   gnet_unpack ("<P", &buf[1], sizeof(void*), &voidp);
-  printf ("\noutput:    %x\n", voidp);
+  printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: 4030201\n");
 
   voidp = (void*) 0xaaaaaaaa;
   gnet_unpack ("<P", &bufh[1], sizeof(void*), &voidp);
-  printf ("\noutput:    %x\n", voidp);
+  printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: f4f3f2f1\n");
 
 
@@ -388,24 +388,24 @@ main()
 
   lgint32 = 0x2a2a;
   gnet_unpack (">l", &buf[1], 4, &lgint32);
-  printf ("\noutput:    %x\n", lgint32);
+  printf ("\noutput:    %x\n", (unsigned int) lgint32);
   printf ("should be: 1020304\n");
 
   lgint32 = 0x2a2a;
   gnet_unpack (">l", &bufh[1], 4, &lgint32);
-  printf ("\noutput:    %x\n", lgint32);
+  printf ("\noutput:    %x\n", (unsigned int) lgint32);
   printf ("should be: f1f2f3f4\n");
 
   /* ********** */
 
   lguint32 = 0x2a2a;
   gnet_unpack (">L", &buf[1], 4, &lguint32);
-  printf ("\noutput:    %x\n", lguint32);
+  printf ("\noutput:    %x\n", (unsigned int) lguint32);
   printf ("should be: 1020304\n");
 
   lguint32 = 0x2a2a;
   gnet_unpack (">L", &bufh[1], 4, &lguint32);
-  printf ("\noutput:    %x\n", lguint32);
+  printf ("\noutput:    %x\n", (unsigned int) lguint32);
   printf ("should be: f1f2f3f4\n");
 
 
@@ -413,12 +413,12 @@ main()
 
   voidp = (void*) 0xaaaaaaaa;
   gnet_unpack (">P", &buf[1], sizeof(void*), &voidp);
-  printf ("\noutput:    %x\n", voidp);
+  printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: 1020304\n");
 
   voidp = (void*) 0xaaaaaaaa;
   gnet_unpack (">P", &bufh[1], sizeof(void*), &voidp);
-  printf ("\noutput:    %x\n", voidp);
+  printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: f1f2f3f4\n");
 
 

@@ -1728,6 +1728,33 @@ gnet_inetaddr_gethostaddr(void)
 
 
 /**
+ *  gnet_inetaddr_new_any:
+ *
+ *  Create a #GInetAddr with the address INADDR_ANY and port 0.  This
+ *  is useful for creating default addresses for binding.  The
+ *  address's name will be "<INADDR_ANY>".
+ *
+ *  Returns: INADDR_ANY #GInetAddr.
+ *
+ **/
+GInetAddr* 
+gnet_inetaddr_new_any (void)
+{
+  GInetAddr* ia;
+  struct sockaddr_in* sa_in;
+
+  ia = g_new0 (GInetAddr, 1);
+  sa_in = (struct sockaddr_in*) &ia->sa;
+  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+  sa_in->sin_port = 0;
+  ia->name = g_strdup ("<INADDR_ANY>");
+
+  return ia;
+}
+
+
+
+/**
  *  gnet_inetaddr_autodetect_internet_interface:
  *
  *  Find an Internet interface.  Usually, this interface routes

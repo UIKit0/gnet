@@ -130,16 +130,15 @@ GInetAddrNewAsyncID
 gnet_inetaddr_new_async (const gchar* name, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data);
 
-void gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
+void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
 
 GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
 
 GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
 
-void gnet_inetaddr_delete (GInetAddr* ia);
+void       gnet_inetaddr_delete (GInetAddr* ia);
 
 void gnet_inetaddr_ref (GInetAddr* ia);
-
 void gnet_inetaddr_unref (GInetAddr* ia);
 
 
@@ -176,21 +175,19 @@ gboolean gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr);
 /* ********** */
 
 guint gnet_inetaddr_hash (const gpointer p);
-
-gint gnet_inetaddr_equal (const gpointer p1, const gpointer p2);
-
-gint gnet_inetaddr_noport_equal (const gpointer p1, const gpointer p2);
+gint  gnet_inetaddr_equal (const gpointer p1, const gpointer p2);
+gint  gnet_inetaddr_noport_equal (const gpointer p1, const gpointer p2);
 
 
 /* ********** */
 
-gchar* gnet_inetaddr_gethostname (void);
-
+gchar*     gnet_inetaddr_gethostname (void);
 GInetAddr* gnet_inetaddr_gethostaddr (void);
 
 
 /* ********** */
 
+GInetAddr* gnet_inetaddr_new_any (void);
 GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
 GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* addr);
 GInetAddr* gnet_inetaddr_get_internet_interface (void);
