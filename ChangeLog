@@ -1,3 +1,8 @@
+Fri May  3 11:18:51 2002  David Helder  <dhelder@umich.edu>
+
+	* src/{inetaddr,tcp}.h: s/id/async_id/.  id is a reserved
+	    word in Objective C.
+
 Thu Apr 25 10:14:07 2002  David Helder  <dhelder@umich.edu>
 
         * Release GNet 1.1.3

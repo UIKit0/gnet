@@ -144,7 +144,7 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
 			       gpointer data);
 
 /* Cancel quick and easy asynchronous constructor */
-void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
+void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID async_id);
 
 /* Blocking constructor */
 GTcpSocket* gnet_tcp_socket_new (const GInetAddr* addr);
@@ -156,7 +156,7 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 			   gpointer data);
 
 /* Cancel asynchronous constructor */
-void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
+void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID async_id);
 
 void gnet_tcp_socket_delete (GTcpSocket* s);
 

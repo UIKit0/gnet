@@ -137,7 +137,7 @@ GInetAddrNewAsyncID
 gnet_inetaddr_new_async (const gchar* name, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data);
 
-void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
+void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id);
 
 GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
 
@@ -160,7 +160,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 			      GInetAddrGetNameAsyncFunc func,
 			      gpointer data);
 
-void gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
+void gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID async_id);
 
 gchar* gnet_inetaddr_get_canonical_name (const GInetAddr* ia);
 
