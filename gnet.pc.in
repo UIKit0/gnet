@@ -7,4 +7,4 @@ Name: Gnet
 Description: A network compatibility layer library
 Version: @VERSION@
 Libs: -L${libdir} -lgnet @GLIB_LIBS@ @GTHREAD_LIBS@
-Cflags: -I${includedir}/gnet @GLIB_CFLAGS@ @GTHREAD_CFLAGS@
+Cflags: -I${includedir}/gnet -I${libdir}/gnet/include/ @GLIB_CFLAGS@ @GTHREAD_CFLAGS@
