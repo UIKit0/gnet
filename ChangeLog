@@ -1,3 +1,10 @@
+2005-02-17  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/dnslookup.c: (main):
+	  getopt returns an int, not a char; fixes compilation 
+	  under strict conditions. (fixes #167706, patch by 
+	  Joseph Sacco)
+
 2005-02-07  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* configure.ac:

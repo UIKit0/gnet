@@ -65,7 +65,7 @@ main(int argc, char** argv)
 {
   extern char* optarg;
   extern int   optind;
-  char c;
+  int c;
 
   gnet_init ();
 
