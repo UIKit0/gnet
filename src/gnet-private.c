@@ -31,11 +31,15 @@
    on the particular interface, or on IPv6 policy if there is no interface.
 
  */
-int
+SOCKET
 gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
 {
   int family = 0;
   SOCKET sockfd;
+#ifdef GNET_WIN32
+  struct addrinfo Hints, *AddrInfo;
+  char port_buff[12];
+#endif
 
   if (iface)
     {
@@ -65,13 +69,28 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
 	{
 	  struct sockaddr_in6* sa_in6;
 
+	  sa_in6 = (struct sockaddr_in6*) sa;
 	  family = AF_INET6;
 
-	  sa_in6 = (struct sockaddr_in6*) sa;
-	  sa_in6->sin6_family = AF_INET6;
-	  GNET_SOCKADDR_SET_SS_LEN(*sa);
-	  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
-	  sa_in6->sin6_port = g_htons(port);
+  #ifndef GNET_WIN32    /* Unix */
+
+	sa_in6->sin6_family = AF_INET6;
+	GNET_SOCKADDR_SET_SS_LEN(*sa);
+	memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
+	sa_in6->sin6_port = g_htons(port);
+
+  #else                 /* Windows */
+
+    /* A simple memset does not work for some reason on Windows */
+	sprintf(port_buff, "%d", port);
+	memset(&Hints, 0, sizeof(Hints));
+    Hints.ai_family = AF_INET6;
+    Hints.ai_socktype = type;
+    Hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
+	pfn_getaddrinfo(NULL, port_buff, &Hints, &AddrInfo);
+	memcpy(sa_in6, AddrInfo->ai_addr, AddrInfo->ai_addrlen);
+
+  #endif
 	}
 #endif
     }

@@ -1,3 +1,13 @@
+Sat Dec 27 2003 Andrew Lanoix <alanoix@umich.edu>
+
+	*src/tcp.c(gnet_tcp_socket_server_new_full): Set socket
+	  as reusable and non-blocking on Windows as well.
+	*src/gnet-private.h: Have gnet_private_create_listen_socket
+	  return SOCKET not int to make VC happy.
+	*src/gnet-private.c(gnet_private_create_listen_socket): On
+	  Windows use getaddrinfo() in IPv6 case for a simple memset
+	  does not work for bind() fails.
+	
 Tue Dec  9 21:10:46 2003  David Helder  <dhelder@gizmolabs.org>
 
 	* src/inetaddr.c: Check return value of inet_pton 

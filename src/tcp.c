@@ -1,6 +1,6 @@
 /* GNet - Networking library
- * Copyright (C) 2000-3  David Helder
- * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2000-2003  David Helder
+ * Copyright (C) 2000-2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -928,10 +928,12 @@ gnet_tcp_socket_server_new_with_port (gint port)
 GTcpSocket* 
 gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
 {
-  int sockfd = 0;
+  SOCKET sockfd = 0;
   struct sockaddr_storage sa;
   GTcpSocket* s;
   socklen_t socklen;
+  gint flags;
+  const int on = 1;
 
   /* Use SOCKS if enabled */
   if (!iface && gnet_socks_get_enabled())
@@ -941,18 +943,14 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
   sockfd = gnet_private_create_listen_socket (SOCK_STREAM, iface, port, &sa);
   if (sockfd < 0)
     return NULL;
+  
+  /* Set REUSEADDR so we can reuse the port */
+  if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, 
+	  (void*) &on, sizeof(on)) != 0)
+	      g_warning("Can't set reuse on tcp socket\n");
 
-  /* The socket is set to non-blocking mode later in the Windows
-     version.*/
 #ifndef GNET_WIN32		/* Unix */
   {
-    gint flags;
-    const int on = 1;
-    /* Set REUSEADDR so we can reuse the port */
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, 
-		   (void*) &on, sizeof(on)) != 0)
-      g_warning("Can't set reuse on tcp socket\n");
-
     /* Get the flags (should all be 0?) */
     flags = fcntl(sockfd, F_GETFL, 0);
     if (flags == -1)
@@ -968,6 +966,15 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
 	goto error;
       }
   }
+#else /* Windows */
+  {
+    u_long arg;
+
+	/* Make the socket non-blocking */
+    arg = 1;
+    if (ioctlsocket(sockfd, FIONBIO, &arg))
+      goto error;
+    }
 #endif
 
   /* Bind */
@@ -1141,7 +1148,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
 GTcpSocket*
 gnet_tcp_socket_server_accept (GTcpSocket* socket)
 {
-  gint sockfd;
+  SOCKET sockfd;
   struct sockaddr_storage sa;
   fd_set fdset;
   GTcpSocket* s;
@@ -1179,7 +1186,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
 GTcpSocket*
 gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
 {
-  gint sockfd;
+  SOCKET sockfd;
   struct sockaddr_storage sa;
 
   fd_set fdset;
@@ -1196,11 +1203,9 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   FD_SET((unsigned)socket->sockfd, &fdset);
 
   if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
-    {
       return NULL;
-    }
-  /* make sure the socket is in non-blocking mode */
 
+  /* make sure the socket is in non-blocking mode */
   arg = 1;
   if (ioctlsocket(socket->sockfd, FIONBIO, &arg))
     return NULL;
@@ -1210,9 +1215,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   /* if it fails, looping isn't going to help */
 
   if (sockfd == INVALID_SOCKET)
-    {
       return NULL;
-    }
 
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;

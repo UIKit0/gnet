@@ -669,7 +669,7 @@ PFN_GETADAPTERSADDRESSES pfn_getaddaptersaddresses;
 
 GIOChannel* gnet_private_io_channel_new (int sockfd);
 
-int gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
+SOCKET gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
 
 
 #ifdef __cplusplus
