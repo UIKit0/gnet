@@ -41,6 +41,8 @@ main(int argc, char** argv)
   gint port;
   int i;
 
+  gnet_init ();
+
   if (argc < 3 || argc > 6)
     usage(EXIT_FAILURE);
 

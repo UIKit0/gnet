@@ -36,6 +36,8 @@ main(int argc, char** argv)
   ServerType server_type = NORMAL;
   int port = 0;
 
+  gnet_init ();
+
   if (argc !=  2)
     {
       g_print ("usage: echoserver-udp <port> \n");

@@ -125,6 +125,8 @@ main (int argc, char* argv[])
 {
   int i;
 
+  gnet_init ();
+
   for (i = 0; tests[i].str; ++i)
     {
       GURL* url;

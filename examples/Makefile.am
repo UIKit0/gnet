@@ -5,7 +5,7 @@
 EXTRA_PROGRAMS = echoserver echoclient 	\
 		 echoserver-udp echoclient-udp	\
 		 echoserver-unix echoclient-unix \
-		 hfetch sdr
+		 hash hfetch sdr
 EXTRA_DIST     = makefile.mingw
 CLEANFILES     = $(EXTRA_PROGRAMS)
 
@@ -37,6 +37,9 @@ echoclient_unix_SOURCES = \
 sdr_SOURCES = \
 	sdr.c
 
+hash_SOURCES = \
+	hash.c
+
 hfetch_SOURCES = 	\
 	hfetch.c
 
@@ -47,4 +50,4 @@ hfetch_SOURCES = 	\
 examples: echoserver echoclient 	  \
 	  echoserver-udp echoclient-udp   \
 	  echoserver-unix echoclient-unix \
-	  hfetch sdr			  \
+	  hash hfetch sdr

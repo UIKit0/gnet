@@ -34,6 +34,8 @@ main(int argc, char** argv)
   gchar* cname;
   gchar* name;
 
+  gnet_init ();
+
   /* Print info about me */
   ia = gnet_inetaddr_gethostaddr();
   g_assert (ia != NULL);

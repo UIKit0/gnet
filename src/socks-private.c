@@ -29,7 +29,7 @@ static int socks_get_version (void);
 static int
 socks_get_version (void)
 {
-  char* verc;
+  const gchar* verc;
 
   if ((verc = g_getenv("SOCKS_VERSION"))) 
     return atoi(verc);

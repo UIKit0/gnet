@@ -28,3 +28,20 @@ const guint gnet_micro_version = GNET_MICRO_VERSION;
 const guint gnet_interface_age = GNET_INTERFACE_AGE;
 const guint gnet_binary_age = GNET_BINARY_AGE;
 
+
+/**
+ *  gnet_init:
+ *
+ *  Initializes the GNet library.  This should be called at the
+ *  beginning of any GNet program and before any call to gtk_init().
+ *
+ **/
+void
+gnet_init (void)
+{
+#ifdef G_THREADS_ENABLED
+  if (!g_thread_supported ()) 
+    g_thread_init (NULL);
+#endif /* G_THREADS_ENABLED */
+}
+

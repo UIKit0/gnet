@@ -115,7 +115,7 @@ AC_CHECK_LIB([c_r],
 	     [pthread_create],
 	     [pthread_libs="-lc_r"])
 if test "$pthread_libs"; then
-	AC_DEFINE(HAVE_LIBPTHREAD)
+	AC_DEFINE(HAVE_LIBPTHREAD, 1)
 	LIBS="$pthread_libs $LIBS"
 fi
 AC_SUBST(pthread_libs)

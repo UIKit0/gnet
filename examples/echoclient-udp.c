@@ -36,6 +36,8 @@ main(int argc, char** argv)
 {
   ClientType client_type = NORMAL;
 
+  gnet_init ();
+
   if (argc != 3)
     usage(EXIT_FAILURE);
 

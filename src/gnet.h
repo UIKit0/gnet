@@ -74,7 +74,7 @@ GNET_EXPORT const guint gnet_binary_age;
      (GNET_MAJOR_VERSION == (major) && GNET_MINOR_VERSION == (minor) && \
       GNET_MICRO_VERSION >= (micro)))
 
-
+void gnet_init (void);
 
 #ifdef __cplusplus
 }

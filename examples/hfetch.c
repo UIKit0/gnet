@@ -39,6 +39,7 @@ main(int argc, char** argv)
   gchar* filename = NULL;
   gchar* p = NULL;
 
+  gnet_init ();
 
   if (argc != 2)
     {

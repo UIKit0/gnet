@@ -1,5 +1,5 @@
-/* Gnet-Pack test/example
- * Copyright (C) 2000  David Helder
+/* Gnet-Pack test
+ * Copyright (C) 2000, 2002  David Helder
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,54 @@
 #include <glib.h>
 #include <stdio.h>
 
-#include <pack.h>
+#include <gnet.h>
 
-void print_bytes(char* s, int len);
+static int failed = 0;
+
+void test_bytes (int test_num, char* s /* binary */, int len, 
+		 char* answer /* ascii */);
+
+
+#define TEST0(NUM, ANSWER, FORMAT, SIZE) do {	\
+  gnet_pack (FORMAT, buffer, SIZE);		\
+  test_bytes (NUM, buffer, SIZE, ANSWER);       \
+  len = gnet_pack_strdup (FORMAT, &str);	\
+  test_bytes (NUM+1, buffer, SIZE, ANSWER);	\
+  g_free (str);				} while (0)
+
+#define TEST1(NUM, ANSWER, FORMAT, SIZE, ARG1) do {	\
+  gnet_pack (FORMAT, buffer, SIZE, ARG1);		\
+  test_bytes (NUM, buffer, SIZE, ANSWER);   		\
+  len = gnet_pack_strdup (FORMAT, &str, ARG1);		\
+  test_bytes (NUM+1, buffer, SIZE, ANSWER);		\
+  g_free (str);				} while (0)
+
+#define TEST2(NUM, ANSWER, FORMAT, SIZE, ARG1, ARG2) do {	\
+  gnet_pack (FORMAT, buffer, SIZE, ARG1, ARG2);			\
+  test_bytes (NUM, buffer, SIZE, ANSWER);			\
+  len = gnet_pack_strdup (FORMAT, &str, ARG1, ARG2);		\
+  test_bytes (NUM+1, buffer, SIZE, ANSWER);			\
+  g_free (str);				} while (0)
+
+#define TEST3(NUM, ANSWER, FORMAT, SIZE, ARG1, ARG2, ARG3) do {	\
+  gnet_pack (FORMAT, buffer, SIZE, ARG1, ARG2, ARG3);		\
+  test_bytes (NUM, buffer, SIZE, ANSWER);			\
+  len = gnet_pack_strdup (FORMAT, &str, ARG1, ARG2, ARG3);	\
+  test_bytes (NUM+1, buffer, SIZE, ANSWER);			\
+  g_free (str);				} while (0)
+
+#define TEST4(NUM, ANSWER, FORMAT, SIZE, ARG1, ARG2, ARG3, ARG4) do {	\
+  gnet_pack (FORMAT, buffer, SIZE, ARG1, ARG2, ARG3, ARG4);		\
+  test_bytes (NUM, buffer, SIZE, ANSWER);				\
+  len = gnet_pack_strdup (FORMAT, &str, ARG1, ARG2, ARG3, ARG4);	\
+  test_bytes (NUM+1, buffer, SIZE, ANSWER);				\
+  g_free (str);				} while (0)
+
+#define MEMTEST1(NUM, FORMAT, SIZE, ARG1) do {		\
+  gnet_pack (FORMAT, buffer, SIZE, ARG1);		\
+  len = gnet_pack_strdup (FORMAT, &str, ARG1);		\
+  g_free (str);				} while (0)
+
 
 
 int
@@ -32,1109 +77,237 @@ main(int argc, char** argv)
   char* str;
   int len;
 
+  gnet_init ();
+
   /* **************************************** */
+  /* NATIVE */
 
-  printf ("\n\n************\n");
-  printf ("native tests (assumes little endian)\n");
+  TEST0 (10100, "00", "x", 1);
 
-  gnet_pack ("x", buffer, 1);
-  print_bytes (buffer, 1);
-  printf ("should be: 00\n");
+  TEST1 (10200, "17", "b", 1, 0x17);
+  TEST1 (10210, "f1", "b", 1, 0xf1);
 
-  /* ********** */
+  TEST1 (10300, "17", "B", 1, 0x17);
+  TEST1 (10310, "f1", "B", 1, 0xf1);
 
-  gnet_pack ("b", buffer, 1, 0x17);
-  print_bytes (buffer, 1);
-  printf ("should be: 17\n");
+#if (G_BYTE_ORDER ==  G_LITTLE_ENDIAN)	/* NATIVE LITTLE ENDIAN */
 
-  gnet_pack ("b", buffer, 1, 0xf1);
-  print_bytes (buffer, 1);
-  printf ("should be: f1\n");
+  TEST1 (10400, "0201", "h", sizeof(short), 0x0102);
+  TEST1 (10410, "01f0", "h", sizeof(short), 0xf001);
+  TEST1 (10420, "f001", "h", sizeof(short), 0x01f0);
 
-  /* ********** */
+  TEST1 (10500, "0201", "H", sizeof(short), 0x0102);
+  TEST1 (10510, "01f0", "H", sizeof(short), 0xf001);
+  TEST1 (10520, "f001", "H", sizeof(short), 0x01f0);
 
-  gnet_pack ("B", buffer, 1, 0x17);
-  print_bytes (buffer, 1);
-  printf ("should be: 17\n");
+  TEST1 (10600, "04030201", "i", sizeof(int), 0x01020304);
+  TEST1 (10610, "040302f1", "i", sizeof(int), 0xf1020304);
+  TEST1 (10620, "f4030201", "i", sizeof(int), 0x010203f4);
 
-  gnet_pack ("B", buffer, 1, 0xf1);
-  print_bytes (buffer, 1);
-  printf ("should be: f1\n");
+  TEST1 (10700, "04030201", "I", sizeof(int), 0x01020304);
+  TEST1 (10710, "040302f1", "I", sizeof(int), 0xf1020304);
+  TEST1 (10720, "f4030201", "I", sizeof(int), 0x010203f4);
 
-  /* ********** */
+  TEST1 (10800, "04030201", "l", sizeof(int), 0x01020304);
+  TEST1 (10810, "040302f1", "l", sizeof(int), 0xf1020304);
+  TEST1 (10820, "f4030201", "l", sizeof(int), 0x010203f4);
 
-  gnet_pack ("h", buffer, sizeof(short), 0x0102);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: 02 01\n");
+  TEST1 (10900, "04030201", "L", sizeof(int), 0x01020304);
+  TEST1 (10910, "040302f1", "L", sizeof(int), 0xf1020304);
+  TEST1 (10920, "f4030201", "L", sizeof(int), 0x010203f4);
 
-  gnet_pack ("h", buffer, sizeof(short), 0xf001);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: 01 f0\n");
+  if (sizeof(void*) == 4)
+    {
+      TEST1 (11100, "04030201", "v", sizeof(void*), (void*) 0x01020304);
+      TEST1 (11110, "040302f1", "v", sizeof(void*), (void*) 0xf1020304);
+      TEST1 (11120, "f4030201", "v", sizeof(void*), (void*) 0x010203f4);
+    }
 
-  gnet_pack ("h", buffer, sizeof(short), 0x01f0);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: f0 01\n");
+  TEST3 (11200, "00010002",         "bhb", 4,  0x00, 0x0001, 0x02);
+  TEST2 (11210, "0403020108070605", "ii",  8, 0x01020304, 0x05060708);
+  TEST2 (11220, "0403020108070605", "2i",  8, 0x01020304, 0x05060708);
 
-  /* ********** */
+#else					/* NATIVE BIG ENDIAN */
 
-  gnet_pack ("H", buffer, sizeof(unsigned short), 0x0102);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: 02 01\n");
+  TEST1 (10400, "0102", "h", sizeof(short), 0x0102);
+  TEST1 (10410, "f001", "h", sizeof(short), 0xf001);
+  TEST1 (10420, "01f0", "h", sizeof(short), 0x01f0);
 
-  gnet_pack ("H", buffer, sizeof(unsigned short), 0xf001);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: 01 f0\n");
+  TEST1 (10500, "0102", "H", sizeof(short), 0x0102);
+  TEST1 (10510, "f001", "H", sizeof(short), 0xf001);
+  TEST1 (10520, "01f0", "H", sizeof(short), 0x01f0);
 
-  gnet_pack ("H", buffer, sizeof(unsigned short), 0x01f0);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: f0 01\n");
+  TEST1 (10600, "01020304", "i", sizeof(int), 0x01020304);
+  TEST1 (10610, "f1020304", "i", sizeof(int), 0xf1020304);
+  TEST1 (10620, "010203f4", "i", sizeof(int), 0x010203f4);
 
-  /* ********** */
+  TEST1 (10700, "01020304", "I", sizeof(int), 0x01020304);
+  TEST1 (10710, "f1020304", "I", sizeof(int), 0xf1020304);
+  TEST1 (10720, "010203f4", "I", sizeof(int), 0x010203f4);
 
-  gnet_pack ("i", buffer, sizeof(int), 0x01020304);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: 04 03 02 01\n");
+  TEST1 (10800, "01020304", "l", sizeof(int), 0x01020304);
+  TEST1 (10810, "f1020304", "l", sizeof(int), 0xf1020304);
+  TEST1 (10820, "010203f4", "l", sizeof(int), 0x010203f4);
 
-  gnet_pack ("i", buffer, sizeof(int), 0xf1020304);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: 04 03 02 f1\n");
+  TEST1 (10900, "01020304", "L", sizeof(int), 0x01020304);
+  TEST1 (10910, "f1020304", "L", sizeof(int), 0xf1020304);
+  TEST1 (10920, "010203f4", "L", sizeof(int), 0x010203f4);
 
-  gnet_pack ("i", buffer, sizeof(int), 0x010203f4);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: f4 03 02 01\n");
+  if (sizeof(void*) == 4)
+    {
+      TEST1 (11100, "01020304", "v", sizeof(void*), (void*) 0x01020304);
+      TEST1 (11110, "01020304", "v", sizeof(void*), (void*) 0xf1020304);
+      TEST1 (11120, "01020304", "v", sizeof(void*), (void*) 0x010203f4);
+    }
 
-  /* ********** */
+  TEST3 (11200, "00000102", "bhb", 4,  0x00, 0x0001, 0x02);
+  TEST2 (11201, "0102030405060708", "ii", 8, 0x01020304, 0x05060708);
+  TEST2 (11202, "0102030405060708", "2i", 8, 0x01020304, 0x05060708);
 
-  gnet_pack ("I", buffer, sizeof(unsigned int), 0x01020304);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: 04 03 02 01\n");
+#endif
 
-  gnet_pack ("I", buffer, sizeof(unsigned int), 0xf1020304);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("I", buffer, sizeof(unsigned int), 0x010203f4);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("l", buffer, sizeof(long), 0x01020304);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("l", buffer, sizeof(long), 0xf1020304);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("l", buffer, sizeof(long), 0x010203f4);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("L", buffer, sizeof(unsigned long), 0x01020304);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("L", buffer, sizeof(unsigned long), 0xf1020304);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("L", buffer, sizeof(unsigned long), 0x010203f4);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("f", buffer, sizeof(float), 23.43);
-  print_bytes (buffer, sizeof(float));
-  printf ("should be: ?\n");
-
-  gnet_pack ("d", buffer, sizeof(double), 43.22);
-  print_bytes (buffer, sizeof(double));
-  printf ("should be: ?\n");
-
-  /* ********** */
-
-  gnet_pack ("v", buffer, sizeof(void*), (void*) 0x01020304);
-  print_bytes (buffer, sizeof(void*));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("v", buffer, sizeof(void*), (void*) 0xf1020304);
-  print_bytes (buffer, sizeof(void*));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("v", buffer, sizeof(void*), (void*) 0x010203f4);
-  print_bytes (buffer, sizeof(void*));
-  printf ("should be: f4 03 02 01\n");
+  MEMTEST1 (11000, "f", sizeof(float),  23.43);
+  MEMTEST1 (11010, "d", sizeof(double), 43.21);
+  
 
 
   /* **************************************** */
+  /* LITTLE ENDIAN */
 
-  printf ("\n\n********************\n");
-  printf ("little endian tests\n");
+  TEST0 (20100, "00", "<x", 1);
 
+  TEST1 (20200, "17", "<b", 1, 0x17);
+  TEST1 (20210, "f1", "<b", 1, 0xf1);
 
-  gnet_pack ("<x", buffer, 1);
-  print_bytes (buffer, 1);
-  printf ("should be: 00\n");
+  TEST1 (20300, "17", "<B", 1, 0x17);
+  TEST1 (20310, "f1", "<B", 1, 0xf1);
 
-  /* ********** */
+  TEST1 (20400, "0201", "<h", 2, 0x0102);
+  TEST1 (20410, "01f0", "<h", 2, 0xf001);
+  TEST1 (20420, "f001", "<h", 2, 0x01f0);
 
-  gnet_pack ("<b", buffer, 1, 0x17);
-  print_bytes (buffer, 1);
-  printf ("should be: 17\n");
+  TEST1 (20500, "0201", "<H", 2, 0x0102);
+  TEST1 (20510, "01f0", "<H", 2, 0xf001);
+  TEST1 (20520, "f001", "<H", 2, 0x01f0);
 
-  gnet_pack ("<b", buffer, 1, 0xf1);
-  print_bytes (buffer, 1);
-  printf ("should be: f1\n");
+  TEST1 (20600, "04030201", "<i", 4, 0x01020304);
+  TEST1 (20610, "040302f1", "<i", 4, 0xf1020304);
+  TEST1 (20620, "f4030201", "<i", 4, 0x010203f4);
 
-  /* ********** */
+  TEST1 (20700, "04030201", "<I", 4, 0x01020304);
+  TEST1 (20710, "040302f1", "<I", 4, 0xf1020304);
+  TEST1 (20720, "f4030201", "<I", 4, 0x010203f4);
 
-  gnet_pack ("<B", buffer, 1, 0x17);
-  print_bytes (buffer, 1);
-  printf ("should be: 17\n");
+  TEST1 (20800, "04030201", "<l", 4, 0x01020304);
+  TEST1 (20810, "040302f1", "<l", 4, 0xf1020304);
+  TEST1 (20820, "f4030201", "<l", 4, 0x010203f4);
 
-  gnet_pack ("<B", buffer, 1, 0xf1);
-  print_bytes (buffer, 1);
-  printf ("should be: f1\n");
+  TEST1 (20900, "04030201", "<L", 4, 0x01020304);
+  TEST1 (20910, "040302f1", "<L", 4, 0xf1020304);
+  TEST1 (20920, "f4030201", "<L", 4, 0x010203f4);
 
-  /* ********** */
-
-  gnet_pack ("<h", buffer, sizeof(short), 0x0102);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: 02 01\n");
-
-  gnet_pack ("<h", buffer, sizeof(short), 0xf001);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: 01 f0\n");
-
-  gnet_pack ("<h", buffer, sizeof(short), 0x01f0);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: f0 01\n");
-
-  /* ********** */
-
-  gnet_pack ("<H", buffer, sizeof(unsigned short), 0x0102);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: 02 01\n");
-
-  gnet_pack ("<H", buffer, sizeof(unsigned short), 0xf001);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: 01 f0\n");
-
-  gnet_pack ("<H", buffer, sizeof(unsigned short), 0x01f0);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: f0 01\n");
-
-  /* ********** */
-
-  gnet_pack ("<i", buffer, sizeof(int), 0x01020304);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("<i", buffer, sizeof(int), 0xf1020304);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("<i", buffer, sizeof(int), 0x010203f4);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("<I", buffer, sizeof(unsigned int), 0x01020304);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("<I", buffer, sizeof(unsigned int), 0xf1020304);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("<I", buffer, sizeof(unsigned int), 0x010203f4);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("<l", buffer, sizeof(long), 0x01020304);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("<l", buffer, sizeof(long), 0xf1020304);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("<l", buffer, sizeof(long), 0x010203f4);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("<L", buffer, sizeof(unsigned long), 0x01020304);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: 04 03 02 01\n");
-
-  gnet_pack ("<L", buffer, sizeof(unsigned long), 0xf1020304);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: 04 03 02 f1\n");
-
-  gnet_pack ("<L", buffer, sizeof(unsigned long), 0x010203f4);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: f4 03 02 01\n");
-
-  /* ********** */
-
-  gnet_pack ("<f", buffer, sizeof(float), 23.43);
-  print_bytes (buffer, sizeof(float));
-  printf ("should be: ?\n");
-
-  gnet_pack ("<d", buffer, sizeof(double), 43.22);
-  print_bytes (buffer, sizeof(double));
-  printf ("should be: ?\n");
+  MEMTEST1 (21000, "<f", sizeof(float),  23.43);
+  MEMTEST1 (21010, "<d", sizeof(double), 43.21);
+  
+  TEST3 (21100, "00010002", "<bhb", 4,  0x00, 0x0001, 0x02);
+  TEST2 (21110, "0403020108070605", "<ii", 8, 0x01020304, 0x05060708);
+  TEST2 (21120, "0403020108070605", "<2i", 8, 0x01020304, 0x05060708);
 
 
   /* **************************************** */
+  /* BIG ENDIAN */
 
-  printf ("\n\n********************\n");
-  printf ("big endian tests\n");
+  TEST0 (30100, "00", ">x", 1);
 
-  gnet_pack (">x", buffer, 1);
-  print_bytes (buffer, 1);
-  printf ("should be: 00\n");
+  TEST1 (30200, "17", ">b", 1, 0x17);
+  TEST1 (30210, "f1", ">b", 1, 0xf1);
 
-  /* ********** */
+  TEST1 (30300, "17", ">B", 1, 0x17);
+  TEST1 (30310, "f1", ">B", 1, 0xf1);
 
-  gnet_pack (">b", buffer, 1, 0x17);
-  print_bytes (buffer, 1);
-  printf ("should be: 17\n");
+  TEST1 (30400, "0102", ">h", 2, 0x0102);
+  TEST1 (30410, "f001", ">h", 2, 0xf001);
+  TEST1 (30420, "01f0", ">h", 2, 0x01f0);
 
-  gnet_pack (">b", buffer, 1, 0xf1);
-  print_bytes (buffer, 1);
-  printf ("should be: f1\n");
+  TEST1 (30500, "0102", ">H", 2, 0x0102);
+  TEST1 (30510, "f001", ">H", 2, 0xf001);
+  TEST1 (30520, "01f0", ">H", 2, 0x01f0);
 
-  /* ********** */
+  TEST1 (30600, "01020304", ">i", 4, 0x01020304);
+  TEST1 (30610, "f1020304", ">i", 4, 0xf1020304);
+  TEST1 (30620, "010203f4", ">i", 4, 0x010203f4);
 
-  gnet_pack (">B", buffer, 1, 0x17);
-  print_bytes (buffer, 1);
-  printf ("should be: 17\n");
+  TEST1 (30700, "01020304", ">I", 4, 0x01020304);
+  TEST1 (30710, "f1020304", ">I", 4, 0xf1020304);
+  TEST1 (30720, "010203f4", ">I", 4, 0x010203f4);
 
-  gnet_pack (">B", buffer, 1, 0xf1);
-  print_bytes (buffer, 1);
-  printf ("should be: f1\n");
+  TEST1 (30800, "01020304", ">l", 4, 0x01020304);
+  TEST1 (30810, "f1020304", ">l", 4, 0xf1020304);
+  TEST1 (30820, "010203f4", ">l", 4, 0x010203f4);
 
-  /* ********** */
+  TEST1 (30900, "01020304", ">L", 4, 0x01020304);
+  TEST1 (30910, "f1020304", ">L", 4, 0xf1020304);
+  TEST1 (30920, "010203f4", ">L", 4, 0x010203f4);
 
-  gnet_pack (">h", buffer, sizeof(short), 0x0102);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: 01 02\n");
-
-  gnet_pack (">h", buffer, sizeof(short), 0xf001);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: f0 01\n");
-
-  gnet_pack (">h", buffer, sizeof(short), 0x01f0);
-  print_bytes (buffer, sizeof(short));
-  printf ("should be: 01 f0\n");
-
-  /* ********** */
-
-  gnet_pack (">H", buffer, sizeof(unsigned short), 0x0102);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: 01 02\n");
-
-  gnet_pack (">H", buffer, sizeof(unsigned short), 0xf001);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: f0 01\n");
-
-  gnet_pack (">H", buffer, sizeof(unsigned short), 0x01f0);
-  print_bytes (buffer, sizeof(unsigned short));
-  printf ("should be: 01 f0\n");
-
-  /* ********** */
-
-  gnet_pack (">i", buffer, sizeof(int), 0x01020304);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: 01 02 03 04\n");
-
-  gnet_pack (">i", buffer, sizeof(int), 0xf1020304);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: f1 02 03 04\n");
-
-  gnet_pack (">i", buffer, sizeof(int), 0x010203f4);
-  print_bytes (buffer, sizeof(int));
-  printf ("should be: 01 02 03 f4\n");
-
-  /* ********** */
-
-  gnet_pack (">I", buffer, sizeof(unsigned int), 0x01020304);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: 01 02 03 04\n");
-
-  gnet_pack (">I", buffer, sizeof(unsigned int), 0xf1020304);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: f1 02 03 04\n");
-
-  gnet_pack (">I", buffer, sizeof(unsigned int), 0x010203f4);
-  print_bytes (buffer, sizeof(unsigned int));
-  printf ("should be: 01 02 03 f4\n");
-
-  /* ********** */
-
-  gnet_pack (">l", buffer, sizeof(long), 0x01020304);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: 01 02 03 04\n");
-
-  gnet_pack (">l", buffer, sizeof(long), 0xf1020304);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: f1 02 03 04\n");
-
-  gnet_pack (">l", buffer, sizeof(long), 0x010203f4);
-  print_bytes (buffer, sizeof(long));
-  printf ("should be: 01 02 03 f4\n");
-
-  /* ********** */
-
-  gnet_pack (">L", buffer, sizeof(unsigned long), 0x01020304);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: 01 02 03 04\n");
-
-  gnet_pack (">L", buffer, sizeof(unsigned long), 0xf1020304);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: f1 02 03 04\n");
-
-  gnet_pack (">L", buffer, sizeof(unsigned long), 0x010203f4);
-  print_bytes (buffer, sizeof(unsigned long));
-  printf ("should be: 01 02 03 f4\n");
-
-  /* ********** */
-
-  gnet_pack (">f", buffer, sizeof(float), 23.43);
-  print_bytes (buffer, sizeof(float));
-  printf ("should be: ?\n");
-
-  gnet_pack (">d", buffer, sizeof(double), 43.22);
-  print_bytes (buffer, sizeof(double));
-  printf ("should be: ?\n");
+  MEMTEST1 (31000, ">f", sizeof(float),  23.43);
+  MEMTEST1 (31010, ">d", sizeof(double), 43.21);
+  
+  TEST3 (31200, "00000102", ">bhb", 4,  0x00, 0x0001, 0x02);
+  TEST2 (31210, "0102030405060708", ">ii", 8, 0x01020304, 0x05060708);
+  TEST2 (31220, "0102030405060708", ">2i", 8, 0x01020304, 0x05060708);
 
 
   /* **************************************** */
+  /* STRINGS */
 
-  printf ("\n\n********************\n");
-  printf ("native combinations (assumes little endian)\n");
-
-  gnet_pack ("bhb", buffer, 4, 0x00, 0x0001, 0x02);
-  print_bytes (buffer, 4);
-  printf ("should be: 00 01 00 02\n");
-
-  gnet_pack ("ii", buffer, 8, 0x01020304, 0x05060708);
-  print_bytes (buffer, 8);
-  printf ("should be: 04 03 02 01 08 07 06 05\n");
-
-  gnet_pack ("2i", buffer, 8, 0x01020304, 0x05060708);
-  print_bytes (buffer, 8);
-  printf ("should be: 04 03 02 01 08 07 06 05\n");
-
+  TEST2 (40000, "68656c6c6f00746865726500", "ss", 12, "hello", "there");
+  TEST2 (40010, "74686572650068656c6c6f00", "2s", 12, "there", "hello");
+  TEST1 (40020, "626f6f676572000000000000", "12S", 12, "booger");
+  TEST1 (40030, "64617669", "4S", 4, "david");
+  TEST1 (40040, "68656c646572", "6S", 6, "helder");
+  TEST2 (40050, "64636261", "r", 4, "dcba", 4);
+  TEST4 (40060, "6162636465666768", "2r", 8, "abcd", 4, "efgh", 4);
+  TEST1 (40070, "64636261", "4R", 4, "dcba"); 
+  TEST2 (40080, "6566676861626364", "4R4R", 8, "efgh", "abcd");
+  TEST1 (40090, "0461626364", "p", 5, "abcd");
+  TEST2 (40100, "04656667680461626364", "2p", 10, "efgh", "abcd");
 
   /* **************************************** */
-
-  printf ("\n\n********************\n");
-  printf ("big endian combinations \n");
-
-  gnet_pack (">bhb", buffer, 4, 0, 1, 2);
-  print_bytes (buffer, 4);
-  printf ("should be: 00 00 01 02\n");
-
-  gnet_pack (">ii", buffer, 8, 0x01020304, 0x05060708);
-  print_bytes (buffer, 8);
-  printf ("should be: 01 02 03 04 05 06 07 08\n");
-
-  gnet_pack (">2i", buffer, 8, 0x01020304, 0x05060708);
-  print_bytes (buffer, 8);
-  printf ("should be: 01 02 03 04 05 06 07 08\n");
-
-
-  /* **************************************** */
-
-  printf ("\n\n********************\n");
-  printf ("strings\n");
-
-  gnet_pack ("ss", buffer, 12, "hello", "there");
-  print_bytes (buffer, 12);
-  printf ("should be: 68 65 6c 6c 6f 00 74 68 65 72 65 00\n");
-
-  gnet_pack ("2s", buffer, 12, "there", "hello");
-  print_bytes (buffer, 12);
-  printf ("should be: 74 68 65 72 65 00 68 65 6c 6c 6f 00\n");
-
-  gnet_pack ("12S", buffer, 12, "booger");
-  print_bytes (buffer, 12);
-  printf ("should be: 62 6f 6f 67 65 72 00 00 00 00 00 00\n");
-
-  gnet_pack ("4S", buffer, 4, "david");
-  print_bytes (buffer, 4);
-  printf ("should be: 64 61 76 69\n");
-
-  gnet_pack ("6S", buffer, 6, "helder");
-  print_bytes (buffer, 6);
-  printf ("should be: 68 65 6c 64 65 72\n");
-
-  gnet_pack ("r", buffer, 4, "dcba", 4);
-  print_bytes (buffer, 4);
-  printf ("should be: 64 63 62 61\n");
-
-  gnet_pack ("2r", buffer, 8, "abcd", 4, "efgh", 4);
-  print_bytes (buffer, 8);
-  printf ("should be: 61 62 63 64 65 66 67 68\n");
-
-  gnet_pack ("4R", buffer, 4, "dcba");
-  print_bytes (buffer, 4);
-  printf ("should be: 64 63 62 61\n");
-
-  gnet_pack ("4R4R", buffer, 8, "efgh", "abcd");
-  print_bytes (buffer, 8);
-  printf ("should be: 65 66 67 68 61 62 63 64\n");
-
-  gnet_pack ("p", buffer, 5, "abcd");
-  print_bytes (buffer, 5);
-  printf ("should be: 04 61 62 63 64\n");
-
-  gnet_pack ("2p", buffer, 10, "efgh", "abcd");
-  print_bytes (buffer, 10);
-  printf ("should be: 04 65 66 67 68 04 61 62 63 64\n");
-
-
-  /* **************************************** */
+  /* FAILURES (these cause gnet warnings) */
 
 #if 0
-  printf ("\n\n********************\n");
-  printf ("failures\n");
-
   gnet_pack ("b", buffer, 0, 0);
-  printf ("fail\n");
-
   gnet_pack ("B", buffer, 0, 0);
-  printf ("fail\n");
-
   gnet_pack ("h", buffer, sizeof(short) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("H", buffer, sizeof(unsigned short) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("i", buffer, sizeof(int) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("I", buffer, sizeof(unsigned int) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("l", buffer, sizeof(long) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("L", buffer, sizeof(unsigned long) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("f", buffer, sizeof(float) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("d", buffer, sizeof(double) - 1, 0);
-  printf ("fail\n");
-
   gnet_pack ("s", buffer, 5, "hello");
-  printf ("fail\n");
-
   gnet_pack ("ss", buffer, 11, "hello", "world");
-  printf ("fail\n");
-
   gnet_pack ("12S", buffer, 11, "booger");
-  printf ("fail\n");
-
   gnet_pack ("4S", buffer, 3, "david");
-  printf ("fail\n");
-
   gnet_pack ("6S", buffer, 5, "helder");
-  printf ("fail\n");
-
   gnet_pack ("2r", buffer, 7, "abcd", 4, "efgh", 4);
-  printf ("fail\n");
-
   gnet_pack ("4R", buffer, 3, "dcba");
-  printf ("fail\n");
-
   gnet_pack ("4R4R", buffer, 7, "efgh", "abcd");
-  printf ("fail\n");
-
   gnet_pack ("p", buffer, 4, "abcd");
-  printf ("fail\n");
-
   gnet_pack ("2p", buffer, 9, "efgh", "abcd");
-  printf ("fail\n");
-
 #endif
 
   /* **************************************** */
 
-  printf ("\n\n******************************************\n");
-  printf ("strdup tests\n");
-
-  /* Strdup */
-
-  len = gnet_pack_strdup ("x", &str);
-  print_bytes (str, len);
-  printf ("should be: 00\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("b", &str, 0x17);
-  print_bytes (str, len);
-  printf ("should be: 17\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("b", &str, 0xf1);
-  print_bytes (str, len);
-  printf ("should be: f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("B", &str, 0x17);
-  print_bytes (str, len);
-  printf ("should be: 17\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("B", &str, 0xf1);
-  print_bytes (str, len);
-  printf ("should be: f1\n");
-  g_free (str);
-
-
-  len = len = gnet_pack_strdup ("h", &str, 0x0102);
-  print_bytes (str, len);
-  printf ("should be: 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("h", &str, 0xf001);
-  print_bytes (str, len);
-  printf ("should be: 01 f0\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("h", &str, 0x01f0);
-  print_bytes (str, len);
-  printf ("should be: f0 01\n");
-  g_free (str);
-
-
-  len = gnet_pack_strdup ("H", &str, 0x0102);
-  print_bytes (str, len);
-  printf ("should be: 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("H", &str, 0xf001);
-  print_bytes (str, len);
-  printf ("should be: 01 f0\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("H", &str, 0x01f0);
-  print_bytes (str, len);
-  printf ("should be: f0 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("i", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("i", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("i", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("I", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("I", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("I", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("l", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("l", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("l", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("L", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("L", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("L", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("f", &str, 23.43);
-  print_bytes (str, len);
-  printf ("should be: ?\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("d", &str, 43.22);
-  print_bytes (str, len);
-  printf ("should be: ?\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("v", &str, (void*) 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("v", &str, (void*) 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("v", &str, (void*) 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  printf ("\n\n********************\n");
-  printf ("little endian tests\n");
-
-
-  len = gnet_pack_strdup ("<x", &str);
-  print_bytes (str, len);
-  printf ("should be: 00\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<b", &str, 0x17);
-  print_bytes (str, len);
-  printf ("should be: 17\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<b", &str, 0xf1);
-  print_bytes (str, len);
-  printf ("should be: f1\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<B", &str, 0x17);
-  print_bytes (str, len);
-  printf ("should be: 17\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<B", &str, 0xf1);
-  print_bytes (str, len);
-  printf ("should be: f1\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<h", &str, 0x0102);
-  print_bytes (str, len);
-  printf ("should be: 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<h", &str, 0xf001);
-  print_bytes (str, len);
-  printf ("should be: 01 f0\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<h", &str, 0x01f0);
-  print_bytes (str, len);
-  printf ("should be: f0 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<H", &str, 0x0102);
-  print_bytes (str, len);
-  printf ("should be: 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<H", &str, 0xf001);
-  print_bytes (str, len);
-  printf ("should be: 01 f0\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<H", &str, 0x01f0);
-  print_bytes (str, len);
-  printf ("should be: f0 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<i", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<i", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<i", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<I", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<I", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<I", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<l", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<l", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<l", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<L", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<L", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 f1\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<L", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: f4 03 02 01\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup ("<f", &str, 23.43);
-  print_bytes (str, len);
-  printf ("should be: ?\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("<d", &str, 43.22);
-  print_bytes (str, len);
-  printf ("should be: ?\n");
-  g_free (str);
-
-
-  /* **************************************** */
-
-  printf ("\n\n********************\n");
-  printf ("big endian tests\n");
-
-  len = gnet_pack_strdup (">x", &str);
-  print_bytes (str, len);
-  printf ("should be: 00\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">b", &str, 0x17);
-  print_bytes (str, len);
-  printf ("should be: 17\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">b", &str, 0xf1);
-  print_bytes (str, len);
-  printf ("should be: f1\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">B", &str, 0x17);
-  print_bytes (str, len);
-  printf ("should be: 17\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">B", &str, 0xf1);
-  print_bytes (str, len);
-  printf ("should be: f1\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">h", &str, 0x0102);
-  print_bytes (str, len);
-  printf ("should be: 01 02\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">h", &str, 0xf001);
-  print_bytes (str, len);
-  printf ("should be: f0 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">h", &str, 0x01f0);
-  print_bytes (str, len);
-  printf ("should be: 01 f0\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">H", &str, 0x0102);
-  print_bytes (str, len);
-  printf ("should be: 01 02\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">H", &str, 0xf001);
-  print_bytes (str, len);
-  printf ("should be: f0 01\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">H", &str, 0x01f0);
-  print_bytes (str, len);
-  printf ("should be: 01 f0\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">i", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">i", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: f1 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">i", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 f4\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">I", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">I", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: f1 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">I", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 f4\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">l", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">l", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: f1 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">l", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 f4\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">L", &str, 0x01020304);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">L", &str, 0xf1020304);
-  print_bytes (str, len);
-  printf ("should be: f1 02 03 04\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">L", &str, 0x010203f4);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 f4\n");
-  g_free (str);
-
-  /* ********** */
-
-  len = gnet_pack_strdup (">f", &str, 23.43);
-  print_bytes (str, len);
-  printf ("should be: ?\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">d", &str, 43.22);
-  print_bytes (str, len);
-  printf ("should be: ?\n");
-  g_free (str);
-
-
-  /* **************************************** */
-
-  printf ("\n\n********************\n");
-  printf ("native combinations (assumes little endian)\n");
-
-  len = gnet_pack_strdup ("bhb", &str, 0x00, 0x0001, 0x02);
-  print_bytes (str, len);
-  printf ("should be: 00 01 00 02\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("ii", &str, 0x01020304, 0x05060708);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01 08 07 06 05\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("2i", &str, 0x01020304, 0x05060708);
-  print_bytes (str, len);
-  printf ("should be: 04 03 02 01 08 07 06 05\n");
-  g_free (str);
-
-
-
-  /* **************************************** */
-
-  printf ("\n\n********************\n");
-  printf ("big endian combinations \n");
-
-  len = gnet_pack_strdup (">bhb", &str, 0, 1, 2);
-  print_bytes (str, len);
-  printf ("should be: 00 00 01 02\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">ii", &str, 0x01020304, 0x05060708);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 04 05 06 07 08\n");
-  g_free (str);
-
-  len = gnet_pack_strdup (">2i", &str, 0x01020304, 0x05060708);
-  print_bytes (str, len);
-  printf ("should be: 01 02 03 04 05 06 07 08\n");
-  g_free (str);
-
-
-  /* **************************************** */
-
-  printf ("\n\n********************\n");
-  printf ("strings\n");
-
-  len = gnet_pack_strdup ("ss", &str, "hello", "there");
-  print_bytes (str, len);
-  printf ("should be: 68 65 6c 6c 6f 00 74 68 65 72 65 00\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("2s", &str, "there", "hello");
-  print_bytes (str, len);
-  printf ("should be: 74 68 65 72 65 00 68 65 6c 6c 6f 00\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("12S", &str, "booger");
-  print_bytes (str, len);
-  printf ("should be: 62 6f 6f 67 65 72 00 00 00 00 00 00\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("4S", &str, "david");
-  print_bytes (str, len);
-  printf ("should be: 64 61 76 69\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("6S", &str, "helder");
-  print_bytes (str, len);
-  printf ("should be: 68 65 6c 64 65 72\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("r", &str, "dcba", 4);
-  print_bytes (str, len);
-  printf ("should be: 64 63 62 61\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("2r", &str, "abcd", 4, "efgh", 4);
-  print_bytes (str, len);
-  printf ("should be: 61 62 63 64 65 66 67 68\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("4R", &str, "dcba");
-  print_bytes (str, len);
-  printf ("should be: 64 63 62 61\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("4R4R", &str, "efgh", "abcd");
-  print_bytes (str, len);
-  printf ("should be: 65 66 67 68 61 62 63 64\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("p", &str, "abcd");
-  print_bytes (str, len);
-  printf ("should be: 04 61 62 63 64\n");
-  g_free (str);
-
-  len = gnet_pack_strdup ("2p", &str, "efgh", "abcd");
-  print_bytes (str, len);
-  printf ("should be: 04 65 66 67 68 04 61 62 63 64\n");
-  g_free (str);
-
-  /* **************************************** */
+  if (failed)
+    {
+/*        fprintf (stderr, "FAIL\n"); */
+      exit (1);
+    }
+
+/*    fprintf (stderr, "PASS\n"); */
+  exit (0);
 
   return 0;
 }
@@ -1146,16 +319,27 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
 			      'c', 'd', 'e', 'f' };
 
 void
-print_bytes(char* s, int len)
+test_bytes (int test_num, char* s /* binary */, int len, 
+	    char* answer /* ascii */)
 {
   int i;
 
-  printf ("\n");
-  printf ("output   : ");
-
   for (i = 0; i < len; ++i)
-    printf ("%c%c ", bits2hex[(s[i] & 0xf0) >> 4], 
-	             bits2hex[s[i] & 0xf]);
+    {
+      if (!answer[2 * i] || !answer[(2 * i) + 1] ||
+	  (bits2hex[(s[i] & 0xf0) >> 4] != answer[2 * i]) ||
+	  (bits2hex[(s[i] & 0xf)      ] != answer[(2 * i) + 1]))
+      {
+	int j;
 
-  printf ("\n");
+	fprintf (stderr, "FAILURE: test #%d at byte %d\n", test_num, i);
+	fprintf (stderr, "\toutput   : ");
+	for (j = 0; j < len; ++j)
+	  fprintf (stderr, "%c%c", bits2hex[(s[j] & 0xf0) >> 4], 
+		   bits2hex[s[j] & 0xf]);
+	fprintf (stderr, "\n\tshould be: %s\n", answer);
+	failed = 1;
+      }
+    }
 }
+

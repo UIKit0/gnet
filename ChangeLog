@@ -1,3 +1,28 @@
+Sat Aug 10 19:18:33 2002  David Helder  <dhelder@umich.edu>
+
+	* examples/hash.c: Move hash example to examples.
+
+	* tests/pack.c: Made this a proper automake automated test.
+	* tests/unpack.c: "
+	* tests/hash.c: "
+	* examples/Makefile.am: Updated
+	
+	* tests/hash.c: Don't dump core on './hash'
+
+	* tests/urlparse.c: Removed.  url_test covers this.
+
+	* src/gnet.c (gnet_init): Added.  Call this at the beginning of
+	    any Gnet program.  (This is really only required for
+	    asynchronous DNS support when pthreads are available and GNet
+	    is compiled with GLib 2.0.)
+	* examples/*.c (main): Add call to gnet_init ().
+	* tests/*.c (main): "
+
+	* src/Makefile.am (libgnet_la_LDFLAGS): Link with GTHREAD_LIBS.
+
+	* src/socks.c (gnet_socks_get_server): Add const
+	* src/socks-private.c (socks_get_version): "
+
 Mon Aug  5 16:54:55 2002  David Helder  <dhelder@umich.edu>
 
 	* src/conn.h: Fix typo.

@@ -43,6 +43,8 @@ main(int argc, char** argv)
   gchar *path = NULL;
   ServerType server_type = NORMAL;
 	
+  gnet_init ();
+
   if (argc !=  2 && argc != 3) {
     usage(EXIT_FAILURE);
   }

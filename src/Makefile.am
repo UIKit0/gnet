@@ -14,7 +14,7 @@ lib_LTLIBRARIES = libgnet.la
 libgnet_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
-	$(GLIB_LIBS) $(GTHREAD_CFLAGS)
+	$(GLIB_LIBS) $(GTHREAD_LIBS)
 
 libgnet_la_SOURCES = 		\
 	gnet.c			\

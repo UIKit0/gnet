@@ -2,6 +2,7 @@
 <FILE>gnet</FILE>
 GNET_EXPORT
 GNET_CHECK_VERSION
+gnet_init
 </SECTION>
 
 <SECTION>

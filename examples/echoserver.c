@@ -39,6 +39,7 @@ main(int argc, char** argv)
   int port = 0;
   ServerType server_type = NORMAL;
 
+  gnet_init ();
 
   if (argc !=  2 && argc != 3)
     {

@@ -45,6 +45,7 @@ main(int argc, char** argv)
   GInetAddr* ia;
   gint rv;
 
+  gnet_init ();
 
   /* Create a multicast socket */
   ms = gnet_mcast_socket_port_new(9875);

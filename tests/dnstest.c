@@ -47,6 +47,8 @@ main(int argc, char** argv)
 {
   gboolean block = TRUE;
 
+  gnet_init ();
+
   if (argc < 2 || argc > 4)
     usage();
 

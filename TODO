@@ -13,9 +13,6 @@ Features
 
 - URL cleanup.  Need to sync with RFC.
 
-- SOCK5 interface support.  (Marius <marius@umich.edu> is
-    interested)
-
 - Put include files in gnet-MAJOR.MINOR so multiple development
     packages can be installed.
 
@@ -67,8 +64,6 @@ Internal Improvements
 ---------------------
 
 - Better asynchronous DNS
-    * Use pthread's instead of fork where available (or better,
-	  the new Glib 1.4 threads where available)
     * Add option to use GNU ADNS? (and update license)
     * Consider modifying glibc/BIND code?
 
@@ -86,12 +81,6 @@ Other
 - More documentation and examples
 
     Add a beginners guide/tutorial.  Show more code examples.
-
-- Clean up Debian packages.  Add a Debian docs package?
-
-    The packages seem alright, though I'd like someone with more
-    Debian experience to double check them.
-
 
 
 Undecided (things discussed, but not decided on)
