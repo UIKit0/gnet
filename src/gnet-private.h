@@ -85,7 +85,7 @@
 #define socklen_t gint32
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
-#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) gnet_io_channel_win32_new_stream_socket(SOCKFD)
+#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_win32_new_socket(SOCKFD)
 
 #endif	/*********** End Windows specific ***********/
 
@@ -215,6 +215,11 @@ typedef struct _GTcpSocketAsyncState
 } GTcpSocketAsyncState;
 
 #ifdef GNET_WIN32
+/*
+Used for:
+-gnet_inetaddr_new_async
+-gnet_inetaddr_get_name_asymc
+*/
 typedef struct _SocketWatchAsyncState 
 {
 	GIOChannel *channel;
@@ -224,8 +229,6 @@ typedef struct _SocketWatchAsyncState
   gint errorcode;
 	GSList* callbacklist;
 } SocketWatchAsyncState;
-
-int gnet_socket_watch_cb(GIOChannel *iochannel, GIOCondition condition, void *nodata);
 #endif
 
 void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
@@ -253,15 +256,13 @@ typedef struct _GTcpSocketConnectState
 
 #ifdef GNET_WIN32
 
-extern WNDCLASSEX gnetWndClass, gnetWndClass_sock;
-extern HWND  gnet_hWnd, gnet_sock_hWnd; 
-extern guint gnet_io_watch_ID, gnet_io_sock_watch_ID;
-extern GIOChannel *gnet_iochannel, *gnet_sock_iochannel;
+extern WNDCLASSEX gnetWndClass;
+extern HWND  gnet_hWnd; 
+extern guint gnet_io_watch_ID;
+extern GIOChannel *gnet_iochannel;
 	
 extern GHashTable *gnet_hash;
-extern GHashTable *gnet_select_hash; /* gnet_tcp_socket_new_async needs its own hash */
 extern HANDLE gnet_Mutex; 
-extern HANDLE gnet_select_Mutex;
 extern HANDLE gnet_hostent_Mutex;
 	
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */

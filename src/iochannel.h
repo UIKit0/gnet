@@ -46,11 +46,6 @@ GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel,
 					  gchar         **buf_ptr, 
 					  guint         *bytes_read);
 
-/* Alternative Implementation of Glib Socket GIOChannels */
-#ifdef GNET_WIN32
-GIOChannel* gnet_io_channel_win32_new_stream_socket(int socket);
-#endif
-
 /* **************************************** */
 
 /* This section is experimental, buggy, and unstable.  Use at your own risk. */

@@ -139,15 +139,13 @@ gnet_udp_socket_get_MTU(GUdpSocket* us)
 
 #ifdef GNET_WIN32
 
-WNDCLASSEX gnetWndClass, gnetWndClass_sock;
-HWND  gnet_hWnd, gnet_sock_hWnd; 
-guint gnet_io_watch_ID, gnet_io_sock_watch_ID;
-GIOChannel *gnet_iochannel, *gnet_sock_iochannel;
+WNDCLASSEX gnetWndClass;
+HWND  gnet_hWnd; 
+guint gnet_io_watch_ID;
+GIOChannel *gnet_iochannel;
 	
 GHashTable *gnet_hash;
-GHashTable *gnet_select_hash;
 HANDLE gnet_Mutex; 
-HANDLE gnet_select_Mutex;
 HANDLE gnet_hostent_Mutex;
 
 
@@ -362,57 +360,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 					  gnet_MainCallBack, 
 					  NULL);
 
-
-	/* Setup and register a windows class that we use for socket watches */
-	gnetWndClass_sock.cbSize = sizeof(WNDCLASSEX); 
-	gnetWndClass_sock.style = CS_SAVEBITS; /* doesn't matter, need something? */ 
-	gnetWndClass_sock.lpfnWndProc = (WNDPROC) GnetWndProcWatch; 
-	gnetWndClass_sock.cbClsExtra = 0; 
-	gnetWndClass_sock.cbWndExtra = 0; 
-	gnetWndClass_sock.hInstance = hinstDLL; 
-	gnetWndClass_sock.hIcon = NULL; 
-	gnetWndClass_sock.hCursor = NULL; 
-	gnetWndClass_sock.hbrBackground = NULL; 
-	gnetWndClass_sock.lpszMenuName = NULL; 
-	gnetWndClass_sock.lpszClassName = "GnetWatch"; 
-	gnetWndClass_sock.hIconSm = NULL; 
-
-	if (!RegisterClassEx(&gnetWndClass_sock))
-	  {
-	    return FALSE;	
-	  }
-
-	gnet_sock_hWnd  = CreateWindowEx
-	  (
-	   0,
-	   "Gnet", 
-	   "none",
-	   WS_OVERLAPPEDWINDOW, 
-	   CW_USEDEFAULT, 
-	   CW_USEDEFAULT, 
-	   CW_USEDEFAULT, 
-	   CW_USEDEFAULT, 
-	   (HWND) NULL, 
-	   (HMENU) NULL, 
-	   hinstDLL, 
-	   (LPVOID) NULL);  
-
-	if (!gnet_sock_hWnd) 
-	  {
-	    return FALSE;
-	  }
-
-	gnet_sock_iochannel = g_io_channel_win32_new_messages((unsigned int)gnet_sock_hWnd);
-
-	/* Add a watch */
-	gnet_io_sock_watch_ID = g_io_add_watch(gnet_sock_iochannel,
-					  (GIOCondition)(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
-					  gnet_socket_watch_cb, 
-					  NULL);
-
-	gnet_hash = g_hash_table_new(NULL, NULL);
-	gnet_select_hash = g_hash_table_new(NULL, NULL);
-	
+	gnet_hash = g_hash_table_new(NULL, NULL);	
 
 	gnet_Mutex = CreateMutex( 
 				 NULL,                       /* no security attributes */
@@ -420,16 +368,6 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 				 "gnet_Mutex");  /* name of mutex */
 
 	if (gnet_Mutex == NULL) 
-	  {
-	    return FALSE;
-	  }
-
-	gnet_select_Mutex = CreateMutex( 
-					NULL,                       /* no security attributes */
-					FALSE,                      /* initially not owned */
-					"gnet_select_Mutex");  /* name of mutex */
-
-	if (gnet_select_Mutex == NULL) 
 	  {
 	    return FALSE;
 	  }
@@ -463,10 +401,6 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 	g_source_remove(gnet_io_watch_ID);
 	g_free(gnet_iochannel);
 	DestroyWindow(gnet_hWnd);
-
-	g_source_remove(gnet_io_watch_ID);
-	g_free(gnet_sock_iochannel);
-	DestroyWindow(gnet_sock_hWnd);
 
 	/*CleanUp WinSock 2 */
 	WSACleanup();

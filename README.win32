@@ -4,8 +4,8 @@ GNet README for Win32
 
 This document contains
  - General Win32 Specific Information
- - How to link your project to the Gnet DLL
- - How to compile GNet with MSVC 6.0
+ - MINGW/GCC & CYGWIN Notes
+ - MSVC 6.0 Notes
  - HACKING/TODO on Win32
 
 
@@ -15,37 +15,30 @@ General Win32 Specific Information
 The Windows port requires either Windows 95 (with the Winsock2 patch)
 or better, or Windows NT (with Service Pack 4) or better. 
 
-GNet includes an alternative implementation of socket GIOChannels
-for Glib for Windows. It supports multiple watches per socket. 
-One GIOChannel per socket. OOB data is not supported. 
-
-No modifications to the Glib source were made. All changes were 
-through function pointers.
-
-Use gnet_io_channel_win32_new_stream_socket() instead of
-g_io_channel_win32_new_stream_socket(). In callbacks the socket is
-set to blocking mode.
-
 gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
 
 gnet_private_inetaddr_list_interfaces() does not support more than 10
 interfaces.
 
+MINGW/GCC & CYGWIN Notes
+------------------------
+
 Compiling GNet on windows with gcc/mingw (with or without cygwin) is 
 not supported. This is because GNet requires winsock2. 
 
-How to link your project to the Gnet DLL
-----------------------------------------
+You can use/link GNet with gcc/mingw. Follow the latest instructions 
+that came with gcc/mingw on how to build libgnet-X.Y.a from gnet-X.Y.dll.
 
+MSVC 6.0 Notes
+--------------
+
+How to link your project to the Gnet DLL uing MSVC 6.0:
 Download the latest version of Glib for Win32 and copy the header
 files and glib-X.Y.dll and glib-X.Y.lib to the gnet project folder. Do
 the same for GNet. Remember change your project settings to include
 glib-X.Y.lib gnet-X.Y.lib in the link tab.
 
-
-How to compile GNet with MSVC 6.0
----------------------------------
-
+How to compile GNet with MSVC 6.0:
 Download the latest version of Glib for Win32 and copy the header
 files and glib-X.Y.dll and glib-X.Y.lib to your project folder.
 Download the latest version of Gnet for Win32 and a .dsp file is 
