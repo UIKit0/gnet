@@ -1,3 +1,8 @@
+Wed Oct 11 23:18:04 2000  David Helder  <dhelder@umich.edu>
+
+	* examples/pack.c: Added
+	* examples/hash.c: Added
+
 Wed Oct 11 23:16:48 2000  David Helder  <dhelder@umich.edu>
 
 	* src/scheduler.[hc]: Added, but not used yet.
