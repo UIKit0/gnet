@@ -7,6 +7,7 @@ Wed May 23  9:33:45 2001  Andrew Lanoix <alanoix@umich.edu>
 
 	*update Gnet.dsp
 	*update gnet.def
+	*update gnetconfig.h.win32 Version to 1.1.0
 
 Wed May 23 10:08:09 2001  David Helder  <dhelder@umich.edu>
 
