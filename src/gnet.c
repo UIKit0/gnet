@@ -81,6 +81,7 @@ gnet_init (void)
 #else /* Windows */
 	GIPv6Policy policy;
 
+#ifdef HAVE_IPV6
 	hLibrary_ws2_32 = LoadLibrary("ws2_32.dll");
 	hLibrary_Iphlpapi = LoadLibrary("Iphlpapi.dll");
 	if (hLibrary_ws2_32)
@@ -107,6 +108,9 @@ gnet_init (void)
 	}
 
 	/* Should I check to see if IPv6 interfaces exist? */
+#else /* no IPV6 */
+	policy = GIPV6_POLICY_IPV4_ONLY;  
+#endif
 
 	gnet_ipv6_set_policy (policy);
 	gnet_initialize_windows_sockets();
