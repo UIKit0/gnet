@@ -33,6 +33,8 @@
 #include "iochannel.h"
 #include "conn.h"
 #include "server.h"
+#include "md5.h"
+#include "sha.h"
 #endif
 
 

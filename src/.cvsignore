@@ -11,3 +11,11 @@ udp.lo
 libgnet.la
 ftp.lo
 Makefile.in
+iochannel.lo
+md5.lo
+sha.lo
+pack.lo
+url.lo
+conn.lo
+server.lo
+scheduler.lo

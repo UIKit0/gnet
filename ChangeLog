@@ -1,3 +1,12 @@
+Wed Oct 11 23:16:48 2000  David Helder  <dhelder@umich.edu>
+
+	* src/scheduler.[hc]: Added, but not used yet.
+	
+	* src/md5.[hc]: Added
+	* src/sha.[hc]: Added
+
+	* src/gnet.h: Added md5 and sha
+
 Wed Oct 11 22:57:18 2000  David Helder  <dhelder@umich.edu>
 
 	* src/iochannel.[hc]: Moved functions in gnet.h here
