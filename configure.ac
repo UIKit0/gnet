@@ -271,6 +271,7 @@ AC_CONFIG_FILES([
 	examples/Makefile
 	tests/Makefile
 	doc/Makefile
+	doc/gnet-config.1
 	gnetconfig.h
 	debian/rules
 	debian/control
