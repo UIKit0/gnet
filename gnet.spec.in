@@ -5,7 +5,7 @@
 %define prefix   /usr
 
 Summary: Gnet, a network library
-Name:      gnet
+Name:      gnet2
 Version:   %ver
 Release:   %rel
 Copyright: LGPL
