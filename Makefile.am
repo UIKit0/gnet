@@ -24,14 +24,15 @@ EXTRA_DIST= 					\
 	src/socks-private.h 			\
 	src/usagi_ifaddrs.h  			\
 	tests/makefile.mingw			\
+	tests/testfile				\
 	tests/client_server_test.pl		\
 	tests/dns_test.pl
 
 m4datadir = $(datadir)/aclocal
-m4data_DATA = gnet.m4
+m4data_DATA = gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).m4
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = gnet.pc
+pkgconfig_DATA = gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).pc
 
 $(pkgconfig_DATA): config.status
 

@@ -4,6 +4,13 @@ GNet NEWS
 
 Changes in Gnet
 
+1.3.2 ("Sacrilicious" DEVELOPERS release)
+-----
+* DNS bug fixes
+* FreeBSD compile fixes
+* Build improvements: library is now named libglib-MAJOR.MINOR,
+    favors GLib 2 over GLib 1.2
+
 
 1.3.1 ("Tomacco 2" DEVELOPERS release)
 -----

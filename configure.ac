@@ -54,11 +54,11 @@ AC_DEFINE_UNQUOTED(GNET_BINARY_AGE, $GNET_BINARY_AGE, [GNet binary age])
 
 
 ####################
-# Glib2
+# Glib1
 
-AC_ARG_ENABLE(glib2,
-	      AC_HELP_STRING([--enable-glib2],
-			     [prefer glib 2.0 over glib 1.2]))
+AC_ARG_ENABLE(glib12,
+	      AC_HELP_STRING([--enable-glib1.2],
+			     [prefer GLib 1.2 over GLib 2]),,enable_glib12=no)
 
 ####################
 # Debug
@@ -133,45 +133,73 @@ AC_ARG_ENABLE(pthreads,
              enable_pthreads=yes)
 
 if test "x${enable_pthreads}" = "xyes"; then
-  pthread_libs=""
+  PTHREAD_LIBS=""
+
+  AC_MSG_CHECKING([for -pthread])
+  gnet_save_LIBS=$LIBS
+  LIBS="$LIBS -pthread"
+  AC_LINK_IFELSE([int main() { return 0; }], 
+	[dash_pthread="-pthread"
+	 AC_MSG_RESULT(yes)],
+	[dash_pthread=""
+	 AC_MSG_RESULT(no)])
+  LIBS="$gnet_save_LIBS $dash_pthread"
+
   AC_CHECK_LIB([pthread],
           [pthread_create],
-          [pthread_libs="-lpthread"])
+          [PTHREAD_LIBS="-lpthread"])
   AC_CHECK_LIB([c_r],
           [pthread_create],
-          [pthread_libs="-lc_r"])
-  if test "$pthread_libs"; then
+          [PTHREAD_LIBS="-lc_r $PTHREAD_LIBS"])
+  if test "x$PTHREAD_LIBS" != "x"; then
           AC_DEFINE(HAVE_LIBPTHREAD, 1,
                   [Define if pthreads library is available])
-          LIBS="$pthread_libs $LIBS"
+          LIBS="$PTHREAD_LIBS $LIBS"
   fi
 fi
-AC_SUBST(pthread_libs)
 
-if test "x${enable_glib2}" != "xyes"; then
+
+# Check for GLib 1.2 if enabled
+if test "x${enable_glib12}" = "xyes"; then
   AM_PATH_GLIB([1.2.10],
 		# GTHREAD_CFLAGS are included in GLIB_CFLAGS for 1.2
 		GTHREAD_CFLAGS=" ",  
-		[enable_glib2=yes],
+		AC_MSG_ERROR([GLib 1.2 could not be found]),
+		[gthread])
+   
+fi
+
+
+# Check for GLib 2.0
+echo "enable_glib12 = ${enable_glib12}"
+if test "x${PKGCONFIG}" = "xyes" -a "x${enable_glib12}" != "xyes"; then
+
+  # Check for GLib 2.0 (or 2.2)
+  PKG_CHECK_MODULES(GLIB, [glib-2.0], [:], [:])
+  PKG_CHECK_MODULES(GTHREAD, [gthread-2.0], [:], [:])
+
+  # Check for GLib 1.2 (using pkg-config)
+  if test "x${GLIB_CFLAGS}" = "x"; then
+
+    PKG_CHECK_MODULES(GLIB, [glib], [:], [:])
+    PKG_CHECK_MODULES(GTHREAD, [gthread], [:], [:])
+  fi
+fi
+
+
+# Check for GLib 1.2 if no GLib 2.X
+if test "x${GLIB_CFLAGS}" = "x"; then
+  AM_PATH_GLIB([1.2.10],
+		# GTHREAD_CFLAGS are included in GLIB_CFLAGS for 1.2
+		GTHREAD_CFLAGS=" ",  
+		,
 		[gthread])
 fi
 
-if test "x${PKGCONFIG}" = "xyes" -a "x${enable_glib2}" = "xyes"; then
-  # Check for 2.0, then 1.2
-  PKG_CHECK_MODULES(GLIB,
-		  [glib-2.0],
-		  ,
-		  [PKG_CHECK_MODULES(GLIB, glib)])
-  PKG_CHECK_MODULES(GTHREAD,
-		  [gthread-2.0],
-		  ,
-		  [PKG_CHECK_MODULES(GTHREAD, gthread)])
-fi
 
-
-# If pkg-config wasn't found, or didn't work
+# Fail if we didn't find GLib
 if test "x${GLIB_CFLAGS}" = "x"; then
-   AC_MSG_ERROR([glib could not be found])
+   AC_MSG_ERROR([GLib could not be found])
 fi
 
 
@@ -185,7 +213,7 @@ AC_SUBST(GTHREAD_LIBS)
 ###############################
 # Check for headers
 AC_HEADER_STDC
-AC_CHECK_HEADERS([sys/sockio.h sys/param.h])
+AC_CHECK_HEADERS([sys/sockio.h sys/param.h ifaddrs.h])
 
 
 AC_MSG_CHECKING([for linux/netlink.h])
@@ -197,6 +225,8 @@ AC_TRY_CPP([#include <linux/netlink.h>],
            ],[
              AC_MSG_RESULT(no)
            ])
+
+
 
 ###############################
 # Check for types
@@ -434,5 +464,6 @@ AC_CONFIG_FILES([
 	gnet.spec
 	gnet.pc],
 	[], # Do nothing
-	[cp -f gnet.pc gnet-1.3.pc ])
+	[cp -f gnet.pc gnet-1.3.pc
+	 cp -f gnet.m4 gnet-1.3.m4 ])
 AC_OUTPUT

@@ -371,8 +371,7 @@ gnet_udp_socket_get_ttl (const GUdpSocket* socket)
 {
   int ttl;
   socklen_t ttl_size;
-  int rv;
-
+  int rv = -2;
 
   ttl_size = sizeof(ttl);
 

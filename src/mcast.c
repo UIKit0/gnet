@@ -237,7 +237,7 @@ gnet_mcast_socket_join_group (GMcastSocket* socket,
       mreq.ipv6mr_interface = 0;
 
       /* Join the group */
-      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
+      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		      (void*) &mreq, sizeof(mreq));
     }
   else
@@ -286,7 +286,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
       mreq.ipv6mr_interface = 0;
 
       /* Join the group */
-      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP,
+      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 		      (void*) &mreq, sizeof(mreq));
     }
   else

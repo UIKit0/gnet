@@ -50,6 +50,8 @@ Features
 Internal Improvements
 ---------------------
 
+- 64-bit MDA/SHA.  These modules cannot handle buffers longer than 4G.
+
 - Better asynchronous DNS
     * Add option to use GNU ADNS? (and update license)
     * Consider modifying glibc/BIND code?

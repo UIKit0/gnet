@@ -179,8 +179,8 @@ main (int argc, char* argv[])
   TEST ("equal, no port", gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
   
   /* hash */
-  TEST ("hash", gnet_inetaddr_hash (inetaddr) == 870716602u);
-  TEST ("hash port", gnet_inetaddr_hash (inetaddr) != gnet_inetaddr_hash (inetaddr2));
+  TEST ("hash2", gnet_inetaddr_hash (inetaddr) == 870716602u);
+  TEST ("hash2 port", gnet_inetaddr_hash (inetaddr) != gnet_inetaddr_hash (inetaddr2));
 
   gnet_inetaddr_delete (inetaddr);
   gnet_inetaddr_delete (inetaddr2);

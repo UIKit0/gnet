@@ -29,6 +29,10 @@
 #include <usagi_ifaddrs.h>
 #endif
 
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+#endif
+
 
 /* **************************************** */
 
@@ -2401,7 +2405,7 @@ gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
     {
       guint32 high_addr;
 
-      high_addr = GNET_INETADDR_SA6(inetaddr).sin6_addr.s6_addr32[0];
+      high_addr = GNET_INETADDR_ADDR32(inetaddr, 0);
       high_addr = g_ntohl(high_addr);
 
       if ((high_addr & 0xFFFF0000) == 0)	/* 0000 0000 prefix */
@@ -2584,12 +2588,10 @@ gnet_inetaddr_hash (gconstpointer p)
     }
   else if (GNET_INETADDR_FAMILY(ia) == AF_INET6)
     {
-      struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*) &ia->sa;
-
-      addr = g_ntohl(sa_in6->sin6_addr.s6_addr32[0]) ^
-	g_ntohl(sa_in6->sin6_addr.s6_addr32[1]) ^
-	g_ntohl(sa_in6->sin6_addr.s6_addr32[2]) ^
-	g_ntohl(sa_in6->sin6_addr.s6_addr32[3]);
+      addr = g_ntohl(GNET_INETADDR_ADDR32(ia, 0)) ^
+	g_ntohl(GNET_INETADDR_ADDR32(ia, 1)) ^
+	g_ntohl(GNET_INETADDR_ADDR32(ia, 2)) ^
+	g_ntohl(GNET_INETADDR_ADDR32(ia, 3));
     }
   else
     g_assert_not_reached();
@@ -2681,17 +2683,14 @@ gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2)
     }
   else if (GNET_INETADDR_FAMILY(ia1) == AF_INET6)
     {
-      struct sockaddr_in6* sa_in1 = (struct sockaddr_in6*) &ia1->sa;
-      struct sockaddr_in6* sa_in2 = (struct sockaddr_in6*) &ia2->sa;
-
-      if ((sa_in1->sin6_addr.s6_addr32[0] == 
-	   sa_in2->sin6_addr.s6_addr32[0]) &&
-	  (sa_in1->sin6_addr.s6_addr32[1] == 
-	   sa_in2->sin6_addr.s6_addr32[1]) &&
-	  (sa_in1->sin6_addr.s6_addr32[2] == 
-	   sa_in2->sin6_addr.s6_addr32[2]) &&
-	  (sa_in1->sin6_addr.s6_addr32[3] == 
-	   sa_in2->sin6_addr.s6_addr32[3]))
+      if ((GNET_INETADDR_ADDR32(ia1, 0) ==
+	   GNET_INETADDR_ADDR32(ia2, 0)) &&
+	  (GNET_INETADDR_ADDR32(ia1, 1) ==
+	   GNET_INETADDR_ADDR32(ia2, 1)) &&
+	  (GNET_INETADDR_ADDR32(ia1, 2) ==
+	   GNET_INETADDR_ADDR32(ia2, 2)) &&
+	  (GNET_INETADDR_ADDR32(ia1, 3) ==
+	   GNET_INETADDR_ADDR32(ia2, 3)))
 	return TRUE;
     }
   else
