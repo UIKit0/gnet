@@ -147,8 +147,8 @@ AM_PATH_GLIB(1.2.0,
             [LIBS="$LIBS $GLIB_LIBS" CFLAGS="$CFLAGS $GLIB_CFLAGS"],
             AC_MSG_ERROR(Cannot find GLIB: Is glib-config in path?))
 
-glib_cflags=`glib-config --cflags glib`
-glib_libs=`glib-config --libs glib`
+glib_cflags=`$GLIB_CONFIG --cflags glib`
+glib_libs=`$GLIB_CONFIG --libs glib`
 
 AC_SUBST(glib_cflags)
 AC_SUBST(glib_libs)
@@ -199,8 +199,15 @@ AC_TRY_COMPILE([
 # ****************************************
 # Checks for library functions.
 
-# Check for pthread.  If no pthread, check for fork.
-AC_CHECK_LIB(pthread, pthread_create)
+# Check for pthread.
+AC_CHECK_LIB(pthread, pthread_create, [
+    AC_DEFINE(HAVE_LIBPTHREAD)
+    LIBS="-lpthread $LIBS"
+    pthread_libs="-lpthread"
+  ],[
+    pthread_libs=""
+  ])
+AC_SUBST(pthread_libs)
 
 
 # Check if we have gethostbyname_r (we assume that if the user has gethostbyname_r,

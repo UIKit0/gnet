@@ -1,14 +1,27 @@
+Thu Sep 20 12:40:43 2001  David Helder  <dhelder@umich.edu>
+	
+	* configure.in (glib_libs): Set -lpthread in gnet-config --libs
+	   when pthreads are used.
+	* acconfig.h: Added HAVE_LIBPTHREAD manually
+	* gnet-config.in: "
+
+	* Makefile.am (EXTRA_DIST): Include gnet.m4.  It was in m4data,
+	    not sure what's going on with autoconf.
+
+	* configure.in (glib_libs): Use proper glib-config
+	    when getting flags for gnet-config
+
 Mon Aug 27 13:49:46 2001 Andrew Lanoix <alanoix@umich.edu>
 	
-	*README.win32: Fix typo
+	* README.win32: Fix typo
 
 Fri Aug 24 10:47:34 2001 Andrew Lanoix <alanoix@umich.edu>
 	
-	*README.win32: Update
+	* README.win32: Update
 
 Sun Aug 12 11:59:22 2001  Andrew Lanoix <alanoix@umich.edu>
 
-	*gnet.def: Add missing gnet_inetaddr_new_nonblock &
+	* gnet.def: Add missing gnet_inetaddr_new_nonblock &
 	   gnet_inetaddr_new_nonblock 
 
 Mon Aug  6 13:31:37 2001  David Helder  <dhelder@umich.edu>

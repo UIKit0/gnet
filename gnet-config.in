@@ -4,6 +4,7 @@
 
 glib_libs="@glib_libs@"
 glib_cflags="@glib_cflags@"
+pthread_libs="@pthread_libs@"
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -106,6 +107,6 @@ if test "$echo_libs" = "yes"; then
         fi
       done
 
-      echo $libdirs -lgnet $my_glib_libs
+      echo $libdirs -lgnet $my_glib_libs $pthread_libs
 fi      
 

@@ -5,7 +5,7 @@ SUBDIRS = src examples tests doc
 @SET_MAKE@
 
 EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
-	README.win32 GNET.DSP config.h.win32 gnet.def
+	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4
 
 bin_SCRIPTS=gnet-config
 BUILT_SOURCES=gnet-config
