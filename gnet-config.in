@@ -9,6 +9,8 @@ pthread_libs="@pthread_libs@"
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 exec_prefix_set=no
+cflags="-I@includedir@/gnet -I@libdir@/gnet/include"
+libs="-L@libdir@ -lgnet"
 
 usage()
 {
@@ -83,28 +85,16 @@ if test "$echo_exec_prefix" = "yes"; then
 fi
 
 if test "$echo_cflags" = "yes"; then
-      includes="@GLIB_CFLAGS@ -I@includedir@/gnet"
-      for i in $glib_cflags ; do
-        if test $i = -I@includedir@ ; then
-          includes=""
-        fi
-      done
-      echo $includes -I@libdir@/gnet/include $glib_cflags
+      cflags="$glib_cflags $cflags"
+      # Include @includedir@ if it's in a non-standard place
+      if test @includedir@ != /usr/include ; then
+        cflags="$cflags -I@includedir@"
+      fi
+      echo $cflags
 fi
 
 if test "$echo_libs" = "yes"; then
-      my_glib_libs="@GLIB_LIBS@"
-      libdirs=-L@libdir@
-      for i in $glib_libs ; do
-        if test $i != -L@libdir@ ; then
-          if test -z "$my_glib_libs" ; then
-            my_glib_libs="$i"
-          else
-            my_glib_libs="$my_glib_libs $i"
-          fi
-        fi
-      done
-
-      echo $libdirs -lgnet $my_glib_libs $pthread_libs
+      libs="$libs $glib_libs $pthread_libs"
+      echo $libs
 fi      
 

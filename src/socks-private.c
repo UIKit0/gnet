@@ -418,7 +418,7 @@ gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* socket,
 
   /* Save callback */
   socket->accept_func = accept_func;
-  socket->accept_data = accept_func;
+  socket->accept_data = user_data;
 
   /* Add read watch */
   iochannel = gnet_tcp_socket_get_iochannel (socket);

@@ -1,3 +1,40 @@
+Fri Feb  1 19:37:25 2002  David Helder  <dhelder@umich.edu>
+
+	* src/iochannel.c (gnet_io_channel_read_async_cancel): Don't call
+	   g_assert(func()) cause assertions are disabled and func()
+	   won't get called.  Duh!
+	* src/conn.c (gnet_conn_watch_remove_read): "
+	* src/conn.c (gnet_conn_watch_remove_write): "
+	* src/conn.c (gnet_conn_watch_remove_error): "
+	* src/scheduler.c: "
+	* examples/sdr.c (main): "
+	* examples/echoclient-udp.c (normal_echoclient): "
+	
+	* src/iochannel.c (write_async_cb): Merged write and error cb's
+	   into this cb.
+	* src/iochannel.c (read_async_cb): Likewise.
+
+	* src/conn.c (conn_check_queued_writes): Delete removed link.  This
+	   was leaking memory.
+
+	* src/tcp.c (gnet_tcp_socket_server_accept_async): Fix typo (user
+	   data not set right).
+	* src/socks-private.c
+	(gnet_private_socks_tcp_socket_server_accept_async): Fix typo.
+
+	* examples/echoclient.c: Added better debug output.
+
+	* gnet-config.in: Cleaned up somemore.
+
+	* src/tcp.c (gnet_tcp_socket_unref): Remove accept watch on
+	   destroy.
+	
+	* examples/ljoust.c: Removed.  Out-of-date.
+	* doc/gnet.sgml: "
+
+	* examples/echoserver.c: Update to use new async accept func.
+	* src/server.c: "
+
 Wed Jan 30 20:22:33 2002  David Helder  <dhelder@umich.edu>
 
 	* src/sha.c (gnet_sha_new_string): Fixed warning

@@ -97,11 +97,19 @@ normal_echoclient(gchar* hostname, gint port)
 
   /* Create the address */
   addr = gnet_inetaddr_new(hostname, port);
-  g_assert (addr != NULL);
+  if (!addr)
+    {
+      fprintf (stderr, "Error: Name lookup for %s failed\n", hostname);
+      exit (EXIT_FAILURE);
+    }
 
   /* Create the socket */
   socket = gnet_tcp_socket_new(addr);
-  g_assert (socket != NULL);
+  if (!socket)
+    {
+      fprintf (stderr, "Error: Could not connect to %s:%d\n", hostname, port);
+      exit (EXIT_FAILURE);
+    }
 
   /* Get the IOChannel */
   iochannel = gnet_tcp_socket_get_iochannel(socket);
@@ -147,10 +155,10 @@ async_echoclient (gchar* hostname, gint port)
 {
   GMainLoop* main_loop = NULL;
 
-  g_print ("connect to %s %d\n", hostname, port);
-
   /* Create the main loop */
   main_loop = g_main_new(FALSE);
+
+  g_print ("Connecting to %s:%d... ", hostname, port);
 
   /* Connect asynchronously */
   gnet_tcp_socket_connect_async (hostname, port, async_client_connfunc, NULL);
@@ -169,9 +177,11 @@ async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
 
   if (status != GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK)
     {
-      fprintf (stderr, "Could not connect (status = %d)\n", status);
+      fprintf (stderr, "Error: Could not connect (status = %d)\n", status);
       exit (EXIT_FAILURE);
     }
+
+  fprintf (stderr, "connected\n");
 
   /* Read from socket */
   sin = gnet_tcp_socket_get_iochannel (socket);
@@ -192,7 +202,7 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
   /* Check for socket error */
   if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
     {
-      fprintf (stderr, "Socket error\n");
+      fprintf (stderr, "Error: Socket error\n");
       goto error;
     }
 
@@ -210,7 +220,7 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Check for stdin error */
       if (error != G_IO_ERROR_NONE)
 	{
-	  fprintf (stderr, "Read error (%d)\n", error);
+	  fprintf (stderr, "Error: Read error (%d)\n", error);
 	  goto error;
 	}
 
@@ -244,7 +254,7 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
   /* Check for socket error */
   if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
     {
-      fprintf (stderr, "Socket error\n");
+      fprintf (stderr, "Error: Socket error\n");
       goto error;
     }
 
@@ -262,7 +272,7 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Check for stdin error */
       if (error != G_IO_ERROR_NONE)
 	{
-	  fprintf (stderr, "Read error (%d)\n", error);
+	  fprintf (stderr, "Error: Read error (%d)\n", error);
 	  goto error;
 	}
 
@@ -332,7 +342,7 @@ object_echoclient (gchar* hostname, gint port)
   GConn* conn;
   GIOChannel* in;
 
-  g_print ("connect to %s %d\n", hostname, port);
+  g_print ("Connecting to %s:%d... ", hostname, port);
 
   /* Create the main loop */
   main_loop = g_main_new(FALSE);
@@ -363,7 +373,7 @@ ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
   /* Check for socket error */
   if (condition & G_IO_ERR)
     {
-      fprintf (stderr, "Socket error\n");
+      fprintf (stderr, "Error: Socket error\n");
       goto error;
     }
 
@@ -420,7 +430,7 @@ ob_conn_func (GConn* conn, GConnStatus status,
 
     case GNET_CONN_STATUS_CONNECT:
       {
-	fprintf (stderr, "connect\n");
+	g_print ("connected\n");
 	gnet_conn_readline (conn, NULL, 1024, 60000);
 	break;
       }
@@ -428,6 +438,7 @@ ob_conn_func (GConn* conn, GConnStatus status,
     case GNET_CONN_STATUS_READ:
       {
 	fwrite (buffer, length, 1, stdout);
+	return TRUE;
 	break;
       }
 
@@ -438,10 +449,23 @@ ob_conn_func (GConn* conn, GConnStatus status,
       }
 
     case GNET_CONN_STATUS_CLOSE:
+      {
+	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	exit (EXIT_SUCCESS);
+      }
+
     case GNET_CONN_STATUS_TIMEOUT:
+      {
+	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	fprintf (stderr, "Connection timeout\n");
+	exit (EXIT_FAILURE);
+      }
+
     case GNET_CONN_STATUS_ERROR:
       {
 	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	fprintf (stderr, "Connection failure\n");
+	exit (EXIT_FAILURE);
 	break;
       }
 
@@ -449,6 +473,5 @@ ob_conn_func (GConn* conn, GConnStatus status,
       g_assert_not_reached ();
     }
 
-  return TRUE;	/* TRUE means read more if status was read, otherwise
-                   its ignored */
+  return FALSE;	/* rv only matters for a read */
 }

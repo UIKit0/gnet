@@ -84,13 +84,15 @@ normal_echoclient(gchar* hostname, gint port)
   while (fgets(buffer, sizeof(buffer), stdin) != 0)
     {
       GUdpPacket* packet;
+      gint rv;
 
       /* Create packet */
       n = strlen(buffer);
       packet = gnet_udp_packet_send_new (buffer, n, addr);
 
       /* Send packet */
-      g_assert (gnet_udp_socket_send(socket, packet) == 0);
+      rv = gnet_udp_socket_send(socket, packet);
+      g_assert (rv == 0);
       gnet_udp_packet_delete (packet);
 
       /* Receive packet */

@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000-2002  David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -23,8 +23,7 @@
 
 
 
-static gboolean server_accept_cb (GIOChannel* listen_iochannel, 
-				  GIOCondition condition, gpointer user_data);
+static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpointer data);
 
 
 GServer*  
@@ -64,15 +63,9 @@ gnet_server_new (const GInetAddr* iface, gboolean force_port,
   /* Get the address */
   server->iface = gnet_tcp_socket_get_inetaddr (server->socket);
 
-  /* Get the iochannel */
-  server->iochannel = gnet_tcp_socket_get_iochannel (server->socket);
-  if (server->iochannel == NULL)
-    goto error;
-
   /* Wait for new connections */
-  server->watch_id = g_io_add_watch (server->iochannel, 
-				     G_IO_IN | G_IO_ERR | G_IO_NVAL, 
-				     server_accept_cb, server);
+  gnet_tcp_socket_server_accept_async (server->socket, 
+				       server_accept_cb, server);
 
   return server;
 
@@ -88,8 +81,6 @@ gnet_server_delete (GServer* server)
 {
   if (server)
     {
-      if (server->watch_id)      g_source_remove (server->watch_id);
-      if (server->iochannel)     g_io_channel_unref (server->iochannel);
       if (server->socket)	 gnet_tcp_socket_delete (server->socket);
       if (server->iface)     	 gnet_inetaddr_delete (server->iface);
 
@@ -100,36 +91,27 @@ gnet_server_delete (GServer* server)
 
 
 
-static gboolean
-server_accept_cb (GIOChannel* listen_iochannel, 
-		  GIOCondition condition, gpointer user_data)
+static void
+server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpointer data)
 {
-  GServer* server = (GServer*) user_data;
+  GServer* server = (GServer*) data;
 
   g_return_val_if_fail (server, FALSE);
 
-  if (condition == G_IO_IN)
+  if (client)
     {
-      GTcpSocket* socket = NULL;
       GIOChannel* iochannel = NULL;
       GConn* conn; 
 
-      /* Accept the connection */
-      socket = gnet_tcp_socket_server_accept_nonblock (server->socket);
-
-      /* Ignore if the connection is now gone */
-      if (socket == NULL) 
-	return TRUE;
-
       /* Get the iochannel */
-      iochannel = gnet_tcp_socket_get_iochannel (socket);
+      iochannel = gnet_tcp_socket_get_iochannel (client);
       g_return_val_if_fail (iochannel, FALSE);
 
       /* Create a Connection */
       conn = g_new0 (GConn, 1);
-      conn->socket = socket;
+      conn->socket = client;
       conn->iochannel = iochannel;
-      conn->inetaddr = gnet_tcp_socket_get_inetaddr (socket);
+      conn->inetaddr = gnet_tcp_socket_get_inetaddr (client);
       conn->hostname = gnet_inetaddr_get_canonical_name (conn->inetaddr);
       conn->port = gnet_inetaddr_get_port (conn->inetaddr);
 
@@ -138,11 +120,9 @@ server_accept_cb (GIOChannel* listen_iochannel,
     }
   else
     {
+      gnet_tcp_socket_server_accept_async_cancel (server_socket);
       (server->func)(server, GNET_SERVER_STATUS_ERROR, 
 		     NULL, server->user_data);
-      return FALSE;
     }
-
-  return TRUE;
 }
 

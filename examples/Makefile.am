@@ -5,9 +5,9 @@
 EXTRA_PROGRAMS = echoserver echoclient 	\
 		 echoserver-udp echoclient-udp	\
 		 echoserver-unix echoclient-unix \
-		 hfetch sdr ljoust
-EXTRA_DIST     = ljoust.c makefile.mingw
-CLEANFILES     = $(EXTRA_PROGRAMS) ljoust
+		 hfetch sdr
+EXTRA_DIST     = makefile.mingw
+CLEANFILES     = $(EXTRA_PROGRAMS)
 
 INCLUDES += `gnet-config --cflags`
 LDFLAGS  += `gnet-config --libs`
@@ -39,9 +39,6 @@ sdr_SOURCES = \
 
 hfetch_SOURCES = 	\
 	hfetch.c
-
-ljoust:
-	$(CC) ljoust.c -o ljoust `gtk-config --cflags --libs` `gnet-config --cflags --libs`
 
 
 

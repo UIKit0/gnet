@@ -268,18 +268,6 @@ AM_PATH_GNET(&lt;version number&gt;,
 
     </sect1>
 
-
-    <sect1 id="ljoust">
-      <title>Llama Joust</title>
-
-      <para>
-	ljoust is Networked Llama Joust.  You control a flying llama
-	and can fly around the screen and bounce off things.  It uses
-	GNet's multicast for the networking and GTK for the GUI.  The
-	game in incomplete - there is no llama-to-llama collision
-	detection and no scoring.
-      </para>
-
     <sect1 id="tests">
       <title>Various test files</title>
       

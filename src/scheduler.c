@@ -105,7 +105,7 @@ scheduler_set_max_ups (Scheduler* scheduler, gint max_units_per_second)
 
       if (scheduler->queue)
 	{
-	  g_assert (gettimeofday(&scheduler->last_dispatch, NULL) == 0);
+	  gettimeofday(&scheduler->last_dispatch, NULL);
 
 	  g_list_free (scheduler->queue);
 	  scheduler->queue = NULL;
@@ -137,7 +137,7 @@ scheduler_add (Scheduler* scheduler, gpointer user_data, SchedulerFunc func, gin
   if (!scheduler->queue && can_dispatch (scheduler))
     {
       scheduler->last_units = (func)(user_data);
-      g_assert (gettimeofday(&scheduler->last_dispatch, NULL) == 0);
+      gettimeofday(&scheduler->last_dispatch, NULL);
     }
 
   /* Otherwise, add to the queue.  Make sure the timer is set. */
@@ -201,7 +201,7 @@ can_dispatch (Scheduler* scheduler)
   if (scheduler->max_ups < 0)
     return TRUE;
 
-  g_assert (gettimeofday(&timeofday, NULL) == 0);
+  gettimeofday(&timeofday, NULL);
 
   timersub (&timeofday, &scheduler->last_dispatch, &diff);
   secs = (gdouble) diff.tv_sec + (((gdouble) diff.tv_usec) / 1000000.0);
@@ -231,7 +231,7 @@ set_timer (Scheduler* scheduler)
   diff.tv_sec = (gint) offset;
   diff.tv_usec = (offset - floor(offset)) * 1000000.0;
 
-  g_assert (gettimeofday(&timeofday, NULL) == 0);
+  gettimeofday(&timeofday, NULL);
 
   timeradd (&scheduler->last_dispatch, &diff, &diff);
   timersub (&diff, &timeofday, &diff);
@@ -270,7 +270,7 @@ scheduler_cb (gpointer data)
       if (!scheduler->last_units && scheduler->queue)
 	goto again;
 
-      g_assert (gettimeofday(&scheduler->last_dispatch, NULL) == 0);
+      gettimeofday(&scheduler->last_dispatch, NULL);
 
       /* Schedule next dispatch */
       if (scheduler->queue)

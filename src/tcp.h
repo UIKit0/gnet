@@ -205,8 +205,8 @@ GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
  *   failed if client_socket is NULL.
  *
  **/
-typedef void (*GTcpSocketAcceptFunc)(GTcpSocket* server_socket, 
-				     GTcpSocket* client_socket,
+typedef void (*GTcpSocketAcceptFunc)(GTcpSocket* server, 
+				     GTcpSocket* client,
 				     gpointer data);
 
 void gnet_tcp_socket_server_accept_async (GTcpSocket* socket,

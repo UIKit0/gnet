@@ -154,6 +154,8 @@ gnet_conn_connect (GConn* conn, guint timeout)
 				     conn_connect_cb, conn);
   else
     g_return_if_fail (FALSE);
+
+  /* FIX: Use the timeout! */
 }
 
 
@@ -325,7 +327,7 @@ gnet_conn_watch_remove_read (GConn* conn)
 
   if (conn->read_watch)
     {
-      g_assert (g_source_remove(conn->read_watch));
+      g_source_remove (conn->read_watch);
       conn->read_watch = 0;
     }
 }
@@ -338,7 +340,7 @@ gnet_conn_watch_remove_write (GConn* conn)
 
   if (conn->write_watch)
     {
-      g_assert (g_source_remove(conn->write_watch));
+      g_source_remove (conn->write_watch);
       conn->write_watch = 0;
     }
 }
@@ -351,7 +353,7 @@ gnet_conn_watch_remove_error (GConn* conn)
 
   if (conn->err_watch)
     {
-      g_assert (g_source_remove(conn->err_watch));
+      g_source_remove (conn->err_watch);
       conn->err_watch = 0;
     }
 }
@@ -413,6 +415,7 @@ conn_read_cb (GIOChannel* iochannel, GNetIOChannelReadAsyncStatus status,
   gpointer read_id;
 
   g_return_val_if_fail (conn, FALSE);
+  g_return_val_if_fail (conn->func, FALSE);
 
   /* If the upper level calls disconnect, we don't want it to delete
      the read_id. */
@@ -432,11 +435,13 @@ conn_read_cb (GIOChannel* iochannel, GNetIOChannelReadAsyncStatus status,
 	}
       else
 	{
+	  /* read_id is invalid */
 	  (conn->func)(conn, GNET_CONN_STATUS_CLOSE, NULL, 0, conn->user_data);
 	}
     }
   else
     {
+      /* read_id is invalid */
       (conn->func)(conn, GNET_CONN_STATUS_ERROR, NULL, 0, conn->user_data);
     }
 
@@ -458,7 +463,9 @@ gnet_conn_write (GConn* conn, gchar* buffer, gint length, guint timeout)
     }
   else
     {
-      QueuedWrite* queued_write = g_new0 (QueuedWrite, 1);
+      QueuedWrite* queued_write;
+
+      queued_write = g_new0 (QueuedWrite, 1);
       queued_write->buffer = buffer;
       queued_write->length = length;
       queued_write->timeout = timeout;
@@ -478,6 +485,7 @@ conn_write_cb (GIOChannel* iochannel, gchar* buffer, guint length,
   g_return_if_fail (conn);
 
   conn->write_id = NULL;
+  /* write id is invalid */
 
   if (status == GNET_IOCHANNEL_WRITE_ASYNC_STATUS_OK)
     {
@@ -536,8 +544,7 @@ conn_check_queued_writes (GConn* conn)
   if (conn->queued_writes)
     {
       QueuedWrite* queued_write = conn->queued_writes->data;
-      conn->queued_writes = g_list_remove_link (conn->queued_writes, 
-						conn->queued_writes);
+      conn->queued_writes = g_list_remove (conn->queued_writes, queued_write);
 
       conn->write_id = 
 	gnet_io_channel_write_async (conn->iochannel, 

@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <gnet/gnet.h>
 
+#include <signal.h>
 
 
 typedef enum { NORMAL, ASYNC, OBJECT} ServerType;
@@ -136,8 +137,9 @@ typedef struct
 
 static void clientstate_delete (ClientState* state);
 
-static gboolean async_server_iofunc (GIOChannel* server, 
-				     GIOCondition condition, gpointer data);
+static void async_accept (GTcpSocket* server_socket, 
+			  GTcpSocket* client_socket,
+			  gpointer data);
 static gboolean async_client_iofunc (GIOChannel* client, 
 				     GIOCondition condition, gpointer data);
 
@@ -158,7 +160,6 @@ static void
 async_echoserver(gint port)
 {
   GTcpSocket* server;
-  GIOChannel* iochannel = NULL;
   GMainLoop* main_loop = NULL;
 
   /* Create the server */
@@ -168,36 +169,23 @@ async_echoserver(gint port)
   /* Create the main loop */
   main_loop = g_main_new(FALSE);
 
-  /* Add a watch for incoming clients */
-  iochannel = gnet_tcp_socket_get_iochannel(server);
-  g_io_add_watch(iochannel, 
-		 G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
-		 async_server_iofunc, server);
+  /* Wait asyncy for incoming clients */
+  gnet_tcp_socket_server_accept_async (server, async_accept, NULL);
 
   /* Start the main loop */
   g_main_run(main_loop);
 }
 
 
-static gboolean
-async_server_iofunc (GIOChannel* iochannel, GIOCondition condition, 
-		     gpointer data)
+static void
+async_accept (GTcpSocket* server, GTcpSocket* client, gpointer data)
 {
-  GTcpSocket* server = (GTcpSocket*) data;
-  g_assert (server != NULL);
-
-  /*    g_print ("nb_server_iofunc %d\n", condition); */
-
-  if (condition & G_IO_IN)
+  if (client)
     {
-      GTcpSocket* client = NULL;
-      GIOChannel* client_iochannel = NULL;
-      ClientState* client_state = NULL;
+      GIOChannel* client_iochannel;
+      ClientState* client_state;
 
-      client = gnet_tcp_socket_server_accept_nonblock (server);
-      if (!client) return TRUE;
-
-      client_iochannel = gnet_tcp_socket_get_iochannel(client);
+      client_iochannel = gnet_tcp_socket_get_iochannel (client);
       g_assert (client_iochannel != NULL);
 
       client_state = g_new0(ClientState, 1);
@@ -207,14 +195,14 @@ async_server_iofunc (GIOChannel* iochannel, GIOCondition condition,
       g_io_add_watch (client_iochannel, 
 		      G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
 		      async_client_iofunc, client_state);
+
+      g_io_channel_unref (client_iochannel);
     }
   else
     {
-      fprintf (stderr, "Server error %d\n", condition);
-      return FALSE;
+      fprintf (stderr, "Server error\n");
+      exit (EXIT_FAILURE);
     }
-
-  return TRUE;
 }
 
 
@@ -351,6 +339,9 @@ static void ob_server_func (GServer* server, GServerStatus status,
 static gboolean ob_client_func (GConn* conn, GConnStatus status, 
 				gchar* buffer, gint length, 
 				gpointer user_data);
+static void ob_sig_int (int signum);
+
+static GServer* ob_server = NULL;
 
 
 static void
@@ -369,7 +360,14 @@ object_echoserver (gint port)
 
   /* Create the server */
   server = gnet_server_new (addr, TRUE, ob_server_func, NULL);
-  g_assert (server);
+  if (!server)
+    {
+      fprintf (stderr, "Error: Could not start server\n");
+      exit (EXIT_FAILURE);
+    }
+
+  ob_server = server;
+  signal (SIGINT, ob_sig_int);
 
   /* Start the main loop */
   g_main_run(main_loop);
@@ -385,7 +383,7 @@ ob_server_func (GServer* server, GServerStatus status,
     case GNET_SERVER_STATUS_CONNECT:
       {
 	conn->func = ob_client_func;
-	gnet_conn_readline (conn, NULL, 1024, 60000);
+	gnet_conn_readline (conn, NULL, 1024, 30000);
 	break;
       }
 
@@ -407,7 +405,9 @@ ob_client_func (GConn* conn, GConnStatus status,
     {
     case GNET_CONN_STATUS_READ:
       {
-	gchar* buffer_copy = g_memdup(buffer, length);
+	gchar* buffer_copy;
+
+	buffer_copy = g_memdup(buffer, length);
 	buffer_copy[length] = '\n';
 
 	gnet_conn_write (conn, buffer_copy, length, 0);
@@ -424,7 +424,7 @@ ob_client_func (GConn* conn, GConnStatus status,
     case GNET_CONN_STATUS_TIMEOUT:
     case GNET_CONN_STATUS_ERROR:
       {
-	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	gnet_conn_delete (conn, TRUE);
 	break;
       }
 
@@ -434,4 +434,13 @@ ob_client_func (GConn* conn, GConnStatus status,
 
   return TRUE;	/* TRUE means read more if status was read, otherwise
                    its ignored */
+}
+
+
+
+static void 
+ob_sig_int (int signum)
+{
+  gnet_server_delete (ob_server);
+  exit (EXIT_FAILURE);
 }

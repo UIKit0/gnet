@@ -13,6 +13,7 @@ Changes in Gnet
     no longer succeeds immediately
 * New gnet_{sha,md5}_clone functions
 * MacOSX port
+* read_async and write_async performance fixes
 * Various small compile and configuration fixes
 
 

@@ -43,6 +43,7 @@ main(int argc, char** argv)
 
   GMcastSocket* ms;
   GInetAddr* ia;
+  gint rv;
 
 
   /* Create a multicast socket */
@@ -54,7 +55,8 @@ main(int argc, char** argv)
   g_assert(ia != NULL);
 
   /* Join the group */
-  g_assert(gnet_mcast_socket_join_group(ms, ia) == 0);
+  rv = gnet_mcast_socket_join_group(ms, ia);
+  g_assert(rv == 0);
 
   printf("Joined %s:%d...\n", gnet_inetaddr_get_name(ia), gnet_inetaddr_get_port(ia));
 
@@ -69,7 +71,8 @@ main(int argc, char** argv)
 /*  	   gnet_udp_socket_get_MTU(gnet_mcast_socket_to_udp_socket(ms))); */
 
   /* Change the loopback */
-  g_assert (gnet_mcast_socket_set_loopback(ms, 0) == 0);
+  rv = gnet_mcast_socket_set_loopback(ms, 0);
+  g_assert (rv == 0);
 
   /* Create a packet for receiving */
   packet = gnet_udp_packet_receive_new(buf, MAXLINE);

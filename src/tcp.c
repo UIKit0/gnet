@@ -622,6 +622,9 @@ gnet_tcp_socket_unref(GTcpSocket* s)
 
   if (s->ref_count == 0)
     {
+      if (s->accept_watch)
+	g_source_remove (s->accept_watch);
+
       GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
 
       if (s->iochannel)
@@ -1136,7 +1139,7 @@ gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
 
   /* Save callback */
   socket->accept_func = accept_func;
-  socket->accept_data = accept_func;
+  socket->accept_data = user_data;
 
   /* Add read watch */
   iochannel = gnet_tcp_socket_get_iochannel (socket);
@@ -1158,7 +1161,7 @@ tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition
   if (condition & G_IO_IN)
     {
       GTcpSocket* client;
-      gboolean destroy = FALSE;
+      gboolean destroyed = FALSE;
 
       client = gnet_tcp_socket_server_accept_nonblock (server);
       if (!client) 
@@ -1166,11 +1169,13 @@ tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition
 
       /* Do upcall, protected by a ref */
       gnet_tcp_socket_ref (server);
+
       (server->accept_func)(server, client, server->accept_data);
+
       if (server->ref_count == 1)
-	destroy = TRUE;
+	destroyed = TRUE;
       gnet_tcp_socket_unref (server);
-      if (destroy || !server->accept_watch)
+      if (destroyed || !server->accept_watch)
 	return FALSE;
     }
   else
@@ -1202,5 +1207,3 @@ gnet_tcp_socket_server_accept_async_cancel (GTcpSocket* socket)
   g_source_remove (socket->accept_watch);
   socket->accept_watch = 0;
 }
-
-
