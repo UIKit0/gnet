@@ -1,3 +1,7 @@
+Sun Apr 13 17:50:23 2003  David Helder  <dhelder@umich.edu>
+
+	* doc/Makefile.am (maintainer-clean-local): Fix clean rule.
+
 Sun Apr 13 14:09:14 2003  David Helder  <dhelder@umich.edu>
 
 	* doc/gnet-docs.sgml: Update version.
