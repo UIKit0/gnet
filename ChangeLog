@@ -1,3 +1,12 @@
+Wed Jun 13 11:29:25 2001  Andrew Lanoix <alanoix@umich.edu>
+
+	*gnet.def: update
+	*README.win32: update
+	*tests/Makefile.mingw: Build hash.c
+	*tests/hash.c: Add a note that extra \r's on win32
+	  text files will throw off SHA and MD5 if you don't
+	  remove them
+  
 Sat Jun  9 15:35:19 2001  David Helder  <dhelder@umich.edu>
 
 	* tests/hash.c: Actually removed mmap as advertised.

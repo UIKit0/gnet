@@ -7,3 +7,4 @@ all:
 	$(CC) $(FLAGS) $(INC) dnstest.c -o dnstest $(LINK)
 	$(CC) $(FLAGS) $(INC) pack.c -o pack $(LINK)
 	$(CC) $(FLAGS) $(INC) unpack.c -o unpack $(LINK)
+	$(CC) $(FLAGS) $(INC) hash.c -o hash $(LINK)

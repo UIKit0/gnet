@@ -73,6 +73,12 @@ main (int argc, char* argv[])
     buffer = NULL;
   fclose (file);
 
+  /* Reminder that on windows, text files have extra "\r" in them 
+     where as on *NIX they do not. This will throw off SHA & MD5 
+     if you don't filter the extra characters out before calling 
+     those functions.
+  */
+
   /* **************************************** */
 
   /* Create MD5 */

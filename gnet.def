@@ -1,4 +1,6 @@
 EXPORTS
+	; 1.0 (Stable)
+	;
 	DllMain
 	;
 	gnet_major_version
@@ -79,7 +81,7 @@ EXPORTS
 	gnet_mcast_socket_is_loopback
 	gnet_mcast_socket_set_loopback
 	;
-	; 1.1/1.2 Code
+	; 1.1 Code (Stable)
 	;
 	gnet_pack
 	gnet_pack_strdup 
@@ -88,6 +90,33 @@ EXPORTS
 	gnet_vcalcsize
 	gnet_unpack
 	gnet_vunpack
+	;
+	gnet_md5_new
+	gnet_md5_new_string
+	gnet_md5_delete
+	gnet_md5_new_incremental
+	gnet_md5_update
+	gnet_md5_final
+	gnet_md5_equal
+	gnet_md5_hash
+	gnet_md5_get_digest
+	gnet_md5_get_string
+	gnet_md5_copy_string
+	;
+	gnet_sha_new_incremental
+	gnet_sha_update
+	gnet_sha_final
+	gnet_sha_equal
+	gnet_sha_hash
+	gnet_sha_get_digest
+	gnet_sha_get_string
+	gnet_sha_copy_string
+	;
+	gnet_sha_new
+	gnet_sha_new_string
+	gnet_sha_delete
+	;
+	; Unstable / Untested
 	;
 	gnet_conn_new
 	gnet_conn_new_inetaddr
@@ -114,33 +143,8 @@ EXPORTS
 	gnet_io_channel_readany_check_func
 	gnet_io_channel_readline_check_func
 	;
-	gnet_md5_new
-	gnet_md5_new_string
-	gnet_md5_delete
-	gnet_md5_new_incremental
-	gnet_md5_update
-	gnet_md5_final
-	gnet_md5_equal
-	gnet_md5_hash
-	gnet_md5_get_digest
-	gnet_md5_get_string
-	gnet_md5_copy_string
-	;
 	gnet_server_new
 	gnet_server_delete
-	;
-	gnet_sha_new
-	gnet_sha_new_string
-	gnet_sha_delete
-	;
-	gnet_sha_new_incremental
-	gnet_sha_update
-	gnet_sha_final
-	gnet_sha_equal
-	gnet_sha_hash
-	gnet_sha_get_digest
-	gnet_sha_get_string
-	gnet_sha_copy_string
 	;
 	gnet_url_new
 	gnet_url_new_fields
@@ -155,4 +159,3 @@ EXPORTS
 	;
 	gnet_tcp_socket_set_tos
 	gnet_tcp_socket_server_new_interface
-	
