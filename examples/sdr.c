@@ -61,7 +61,7 @@ main(int argc, char** argv)
   printf("Joined %s:%d...\n", gnet_inetaddr_get_name(ia), gnet_inetaddr_get_port(ia));
 
   /* Print some information about our multicast socket */
-  g_print ("My addresss: %s\n", gnet_inetaddr_gethostname());
+  g_print ("My addresss: %s\n", gnet_inetaddr_get_host_name());
   g_print ("Loopback: %d\n", gnet_mcast_socket_is_loopback (ms));
   g_print ("Mcast TTL: %d\n", gnet_mcast_socket_get_ttl(ms));
 

@@ -82,6 +82,8 @@ applications.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -90,6 +92,8 @@ applications.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -98,6 +102,8 @@ applications.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -106,12 +112,13 @@ applications.
 
 </para>
 
-@s: 
+@socket: 
 @buffer: 
 @length: 
 @dst: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@s: 
 @data: 
 
 
@@ -120,12 +127,13 @@ applications.
 
 </para>
 
-@s: 
+@socket: 
 @buffer: 
 @length: 
 @src: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@s: 
 @data: 
 
 
@@ -134,8 +142,10 @@ applications.
 
 </para>
 
-@s: 
+@socket: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@s: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_get_io_channel ##### -->
@@ -152,8 +162,10 @@ applications.
 
 </para>
 
-@us: 
+@socket: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@us: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_set_ttl ##### -->
@@ -161,10 +173,11 @@ applications.
 
 </para>
 
-@us: 
+@socket: 
 @ttl: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@us: 
 @val: 
 
 

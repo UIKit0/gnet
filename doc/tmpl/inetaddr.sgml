@@ -187,9 +187,11 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@addr: 
+@bytes: 
 @length: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@addr: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_clone ##### -->
@@ -197,8 +199,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_delete ##### -->
@@ -206,6 +210,8 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
+@inetaddr: 
+<!-- # Unused Parameters # -->
 @ia: 
 
 
@@ -214,6 +220,8 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
+@inetaddr: 
+<!-- # Unused Parameters # -->
 @ia: 
 
 
@@ -222,6 +230,8 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
+@inetaddr: 
+<!-- # Unused Parameters # -->
 @ia: 
 
 
@@ -230,8 +240,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
@@ -239,8 +251,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### TYPEDEF GInetAddrGetNameAsyncID ##### -->
@@ -265,10 +279,12 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @func: 
 @data: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_name_async_cancel ##### -->
@@ -286,8 +302,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_port ##### -->
@@ -295,8 +313,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_set_port ##### -->
@@ -304,8 +324,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@ia: 
+@inetaddr: 
 @port: 
+<!-- # Unused Parameters # -->
+@ia: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_is_canonical ##### -->
@@ -420,7 +442,7 @@ be used to automatically configure peer-to-peer applications.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_inetaddr_gethostname ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_get_host_name ##### -->
 <para>
 
 </para>
@@ -428,7 +450,7 @@ be used to automatically configure peer-to-peer applications.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_inetaddr_gethostaddr ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_get_host_addr ##### -->
 <para>
 
 </para>
@@ -449,8 +471,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@addr: 
+@inetaddr: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@addr: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_internet_interface ##### -->

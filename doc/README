@@ -62,14 +62,13 @@ Style notes
  x_delete: Deletes a #X.
  x_hash: Creates a hash code for a #X for use with GHashTable.
 	Returns: the hash code for @x.
- x_equal: Compares two #Xs for equality.  Returns: 1 if they are equal;
-	0 otherwise.  (args are "a #X" and "another #X"
- x_ref:  Adds a reference to a #X.
+ x_equal: Compares two #Xs for equality.  Returns: TRUE if they are
+	equal; FALSE otherwise.  (args are "a #X" and "another #X"
+ x_ref: Adds a reference to a #X.
  x_unref: Removes a reference from a #X.  A #X is deleted when
  	the reference count reaches 0.
 
 
 
 TODO:
-
   failure vs. error - is there a difference?

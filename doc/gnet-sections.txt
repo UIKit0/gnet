@@ -46,9 +46,8 @@ gnet_inetaddr_is_ipv6
 gnet_inetaddr_hash
 gnet_inetaddr_equal
 gnet_inetaddr_noport_equal
-gnet_inetaddr_gethostname
-gnet_inetaddr_gethostaddr
-gnet_inetaddr_new_any
+gnet_inetaddr_get_host_name
+gnet_inetaddr_get_host_addr
 gnet_inetaddr_autodetect_internet_interface
 gnet_inetaddr_get_interface_to
 gnet_inetaddr_get_internet_interface
@@ -98,10 +97,12 @@ gnet_tcp_socket_unref
 gnet_tcp_socket_get_io_channel
 gnet_tcp_socket_get_inetaddr
 gnet_tcp_socket_get_port
+gnet_tcp_socket_get_local_inetaddr
 GNetTOS
 gnet_tcp_socket_set_tos
 gnet_tcp_socket_server_new
-gnet_tcp_socket_server_new_interface
+gnet_tcp_socket_server_new_with_port
+gnet_tcp_socket_server_new_full
 gnet_tcp_socket_server_accept
 gnet_tcp_socket_server_accept_nonblock
 GTcpSocketAcceptFunc
@@ -196,6 +197,8 @@ GServer
 GServerFunc
 gnet_server_new
 gnet_server_delete
+gnet_server_ref
+gnet_server_unref
 </SECTION>
 
 <SECTION>
@@ -247,16 +250,18 @@ gnet_uri_equal
 <SECTION>
 <FILE>socks</FILE>
 GNET_SOCKS_PORT
+GNET_SOCKS_VERSION
 gnet_socks_get_enabled
 gnet_socks_set_enabled
 gnet_socks_get_server
 gnet_socks_set_server
+gnet_socks_get_version
+gnet_socks_set_version
 </SECTION>
 
 <SECTION>
 <FILE>unix</FILE>
 GUnixSocket
-gnet_unix_socket_connect
 gnet_unix_socket_new
 gnet_unix_socket_delete
 gnet_unix_socket_ref

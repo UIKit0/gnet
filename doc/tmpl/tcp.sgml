@@ -158,6 +158,8 @@ This module will use SOCKS if enabled.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -166,6 +168,8 @@ This module will use SOCKS if enabled.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -174,6 +178,8 @@ This module will use SOCKS if enabled.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -196,6 +202,15 @@ This module will use SOCKS if enabled.
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_get_port ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_get_local_inetaddr ##### -->
 <para>
 
 </para>
@@ -229,11 +244,21 @@ This module will use SOCKS if enabled.
 
 </para>
 
+@Returns: 
+<!-- # Unused Parameters # -->
+@port: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_new_with_port ##### -->
+<para>
+
+</para>
+
 @port: 
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_tcp_socket_server_new_interface ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_server_new_full ##### -->
 <para>
 
 </para>

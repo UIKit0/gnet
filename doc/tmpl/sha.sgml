@@ -100,8 +100,10 @@ gnet_sha_delete (sha);
 
 </para>
 
-@gsha: 
+@sha: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@gsha: 
 
 
 <!-- ##### FUNCTION gnet_sha_delete ##### -->
@@ -109,6 +111,8 @@ gnet_sha_delete (sha);
 
 </para>
 
+@sha: 
+<!-- # Unused Parameters # -->
 @gsha: 
 
 
@@ -125,9 +129,11 @@ gnet_sha_delete (sha);
 
 </para>
 
-@gsha: 
+@sha: 
 @buffer: 
 @length: 
+<!-- # Unused Parameters # -->
+@gsha: 
 
 
 <!-- ##### FUNCTION gnet_sha_final ##### -->
@@ -135,6 +141,8 @@ gnet_sha_delete (sha);
 
 </para>
 
+@sha: 
+<!-- # Unused Parameters # -->
 @gsha: 
 
 
@@ -162,8 +170,10 @@ gnet_sha_delete (sha);
 
 </para>
 
-@gsha: 
+@sha: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@gsha: 
 
 
 <!-- ##### FUNCTION gnet_sha_get_string ##### -->
@@ -171,8 +181,10 @@ gnet_sha_delete (sha);
 
 </para>
 
-@gsha: 
+@sha: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@gsha: 
 
 
 <!-- ##### FUNCTION gnet_sha_copy_string ##### -->
@@ -180,7 +192,9 @@ gnet_sha_delete (sha);
 
 </para>
 
-@gsha: 
+@sha: 
 @buffer: 
+<!-- # Unused Parameters # -->
+@gsha: 
 
 

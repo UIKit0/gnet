@@ -64,6 +64,24 @@ version is used.  The default is version 5.
 
 </para>
 
+@inetaddr: 
+<!-- # Unused Parameters # -->
 @ia: 
+
+
+<!-- ##### FUNCTION gnet_socks_get_version ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_socks_set_version ##### -->
+<para>
+
+</para>
+
+@version: 
 
 

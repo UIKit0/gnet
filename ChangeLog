@@ -1,3 +1,50 @@
+Mon Feb  3 23:06:59 2003  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c (gnet_tcp_socket_get_local_inetaddr): Added.
+	   I'm tempted to change gnet_tcp_socket_get_inetaddr to
+	   gnet_tcp_socket_get_remote_inetaddr.
+
+	* src/*: param name clean-ups.
+	
+	* src/unix.c (gnet_unix_socket_unref): Restore old unref code.
+	    (Where did it go?!)
+	
+	* src/uri.c (gnet_uri_equal): Return gboolean.
+	* src/inetaddr.c (gnet_inetaddr_equal): "
+	* src/inetaddr.c (gnet_inetaddr_noport_equal): "
+	* src/sha.c (gnet_sha_equal): "
+	* src/sha.c (gnet_md5_equal): "
+
+	* src/inetaddr.c (gnet_inetaddr_new_bytes): 
+	    s/guint8*/gchar*/ for bytes arg.
+
+	* src/inetaddr.c: s/ia/inetaddr in args.
+
+	* src/inetaddr.c (gnet_inetaddr_set_port): port is
+	    a gint, not a guint.
+
+	* src/inetaddr.c: gnet_inetaddr_gethostname ->
+		gnet_inetaddr_get_host_name.  
+		gnet_inetaddr_gethostaddr ->
+		gnet_inetaddr_get_host_addr.  
+
+
+Mon Feb  3 20:21:02 2003  David Helder  <dhelder@umich.edu>
+
+	* src/server.c (gnet_server_{ref,unref}): Added
+
+	* src/socks.c (gnet_socks_get_server): Clean-up.
+
+	* src/socks-private.c:
+		s/socks_get_version/gnet_socks_get_version/.
+	* src/socks.c (gnet_socks_{get/set}_version): Added
+
+	* src/tcp.c: gnet_tcp_socket_server_new becomes
+	    gnet_tcp_socket_server_new_with_port, 
+	    gnet_tcp_socket_server_new_interface becomes
+	    gnet_tcp_socket_server_new_full.
+	    gnet_tcp_socket_server_new now takes 0 args.
+
 Mon Feb  3 17:56:55 2003  David Helder  <dhelder@umich.edu>
 
 	* *: More doc work.

@@ -30,6 +30,7 @@ See also #GConn and the echoserver-gserver example.
 @iface: 
 @port: 
 @socket: 
+@ref_count: 
 @func: 
 @user_data: 
 
@@ -56,6 +57,22 @@ See also #GConn and the echoserver-gserver example.
 
 
 <!-- ##### FUNCTION gnet_server_delete ##### -->
+<para>
+
+</para>
+
+@server: 
+
+
+<!-- ##### FUNCTION gnet_server_ref ##### -->
+<para>
+
+</para>
+
+@server: 
+
+
+<!-- ##### FUNCTION gnet_server_unref ##### -->
 <para>
 
 </para>

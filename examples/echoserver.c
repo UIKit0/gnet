@@ -55,7 +55,7 @@ main(int argc, char** argv)
   port = atoi(argv[argc - 1]);
 
   /* Create the server */
-  server = gnet_tcp_socket_server_new(port);
+  server = gnet_tcp_socket_server_new_with_port (port);
   if (server == NULL)
     {
       fprintf (stderr, "Could not create server on port %d\n", port);

@@ -71,6 +71,8 @@ disable loopback.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @ms: 
 
 
@@ -79,6 +81,8 @@ disable loopback.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -87,6 +91,8 @@ disable loopback.
 
 </para>
 
+@socket: 
+<!-- # Unused Parameters # -->
 @s: 
 
 
@@ -104,9 +110,12 @@ disable loopback.
 
 </para>
 
+@socket: 
+@inetaddr: 
+@Returns: 
+<!-- # Unused Parameters # -->
 @ms: 
 @ia: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_leave_group ##### -->
@@ -114,9 +123,12 @@ disable loopback.
 
 </para>
 
+@socket: 
+@inetaddr: 
+@Returns: 
+<!-- # Unused Parameters # -->
 @ms: 
 @ia: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_get_ttl ##### -->
@@ -124,9 +136,10 @@ disable loopback.
 
 </para>
 
-@ms: 
+@socket: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@ms: 
 @us: 
 
 
@@ -135,10 +148,11 @@ disable loopback.
 
 </para>
 
-@ms: 
+@socket: 
 @ttl: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@ms: 
 @val: 
 
 
@@ -147,12 +161,13 @@ disable loopback.
 
 </para>
 
-@ms: 
+@socket: 
 @buffer: 
 @length: 
 @dst: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@ms: 
 @data: 
 
 
@@ -161,12 +176,13 @@ disable loopback.
 
 </para>
 
-@ms: 
+@socket: 
 @buffer: 
 @length: 
 @src: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@ms: 
 @data: 
 
 
@@ -175,8 +191,10 @@ disable loopback.
 
 </para>
 
-@s: 
+@socket: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@s: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_is_loopback ##### -->
@@ -184,8 +202,10 @@ disable loopback.
 
 </para>
 
-@ms: 
+@socket: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@ms: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_set_loopback ##### -->
@@ -193,10 +213,11 @@ disable loopback.
 
 </para>
 
-@ms: 
+@socket: 
 @enable: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@ms: 
 @b: 
 
 

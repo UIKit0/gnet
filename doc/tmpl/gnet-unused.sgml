@@ -205,6 +205,20 @@ url
 @conn: 
 @enable: 
 
+<!-- ##### FUNCTION gnet_inetaddr_gethostaddr ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gnet_inetaddr_gethostname ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
 <!-- ##### FUNCTION gnet_inetaddr_new_any ##### -->
 <para>
 
@@ -322,6 +336,15 @@ url
 </para>
 
 @socket: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_new_interface ##### -->
+<para>
+
+</para>
+
+@iface: 
+@port: 
 @Returns: 
 
 <!-- ##### FUNCTION gnet_udp_packet_delete ##### -->
