@@ -1,6 +1,12 @@
 EXPORTS
 	DllMain
 	;
+	gnet_major_version
+	gnet_minor_version
+	gnet_micro_version
+	gnet_interface_age
+	gnet_binary_age
+	;
 	; gnet.h
 	gnet_io_channel_writen
 	gnet_io_channel_readn

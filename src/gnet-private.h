@@ -31,8 +31,7 @@
 #include <signal.h>
 #include <fcntl.h>
 
-/* **************************************** */
-#ifndef G_OS_WIN32		/* Unix specific include */
+#ifndef G_OS_WIN32  /*********** Unix specific ***********/
 
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -63,8 +62,7 @@
 #define GNET_CLOSE_SOCKET(SOCKFD) close(SOCKFD)
 #define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
 
-/* **************************************** */
-#else	/* Windows specific includes */
+#else	/*********** Windows specific ***********/
 
 #include "config-win32.h"
 #include <windows.h>
@@ -73,13 +71,12 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#define socklen_t gint32	/* Windows doesn't like size_t */
+#define socklen_t gint32
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
 #define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_win32_new_stream_socket(SOCKFD)
 
-#endif	/* end Window */
-/* **************************************** */
+#endif	/*********** End Windows specific ***********/
 
 #include <glib.h>
 #include "gnet.h"
@@ -281,8 +278,8 @@ struct sockaddr gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia);
 GList* gnet_private_inetaddr_list_interfaces(void);
 
 
-/* TODO: Need to port this to Solaris.  This also assumes eth0 (we
-   need to get the name of the interface of the socket) */
+/* TODO: Need to port this to Solaris and Windows.  This also assumes
+   eth0 (we need to get the name of the interface of the socket) */
 
 /*gint gnet_udp_socket_get_MTU(GUdpSocket* us);*/
 

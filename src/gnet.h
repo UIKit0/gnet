@@ -39,7 +39,6 @@ GUTILS_C_VAR const guint gnet_micro_version;
 GUTILS_C_VAR const guint gnet_interface_age;
 GUTILS_C_VAR const guint gnet_binary_age;
 
-
 /**
  *  GNET_CHECK_VERSION:
  *  @major: Major version number

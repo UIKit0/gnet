@@ -228,7 +228,7 @@ gnet_private_inetaddr_list_interfaces(void)
 
 
 
-/* TODO: Need to port this to Solaris */
+/* TODO: Need to port this to Solaris, Windows */
 
 #if 0
 

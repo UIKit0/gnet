@@ -46,7 +46,7 @@ gnet_udp_socket_new(void)
  *
  **/
 GUdpSocket* 
-gnet_udp_socket_port_new(gint port)
+gnet_udp_socket_port_new(const gint port)
 {
   GUdpSocket* s = g_new0(GUdpSocket, 1);
   struct sockaddr_in* sa_in;
@@ -153,7 +153,7 @@ gnet_udp_socket_send(const GUdpSocket* s, const GUdpPacket* packet)
   bytes_sent = sendto(s->sockfd, (void*) packet->data, packet->length, 
 		      0, &to_sa, sizeof(to_sa));
 
-  return (bytes_sent != packet->length);  /* Return 0 if ok, return 1 otherwise */
+  return (bytes_sent != (signed) packet->length);  /* Return 0 if ok, return 1 otherwise */
 }
 
 
@@ -188,7 +188,7 @@ gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet)
 }
 
 
-#ifndef G_OS_WIN  /*********** Unix code ***********/
+#ifndef G_OS_WIN32  /*********** Unix code ***********/
 
 
 /**

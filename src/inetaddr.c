@@ -411,7 +411,7 @@ gnet_inetaddr_new(const gchar* name, const gint port)
 }
 
 
-#ifndef G_OS_WIN  /*********** Unix code ***********/
+#ifndef G_OS_WIN32  /*********** Unix code ***********/
 
 
 /**
@@ -756,6 +756,7 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 }
 
 
+void
 gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
 {
   GInetAddrAsyncState* state = (GInetAddrAsyncState*) id;
@@ -893,7 +894,7 @@ gnet_inetaddr_get_name(GInetAddr* ia)
 }
 
 
-#ifndef G_OS_WIN  /*********** Unix code ***********/
+#ifndef G_OS_WIN32  /*********** Unix code ***********/
 
 
 /**
@@ -1364,7 +1365,7 @@ gnet_inetaddr_noport_equal(const gpointer p1, const gpointer p2)
 
 /* **************************************** */
 
-#ifndef G_OS_WIN  /*********** Unix code ***********/
+#ifndef G_OS_WIN32  /*********** Unix code ***********/
 
 /**
  *  gnet_inetaddr_gethostname:

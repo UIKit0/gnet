@@ -222,7 +222,7 @@ gnet_tcp_socket_new(const GInetAddr* addr)
 }
 
 
-#ifndef G_OS_WIN  /*********** Unix code ***********/
+#ifndef G_OS_WIN32  /*********** Unix code ***********/
 
 
 /**
@@ -706,7 +706,7 @@ gnet_tcp_socket_server_new(const gint port)
 }
 
 
-#ifndef G_OS_WIN  /*********** Unix code ***********/
+#ifndef G_OS_WIN32  /*********** Unix code ***********/
 
 
 /**
