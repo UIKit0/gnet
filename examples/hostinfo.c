@@ -29,6 +29,9 @@
 #include <glib.h>
 #include <gnet/gnet.h>
 
+/* Hidden in gnet/gnet-private.h */
+GList* gnet_private_inetaddr_list_interfaces(void);
+
 
 int
 main(int argc, char** argv)

@@ -145,15 +145,15 @@ gnet_private_inetaddr_list_interfaces(void)
       /* FIX: Skip colons in name?  Can happen if aliases, maybe. */
 
       /* Save the address - the next call will clobber it */
-      memcpy(&addr, &ifr->ifr_ifru.ifru_addr, sizeof(addr));
+      memcpy(&addr, &ifr->ifr_addr, sizeof(addr));
       
       /* Get the flags */
       ioctl(sockfd, SIOCGIFFLAGS, ifr);
 
       /* Ignore entries that aren't running or are loopback.  Someday
 	 we'll write an interface structure and include this stuff. */
-      if (!(ifr->ifr_ifru.ifru_flags & IFF_RUNNING) ||
-	  (ifr->ifr_ifru.ifru_flags & IFF_LOOPBACK))
+      if (!(ifr->ifr_flags & IFF_RUNNING) ||
+	  (ifr->ifr_flags & IFF_LOOPBACK))
 	continue;
 
       /* Create an InetAddr for this one and add it to our list */

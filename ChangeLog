@@ -1,3 +1,14 @@
+Wed Apr  5 14:04:52 2000  David Helder  <dhelder@umich.edu>
+
+	* src/gnet-private.c (gnet_private_inetaddr_list_interfaces): Use
+	   ifr_blah macros and don't access ifr directly (which I should
+	   have done originally).  This fixes a portability issue in
+	   FreeBSD 4.0 which changes ifru_flags from a short to a
+	   short[2].
+
+	* examples/hostinfo.c: Added decl for list_interfaces so it
+	   that it will compile.
+		
 Fri Mar 17 20:07:15 2000  David Helder  <dhelder@umich.edu>
 
 	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock): 
