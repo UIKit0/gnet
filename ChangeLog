@@ -1,3 +1,9 @@
+Wed Sep 04 21:54:47:06 2002 Andrew Lanoix <alanoix@umich.edu>
+
+	* src/gnet.c (gnet_init): Don't do anything on win32
+	* src/gnet-private.h (_GInetAddrAsyncState) Needs in_callback
+	* src/inetaddr.c (gnet_gethostbyname) #define out unix code
+
 Wed Aug 14 12:37:23 2002  David Helder  <dhelder@umich.edu>
 	
 	* *: Release 1.1.5

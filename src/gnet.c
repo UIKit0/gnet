@@ -40,8 +40,10 @@ void
 gnet_init (void)
 {
 #ifdef G_THREADS_ENABLED
+#ifndef GNET_WIN32 
   if (!g_thread_supported ()) 
     g_thread_init (NULL);
+#endif
 #endif /* G_THREADS_ENABLED */
 }
 

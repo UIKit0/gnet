@@ -191,6 +191,7 @@ typedef struct _GInetAddrAsyncState
   int 		WSAhandle;
   char 		hostentBuffer[MAXGETHOSTSTRUCT];
   int 		errorcode;
+  gboolean 	in_callback;
 #endif
 
 } GInetAddrAsyncState;

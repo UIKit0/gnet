@@ -50,6 +50,7 @@ gboolean
 gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicename)
 {
   gboolean rv = FALSE;
+#ifndef GNET_WIN32
   struct in_addr inaddr;
 
   /* Attempt non-blocking lookup */
@@ -61,7 +62,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 	*nicename = g_strdup (hostname);
       return TRUE;
     }
-
+#endif
 #ifdef HAVE_GETHOSTBYNAME_R_GLIBC
   {
     struct hostent result_buf, *result;
