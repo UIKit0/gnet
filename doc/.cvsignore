@@ -1,5 +1,6 @@
 .cvsignore
 Makefile
+Makefile.in
 html
 sgml
 gnet-decl-list.txt

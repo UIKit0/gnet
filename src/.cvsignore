@@ -10,3 +10,4 @@ tcp.lo
 udp.lo
 libgnet.la
 ftp.lo
+Makefile.in

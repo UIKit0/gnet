@@ -87,13 +87,15 @@
 </para>
 
 
-<!-- ##### FUNCTION inetaddr_set_port ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
 <para>
 
 </para>
 
-@ia: 
-@port: 
+@addr: 
+@func: 
+@data: 
+@Returns: 
 
 <!-- ##### FUNCTION udp_socket_send ##### -->
 <para>
@@ -105,15 +107,13 @@
 @Returns: 
 @socket: 
 
-<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
+<!-- ##### FUNCTION inetaddr_set_port ##### -->
 <para>
 
 </para>
 
-@addr: 
-@func: 
-@data: 
-@Returns: 
+@ia: 
+@port: 
 
 <!-- ##### FUNCTION inetaddr_clone ##### -->
 <para>
@@ -497,6 +497,12 @@
 @Returns: 
 @socket: 
 
+<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION udp_socket_get_MTU ##### -->
 <para>
 
@@ -504,12 +510,6 @@
 
 @us: 
 @Returns: 
-
-<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
-<para>
-
-</para>
-
 
 <!-- ##### FUNCTION mcast_socket_new ##### -->
 <para>
