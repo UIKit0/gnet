@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: Gnet
 Description: A network compatibility layer library
 Version: @VERSION@
-Libs: -R${libdir} -L${libdir} -lgnet-@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@ @GLIB_LIBS@ @GTHREAD_LIBS@
+Libs: -L${libdir} -lgnet-@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@ @GLIB_LIBS@ @GTHREAD_LIBS@
 Cflags: -I${includedir}/gnet-@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@ -I${libdir}/gnet-@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@/include/ @GLIB_CFLAGS@ @GTHREAD_CFLAGS@

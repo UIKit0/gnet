@@ -1,3 +1,19 @@
+Wed Jul 23 21:32:30 2003  David Helder  <dhelder@umich.edu>
+
+	* gnet-2.0.pc.in: Back out the -R${libdir} fix for Solaris.
+	    This breaks other systems.
+	   
+	* configure.ac: Check sizeof(long), sizeof(void*)
+	* tests/unpack_test.c (main): Compile 64 bit tests if long is 64
+	    bit.  Use SIZEOF_VOIDP too.
+
+	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock): 
+	    s/INVALID_SOCKET/-1/.  This #define isn't on Unix.
+
+	* examples/echoclient-async.c (async_client_sin_iofunc): Don't
+	   unref async_sin.  (New GNet 2 get_io_channel() semantics).
+	   Fixes bug #118149.  Thanks charles.
+
 Mon Jul 21 21:04:25 2003  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_gethostbyname): Solaris gethostbyname_r()

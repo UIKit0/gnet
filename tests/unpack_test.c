@@ -17,12 +17,15 @@
  */
 
 
+#include "config.h"
+
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <gnet.h>
+
 
 static int failed = 0;
 
@@ -121,7 +124,7 @@ main(int argc, char* argv[])
   TEST1 (10600, 0x04030201, "I", &buf[1], sizeof(iguint32), iguint32);
   TEST1 (10610, 0xf4f3f2f1, "I", &bufh[1], sizeof(iguint32), iguint32);
 
-#if 1 << 32  /* sizeof(long) > 32? */
+#if (SIZEOF_LONG == 8)
    {
      TEST1 (10700, 0x0807060504030201, "l", &buf[1], sizeof(lgint32), lgint32);
      TEST1 (10710, 0xf8f7f6f5f4f3f2f1, "l", &bufh[1], sizeof(lgint32), lgint32);                                                                                
@@ -162,7 +165,7 @@ main(int argc, char* argv[])
   TEST1 (10600, 0x01020304, "I", &buf[1], sizeof(iguint32), iguint32);
   TEST1 (10610, 0xf1f2f3f4, "I", &bufh[1], sizeof(iguint32), iguint32);
 
-#if 1 << 32  /* sizeof(long) > 32? */
+#if (SIZEOF_LONG == 8)
     {
       TEST1 (10700, 0x0102030405060708, "l", &buf[1], sizeof(lgint32), lgint32);
       TEST1 (10710, 0xf1f2f3f4f5f6f7f8, "l", &bufh[1], sizeof(lgint32), lgint32);
@@ -181,11 +184,12 @@ main(int argc, char* argv[])
     }
 #endif
 
-  if (sizeof(void*) == 4)
+#if (SIZEOF_VOIDP == 4)
     {
       TEST1 (11000, (void*) 0x01020304, "v", &buf[1], sizeof(void*), voidp);
       TEST1 (11010, (void*) 0xf1f2f3f4, "v", &bufh[1], sizeof(void*), voidp);
     }
+#endif
 
   TEST3 (12000, 0x01, 0x0203, 0x04, "bhb", &buf[1], 4, igint8, igint16, igint8_2);
   TEST2 (12010, 0x01020304, 0x05060708, "ii", &buf[1], 8, igint32, igint32_2);

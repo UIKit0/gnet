@@ -139,7 +139,6 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
       else if (bytes_read == 0)
 	{
 	  g_io_channel_unref (async_in);
-	  g_io_channel_unref (async_sin);
 	  gnet_tcp_socket_delete (async_socket);
 	  exit (EXIT_SUCCESS);
 	  return FALSE;

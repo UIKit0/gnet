@@ -106,6 +106,8 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_CHECK_PROG(PKGCONFIG, [pkg-config], [yes])
 AM_PROG_LIBTOOL
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(void*)
 
 ####################
 # Mac OS X

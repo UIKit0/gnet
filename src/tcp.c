@@ -1087,7 +1087,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
     }
 
   n = sizeof(sa);
-  if ((sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n)) == INVALID_SOCKET)
+  if ((sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n)) == -1)
     {
       /* If we get an error, return.  We don't want to try again as we
          do in gnet_tcp_socket_server_accept() - it might cause a
