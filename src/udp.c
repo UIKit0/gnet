@@ -81,8 +81,15 @@ gnet_udp_socket_port_new(gint port)
 void
 gnet_udp_socket_delete(GUdpSocket* s)
 {
-  close(s->sockfd);
-  g_free(s);
+  if (s != NULL)
+    {
+      close(s->sockfd);
+
+      if (s->iochannel)
+	g_io_channel_unref(s->iochannel);
+
+      g_free(s);
+    }
 }
 
 
@@ -175,12 +182,20 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
  *  gnet_udp_socket_get_iochannel:
  *  @socket: GUdpSocket to get GIOChannel from.
  *
- *  Get IO Channel from the GUdpSocket.  THIS IS NOT A NORMAL
- *  GIOCHANNEL - DO NOT READ OR WRITE WITH IT.  The intent of this
- *  function is to use it with g_io_add_watch so that you can do
- *  non-blocking IO.  So, if you can read from the IOChannel, use
- *  g_udp_socket_receive to read a packet.  If you can write to the
- *  IOChannel, use g_udp_socket_send to write a packet.
+ *  Get IO Channel from the GUdpSocket.  
+ *
+ *  THIS IS NOT A NORMAL GIOCHANNEL - DO NOT READ OR WRITE WITH IT.
+ *
+ *  Use the channel with g_io_add_watch() to do non-blocking IO (so if
+ *  you do not want to do non-blocking IO, you do not need the
+ *  channel).  If you can read from the channel, use
+ *  g_udp_socket_receive() to read a packet.  If you can write to the
+ *  channel, use g_udp_socket_send() to write a packet.
+ *
+ *  There is one channel for every socket.  This function refs the
+ *  channel before returning it.  You should unref the channel when
+ *  you are done with it.  However, you should not close the channel -
+ *  this is done when you delete the socket.
  *
  *  Returns: A GIOChannel; NULL on failure.
  *
@@ -190,8 +205,12 @@ gnet_udp_socket_get_iochannel(GUdpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, NULL);
 
-  /* Since we only have Unix, just create a Unix socket. */
-  return g_io_channel_unix_new(socket->sockfd);
+  if (socket->iochannel == NULL)
+    socket->iochannel = g_io_channel_unix_new(socket->sockfd);
+  
+  g_io_channel_ref (socket->iochannel);
+
+  return socket->iochannel;
 }
 
 

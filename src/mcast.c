@@ -131,8 +131,11 @@ gnet_mcast_socket_inetaddr_new(GInetAddr* ia)
 void
 gnet_mcast_socket_delete(GMcastSocket* ms)
 {
-  close(ms->sockfd);
-  free(ms);
+  if (ms != NULL)
+    {
+      close(ms->sockfd);
+      free(ms);
+    }
 }
 
 

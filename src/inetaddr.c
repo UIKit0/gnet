@@ -637,10 +637,11 @@ gnet_inetaddr_clone(const GInetAddr* ia)
 void
 gnet_inetaddr_delete(GInetAddr* ia)
 {
-  g_return_if_fail (ia != NULL);
-
-  if (ia->name != NULL) g_free (ia->name);
-  g_free (ia);
+  if (ia != NULL)
+    {
+      if (ia->name != NULL) g_free (ia->name);
+      g_free (ia);
+    }
 }
 
 

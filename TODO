@@ -11,10 +11,10 @@ Before 0.2 (first major release):
 
   Programming
    - More portability fixes
-   - Save the iochannel in sockets and reuse it.
    - Add ref counts to structures.
 
   Documentation
+   - Write a manpage for gnet-config (start with the one for glib).
 
   Other
 
@@ -27,7 +27,8 @@ Long term:
 
     - Add more error types
 
-    - Allow non-blocking calls to be canceled (return the state?)
+    - All non-blocking calls should be cancelable.  They should
+	return a gpointer to the state object.
 
     - Perl-style pack and unpack functions
 

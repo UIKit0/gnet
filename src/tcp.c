@@ -343,6 +343,10 @@ gnet_tcp_socket_delete(GTcpSocket* s)
   if (s != NULL)
     {
       close(s->sockfd);	/* Don't care if this fails... */
+
+      if (s->iochannel)
+	g_io_channel_unref(s->iochannel);
+
       g_free(s);
     }
 }
@@ -353,17 +357,19 @@ gnet_tcp_socket_delete(GTcpSocket* s)
  *  gnet_tcp_socket_get_iochannel:
  *  @socket: GTcpSocket to get GIOChannel from.
  *
- *  Get IO Channel from the GTcpSocket.  For a client socket, the
- *  GIOChannel represents the data stream.  Use it like you would any
- *  other GIOChannel.
+ *  Get the IO Channel for the GTcpSocket.
+ *
+ *  For a client socket, the GIOChannel represents the data stream.
+ *  Use it like you would any other GIOChannel.
  *
  *  For a server socket however, the GIOChannel represents incoming
  *  connections.  If you can read from it, there's a connection
  *  waiting.
  *
- *  Favor using this function over using the socket descriptor
- *  directly - it is more portable.  Moreover, the socket descriptor
- *  may be hidden in the future.
+ *  There is one channel for every socket.  This function refs the
+ *  channel before returning it.  You should unref the channel when
+ *  you are done with it.  However, you should not close the channel -
+ *  this is done when you delete the socket.
  *
  *  Returns: A GIOChannel; NULL on failure.
  *
@@ -373,8 +379,12 @@ gnet_tcp_socket_get_iochannel(GTcpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, NULL);
 
-  /* Since we only have Unix, just create a Unix socket. */
-  return g_io_channel_unix_new(socket->sockfd);
+  if (socket->iochannel == NULL)
+    socket->iochannel = g_io_channel_unix_new(socket->sockfd);
+  
+  g_io_channel_ref (socket->iochannel);
+
+  return socket->iochannel;
 }
 
 

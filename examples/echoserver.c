@@ -131,7 +131,6 @@ normal_echoserver(GTcpSocket* server)
       if (error != G_IO_ERROR_NONE)
 	g_print ("\nReceived error %d (closing socket).\n", error);
 
-      g_io_channel_close(ioclient);
       g_io_channel_unref(ioclient);
       gnet_tcp_socket_delete(client);
     }

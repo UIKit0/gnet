@@ -22,12 +22,15 @@ latest glib package.
 
 GNet is BETA software.  Most of the functions have been tested (in the
 examples programs and in Jungle Monkey), but there may still be some
-bugs.  It also been compiled and tested on Linux and Solaris only, so
-may require some hacking to get it working on other systems.  Help is
+bugs.  There will be a stable release probably by Spring.  Help is
 always welcome.  Check-out the TODO file too.
 
-Comments, questions, and bug reports should be sent to
-gnet-dev@umich.edu.
+Bug reports should be submited through http://bugs.gnome.org.  
+  (see http://bugs.gnome.org/Reporting.html)
+
+Pending bugs can be viewed at http://bugs.gnome.org/db/pa/lgnet.html
+
+Comments and questions should be sent to gnet-dev@umich.edu.
 
 The GNet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet.
 

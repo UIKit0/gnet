@@ -1,3 +1,16 @@
+
+Mon Jan 31 19:40:45 2000  David A Helder  <dhelder@umich.edu>
+	
+	* src/gnet-private.h: Added iochannel member to TcpSocket,
+	    UdpSocket, McastSocket
+	* src/{udp,tcp}.c: Use single iochannel.
+	* examples/{hfetch, echoserver}.c: Don't close iochannel.
+	
+	* src/{udp,inetaddr,tcp,mcast}.c: Check if the argument to
+	    *_delete is NULL.  If it is, don't do anything.
+	
+	* README: Added info on submiting bugs.  
+	* TODO: Added "Write manpage for gnet-config".
 	
 Sun Jan 30 16:34:59 2000  David A Helder  <dhelder@umich.edu>
 
