@@ -1,3 +1,24 @@
+Sun Sep 26 22:02:00 2004  David Helder  <dhelder@gizmolabs.org>
+
+	Apply patch from Stephane Rouleau (srouleau@innobec.com).
+
+	Win32: Don't rely on DllMain() to be called on for init
+	  and uninit.  Instead init in gnet_init() and uninit
+	  on exit.
+	
+	* src/gnet-private.h: 
+	   Add gnet_{un}initialize_windows_sockets()
+
+	* src/gnet-private.c (gnet_initialize_windows_sockets): 
+	   Move init code here.
+	* src/gnet-private.c (gnet_uninitialize_windows_sockets): 
+	   Move uninit code here.
+	
+	* src/gnet.c (gnet_init): 
+	   Call gnet_initialize_windows_sockets()
+	* src/gnet.c (gnet_win32_at_exit): 
+	   Call gnet_uninitialize_windows_sockets()
+
 Wed May 19 22:20:54 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* src/conn-http.c: Apply Tim's second patch.

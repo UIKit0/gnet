@@ -228,31 +228,8 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
       /* The DLL is being mapped into process's address space */
       /* Do any required initialization on a per application basis, return FALSE if failed */
       {
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int err;
- 
-	wVersionRequested = MAKEWORD( 2, 0 );
- 
-	err = WSAStartup( wVersionRequested, &wsaData );
-	if ( err != 0 ) 
+         if( !gnet_initialize_windows_sockets() )
 	  {
-				/* Tell the user that we could not find a usable */
-				/* WinSock DLL.                                  */
-	    return FALSE;
-	  }
- 
-	/* Confirm that the WinSock DLL supports 2.0.*/
-	/* Note that if the DLL supports versions greater    */
-	/* than 2.0 in addition to 2.0, it will still return */
-	/* 2.0 in wVersion since that is the version we      */
-	/* requested.                                        */
- 
-	if ( LOBYTE( wsaData.wVersion ) != 2 ||
-	     HIBYTE( wsaData.wVersion ) != 0 ) {
-	  /* Tell the user that we could not find a usable */
-	  /* WinSock DLL.                                  */
-	  WSACleanup();
 	  return FALSE; 
 	}
  
@@ -338,4 +315,41 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
   return TRUE;
 }
  
+int gnet_initialize_windows_sockets(void)
+{
+  WORD wVersionRequested;
+  WSADATA wsaData;
+  int err;
+
+  wVersionRequested = MAKEWORD( 2, 0 );
+
+  err = WSAStartup(wVersionRequested, &wsaData);
+  if (err != 0)
+    {
+      return FALSE;
+    }
+
+  /* Confirm that the WinSock DLL supports 2.0.*/
+  /* Note that if the DLL supports versions greater    */
+  /* than 2.0 in addition to 2.0, it will still return */
+  /* 2.0 in wVersion since that is the version we      */
+  /* requested.                                        */
+
+  if (LOBYTE(wsaData.wVersion) != 2 ||
+      HIBYTE(wsaData.wVersion) != 0) {
+    /* Tell the user that we could not find a usable */
+    /* WinSock DLL.                                  */
+    WSACleanup();
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+void gnet_uninitialize_windows_sockets(void)
+{
+  WSACleanup();
+}
+
+
 #endif

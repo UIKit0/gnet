@@ -42,8 +42,11 @@ void gnet_win32_at_exit()
 
 	if (hLibrary_ws2_32)
 		FreeLibrary(hLibrary_ws2_32);
+
 	if (hLibrary_Iphlpapi)
 		FreeLibrary(hLibrary_Iphlpapi);
+
+	gnet_uninitialize_windows_sockets();
 }
 #endif
 
@@ -106,6 +109,7 @@ gnet_init (void)
 	/* Should I check to see if IPv6 interfaces exist? */
 
 	gnet_ipv6_set_policy (policy);
+	gnet_initialize_windows_sockets();
 
 	atexit(gnet_win32_at_exit);
 #endif

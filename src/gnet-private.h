@@ -657,6 +657,8 @@ GIOChannel* gnet_private_io_channel_new (SOCKET sockfd);
 
 SOCKET gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
 
+int gnet_initialize_windows_sockets(void);
+void gnet_uninitialize_windows_sockets(void);
 
 #ifdef __cplusplus
 }
