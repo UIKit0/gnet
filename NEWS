@@ -4,7 +4,7 @@ GNet NEWS
 
 Changes in Gnet
 
-2.0.6 (Unreleased)
+2.0.6
 -----
 * New experimental HTTP Conn module (Tim Muller)
 * Misc bug fixes:
@@ -15,7 +15,7 @@ Changes in Gnet
    - fix crash when doing dns lookup on ipv6-enabled
      win32 systems (only if gnet has been built
      using configure/autotools)
-(Unreleased)
+(Released Feb 18, 2005)
 
 2.0.5
 -----

@@ -20,6 +20,7 @@ Features:
   * SHA and MD5 hashes
   * Base64 encoding and decoding
   * SOCKS support
+  * High-level HTTP connection object
 
 GNet has been ported to Linux, *BSD, MacOSX, Solaris, HP, MacOS X, and
 Windows.  It may work on other operating systems also.

@@ -1,3 +1,15 @@
+=== release 2.0.6 ===
+
+2005-02-17  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* Makefile.am:
+	  Add --enable-gtk-doc to DISTCHECK_CONFIGURE_FLAGS,
+	  fixing 'make distcheck'.
+
+	* NEWS:
+	* README:
+	  Update for 2.0.6
+
 2005-02-17  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* GNET.DSP:

@@ -28,6 +28,9 @@ EXTRA_DIST= 					\
 	gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).m4		\
 	gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).pc.in
 
+# build documentation when doing distcheck
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
+
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).m4
 
