@@ -25,6 +25,9 @@
 
 #include <glib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 
 /*
@@ -132,5 +135,8 @@ void gnet_udp_packet_delete(GUdpPacket* packet);
 /* gint udp_socket_set_timeout(UdpSocket* socket, const gint timeout); */
 
 
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
 
 #endif /* _GNET_UDP_H */

@@ -1,4 +1,12 @@
 
+Sun Jan 23 14:05:42 2000  David A Helder  <dhelder@umich.edu>
+
+	* auto*: Upped version to 0.1.6
+	* src/*.h: Added #ifdef __cplusplus...
+	* src/gnet.h, gnet-private.h: Added #ifndef _GNET_H, 
+	   _GNET_PRIVATE_H
+	* TODO, other docs: Reformating, cleanups
+
 Thu Jan 20 12:23:38 2000  David A Helder  <dhelder@umich.edu>
 
 	* doc/.cvsignore, debian/.cvsignore: Added

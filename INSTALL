@@ -1,4 +1,7 @@
 
+GNet INSTALL
+------------
+
 To compile and install gnet, do:
 
   > ./configure

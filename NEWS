@@ -1,5 +1,13 @@
 
+GNet NEWS
+---------
+
 Changes in Gnet
+
+0.1.6
+-----
+* Fixed header files for C++
+* Fixed header files for multiple inclusion
 
 0.1.5
 -----

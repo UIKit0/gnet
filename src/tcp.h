@@ -25,6 +25,9 @@
 
 #include <glib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /*
 
@@ -170,5 +173,8 @@ p
 */
 /*  TcpSocket* tcp_socket_server_any_new(void); */
 
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
 
 #endif /* _GNET_TCP_H */

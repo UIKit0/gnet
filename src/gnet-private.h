@@ -17,6 +17,8 @@
  * Boston, MA  02111-1307, USA.
  */
 
+#ifndef _GNET_PRIVATE_H
+#define _GNET_PRIVATE_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,6 +64,9 @@
 #define GNET_ANY_IO_CONDITION  (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 
 
@@ -118,3 +123,8 @@ GList* gnet_private_inetaddr_list_interfaces(void);
 /*gint gnet_udp_socket_get_MTU(GUdpSocket* us);*/
 
 
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
+
+#endif /* _GNET_PRIVATE_H */

@@ -23,6 +23,10 @@
 
 #include <glib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 
 /*
 
@@ -129,5 +133,8 @@ gchar* gnet_inetaddr_gethostname(void);
 GInetAddr* gnet_inetaddr_gethostaddr(void);
 
 
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
 
 #endif /* _GNET_INETADDR_H */

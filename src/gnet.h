@@ -17,12 +17,21 @@
  * Boston, MA  02111-1307, USA.
  */
 
+#ifndef _GNET_H
+#define _GNET_H
+
 #include <glib.h>
 
 #include "inetaddr.h"
 #include "udp.h"
 #include "mcast.h"
 #include "tcp.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 
 GUTILS_C_VAR const guint gnet_major_version;
 GUTILS_C_VAR const guint gnet_minor_version;
@@ -65,3 +74,9 @@ GIOError gnet_io_channel_readline (GIOChannel    *channel,
 				   guint          len,
 				   guint         *bytes_read);
 
+
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
+
+#endif /* _GNET_H */

@@ -25,6 +25,9 @@
 
 #include <glib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 
 /*
@@ -78,5 +81,8 @@ gint gnet_mcast_socket_set_loopback(GMcastSocket* ms, gint b);
  **/
 #define gnet_mcast_socket_to_udp_socket(MS) ((GUdpSocket*) (MS))
 
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
 
 #endif /* _GNET_MCAST_H */
