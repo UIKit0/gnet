@@ -4,9 +4,10 @@ GNet NEWS
 
 Changes in Gnet
 
-2.0.4 (unreleased)
+2.0.4
 -----
 * Minor memory leak fixed in internet addresses
+* Win32 fixes
 * Compile and regression test fixes for 64-bit systems
 * Compile fix for Solaris
 

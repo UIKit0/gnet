@@ -1,3 +1,7 @@
+Mon Jul 28 20:19:34 2003  David Helder  <dhelder@umich.edu>
+
+	* NEWS: Update for 2.0.4
+
 Wed Jul 23 21:32:30 2003  David Helder  <dhelder@umich.edu>
 
 	* gnet-2.0.pc.in: Back out the -R${libdir} fix for Solaris.
