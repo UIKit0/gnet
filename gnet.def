@@ -102,6 +102,7 @@ EXPORTS
 	gnet_md5_get_digest
 	gnet_md5_get_string
 	gnet_md5_copy_string
+	gnet_md5_clone
 	;
 	gnet_sha_new_incremental
 	gnet_sha_update
@@ -115,6 +116,7 @@ EXPORTS
 	gnet_sha_new
 	gnet_sha_new_string
 	gnet_sha_delete
+	gnet_sha_clone
 	;
 	; Unstable / Untested
 	;
