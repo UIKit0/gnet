@@ -12,11 +12,16 @@ This document contains
 General Win32 Specific Information
 ----------------------------------
 
-The Windows port requires either Windows 95 or better with the
-Winsock2 patch or Windows NT with Service Pack 4.
+The Windows port requires either Windows 95 (with the Winsock2 patch)
+or better, or Windows NT (with Service Pack 4) or better. 
 
-The asynchronous IO functions do _not_ work.  We are working on this.
-The asynchronous DNS functions do work though.
+GNet includes an alternative implementation of socket GIOChannels
+for Glib for Windows. It supports multiple watches per socket. 
+One GIOChannel per socket. OOB data is not supported. 
+
+No modifications to the Glib source were made. All changes were 
+through function pointers and the redefinition of 
+g_io_channel_win32_new_stream_socket().
 
 gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
 gnet_private_inetaddr_list_interfaces() does not support more than 10
@@ -45,7 +50,7 @@ HACKING/TODO on Win32
 ---------------------
 
 For a general description on how GNet for Win32 was implemented see
-halfway down gnet.c.
+halfway down gnet-private.c.
 
 FIX: gnet_inetaddr_gethostname() so it can handle hostnames over 256 chars.
 

@@ -161,6 +161,7 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
   GInetAddrAsyncState *IAstate;
   GInetAddrReverseAsyncState *IARstate;
   GTcpSocketAsyncState *TCPNEWstate;
+  SocketWatchAsyncState *WatchState;
 
   /*Take the msg off the message queue */
   GetMessage (&msg, NULL, 0, 0);
@@ -196,7 +197,7 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 	gnet_inetaddr_get_name_async_cb(NULL, G_IO_IN, (gpointer)IARstate);
 	break;
       }
-    case TCP_SOCK_MSG:
+    case TCP_NEW_MSG:
       {
 	WaitForSingleObject(gnet_select_Mutex, INFINITE);
 	data = g_hash_table_lookup(gnet_select_hash, (gpointer)msg.wParam);
@@ -208,6 +209,18 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 	gnet_tcp_socket_new_async_cb(NULL, G_IO_IN, (gpointer) TCPNEWstate);
 	break;
       }
+		case SOCKET_WATCH_MSG:
+			{
+	WaitForSingleObject(gnet_select_Mutex, INFINITE);
+	data = g_hash_table_lookup(gnet_select_hash, (gpointer)msg.wParam);
+	ReleaseMutex(gnet_select_Mutex);
+
+	WatchState = (SocketWatchAsyncState*) data;
+	WatchState->errorcode = WSAGETSELECTERROR(msg.lParam);
+	/*specifies the network event that has occurred */
+	WatchState->eventcode = WSAGETSELECTEVENT(msg.lParam); 
+	gnet_socket_watch_cb((gpointer) WatchState);
+	break;
     }
 
   return 1;
@@ -248,15 +261,6 @@ GnetWndProc(HWND hwnd,        /* handle to window */
     } 
     return 0; 
 } 
-
-
-gboolean
-RemoveHashEntry(gpointer key, gpointer value, gpointer user_data)
-{
-  g_free(value);
-  return TRUE;
-}
-
 
 BOOL WINAPI 
 DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
@@ -400,16 +404,6 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 	g_source_remove(gnet_io_watch_ID);
 	g_free(gnet_iochannel);
 	DestroyWindow(gnet_hWnd);
-
-	WaitForSingleObject(gnet_Mutex, INFINITE);
-	WaitForSingleObject(gnet_select_Mutex, INFINITE);
-	g_hash_table_foreach_remove(gnet_hash, RemoveHashEntry, NULL);
-	g_hash_table_foreach_remove(gnet_select_hash, RemoveHashEntry, NULL);
-	g_hash_table_destroy(gnet_select_hash);
-	g_hash_table_destroy(gnet_hash);
-	ReleaseMutex(gnet_Mutex);
-	ReleaseMutex(gnet_select_Mutex);
-	ReleaseMutex(gnet_hostent_Mutex);
 
 	/*CleanUp WinSock 2 */
 	WSACleanup();

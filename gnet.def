@@ -7,16 +7,12 @@ EXPORTS
 	gnet_interface_age
 	gnet_binary_age
 	;
-	; gnet.h
 	gnet_io_channel_writen
 	gnet_io_channel_readn
 	gnet_io_channel_readline
 	gnet_io_channel_readline_strdup
 	;
-	; gnet-private.h
-	gnet_private_inetaddr_list_interfaces
-	;
-	; inetaddr.h
+	gnet_inetaddr_list_interfaces
 	gnet_inetaddr_new
 	gnet_inetaddr_new_async
 	gnet_inetaddr_new_async_cancel
@@ -36,7 +32,6 @@ EXPORTS
 	gnet_inetaddr_gethostname
 	gnet_inetaddr_gethostaddr
 	;
-	; tcp.h
 	gnet_tcp_socket_connect
 	gnet_tcp_socket_connect_async
 	gnet_tcp_socket_connect_async_cancel
@@ -53,7 +48,6 @@ EXPORTS
 	gnet_tcp_socket_server_accept
 	gnet_tcp_socket_server_accept_nonblock
 	;
-	;	udp.h
 	gnet_udp_socket_new
 	gnet_udp_socket_port_new
 	gnet_udp_socket_delete
@@ -71,7 +65,6 @@ EXPORTS
 	gnet_udp_packet_send_new
 	gnet_udp_packet_delete
 	;
-	;	mcast.h
 	gnet_mcast_socket_new
 	gnet_mcast_socket_port_new
 	gnet_mcast_socket_inetaddr_new
@@ -85,3 +78,5 @@ EXPORTS
 	gnet_mcast_socket_has_packet
 	gnet_mcast_socket_is_loopback
 	gnet_mcast_socket_set_loopback
+	;
+	g_io_channel_win32_new_stream_socket

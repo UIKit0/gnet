@@ -754,3 +754,581 @@ gnet_io_channel_readline_check_func (gchar* buffer, guint length,
   return 0;
 }
 
+/* ************************************************************ */
+
+/* 
+
+	Alternative Implementation of Socket GIOChannels for GLIB for Windows 
+
+Copyright (C) Andrew Lanoix
+
+Portions Copyright (C) Peter Mattis, Spencer Kimball, Josh MacDonald, 
+											 Owen Taylor and Tor Lillqvist
+
+NOTES:
+	Supports multiple watches per socket.
+	Supports one GIOChannel per socket.
+	OOB data is not supported.
+
+Implementation:
+	I have set things up very much like the async calls in GNet. The only big
+	difference is that I have a 'main record' state that contains the cumulative
+	information about all the watches on one socket iochannel. This contains a 
+	GSList that contains info about each specific watch. I did this since 
+	Winsock2 can only handle one watch per socket. I have info to keep track 
+	of which watches need to be called on that socket of any given GIOCondition. 
+	The main record is created when the iochannel is made, and stays around until 
+	the channel is destroyed.  
+
+*/
+
+#ifdef GNET_WIN32
+
+typedef struct _GIOWin32Channel GIOWin32Channel;
+typedef struct _GIOWin32Watch GIOWin32Watch;
+
+struct _GIOWin32Channel
+{
+  GIOChannel channel;
+  gint fd;
+};
+
+struct _GIOWin32Watch {
+  GPollFD					pollfd;
+  GIOWin32Channel *channel;
+  GIOCondition		condition;
+  GIOFunc					callback;
+	gpointer				user_data;
+	long						wincondition;
+};
+
+static GIOError g_io_win32_sock_read (GIOChannel *channel, 
+				      gchar      *buf, 
+				      guint       count,
+				      guint      *bytes_written);
+static GIOError g_io_win32_sock_write(GIOChannel *channel, 
+				      gchar      *buf, 
+				      guint       count,
+				      guint      *bytes_written);
+static void g_io_win32_sock_close(GIOChannel *channel);
+static void g_io_win32_free (GIOChannel *channel);
+
+static GIOError g_io_win32_no_seek (GIOChannel *channel,
+							gint      offset, 
+							GSeekType type);
+
+static guint g_io_win32_sock_add_watch (GIOChannel      *channel,
+					gint             priority,
+					GIOCondition     condition,
+					GIOFunc          func,
+					gpointer         user_data,
+					GDestroyNotify   notify);
+
+static gboolean g_io_win32_sock_prepare  (gpointer  source_data, 
+					  GTimeVal *current_time,
+					  gint     *timeout);
+static gboolean g_io_win32_sock_check    (gpointer  source_data,
+					  GTimeVal *current_time);
+static gboolean g_io_win32_sock_dispatch (gpointer  source_data,
+					  GTimeVal *current_time,
+					  gpointer  user_data);
+
+static void g_io_win32_destroy (gpointer source_data);
+
+GIOFuncs win32_channel_sock_funcs = {
+  g_io_win32_sock_read,
+  g_io_win32_sock_write,
+  g_io_win32_no_seek,
+  g_io_win32_sock_close,
+  g_io_win32_sock_add_watch,
+  g_io_win32_free
+};
+
+GSourceFuncs win32_watch_sock_funcs = {
+  g_io_win32_sock_prepare,
+  g_io_win32_sock_check,
+  g_io_win32_sock_dispatch,
+  g_io_win32_destroy
+};
+
+static GIOError 
+g_io_win32_sock_read (GIOChannel *channel, 
+		      gchar      *buf, 
+		      guint       count,
+		      guint      *bytes_read)
+{
+  GIOWin32Channel *win32_channel = (GIOWin32Channel *) channel;
+  gint result;
+
+  result = recv (win32_channel->fd, buf, count, 0);
+  if (result == SOCKET_ERROR)
+    {
+      *bytes_read = 0;
+      switch (WSAGetLastError ())
+	{
+	case WSAEINVAL:
+	  return G_IO_ERROR_INVAL;
+	case WSAEWOULDBLOCK:
+	case WSAEINTR:
+	  return G_IO_ERROR_AGAIN;
+	default:
+	  return G_IO_ERROR_UNKNOWN;
+	}
+    }
+  else
+    {
+      *bytes_read = result;
+      return G_IO_ERROR_NONE;
+    }
+}
+		       
+static GIOError 
+g_io_win32_sock_write(GIOChannel *channel, 
+		      gchar      *buf, 
+		      guint       count,
+		      guint      *bytes_written)
+{
+  GIOWin32Channel *win32_channel = (GIOWin32Channel *) channel;
+  gint result;
+
+  result = send (win32_channel->fd, buf, count, 0);
+      
+  if (result == SOCKET_ERROR)
+    {
+      *bytes_written = 0;
+      switch (WSAGetLastError ())
+	{
+	case WSAEINVAL:
+	  return G_IO_ERROR_INVAL;
+	case WSAEWOULDBLOCK:
+	case WSAEINTR:
+	  return G_IO_ERROR_AGAIN;
+	default:
+	  return G_IO_ERROR_UNKNOWN;
+	}
+    }
+  else
+    {
+      *bytes_written = result;
+      return G_IO_ERROR_NONE;
+    }
+}
+
+static GIOError 
+g_io_win32_no_seek (GIOChannel *channel,
+		    gint      offset, 
+		    GSeekType type)
+{
+  g_warning ("GNet's g_io_win32_no_seek: unseekable IO channel type");
+  return G_IO_ERROR_UNKNOWN;
+}
+
+/* This is called when the iochannel is being closed with g_io_channel_close() */
+static void 
+g_io_win32_sock_close (GIOChannel *channel)
+{
+	SocketWatchAsyncState* data;
+	gpointer data2;
+	SocketWatchAsyncState* state;
+	GSList *list;
+  GIOWin32Channel *win32_channel = (GIOWin32Channel *) channel;
+
+	
+	WaitForSingleObject(gnet_select_Mutex, INFINITE);
+	data = NULL;
+	data = g_hash_table_lookup(gnet_select_hash, (gpointer)win32_channel->fd);
+	if (data)
+		{
+			data = (SocketWatchAsyncState*) data;
+
+			/* Cancel event posting on the socket */
+			WSAAsyncSelect(win32_channel->fd, gnet_hWnd, 0, 0);
+
+			/* Delete and free any watches on the socket */
+			data2 = data->callbacklist;
+			list = (GSList*) data2; /* Typecasting this way seems to make VC happy */
+			if (list)
+			{
+				g_slist_free((GSList*)list);
+			}
+			data->callbacklist = NULL;
+
+			/* Remove the main record from the hash */
+			g_hash_table_remove(gnet_select_hash, (gpointer)win32_channel->fd);
+			
+			closesocket(win32_channel->fd);
+
+			/* Delete the main record for the socket*/
+			g_free(data);
+		}
+	ReleaseMutex(gnet_select_Mutex);	
+}
+
+static void 
+g_io_win32_free (GIOChannel *channel)
+{
+	SocketWatchAsyncState* data;
+	gpointer data2;
+	SocketWatchAsyncState* state;
+	GSList *list;
+  GIOWin32Channel *win32_channel = (GIOWin32Channel *) channel;
+
+	if (!win32_channel)
+		return;
+
+	/* Remove any watchs that are on the channel, 
+		but don't close the socket fd */
+
+	WaitForSingleObject(gnet_select_Mutex, INFINITE);
+	data = NULL;
+	data = g_hash_table_lookup(gnet_select_hash, (gpointer)win32_channel->fd);
+	if (data)
+	{
+		data = (SocketWatchAsyncState*) data;
+		
+		/* Cancel event posting on the socket */
+		WSAAsyncSelect(win32_channel->fd, gnet_hWnd, 0, 0);
+
+		/* Delete and free any watches on the socket */
+		data2 = data->callbacklist;
+		list = (GSList*) data2; /* Typecasting this way seems to make VC happy */
+		if (list)
+		{
+			g_slist_free((GSList*)list);
+		}
+		data->callbacklist = NULL;
+
+		/* Remove the main record from the hash */
+		g_hash_table_remove(gnet_select_hash, (gpointer)win32_channel->fd);
+			
+		/* Delete the main record for the socket*/
+		g_free(data);
+		}
+	ReleaseMutex(gnet_select_Mutex);	
+
+}
+
+static guint 
+g_io_win32_sock_add_watch (GIOChannel    *channel,
+			   gint           priority,
+			   GIOCondition   condition,
+			   GIOFunc        func,
+			   gpointer       user_data,
+			   GDestroyNotify notify)
+{
+	gpointer data;
+	SocketWatchAsyncState* state;
+	long watch_event;
+	gint status;
+  GIOWin32Channel *win32_channel = (GIOWin32Channel *) channel;
+	GIOWin32Watch *watch;
+
+  g_io_channel_ref (channel);
+
+	/*
+	Conversion Table:
+	Win32        Unix G_IO_
+	FD_CONNECT   IN
+	FD_READ      IN
+	FD_WRITE     OUT
+	FD_OOB       PRI
+	FD_ACCEPT    IN
+	*/
+
+	watch_event = 0;
+	if (condition & G_IO_PRI)
+	{
+		watch_event = watch_event|FD_OOB;
+	}
+	if (condition & G_IO_IN)
+	{
+		watch_event = watch_event|FD_ACCEPT|FD_READ|FD_CONNECT;
+	}
+	if (condition & G_IO_OUT)
+	{
+		watch_event = watch_event|FD_WRITE;
+	}
+
+	/* Need to get the main record */
+	WaitForSingleObject(gnet_select_Mutex, INFINITE);
+	data = NULL;
+	data = g_hash_table_lookup(gnet_select_hash, (gpointer)win32_channel->fd);
+	if (!data)
+	{
+		return 0; /* The main record should always be there */
+	}
+
+	state = (SocketWatchAsyncState*) data;
+
+	/* Now create new GIOWin32Watch as the data and add it to the list */
+	watch  = g_new0(GIOWin32Watch, 1);
+	watch->pollfd.fd = win32_channel->fd;
+	watch->condition = condition;
+	watch->user_data = user_data;
+	watch->callback = func;
+	watch->channel = win32_channel;
+	watch->wincondition = watch_event;
+
+	/* Now update the master watch record for the socket iochannel */
+	state->winevent = state->winevent | watch_event;
+
+	/* Add the new watch to the socket watch list */
+	state->callbacklist = g_slist_append(state->callbacklist, (gpointer)watch);
+
+	/* Note: WSAAsunc automatically sets the socket to noblocking mode */
+  status = WSAAsyncSelect(win32_channel->fd, gnet_hWnd, SOCKET_WATCH_MSG, state->winevent);
+
+	ReleaseMutex(gnet_select_Mutex);
+
+	if (status == SOCKET_ERROR)
+  {		
+		return 0;
+  }
+
+	g_main_add_poll (&watch->pollfd, priority);
+	return g_source_add (priority, TRUE, &win32_watch_sock_funcs, watch, user_data, notify);
+}
+
+gint remove_check(gconstpointer a, gconstpointer b)
+{
+	/* Ignore b, all we want to know is if we flagged this one to be removed if 
+	the watch condition flags were set to be zero */
+
+	GIOWin32Watch* watch = (GIOWin32Watch*) a;
+
+	if (!watch)
+		return 1;
+
+	if ((watch->condition == 0) || (watch->wincondition == 0))
+		{
+			return 0; /* Then this record needs to be delete */
+		}
+
+	return 1;
+}
+
+void sock_dispatch(gpointer data1, gpointer data2)
+{
+	GIOWin32Watch* watch = (GIOWin32Watch*) data1;
+	GIOCondition *win_condition = data2;
+	GIOCondition cond_for_cb;
+	GIOChannel *channel;
+	gboolean returnval;
+
+	cond_for_cb = watch->condition & *win_condition;
+	if(cond_for_cb)
+	{
+		channel = (GIOChannel*) watch->channel;
+		returnval = (*watch->callback)(channel, cond_for_cb, watch->user_data);
+
+		if (returnval == FALSE) /* Flag to delete later */
+		{ 
+			watch->wincondition = 0;
+			watch->condition = 0;
+		}
+
+	}
+}
+
+void
+gnet_socket_watch_cb(gpointer data)
+{
+	SocketWatchAsyncState* state = (SocketWatchAsyncState*) data;
+	GIOCondition *win_condition;
+	GSList *element, *thelist;
+	gboolean flag;
+
+	win_condition = g_new0(GIOCondition, 1);
+
+	if (state->errorcode)
+	{
+		*win_condition = *win_condition|G_IO_ERR;
+	}
+	if (state->eventcode|FD_CONNECT)
+	{
+		*win_condition = *win_condition|G_IO_IN;
+  }
+	if (state->eventcode|FD_OOB)
+	{
+		*win_condition = *win_condition|G_IO_PRI;
+  }
+	if (state->eventcode|FD_ACCEPT)
+	{
+		*win_condition = *win_condition|G_IO_IN;
+  }
+	if (state->eventcode|FD_READ)
+	{
+		*win_condition = *win_condition|G_IO_IN;	
+	}
+	if (state->eventcode|FD_WRITE)
+	{
+		*win_condition = *win_condition|G_IO_OUT;
+	}
+
+	/* Dispatch the watches */
+	g_slist_foreach(state->callbacklist, sock_dispatch, (gpointer)win_condition); 
+	g_free(win_condition);
+
+	/* Now remove any watches that have conditions of zero- ie. flagged to be removed */
+	flag = 1;
+	thelist = ((GSList*)state->callbacklist);
+
+	while (flag)
+	{	
+
+		if (!thelist)
+			return;
+
+		flag = 0;
+		/* Find a watch flagged  for deletion */
+		element = g_slist_find_custom((GSList*)thelist, (gpointer)NULL, (GCompareFunc)remove_check);
+		thelist = ((GSList*)state->callbacklist);
+
+		if (element)
+		{
+			flag = 1;
+
+			/* Remove that watch */
+			g_io_win32_destroy((gpointer)element->data); 
+		}
+	}
+
+}
+
+/* This redefines the GLIB function */
+GIOChannel*
+g_io_channel_win32_new_stream_socket (int socket)
+{
+	gpointer data;
+  GIOWin32Channel *win32_channel;
+  GIOChannel *channel;
+	SocketWatchAsyncState* state;
+
+	/* Check to see if there is already an iochannel on the same socket. 
+	   If so, return that.*/
+
+	WaitForSingleObject(gnet_select_Mutex, INFINITE);
+	data = NULL;
+	data = g_hash_table_lookup(gnet_select_hash, (gpointer)socket);
+	if(data)
+	{
+		state = (SocketWatchAsyncState*) data;
+		channel = state->channel;
+	}
+	else
+	{
+		win32_channel = g_new (GIOWin32Channel, 1);
+		channel = (GIOChannel *) win32_channel;
+
+		g_io_channel_init (channel);
+		channel->funcs = &win32_channel_sock_funcs;
+		win32_channel->fd = socket;
+
+		/* Need to create the main record here, not on the first watch */
+		state = g_new0(SocketWatchAsyncState, 1);
+		state->channel = channel;
+		state->fd = win32_channel->fd;
+
+		/*using sockfd as the key into the 'select' hash */
+		g_hash_table_insert(gnet_select_hash, 
+		      (gpointer) win32_channel->fd, 
+		      (gpointer) state);	
+	}
+	ReleaseMutex(gnet_select_Mutex);
+
+  return channel;
+}
+
+static gboolean g_io_win32_sock_prepare  (gpointer  source_data, 
+					  GTimeVal *current_time,
+					  gint     *timeout)
+{
+  *timeout = -1;
+
+  return FALSE;
+}
+
+static gboolean g_io_win32_sock_check    (gpointer  source_data,
+					  GTimeVal *current_time)
+{
+	return 0;
+}
+
+static gboolean g_io_win32_sock_dispatch (gpointer source_data, 
+			GTimeVal *current_time,
+			gpointer user_data)
+
+{
+	return 1;
+}
+
+void regen_winevent(gpointer data1, gpointer data2)
+{
+	GIOWin32Watch* watch = (GIOWin32Watch*) data1;
+	long *win_event = data2;
+
+	*win_event = watch->wincondition | *win_event;
+}
+
+/* This is called by g_source_remove*() */
+void g_io_win32_destroy (gpointer source_data) 
+{
+	SocketWatchAsyncState* state;
+	gpointer data;
+	GSList *list;
+	long *win_event;
+  GIOWin32Watch *watch = source_data;
+	gint refcount;
+
+	WaitForSingleObject(gnet_select_Mutex, INFINITE);
+	data = NULL;
+	data = g_hash_table_lookup(gnet_select_hash, (gpointer)watch->pollfd.fd);
+	if (!data)
+	{	
+		return; /* This should never happen */
+	}
+
+	state = (SocketWatchAsyncState*) data;
+	refcount = state->channel->ref_count;
+
+	g_main_remove_poll ((GPollFD*)&watch->pollfd);
+  g_io_channel_unref((GIOChannel*)state->channel);
+	/* The above unref might have been free the state, so we should not 
+	proced if data is no longer valid */
+
+	if (refcount == 1)
+	{
+		ReleaseMutex(gnet_select_Mutex);
+		return;
+	}
+
+	list = state->callbacklist;
+	list = g_slist_remove((GSList*)list, (gpointer)watch);
+	state->callbacklist = list;
+
+	if (list) 
+	{
+		win_event = g_new0(long, 1);
+
+		/* Update the winevent condition on the main watch */
+		g_slist_foreach(state->callbacklist, regen_winevent, (gpointer)win_event); 
+
+		state->winevent = *win_event;
+
+		g_free(win_event);
+	}
+	else
+	{
+		/* Then there are no more watches on the iochannel */
+		
+		/* Cancel winsock2 watch on socketfd */
+		WSAAsyncSelect(state->fd, gnet_hWnd, 0, 0);
+
+		/* Don't remove the main record */
+		state->winevent = 0;
+
+	}
+	ReleaseMutex(gnet_select_Mutex);
+}
+
+#endif

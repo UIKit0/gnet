@@ -405,7 +405,7 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
     }
 	
   /* Note: WSAAsunc automatically sets the socket to noblocking mode */
-  status = WSAAsyncSelect(sockfd, gnet_hWnd, TCP_SOCK_MSG, FD_CONNECT);
+  status = WSAAsyncSelect(sockfd, gnet_hWnd, TCP_NEW_MSG, FD_CONNECT);
 
   if (status == SOCKET_ERROR)
     {
@@ -482,7 +482,11 @@ gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
   /* Cancel event posting on the socket */
   WSAAsyncSelect(state->socket->sockfd, gnet_hWnd, 0, 0);
   gnet_tcp_socket_delete(state->socket);
-  g_free (state);
+
+  WaitForSingleObject(gnet_select_Mutex, INFINITE);
+  g_hash_table_remove(gnet_select_hash, (gpointer)state->socket->sockfd);
+  g_free(state);
+  ReleaseMutex(gnet_select_Mutex);
 }
 
 #endif		/*********** End Windows code ***********/
@@ -928,7 +932,6 @@ gnet_tcp_socket_server_accept(GTcpSocket* socket)
   gint n;
   fd_set fdset;
   GTcpSocket* s;
-  u_long arg;
 
   g_return_val_if_fail (socket != NULL, NULL);
 
@@ -941,11 +944,7 @@ gnet_tcp_socket_server_accept(GTcpSocket* socket)
       return NULL;
     }
 
-  /* make sure the socket is in blocking mode */
-
-  arg = 0;
-  if(ioctlsocket(socket->sockfd, FIONBIO, &arg))
-    return NULL;
+  /* Don't force the socket into blocking mode */
 
   sockfd = accept(socket->sockfd, &sa, NULL);
   /* if it fails, looping isn't going to help */

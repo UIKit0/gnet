@@ -9,4 +9,8 @@
 #define GNET_INTERFACE_AGE 4
 #define GNET_BINARY_AGE    4
 
+#ifndef GNET_WIN32
+#define GNET_WIN32
+#endif
+
 #endif /* GNETCONFIG_H */

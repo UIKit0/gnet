@@ -165,6 +165,10 @@ gint gnet_io_channel_readline_check_func (gchar* buffer, guint length,
   gnet_io_channel_read_async (IO, BUF, LEN, TO, TRUE, 			\
 		     gnet_io_channel_readline_check_func, NULL, FUNC, UD)
 
+/* Alternative Implementation of Glib Socket GIOChannels */
+#ifndef GNET_WIN32
+GIOChannel* g_io_channel_win32_new_stream_socket(int socket);
+#endif
 
 #endif /* GNET_EXPERIMENTAL */
 

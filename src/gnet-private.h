@@ -214,6 +214,19 @@ typedef struct _GTcpSocketAsyncState
 
 } GTcpSocketAsyncState;
 
+#ifdef GNET_WIN32
+typedef struct _SocketWatchAsyncState 
+{
+	GIOChannel *channel;
+	gint fd;
+	long winevent;
+	gint eventcode;
+  gint errorcode;
+	GSList* callbacklist;
+} SocketWatchAsyncState;
+
+void gnet_socket_watch_cb(gpointer data);
+#endif
 
 void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
 					 GInetAddrAsyncStatus status, 
@@ -253,7 +266,8 @@ extern HANDLE gnet_hostent_Mutex;
 	
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
 #define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
-#define TCP_SOCK_MSG 102	/* gnet_tcp_socket_new_async  */
+#define TCP_NEW_MSG 102	/* gnet_tcp_socket_new_async  */
+#define SOCKET_WATCH_MSG 103 /* gnet_tcp_socket_server_watch */
 
 /* Windows does not have inet_aton, but it does have inet_addr.  TODO:
    We should write a better inet_aton because inet_addr doesn't catch
