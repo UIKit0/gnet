@@ -1,3 +1,10 @@
+Sat May 31 12:47:45.57 2003 Andrew Lanoix <alanoix@umich.edu>
+
+	* src/makefile.mingw: Update for 2.0
+	* examples/makefile.mingw: "
+	* tests/makefile.mingw: "
+	* gnet.def: "
+
 Tue May 20 21:03:15 2003  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Don't check for -lpthread or -lc_r if

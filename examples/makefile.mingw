@@ -1,11 +1,18 @@
 CC = gcc
 FLAGS = -g -Wall -mno-cygwin -mcpu=pentium -DGNET_EXPERIMENTAL=1
-LINK =  -lgnet-1.1 -lglib-2.0-0 -lws2_32
+LINK =  -lgnet-2.0 -lglib-2.0-0 -lws2_32
 INC = -I../glib -I. -I../gnet -L../glib -L../gnet
 all:
-	$(CC) $(FLAGS) $(INC) echoserver.c -o echoserver $(LINK)
+	$(CC) $(FLAGS) $(INC) dnslookup.c -o dnslookup $(LINK)
 	$(CC) $(FLAGS) $(INC) echoclient.c -o echoclient $(LINK)
-	$(CC) $(FLAGS) $(INC) echoserver-udp.c -o udp-server $(LINK)
+	$(CC) $(FLAGS) $(INC) echoclient-async.c -o echoclient-async $(LINK)
+	$(CC) $(FLAGS) $(INC) echoclient-gconn.c -o echoclient-gconn $(LINK)
 	$(CC) $(FLAGS) $(INC) echoclient-udp.c -o udp-client $(LINK)
-	$(CC) $(FLAGS) $(INC) hfetch.c -o hfetch $(LINK)
+	$(CC) $(FLAGS) $(INC) echoserver.c -o echoserver $(LINK)
+	$(CC) $(FLAGS) $(INC) echoserver-async.c -o echoserver-async $(LINK)
+	$(CC) $(FLAGS) $(INC) echoserver-gserver.c -o echoserver-gserver $(LINK)
+	$(CC) $(FLAGS) $(INC) echoserver-udp.c -o udp-server $(LINK)
 	$(CC) $(FLAGS) $(INC) hash.c -o hash $(LINK)
+	$(CC) $(FLAGS) $(INC) hfetch.c -o hfetch $(LINK)
+	$(CC) $(FLAGS) $(INC) hostinfo.c -o hostinfo $(LINK)
+	$(CC) $(FLAGS) $(INC) sdr.c -o sdr $(LINK)
