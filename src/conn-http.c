@@ -30,6 +30,7 @@
 
 #include "conn-http.h"
 #include "gnetconfig.h"
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -78,6 +79,7 @@ struct _GConnHttp
 
 	gchar               *post_data;
 	gsize                post_data_len;
+	gsize                post_data_term_len; /* for extra \n\r etc. */
 	
 	gsize                content_length;
 	gsize                content_recv;
@@ -194,7 +196,7 @@ gnet_conn_http_reset (GConnHttp *conn)
 	conn->bufalloc = GNET_CONN_HTTP_BUF_INCREMENT;
 	conn->buflen   = 0;
 	
-        conn->status = STATUS_NONE;
+	conn->status = STATUS_NONE;
 }
 
 /**
@@ -227,7 +229,7 @@ gnet_conn_http_new (void)
 	gnet_conn_http_set_header (conn, "Accept", "*/*", 0);
 	gnet_conn_http_set_header (conn, "Connection", "Keep-Alive", 0); 
 
-	gnet_conn_http_set_timeout (conn, 20*1000); /* 20 secs */
+	gnet_conn_http_set_timeout (conn, 30*1000); /* 30 secs */
 
 	return conn;
 }
@@ -571,8 +573,10 @@ gnet_conn_http_set_method (GConnHttp        *conn,
 			conn->post_data[conn->post_data_len+3] = '\n';
 			conn->post_data[conn->post_data_len+4] = '\000';
 			
-			while (conn->post_data_len < 4 || !g_str_equal(conn->post_data + conn->post_data_len - 4, "\r\n\r\n")) 
-				conn->post_data_len += 2;
+			conn->post_data_term_len = 0;
+			while (conn->post_data_len < 4 
+			    || !g_str_equal(conn->post_data + conn->post_data_len + conn->post_data_term_len - 4, "\r\n\r\n")) 
+				conn->post_data_term_len += 2;
 			
 			return TRUE;
 		}
@@ -623,9 +627,9 @@ gnet_conn_http_conn_connected (GConnHttp *conn)
 		case GNET_CONN_HTTP_METHOD_POST:
 		{
 			gchar  buf[16];
+			
 
-			/* Note: if this is not 1.1 it won't work with all servers
-			 * (e.g. soap.amazon.com just times out in this case */
+			/* Note: this must be 1.1 */
 			g_string_append_printf (request, "POST %s HTTP/1.1\r\n", resource);
 			
 			g_snprintf(buf, sizeof(buf), "%u", conn->post_data_len);
@@ -663,6 +667,7 @@ gnet_conn_http_conn_connected (GConnHttp *conn)
 
 	g_string_append(request, "\r\n");
 
+/*	g_print ("Sending:\n%s\n", request->str); */
 	gnet_conn_write(conn->conn, request->str, request->len);
 	conn->status = STATUS_SENT_REQUEST;
 
@@ -690,7 +695,8 @@ gnet_conn_http_done (GConnHttp *conn)
 	
 	ev = gnet_conn_http_new_event (GNET_CONN_HTTP_DATA_COMPLETE);
 	ev_data = (GConnHttpEventData*)ev;
-	ev_data->buffer = conn->buffer;
+	ev_data->buffer         = conn->buffer;
+	ev_data->buffer_length  = conn->buflen;
 	ev_data->content_length = conn->content_length;
 	ev_data->data_received  = conn->content_recv;
 	gnet_conn_http_emit_event (conn, ev);
@@ -699,7 +705,7 @@ gnet_conn_http_done (GConnHttp *conn)
 	if (conn->connection_close)
 		gnet_conn_disconnect(conn->conn);
 	
-        /* need to do auto-redirect now? */
+	/* need to do auto-redirect now? */
 	if (conn->redirect_location)
 	{
 		if (gnet_conn_http_set_uri(conn, conn->redirect_location))
@@ -848,7 +854,7 @@ gnet_conn_http_conn_recv_response (GConnHttp *conn, gchar *data, gsize len)
 		/* may we continue the POST request? */
 		if (conn->response_code == 100 && conn->method == GNET_CONN_HTTP_METHOD_POST)
 		{
-			gnet_conn_write(conn->conn, conn->post_data, conn->post_data_len);
+			gnet_conn_write(conn->conn, conn->post_data, conn->post_data_len + conn->post_data_term_len);
 			conn->status = STATUS_SENT_REQUEST; /* expecting the response for the content next */
 			return;
 		}
@@ -1168,7 +1174,7 @@ gnet_conn_http_ia_cb (GInetAddr *ia, GConnHttp *conn)
 			                                G_STRLOC);
 			return;
 		}
-
+		
 		gnet_conn_timeout(conn->conn, conn->timeout); 
 		gnet_conn_connect(conn->conn);
 		gnet_conn_set_watch_error(conn->conn, TRUE);
@@ -1186,7 +1192,6 @@ gnet_conn_http_ia_cb (GInetAddr *ia, GConnHttp *conn)
 		gnet_conn_http_conn_connected(conn);
 	}
 }
-
 
 /**
  *  gnet_conn_http_run_async
@@ -1228,7 +1233,6 @@ gnet_conn_http_run_async (GConnHttp        *conn,
 		gnet_conn_http_ia_cb(conn->ia, conn);
 	}
 }
-
 
 /**
  *  gnet_conn_http_run
@@ -1321,8 +1325,11 @@ gnet_conn_http_steal_buffer (GConnHttp        *conn,
 	 || conn->status == STATUS_ERROR)
 		return FALSE;
 
+	/* Not the best way, but better for app 
+	 *  developers trying to trace down leaks */
 	*length = conn->buflen;
-	*buffer = conn->buffer;
+        *buffer = g_malloc0 (*length + 1);
+	memcpy (*buffer, conn->buffer, *length);
 	
 	conn->buffer   = g_malloc (GNET_CONN_HTTP_BUF_INCREMENT);
 	conn->bufalloc = GNET_CONN_HTTP_BUF_INCREMENT;
@@ -1399,8 +1406,9 @@ gnet_conn_http_delete (GConnHttp *conn)
 		g_main_loop_unref(conn->loop);
 
 	g_free(conn->post_data);
+
 	g_free(conn->buffer);
-	
+
 	memset(conn, 0xff, sizeof(GConnHttp));
 	g_free(conn);
 }
@@ -1500,7 +1508,7 @@ gnet_http_get (const gchar  *url,
 		*response = 0;
 
 	ret = FALSE;
-        conn = gnet_conn_http_new();
+	conn = gnet_conn_http_new();
 
 	if (gnet_conn_http_set_uri(conn,url))
 	{

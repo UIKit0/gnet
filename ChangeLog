@@ -1,3 +1,7 @@
+Wed May 19 22:20:54 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* src/conn-http.c: Apply Tim's second patch.
+
 Wed May 19 21:58:46 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* *http*: Apply Tim Müller's first HTTP Conn patch.
