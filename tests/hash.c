@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include <sys/types.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 
 #include <gnet.h>
@@ -67,9 +66,6 @@ main (int argc, char* argv[])
 
   if (length)
     {
-      buffer = mmap (NULL, length, PROT_READ, MAP_PRIVATE, fileno(file), 0);
-      g_assert (buffer != NULL && ((int) buffer != -1));
-      
       buffer = g_malloc (length);
       g_assert (fread (buffer, length, 1, file) == 1);
     }
