@@ -357,13 +357,18 @@ static void
 object_echoserver (gint port)
 {
   GMainLoop* main_loop;
+  GInetAddr* addr;
   GServer* server;
 
   /* Create the main loop */
   main_loop = g_main_new(FALSE);
 
+  /* Create the interface */
+  addr = gnet_inetaddr_new_any ();
+  gnet_inetaddr_set_port (addr, port);
+
   /* Create the server */
-  server = gnet_server_new (NULL, port, ob_server_func, NULL);
+  server = gnet_server_new (addr, TRUE, ob_server_func, NULL);
   g_assert (server);
 
   /* Start the main loop */

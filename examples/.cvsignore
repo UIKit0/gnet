@@ -11,3 +11,5 @@ hfetch
 hostinfo
 dnstest
 ljoust
+echoserver-udp
+echoclient-udp

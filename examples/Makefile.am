@@ -2,13 +2,13 @@
 
 @SET_MAKE@
 
-EXTRA_PROGRAMS = echoserver echoclient 		\
-		 echoserver-udp echoclient-udp	\
-		 hfetch sdr ljoust 	
+noinst_PROGRAMS = echoserver echoclient 	\
+		  echoserver-udp echoclient-udp	\
+		  hfetch sdr
 
-CLEANFILES = 	 echoserver echoclient 		\
-		 echoserver-udp echoclient-udp	\
-		 hfetch sdr ljoust 	
+EXTRA_DIST     = ljoust.c
+EXTRA_PROGRAMS = ljoust
+CLEANFILES     = ljoust
 
 INCLUDES += `gnet-config --cflags`
 LDFLAGS += `gnet-config --libs`
@@ -40,10 +40,9 @@ ljoust:
 
 
 
-
 ########################################
 
 examples: echoserver echoclient 	\
 	  echoserver-udp echoclient-udp \
 	  hfetch sdr			\
-	  dnstest hostinfo
+	  dnstest
