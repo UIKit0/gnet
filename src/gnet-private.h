@@ -335,10 +335,10 @@ typedef struct _GInetAddrReverseAsyncState
   pid_t 	pid;
   guint 	watch;
   GIOChannel* 	iochannel;
-#endif				/* WINDOWS */
+#endif
   guchar	buffer[256 + 1];/* Names can only be 256 characters? */
   int 		len;
-#else
+#else				/* WINDOWS */
   int WSAhandle;
   char hostentBuffer[MAXGETHOSTSTRUCT];
   int errorcode;
@@ -406,12 +406,10 @@ typedef struct _GTcpSocketConnectState
 
 #ifdef GNET_WIN32
 
-extern WNDCLASSEX gnetWndClass;
 extern HWND  gnet_hWnd; 
-extern guint gnet_io_watch_ID;
-extern GIOChannel *gnet_iochannel;
 	
 extern GHashTable *gnet_hash;
+
 extern HANDLE gnet_Mutex; 
 extern HANDLE gnet_hostent_Mutex;
 	

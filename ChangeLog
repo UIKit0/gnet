@@ -1,3 +1,26 @@
+2003-08-22  Tor Lillqvist  <tml@iki.fi>
+
+	* acinclude.m4: New file. Dummy definition of AM_PATH_GLIB to fool
+	aclocal on systems without GLib 1.2.
+
+	* configure.ac: Check for Win32, set automake variable
+	OS_WIN32. Call AC_LIBTOOL_WIN32. Define AM_PATH_GLIB if undefined
+	(calling AC_MSG_ERROR).
+
+	* src/Makefile.am: On Win32, use -no-undefined and link with
+	-lws2_32.
+
+	* src/gnet-private.c: Mark variables used only here as static. Add
+	prototypes, because of the -Wmissing-prototypes and -Werror.
+
+	* src/gnet-private.h: Remove variables marked as static to
+	gnet-private.c above.
+
+	* src/unix.c: Bypass on Win32.
+
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): [Win32 version]
+	Must watch for G_IO_OUT to catch connect() connecting.
+
 Sun Aug 10 21:14:20 2003  David Helder  <dhelder@umich.edu>
 
 	* src/uri.c (field_escape): Mask top 4 bytes before

@@ -1,5 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 
+if OS_WIN32
+no_undefined = -no-undefined
+lws2_32 = -lws2_32
+endif
+
 @SET_MAKE@
 
 INCLUDES = -DG_LOG_DOMAIN=\"GNet\" @GNET_DEBUG_FLAGS@ \
@@ -10,8 +15,9 @@ gnetincludedir = $(includedir)/gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)
 lib_LTLIBRARIES = libgnet-2.0.la
 
 libgnet_2_0_la_LDFLAGS = \
+	$(no_undefined) \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
-	$(GLIB_LIBS) $(GTHREAD_LIBS) 
+	$(GLIB_LIBS) $(GTHREAD_LIBS) $(lws2_32)
 
 libgnet_2_0_la_SOURCES = 	\
 	gnet.c			\

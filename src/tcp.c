@@ -600,7 +600,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   state->connect_watch = 
     g_io_add_watch(gnet_private_io_channel_new(s->sockfd),
-		   G_IO_IN | G_IO_ERR,
+		   G_IO_IN | G_IO_OUT | G_IO_ERR,
 		   gnet_tcp_socket_new_async_cb, 
 		   state);
 

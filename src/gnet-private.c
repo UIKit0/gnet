@@ -162,15 +162,28 @@ gnet_private_io_channel_new (int sockfd)
 
 #ifdef GNET_WIN32
 
-WNDCLASSEX gnetWndClass;
+static WNDCLASSEX gnetWndClass;
 HWND  gnet_hWnd; 
-guint gnet_io_watch_ID;
-GIOChannel *gnet_iochannel;
+static guint gnet_io_watch_ID;
+static GIOChannel *gnet_iochannel;
 	
 GHashTable *gnet_hash;
+
 HANDLE gnet_Mutex; 
 HANDLE gnet_hostent_Mutex;
 
+int gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata);
+
+LRESULT CALLBACK
+GnetWndProc(HWND hwnd,
+	    UINT uMsg,
+	    WPARAM wParam,
+	    LPARAM lParam);
+
+BOOL WINAPI 
+DllMain(HINSTANCE hinstDLL,
+	DWORD fdwReason,
+	LPVOID lpvReserved);
 
 int 
 gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)

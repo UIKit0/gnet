@@ -52,6 +52,19 @@ AC_DEFINE_UNQUOTED(GNET_MICRO_VERSION, $GNET_MICRO_VERSION, [GNet micro version]
 AC_DEFINE_UNQUOTED(GNET_INTERFACE_AGE, $GNET_INTERFACE_AGE, [GNet interface age])
 AC_DEFINE_UNQUOTED(GNET_BINARY_AGE, $GNET_BINARY_AGE, [GNet binary age])
 
+AC_MSG_CHECKING([for Win32])
+case "$host" in
+  *-*-mingw*)
+    gnet_native_win32=yes
+    # Why not use G_OS_WIN32?
+    AC_DEFINE_UNQUOTED(GNET_WIN32, 1, [Define when compiling on Windows])
+    ;;
+  *)
+    gnet_native_win32=no
+    ;;
+esac
+AC_MSG_RESULT([$gnet_native_win32])
+AM_CONDITIONAL(OS_WIN32, [test "$gnet_native_win32" = "yes"])
 
 ####################
 # Glib1
@@ -105,6 +118,7 @@ AM_PROG_CC_STDC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_CHECK_PROG(PKGCONFIG, [pkg-config], [yes])
+AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(void*)
@@ -171,6 +185,7 @@ if test "x${enable_pthreads}" = "xyes"; then
   fi
 fi
 
+m4_ifdef([AM_PATH_GLIB],[],[AC_DEFUN([AM_PATH_GLIB],[AC_MSG_ERROR([No GLib 1.2 on this system])])])
 
 # Check for GLib 1.2 if enabled
 if test "x${enable_glib12}" = "xyes"; then

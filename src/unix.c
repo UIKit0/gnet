@@ -19,6 +19,9 @@
  */
 
 #include "gnet-private.h"
+
+#ifndef GNET_WIN32
+
 #include "unix.h"
 
 #define PATH(S) (((struct sockaddr_un *) (&(S)->sa))->sun_path)
@@ -386,3 +389,5 @@ gnet_unix_socket_unlink(const gchar *path)
   }
   return FALSE;
 }
+
+#endif /* !GNET_WIN32 */

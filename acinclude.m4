@@ -1,0 +1,3 @@
+dnl In case building GNet on a system without any GLib 1.2.x
+dnl Fool aclocal... 
+dnl AC_DEFUN([AM_PATH_GLIB],[:])
