@@ -1,3 +1,8 @@
+Wed Oct 23 13:52:18 2002  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Add --disable-pthreads flag.  Patch from Ian
+	     Peters
+
 Mon Oct 21 19:05:50 2002  David Helder  <dhelder@umich.edu>
 
 	* GNET_1_1 branch.
