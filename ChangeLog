@@ -1,3 +1,10 @@
+Wed Apr 16 15:21:21 2003  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_gethostbyname): Remover sa_inp - not used.
+	* src/inetaddr.c (gnet_gethostbyname): "
+
+	* src/gnet-private.h: Fix sockaddr_storage def.
+
 Wed Apr 16 11:52:22 2003  David Helder  <dhelder@umich.edu>
 
 	* src/{inetaddr,mcast,udp, gnet-private, gnet}.c: Use HAVE_IPV6

@@ -217,7 +217,6 @@ gnet_gethostbyname(const char* hostname)
 #ifdef HAVE_GETHOSTBYNAME_THREADSAFE
   {
     struct hostent* he;
-    struct sockaddr_in* sa_inp = (struct sockaddr_in*) sa;
 
     he = gethostbyname(hostname);
     list = hostent2ialist(he);
@@ -256,7 +255,6 @@ gnet_gethostbyname(const char* hostname)
     char* buf;
     int herr;
     int rv;
-    struct sockaddr_in* sa_inp = (struct sockaddr_in*) sa;
 
     len = 1024;
     buf = g_new(gchar, len);

@@ -71,7 +71,7 @@
 #include <netdb.h>
 
 #ifndef HAVE_SOCKADDR_STORAGE
-typedef struct {
+struct sockaddr_storage {
 #ifdef HAVE_SOCKADDR_LEN
 		unsigned char ss_len;
 		unsigned char ss_family;
@@ -79,7 +79,7 @@ typedef struct {
         unsigned short ss_family;
 #endif
         char info[126];
-} sockaddr_storage;
+};
 #endif
 
 #ifndef socklen_t
