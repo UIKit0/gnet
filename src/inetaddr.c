@@ -1317,7 +1317,8 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
 
   /* Create a structure for the call back */
   state = g_new0(GInetAddrNewListState, 1);
-  state->ia = ia;
+  state->ias = g_list_new();
+  state->ias = g_list_prepend(state->ias, ia);
   state->func = func;
   state->data = data;
 
@@ -1346,6 +1347,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 {
 
   GInetAddrNewListState* state = (GInetAddrNewListState*) data;
+  GInetAddr* ia = (GInetAddr*) &state->ias->data;
   struct hostent *result;
   struct sockaddr_in *sa_in;
 
@@ -1360,13 +1362,13 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 
   result = (struct hostent*)state->hostentBuffer;
 
-  sa_in = (struct sockaddr_in*) &state->ia->sa;
+  sa_in = (struct sockaddr_in*) ia->sa;
   memcpy(&sa_in->sin_addr, result->h_addr_list[0], result->h_length);
 
-  state->ia->name = g_strdup(result->h_name);
+  ia->name = g_strdup(result->h_name);
 
   state->in_callback = TRUE;
-  (*state->func)(state->ia, state->data);
+  (*state->func)(state->ias, state->data);
   state->in_callback = FALSE;
   g_free(state);
 
@@ -1383,7 +1385,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
   if (state->in_callback)
     return;
 
-  gnet_inetaddr_delete (state->ia);
+  ialist_free(state->ias);
   WSACancelAsyncRequest((HANDLE)state->WSAhandle);
 
   /*get a lock and remove the hash entry */

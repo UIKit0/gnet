@@ -1,3 +1,10 @@
+Sun May 11 22:31:59 2003  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c: Use ias, not ia (Win32).  Clean-up list code.
+
+	* src/gnet-private.h (struct _GUnixSocket): ifdef out
+	   for Win32 compile.
+
 Tue May  6 12:27:07 2003  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_gethostbyname): Fix memory leak?

@@ -228,6 +228,16 @@ struct _GTcpSocket
   guint	accept_watch;
 };
 
+struct _GInetAddr
+{
+  gchar* name;
+  guint ref_count;
+  struct sockaddr_storage sa;
+};
+
+
+#ifndef GNET_WIN32  /*********** Unix specific ***********/
+
 struct _GUnixSocket
 {
   gint sockfd;
@@ -238,12 +248,8 @@ struct _GUnixSocket
   gboolean server;
 };
 
-struct _GInetAddr
-{
-  gchar* name;
-  guint ref_count;
-  struct sockaddr_storage sa;
-};
+#endif	/*********** End Unix specific ***********/
+
 
 
 /* **************************************** */
