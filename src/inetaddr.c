@@ -2044,19 +2044,9 @@ inetaddr_get_name_async_pthread (void* arg)
 
   /* Copy name to state */
   if (name)
-    {
-      state->name = name;
-    }
+    state->name = name;
   else 	/* Lookup failed: name is canonical name */
-    {
-      gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-      guchar* p = (guchar*) &(GNET_SOCKADDR_IN(state->ia->sa).sin_addr);
-
-      g_snprintf (buffer, sizeof(buffer), 
-		 "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
-
-      state->name = g_strdup(buffer);
-    }
+    state->name = gnet_inetaddr_get_canonical_name(state->ia);
 
   /* Add a source for reply */
   state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 

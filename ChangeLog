@@ -1,3 +1,12 @@
+Tue Oct 28 19:02:40 2003  David Helder  <dhelder@gizmolabs.org>
+
+	* src/inetaddr.c (inetaddr_get_name_async_pthread): On
+	   failure, call gnet_inetaddr_get_canonical_name().
+	   Before we did a g_snprintf(), which only worked for
+	   IPv6.
+
+	* src/conn.c (gnet_conn_set_watch_error): Fix doc.
+
 Sun Oct  5 20:53:09 2003  David Helder  <dhelder@umich.edu>
 
 	* README (Features): Added Workrave

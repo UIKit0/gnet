@@ -1191,7 +1191,7 @@ conn_write_async_cb (GConn* conn)
 /* **************************************** */
 
 /**
- * gnet_conn_set_watch_readable
+ * gnet_conn_set_watch_error
  * @conn: a #GConn
  * @enable: enable the %GNET_CONN_READABLE event?
  *
