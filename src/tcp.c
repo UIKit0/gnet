@@ -174,6 +174,8 @@ gnet_tcp_socket_new(const GInetAddr* addr)
   GTcpSocket* s = g_new0(GTcpSocket, 1);
   struct sockaddr_in* sa_in;
 
+  g_return_val_if_fail (addr != NULL, NULL);
+
   /* Create socket */
   s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (s->sockfd < 0)
@@ -225,6 +227,9 @@ gnet_tcp_socket_new_nonblock(const GInetAddr* addr,
   GTcpSocket* s;
   struct sockaddr_in* sa_in;
   GTcpSocketNonblockState* state;
+
+  g_return_val_if_fail(addr != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
 
   /* Create socket */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);

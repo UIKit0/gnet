@@ -2,25 +2,33 @@
 GNet TODO
 ---------
 
-I would welcome help for any of these things (especially making
-packages).  Please email me if you can help (dhelder@umich.edu).
+Below are features we are interested in adding.  Please see HACKING if
+you can help.
+
 
 
 Before 0.2 (first major release):
 
   Programming
    - More portability fixes
+   - Save the iochannel in sockets and reuse it.
+   - Add ref counts to structures.
 
   Documentation
 
   Other
 
+
+
 Long term:
 
   Features
     - Build Debian docs package?
+
     - Add more error types
+
     - Allow non-blocking calls to be canceled (return the state?)
+
     - Perl-style pack and unpack functions
 
         These don't have to be exact clones.  There are some things I
@@ -34,10 +42,23 @@ Long term:
 	  the new Glib 1.4 threads where available)
       * Add option to use ADNS? (and update license)
       * Consider modifying glibc/BIND code?
+
     - Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
+
     - Better support for multihomed systems (I'm not sure what's 
 	needed)
+
+    - gnet_inetaddr_new will give you localhost if you give it an
+	hostname of "" in Linux.  Is this true on all systems?  If
+	not, we should do a return-on-fail when we get an empty
+	string.
+
+    - Consider adding gnet_io_channel_{readv/writev}.  Stevens says
+	this isn't Posix (yet?) - check how available it is.  We can
+	always fake it if we don't have it.
+
     - Support IPv6
+
     - Include more protocols
 
 	The goal here is to add basic implementations of popular file
@@ -63,6 +84,10 @@ Long term:
 	guaranteed at least one user.
 
     - Bindings for other languages
+
+	The GTK doc folks are working on a new standard for describing
+	interfaces.  Use this when it's done.
+
     - Some sort of network configuration widget?
 
    Improvements
@@ -70,8 +95,16 @@ Long term:
 
    Other
     - Port, port, port!
+
     - More documentation and examples
+
+	Add a beginners guide.  Show more code examples.
+
     - Clean up Debian packages
+
+	They seems alright, though I'd like someone with more Debian
+	experience to double check them.
+
 
 Never: (things that will probably never become part of gnet)
 

@@ -1,3 +1,12 @@
+	
+Sun Jan 30 16:34:59 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): Added 'return'
+	    if inet_aton worked.  This caused a seg fault.
+	* src/tcp.c (gnet_tcp_socket_new_nonblock): Added some
+	    g_return_val_if_fail.
+	* TODO: Reformated, added some comments.
+	
 2000-01-30  Soren Sandmann Pedersen  <sandmann@nerva.daimi.au.dk>
 
 	* src/inetaddr.c: Use HP-UX' gethostbyaddr_r.  Fixed typo

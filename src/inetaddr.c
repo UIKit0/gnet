@@ -460,6 +460,8 @@ gnet_inetaddr_new_nonblock(const gchar* name, const gint port,
       memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
 
       (*func)(ia, GINETADDR_NONBLOCK_STATUS_OK, data);
+
+      return;
     }
 
   /* That didn't work - we need to fork */
