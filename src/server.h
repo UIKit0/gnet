@@ -25,6 +25,7 @@
 #ifdef GNET_EXPERIMENTAL 
 
 #include <glib.h>
+#include "gnetconfig.h"
 #include "tcp.h"
 #include "conn.h"
 
