@@ -6,7 +6,7 @@
 AC_PREREQ([2.52])
 
 # Init autoconf and automake
-AC_INIT([gnet], [2.0.1], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [2.0.2], [gnet@gnetlibrary.org])
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_MAINTAINER_MODE
