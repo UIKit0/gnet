@@ -20,6 +20,7 @@
 
 #include "conn.h"
 
+#include <stdio.h>
 #include <memory.h> /* required for windows */
 
 

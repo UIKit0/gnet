@@ -1,3 +1,23 @@
+Mon May 13 22:44:44 2002  David Helder  <dhelder@umich.edu>
+
+	* tests/dnstest.c: Minor improvements.
+
+	* src/inetaddr.c (inetaddr_new_async_pthread): Rewrite pthread 
+	    implementation.  Problem was writing to closed pipe raised
+	    SIGPIPE for threads.  Now we don't use pipes with threads.
+	    Stupid UNIX.  It's not like you get SIGACCES when you attempt
+	    to open a file that doesn't exist.
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): "
+
+	* src/inetaddr.c (gnet_inetaddr_new_async): Move process code here.
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): "
+	
+	* src/inetaddr.c (gnet_inetaddr_new_async): Close unused pipes.
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): "
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): Initialize state.
+	* src/inetaddr.c (gnet_inetaddr_new_async): "
+
 Sat May 11 14:36:50 2002  David Helder  <dhelder@umich.edu>
 
 	* src/*.h: Added instructions on using experimental modules.

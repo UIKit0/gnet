@@ -169,25 +169,28 @@ gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 
 typedef struct _GInetAddrAsyncState 
 {
-  GInetAddr* ia;
+  GInetAddr* 	ia;
   GInetAddrNewAsyncFunc func;
-  gpointer data;
-  gboolean in_callback;
+  gpointer 	data;
 #ifndef GNET_WIN32		/* UNIX */
-  GIOChannel* iochannel;
-#ifdef HAVE_LIBPTHREAD
-  pthread_t pthread;
-#else
-  pid_t pid;
+#ifdef HAVE_LIBPTHREAD		/* UNIX pthread	*/
+  pthread_mutex_t mutex;
+  gboolean	is_cancelled;
+  gboolean	lookup_failed;
+  guint 	source;
+#else			       	/* UNIX process	*/
+  int 		fd;
+  pid_t 	pid;
+  GIOChannel* 	iochannel;
+  guint 	watch;
+  guchar 	buffer[16];
+  int 		len;
+  gboolean 	in_callback;
 #endif
-  int fd;
-  guint watch;
-  guchar buffer[16];
-  int len;
-#else				/* WINDOWS */
-  int WSAhandle;
-  char hostentBuffer[MAXGETHOSTSTRUCT];
-  int errorcode;
+#else				/* Windows */
+  int 		WSAhandle;
+  char 		hostentBuffer[MAXGETHOSTSTRUCT];
+  int 		errorcode;
 #endif
 
 } GInetAddrAsyncState;
@@ -204,17 +207,20 @@ typedef struct _GInetAddrReverseAsyncState
   GInetAddrGetNameAsyncFunc func;
   gpointer data;
   gboolean in_callback;
-#ifndef GNET_WIN32		/* UNIX */
-  GIOChannel* iochannel;
-#ifdef HAVE_LIBPTHREAD
-  pthread_t pthread;
-#else
-  pid_t pid;
+#ifndef GNET_WIN32		/* UNIX 	*/
+#ifdef HAVE_LIBPTHREAD		/* UNIX pthread	*/
+  pthread_mutex_t mutex;
+  gboolean	is_cancelled;
+  gchar*	name;
+  guint 	source;
+#else				/* UNIX process	*/
+  int 		fd;
+  pid_t 	pid;
+  guint 	watch;
+  GIOChannel* 	iochannel;
 #endif				/* WINDOWS */
-  int fd;
-  guint watch;
-  guchar buffer[256 + 1];/* I think a domain name can only be 256 characters... */
-  int len;
+  guchar	buffer[256 + 1];/* Names can only be 256 characters? */
+  int 		len;
 #else
   int WSAhandle;
   char hostentBuffer[MAXGETHOSTSTRUCT];

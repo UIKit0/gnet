@@ -1,5 +1,5 @@
 /* DNSTest - Tests InetAddr non-blocking functions
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000-2002  David Helder
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 #include <gnet.h>
 
 
-#define DO_REVERSE 1
-#define VERBOSE 1
+int do_reverse = 0;
+int verbose = 1;
 
 void lookup_block(void);
 void lookup_async(void);
@@ -81,12 +81,10 @@ lookup_block(void)
 {
   int i;
 
-/*    g_print ("lookup_block\n"); */
-
   for (i = 0; i < num_runs; ++i)
     {
       GInetAddr* ia;
-      gchar* cname;
+      gchar* name;
 
       ia = gnet_inetaddr_new(host, 0);
       if (ia == NULL)
@@ -95,15 +93,20 @@ lookup_block(void)
 	  exit (EXIT_FAILURE);
 	}
 
-      cname = gnet_inetaddr_get_canonical_name(ia);
-      g_assert(cname != NULL);
+      if (do_reverse)
+	name = gnet_inetaddr_get_name(ia);
+      else
+	name = gnet_inetaddr_get_canonical_name(ia);
 
-#if VERBOSE
-      g_print ("%d: %s -> %s\n", i, host, cname);
-#endif
+      g_assert (name != NULL);
+
+      if (verbose)
+	g_print ("%d: %s -> %s\n", i, host, name);
+
+      g_free (name);
 
       gnet_inetaddr_delete (ia);
-      g_free(cname);
+
     }
 }
 
@@ -116,32 +119,31 @@ lookup_async(void)
   int i;
   GMainLoop* main_loop = NULL;
 
-/*    g_print ("lookup_async\n"); */
-
   main_loop = g_main_new(FALSE);
 
   for (i = 0; i < num_runs; ++i)
     {
-
-#if (!DO_REVERSE)
-
-      gnet_inetaddr_new_async(host, 0, inetaddr_cb, GINT_TO_POINTER(i));
-      
-#else
-
-      GInetAddr* ia;
-
-      ia = gnet_inetaddr_new(host, 0);
-      if (ia == NULL)
+      if (do_reverse)
 	{
-	  g_print ("DNS lookup for %s failed\n", host);
-	  exit (EXIT_FAILURE);
+	  GInetAddr* ia;
+
+	  ia = gnet_inetaddr_new(host, 0);
+	  if (ia == NULL)
+	    {
+	      if (verbose)
+		g_print ("DNS lookup for %s failed\n", host);
+	      exit (EXIT_FAILURE);
+	    }
+
+	  gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, 
+				       GINT_TO_POINTER(i));
+	}
+      else
+	{
+	  gnet_inetaddr_new_async(host, 0, inetaddr_cb, GINT_TO_POINTER(i));
 	}
 
-      gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, GINT_TO_POINTER(i));
-#endif
-
-      g_main_iteration(FALSE);
+/*        g_main_iteration (FALSE); */
     }
 
   g_main_run(main_loop);
@@ -163,19 +165,18 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 	  g_print ("Reverse DNS lookup failed\n");
 	  exit (EXIT_FAILURE);
 	}
-#if VERBOSE
-      g_print ("%d: %s -> %s\n", i, host, cname);
-#endif
 
-#if (DO_REVERSE) /* Caller owns forward ia, we own reverse ia. */
-      gnet_inetaddr_delete (ia);
-#endif
+      if (verbose)
+	g_print ("%d: %s -> %s\n", i, host, cname);
+
+      if (do_reverse) /* Caller owns forward ia, we own reverse ia. */
+	gnet_inetaddr_delete (ia);
+
       g_free (cname);
     }
-#if VERBOSE
-  else
+
+  else if (verbose)
     g_print("%d: DNS lookup failed\n", i);
-#endif
 
   runs_done++;
 
@@ -185,8 +186,8 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 
 
 void
-reverse_inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, 
-		    gchar* name, gpointer data)
+reverse_inetaddr_cb (GInetAddr* ia, GInetAddrAsyncStatus status, 
+		     gchar* name, gpointer data)
 {
   int i = GPOINTER_TO_INT(data);
 
@@ -201,16 +202,13 @@ reverse_inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status,
 	  exit (EXIT_FAILURE);
 	}
 
-#if VERBOSE
-      g_print ("%d: %s -> %s (reverse)\n", i, cname, name);
-#endif
+      if (verbose)
+	g_print ("%d: %s -> %s (reverse)\n", i, cname, name);
 
       g_free(cname);
     }
-#if VERBOSE
-  else
+  else if (verbose)
     g_print("%d: error\n", i);
-#endif
 
   gnet_inetaddr_delete (ia);
 
