@@ -3,10 +3,10 @@
 @SET_MAKE@
 
 EXTRA_PROGRAMS = sdr jmsend jmreceive hfetch echoserver echoclient \
-		 hostinfo dnstest ljoust
+		 hostinfo dnstest ljoust pack hash
 
 CLEANFILES = sdr jmsend jmreceive hfetch echoserver echoclient \
-	     hostinfo dnstest ljoust
+	     hostinfo dnstest ljoust pack hash
 
 INCLUDES += `gnet-config --cflags`
 LDFLAGS += `gnet-config --libs`
@@ -29,6 +29,13 @@ echoclient_SOURCES =	\
 
 dnstest_SOURCES =	\
 	dnstest.c
+
+hash_SOURCES =		\
+	hash.c
+
+pack_SOURCES =		\
+	pack.c
+
 
 ##########
 # jmtransfer examples

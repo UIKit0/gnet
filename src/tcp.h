@@ -137,9 +137,10 @@ typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket,
 GTcpSocket* gnet_tcp_socket_connect(gchar* hostname, gint port);
 
 /* Quick and easy asynchronous constructor */
-GTcpSocketConnectAsyncID gnet_tcp_socket_connect_async(gchar* hostname, gint port, 
-						       GTcpSocketConnectAsyncFunc func, 
-						       gpointer data);
+GTcpSocketConnectAsyncID
+gnet_tcp_socket_connect_async(gchar* hostname, gint port, 
+			      GTcpSocketConnectAsyncFunc func, 
+			      gpointer data);
 
 /* Cancel quick and easy asynchronous constructor */
 void gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id);
@@ -148,9 +149,10 @@ void gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id);
 GTcpSocket* gnet_tcp_socket_new(const GInetAddr* addr);
 
 /* Asynchronous constructor */
-GTcpSocketNewAsyncID gnet_tcp_socket_new_async(const GInetAddr* addr, 
-					       GTcpSocketNewAsyncFunc func,
-					       gpointer data);
+GTcpSocketNewAsyncID 
+gnet_tcp_socket_new_async(const GInetAddr* addr, 
+			  GTcpSocketNewAsyncFunc func,
+			  gpointer data);
 
 /* Cancel asynchronous constructor */
 void gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id);
@@ -170,13 +172,31 @@ GInetAddr* gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket);
 
 gint gnet_tcp_socket_get_port(const GTcpSocket* socket);
 
+
 /* ********** */
 
-GTcpSocket* gnet_tcp_socket_server_new(const gint port);
+typedef enum
+{
+  GNET_TOS_NONE,
+  GNET_TOS_LOWDELAY,
+  GNET_TOS_THROUGHPUT,
+  GNET_TOS_RELIABILITY,
+  GNET_TOS_LOWCOST
 
-GTcpSocket* gnet_tcp_socket_server_accept(GTcpSocket* socket);
+} GNetTOS;
 
-GTcpSocket* gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket);
+void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
+
+
+/* ********** */
+
+GTcpSocket* gnet_tcp_socket_server_new (const gint port);
+
+GTcpSocket* gnet_tcp_socket_server_new2 (GInetAddr* iface, const gint port);
+
+GTcpSocket* gnet_tcp_socket_server_accept (GTcpSocket* socket);
+
+GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
 
 
 

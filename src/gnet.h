@@ -28,6 +28,13 @@
 #include "mcast.h"
 #include "tcp.h"
 
+#ifndef GNET_WIN32	/* New stuff, not ported to Win32 yet */
+#include "url.h"
+#include "iochannel.h"
+#include "conn.h"
+#include "server.h"
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,26 +69,6 @@ GNET_EXPORT const guint gnet_binary_age;
      (GNET_MAJOR_VERSION == (major) && GNET_MINOR_VERSION == (minor) && \
       GNET_MICRO_VERSION >= (micro)))
 
-
-
-GIOError gnet_io_channel_writen (GIOChannel    *channel, 
-				 gchar         *buf, 
-				 guint          len,
-				 guint         *bytes_written);
-
-GIOError gnet_io_channel_readn (GIOChannel    *channel, 
-				 gchar         *buf, 
-				 guint          len,
-				 guint         *bytes_read);
-
-GIOError gnet_io_channel_readline (GIOChannel    *channel, 
-				   gchar         *buf, 
-				   guint          len,
-				   guint         *bytes_read);
-
-GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel, 
-					  gchar         **buf_ptr, 
-					  guint         *bytes_read);
 
 
 #ifdef __cplusplus

@@ -35,22 +35,6 @@ Features
     to bind to a specific address if the user is on a multi-homed
     system.
 
-- Perl-style pack and unpack functions
-
-    These don't have to be exact clones.  There are some things I
-    don't think are needed (like hexidecimal and bit strings).
-    The main features should be network byte order shorts and
-    longs, bytes, and padded strings.  These would be vararg
-    functions and look like printf.
-
-    Jacques Fortier might be working on this.
-
-- Add MD5 and SHA
-
-    See:
-	http://www.faqs.org/rfcs/rfc1321.html	(includes free code)
-	http://www.itl.nist.gov/fipspubs/fip180-1.htm
-
 - Add lightweight intraprocess communication stuff via IOChannel.  I'd
     like a shared buffer and a message queue.  These should be simple
     to do.
@@ -139,4 +123,4 @@ Other
 
 Never: (things that will probably never become part of GNet)
 
-- Raw IP (use libpcap)
+- Raw or low-level IP (use libpcap, libnet)

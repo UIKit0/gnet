@@ -1,3 +1,32 @@
+Wed Oct 11 22:57:18 2000  David Helder  <dhelder@umich.edu>
+
+	* src/iochannel.[hc]: Moved functions in gnet.h here
+	* src/iochannel.c ({read,write}_async): Added
+
+	* src/pack.[hc]: Added.  Mostly finished.  Needs testing, more
+	   docs.
+
+	* src/conn.[hc]: Added.  Needs review, docs.
+	* src/server.[hc]: Added.  Needs review, docs.
+	
+	* src/url.[hc]: Added.  Very basic, not standards compliant.
+	   Needs work.
+	
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): Added
+	* src/inetaddr.c (gnet_inetaddr_is_*): Added
+	
+	* src/inetaddr.c (gnet_inetaddr_autodetect_internet_interface): Added
+	* src/inetaddr.c (gnet_inetaddr_get_interface_to): "
+	* src/inetaddr.c (gnet_inetaddr_get_internet_interface): "
+	* src/inetaddr.c (gnet_inetaddr_is_internet_domainname): "
+
+	* src/inetaddr.c,gnet-private.c (gnet_inetaddr_list_interfaces):
+	    Moved from private to inetaddr and exposed.
+	
+	* src/tcp.c (gnet_tcp_socket_set_tos): Added
+	* src/tcp.c (gnet_tcp_socket_server_new2): Added.  This
+	    will become gnet_tcp_socket_server_new() in 1.2.
+
 Tue Oct  3 13:26:45 2000  Andrew Lanoix <alanoix@umich.edu>
 
 	* Added: Gnet.dsp (MS VC 6.0 Project File, builds with

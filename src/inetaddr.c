@@ -221,7 +221,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
    the same pattern as gethostbyname_r, so we don't have special
    checks for it in configure.in.
 
-   Returns the hostname, NULL if there was an error.
+   Returns: the hostname, NULL if there was an error.
 */
 
 gchar*
@@ -364,11 +364,11 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
  * 
  *  Create an internet address from a name and port.  
  *
- *  Returns: a new InetAddr, or NULL if there was a failure.  
+ *  Returns: a new #GInetAddr, or NULL if there was a failure.
  *
  **/
 GInetAddr* 
-gnet_inetaddr_new(const gchar* name, const gint port)
+gnet_inetaddr_new (const gchar* name, const gint port)
 {
   struct sockaddr_in* sa_in;
   struct in_addr inaddr;
@@ -448,8 +448,8 @@ gnet_inetaddr_new(const gchar* name, const gint port)
  *
  **/
 GInetAddrNewAsyncID
-gnet_inetaddr_new_async(const gchar* name, const gint port, 
-			GInetAddrNewAsyncFunc func, gpointer data)
+gnet_inetaddr_new_async (const gchar* name, const gint port, 
+			 GInetAddrNewAsyncFunc func, gpointer data)
 {
   pid_t pid = -1;
   int pipes[2];
@@ -778,6 +778,54 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
 
 #endif		/*********** End Windows code ***********/
 
+
+
+/**
+ *  gnet_inetaddr_new_nonblock:
+ *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal name
+ *    (eg, 141.213.8.59).  You can delete the after the function is called.
+ *  @port: port number (0 if the port doesn't matter)
+ * 
+ *  Create an internet address from a name and port, but don't block
+ *  and fail if success would require blocking.  This is, if the name
+ *  is a canonical name or "localhost", it returns the address.
+ *  Otherwise, it returns NULL.
+ *
+ *  Returns: a new #GInetAddr, or NULL if there was a failure.
+ *
+ **/
+GInetAddr* 
+gnet_inetaddr_new_nonblock (const gchar* name, const gint port)
+{
+  struct sockaddr_in* sa_in;
+  struct in_addr inaddr;
+  GInetAddr* ia = NULL;
+
+  g_return_val_if_fail (name, NULL);
+
+  /* Try to read the name as if were dotted decimal */
+ try_again:
+  if (inet_aton(name, &inaddr) != 0)
+    {
+      ia = g_new0(GInetAddr, 1);
+
+      ia->ref_count = 1;
+      sa_in = (struct sockaddr_in*) &ia->sa;
+      sa_in->sin_family = AF_INET;
+      sa_in->sin_port = g_htons(port);
+      memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
+    }
+
+  /* If the name is localhost, change it to 127.0.0.1 and try again */
+  /* FIX: I don't think this is legal... */
+  else if (!strcmp (name, "localhost"))
+    {
+      name = "127.0.0.1";
+      goto try_again;
+    }
+
+  return ia;
+}
 
 
 
@@ -1292,6 +1340,230 @@ gnet_inetaddr_set_port(const GInetAddr* ia, guint port)
 
 
 /**
+ *  gnet_inetaddr_is_canonical:
+ *  @name: Name to check
+ *
+ *  Check if the domain name is canonical.  For IPv4, a canonical name
+ *  is a dotted decimal name (eg, 141.213.8.59).
+ *
+ *  Return: TRUE if @name is canonical; FALSE otherwise.
+ *
+ **/
+gboolean
+gnet_inetaddr_is_canonical (const gchar* name)
+{
+  struct in_addr inaddr;
+
+  g_return_val_if_fail (name, FALSE);
+
+  return (inet_aton(name, &inaddr) != 0);
+}
+
+
+
+/**
+ *  gnet_inetaddr_is_internet:
+ *  @inetaddr: Address to check
+ * 
+ *  Check if the address is a sensible internet address.  This mean it
+ *  is not private, reserved, loopback, multicast, or broadcast.
+ *
+ *  Note that private and loopback address are often valid addresses,
+ *  so this should only be used to check for general Internet
+ *  connectivity.  That is, if the address passes, it is reachable on
+ *  the Internet.
+ *
+ *  Returns: TRUE if the address is an 'Internet' address; FALSE
+ *  otherwise.
+ *
+ **/
+gboolean
+gnet_inetaddr_is_internet (const GInetAddr* inetaddr)
+{
+  g_return_val_if_fail(inetaddr != NULL, FALSE);
+
+  if (!gnet_inetaddr_is_private(inetaddr) 	&&
+      !gnet_inetaddr_is_reserved(inetaddr) 	&&
+      !gnet_inetaddr_is_loopback(inetaddr) 	&&
+      !gnet_inetaddr_is_multicast(inetaddr) 	&&
+      !gnet_inetaddr_is_broadcast(inetaddr))
+    {
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+
+
+/**
+ *  gnet_inetaddr_is_private:
+ *  @inetaddr: Address to check
+ *
+ *  Check if the address is an address reserved for private networks
+ *  or something else.  This includes:
+ *
+ *   10.0.0.0        -   10.255.255.255  (10/8 prefix)
+ *   172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
+ *   192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
+ *
+ *  (from RFC 1918.  See also draft-manning-dsua-02.txt)
+ * 
+ *  Returns: TRUE if the address is reserved for private networks;
+ *  FALSE otherwise.
+ *
+ **/
+gboolean
+gnet_inetaddr_is_private (const GInetAddr* inetaddr)
+{
+  guint addr;
+
+  g_return_val_if_fail (inetaddr != NULL, FALSE);
+
+  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr;
+  addr = g_ntohl(addr);
+
+  if ((addr & 0xFF000000) == (10 << 24))
+    return TRUE;
+
+  if ((addr & 0xFFF00000) == 0xAC100000)
+    return TRUE;
+
+  if ((addr & 0xFFFF0000) == 0xC0A80000)
+    return TRUE;
+
+  return FALSE;
+}
+
+
+/**
+ *  gnet_inetaddr_is_reserved:
+ *  @inetaddr: Address to check
+ *
+ *  Check if the address is reserved for 'something'.  This excludes
+ *  address reserved for private networks.
+ *
+ *  We check for:
+ *    0.0.0.0/16  (top 16 bits are 0's)
+ *    Class E (top 5 bits are 11110)
+ *
+ *  Returns: TRUE if the address is reserved for something; FALSE
+ *  otherwise.
+ *
+ **/
+gboolean
+gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
+{
+  guint addr;
+
+  g_return_val_if_fail (inetaddr != NULL, FALSE);
+
+  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr;
+  addr = g_ntohl(addr);
+
+  if ((addr & 0xFFFF0000) == 0)
+    return TRUE;
+
+  if ((addr & 0xF8000000) == 0xF0000000)
+    return TRUE;
+
+  return FALSE;
+}
+
+
+
+/**
+ *  gnet_inetaddr_is_loopback:
+ *  @inetaddr: Address to check
+ *
+ *  Check if the address is a loopback address.  Loopback addresses
+ *  have the prefix 127.0.0.1/16.
+ * 
+ *  Returns: TRUE if the address is a loopback address; FALSE
+ *  otherwise.
+ *
+ **/
+gboolean
+gnet_inetaddr_is_loopback (const GInetAddr* inetaddr)
+{
+  guint addr;
+
+  g_return_val_if_fail (inetaddr != NULL, FALSE);
+
+  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr;
+  addr = g_ntohl(addr);
+
+  if ((addr & 0xFF000000) == (127 << 24))
+    return TRUE;
+
+  return FALSE;
+}
+
+
+/**
+ *  gnet_inetaddr_is_multicast:
+ *  @inetaddr: Address to check
+ *
+ *  Check if the address is a multicast address.  Multicast address
+ *  are in the range 224.0.0.1 - 239.255.255.255 (ie, the top four
+ *  bits are 1110).
+ * 
+ *  Returns: TRUE if the address is a multicast address; FALSE
+ *  otherwise.
+ *
+ **/
+gboolean 
+gnet_inetaddr_is_multicast (const GInetAddr* inetaddr)
+{
+  guint addr;
+
+  g_return_val_if_fail (inetaddr != NULL, FALSE);
+
+  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr;
+  addr = g_htonl(addr);
+
+  if ((addr & 0xF0000000) == 0xE0000000)
+    return TRUE;
+
+  return FALSE;
+}
+
+
+/**
+ *  gnet_inetaddr_is_broadcast:
+ *  @inetaddr: Address to check
+ *
+ *  Check if the address is a broadcast address.  The broadcast
+ *  address is 255.255.255.255.  (Network broadcast address are
+ *  network dependent.)
+ * 
+ *  Returns: TRUE if the address is a broadcast address; FALSE
+ *  otherwise.
+ *
+ **/
+gboolean 
+gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr)
+{
+  guint addr;
+
+  g_return_val_if_fail (inetaddr != NULL, FALSE);
+
+  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr;
+
+  if (addr == 0xFFFFFFFF)
+    return TRUE;
+
+  return FALSE;
+}
+
+
+
+
+/* **************************************** */
+
+
+
+/**
  *  gnet_inetaddr_hash:
  *  @p: Pointer to an #GInetAddr.
  *
@@ -1447,3 +1719,383 @@ gnet_inetaddr_gethostaddr(void)
 
   return ia;
 }
+
+
+/* **************************************** */
+
+
+
+
+/**
+ *  gnet_inetaddr_autodetect_internet_interface:
+ *
+ *  Find an Internet interface.  Usually, this interface routes
+ *  packets to and from the Internet.  It can be used to automatically
+ *  configure simple servers that must advertise their address.  This
+ *  sometimes doesn't work correctly when the user is behind a NAT.
+ *
+ *  Returns: Address of an Internet interface; NULL if it couldn't
+ *  find one or there was an error.
+ *
+ **/
+GInetAddr* 
+gnet_inetaddr_autodetect_internet_interface (void)
+{
+  GInetAddr* jm_addr;
+  GInetAddr* interface;
+
+  /* First try to get the interface with a route to
+     junglemonkey.net (141.213.11.1).  This uses the connected UDP
+     socket method described by Stevens.  It does not work on all
+     systems.  (see Stevens UNPv1 pp 231-3) */
+  jm_addr = gnet_inetaddr_new_nonblock ("141.213.11.1", 0);
+  g_assert (jm_addr);
+
+  interface = gnet_inetaddr_get_interface_to (jm_addr);
+  gnet_inetaddr_delete (jm_addr);
+
+  /* We want an internet interface */
+  if (interface && gnet_inetaddr_is_internet(interface))
+    return interface;
+  gnet_inetaddr_delete (interface);
+
+  /* Try getting an internet interface from the list via
+     SIOCGIFCONF. (see Stevens UNPv1 pp 428-) */
+  interface = gnet_inetaddr_get_internet_interface ();
+
+  return interface;
+}
+
+
+
+/**
+ *  gnet_inetaddr_get_interface_to:
+ *  @addr: address
+ *
+ *  Figure out which local interface would be used to send a packet to
+ *  @addr.  This works on some systems, but not others.  We recommend
+ *  using gnet_inetaddr_autodetect_internet_interface() to find an
+ *  Internet interface since it's more likely to work.
+ *
+ *  Returns: Address of an interface used to route packets to @addr;
+ *  NULL if there is no such interface or the system does not support
+ *  this check.
+ *
+ **/
+GInetAddr* 
+gnet_inetaddr_get_interface_to (GInetAddr* addr)
+{
+  int sockfd;
+  struct sockaddr_in myaddr;
+  socklen_t len;
+  GInetAddr* interface;
+
+  g_return_val_if_fail (addr, NULL);
+
+  sockfd = socket (AF_INET, SOCK_DGRAM, 0);
+  if (sockfd == -1)
+    return NULL;
+
+  if (connect (sockfd, &addr->sa, sizeof(addr->sa)) == -1)
+    {
+      close (sockfd);
+      return NULL;
+    }
+
+  len = sizeof (myaddr);
+  if (getsockname (sockfd, (struct sockaddr*) &myaddr, &len) != 0)
+    {
+      close (sockfd);
+      return NULL;
+    }
+
+  interface = g_new0 (GInetAddr, 1);
+  interface->ref_count = 1;
+  memcpy (&interface->sa, (char*) &myaddr, sizeof (struct sockaddr_in));
+
+  return interface;
+}
+
+
+
+/**
+ *  gnet_inetaddr_get_internet_interface:
+ *  @addr: address
+ *
+ *  Find an Internet interface.  This just calls
+ *  gnet_inetaddr_list_interfaces() and returns the first one that
+ *  passes gnet_inetaddr_is_internet().  This works well on some
+ *  systems, but not so well on others.  We recommend using
+ *  gnet_inetaddr_autodetect_internet_interface() to find an Internet
+ *  interface since it's more likely to work.
+ *
+ *  Returns: Address of an Internet interface; NULL if there is no
+ *  such interface or the system does not support this check.
+ *
+ **/
+GInetAddr* 
+gnet_inetaddr_get_internet_interface (void)
+{
+  GInetAddr* interface = NULL;
+  GList* interfaces;
+  GList* i;
+
+  /* Get a list of interfaces */
+  interfaces = gnet_inetaddr_list_interfaces ();
+  if (interfaces == NULL)
+    return NULL;
+
+  /* Find the first interface that's an internet interface */
+  for (i = interfaces; i != NULL; i = i->next)
+    {
+      GInetAddr* ia;
+
+      ia = (GInetAddr*) i->data;
+
+      if (gnet_inetaddr_is_internet (ia))
+	{
+	  interface = gnet_inetaddr_clone (ia);
+	  break;
+	}
+    }
+
+  /* If we didn't find one, return the first interface. */
+  if (interface == NULL)
+    interface = gnet_inetaddr_clone ((GInetAddr*) interfaces->data);
+
+  /* Delete the interface list */
+  for (i = interfaces; i != NULL; i = i->next)
+    gnet_inetaddr_delete ((GInetAddr*) i->data);
+  g_list_free (interfaces);
+
+  return interface;
+}
+
+
+
+
+
+/**
+ *  gnet_inetaddr_is_internet_domainname
+ *  @name: Domain name to check
+ *
+ *  Check if the domain name is a sensible Internet domain name.  This
+ *  function uses heuristics and does not use DNS (or even block).
+ *  For example, "localhost" and "10.10.23.42" are not sensible
+ *  Internet domain names.  (10.10.23.42 is a network address, but not
+ *  accessible to the Internet at large.)
+ *
+ *  Returns: TRUE if @name is a sensible Internet domain name; FALSE
+ *  otherwise.
+ *
+ **/
+gboolean
+gnet_inetaddr_is_internet_domainname (gchar* name)
+{
+  GInetAddr* addr;
+
+  g_return_val_if_fail (name, FALSE);
+
+  /* The name can't be localhost or localhost.localdomain */
+  if (!strcmp(name, "localhost") || 
+      !strcmp(name, "localhost.localdomain"))
+    {
+      return FALSE;
+    }
+
+  /* The name must have a dot in it */
+  if (!strchr(name, '.'))
+    {
+      return FALSE;
+    }
+	
+  /* If it's dotted decimal, make sure it's valid */
+  addr = gnet_inetaddr_new_nonblock (name, 0);
+  if (addr)
+    {
+      gboolean rv;
+
+      rv = gnet_inetaddr_is_internet (addr);
+      gnet_inetaddr_delete (addr);
+
+      if (!rv)
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
+
+/* **************************************** */
+
+
+
+
+#ifndef GNET_WIN32		/* Unix specific version */
+
+/**
+ *  gnet_inetaddr_list_interfaces:
+ *
+ *  Get a list of #GInetAddr interfaces's on this host.  This list
+ *  includes all "up" Internet interfaces and the loopback interface,
+ *  if it exists.
+ *
+ *  Note that the Windows version supports a maximum of 10 interfaces.
+ *  In Windows NT, Service Pack 4 (or higher) is required.
+ *
+ *  Returns: A list of #GInetAddr's representing available interfaces.
+ *  The caller should delete the list and the addresses.
+ *
+ **/
+GList* 
+gnet_inetaddr_list_interfaces (void)
+{
+  GList* list = NULL;
+  gint len, lastlen;
+  gchar* buf;
+  gchar* ptr;
+  gint sockfd;
+  struct ifconf ifc;
+
+
+  /* Create a dummy socket */
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockfd == -1) return NULL;
+
+  len = 8 * sizeof(struct ifreq);
+  lastlen = 0;
+
+  /* Get the list of interfaces.  We might have to try multiple times
+     if there are a lot of interfaces. */
+  while(1)
+    {
+      buf = g_new0(gchar, len);
+      
+      ifc.ifc_len = len;
+      ifc.ifc_buf = buf;
+      if (ioctl(sockfd, SIOCGIFCONF, &ifc) < 0)
+	{
+	  /* Might have failed because our buffer was too small */
+	  if (errno != EINVAL || lastlen != 0)
+	    {
+	      g_free(buf);
+	      return NULL;
+	    }
+	}
+      else
+	{
+	  /* Break if we got all the interfaces */
+	  if (ifc.ifc_len == lastlen)
+	    break;
+
+	  lastlen = ifc.ifc_len;
+	}
+
+      /* Did not allocate big enough buffer - try again */
+      len += 8 * sizeof(struct ifreq);
+      g_free(buf);
+    }
+
+
+  /* Create the list.  Stevens has a much more complex way of doing
+     this, but his is probably much more correct portable.  */
+  for (ptr = buf; ptr < (buf + ifc.ifc_len); )
+    {
+      struct ifreq* ifr = (struct ifreq*) ptr;
+      struct sockaddr addr;
+      GInetAddr* ia;
+
+#ifdef HAVE_SOCKADDR_SA_LEN      
+      ptr += sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len;
+#else
+      ptr += sizeof(struct ifreq);
+#endif
+
+      /* Ignore non-AF_INET */
+      if (ifr->ifr_addr.sa_family != AF_INET)
+	continue;
+
+      /* FIX: Skip colons in name?  Can happen if aliases, maybe. */
+
+      /* Save the address - the next call will clobber it */
+      memcpy(&addr, &ifr->ifr_addr, sizeof(addr));
+      
+      /* Get the flags */
+      ioctl(sockfd, SIOCGIFFLAGS, ifr);
+
+      /* Ignore entries that aren't up or loopback.  Someday we'll
+	 write an interface structure and include this stuff. */
+      if (!(ifr->ifr_flags & IFF_UP) ||
+	  (ifr->ifr_flags & IFF_LOOPBACK))
+	continue;
+
+      /* Create an InetAddr for this one and add it to our list */
+      ia = g_new0 (GInetAddr, 1);
+      ia->ref_count = 1;
+      memcpy(&ia->sa, &addr, sizeof(addr));
+      list = g_list_prepend (list, ia);
+    }
+
+  list = g_list_reverse (list);
+
+  return list;
+}
+
+
+#else GNET_WIN32		/* Windows specific version */
+
+GList* 
+gnet_inetaddr_list_interfaces (void)
+{
+  GList* list;
+  SOCKET s;
+  int wsError;
+  DWORD bytesReturned;
+  SOCKADDR_IN* pAddrInet;
+  u_long SetFlags;
+  INTERFACE_INFO localAddr[10];  /* Assumes there will be no more than 10 IP interfaces */
+  int numLocalAddr; 
+  int i;
+  struct sockaddr addr;
+  GInetAddr *ia;
+  /*SOCKADDR_IN* pAddrInet2; */	/* For testing */
+
+  list = NULL;
+  if((s = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, 0)) == INVALID_SOCKET)
+    {
+      return NULL;
+    }
+
+  /* Enumerate all IP interfaces */
+  wsError = WSAIoctl(s, SIO_GET_INTERFACE_LIST, NULL, 0, &localAddr,
+		     sizeof(localAddr), &bytesReturned, NULL, NULL);
+  if (wsError == SOCKET_ERROR)
+    {
+      closesocket(s);
+      return NULL;
+    }
+
+  closesocket(s);
+
+  /* Display interface information */
+  numLocalAddr = (bytesReturned/sizeof(INTERFACE_INFO));
+  for (i=0; i<numLocalAddr; i++) 
+    {
+      pAddrInet = (SOCKADDR_IN*)&localAddr[i].iiAddress;
+      memcpy(&addr, pAddrInet, sizeof(addr));
+      /* pAddrInet2 = (SOCKADDR_IN*)&addr; */	/*For testing */
+
+      SetFlags = localAddr[i].iiFlags;
+      if ((SetFlags & IFF_UP) || (SetFlags & IFF_LOOPBACK))
+	{
+	  /* Create an InetAddr for this one and add it to our list */
+	  ia = gnet_private_inetaddr_sockaddr_new(addr);
+	  if (ia != NULL)
+	    list = g_list_prepend(list, ia);
+	}
+    }
+  return list;
+}
+
+#endif /* end Windows specific gnet_inetaddr_list_interfaces */
+

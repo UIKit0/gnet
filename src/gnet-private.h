@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <sys/types.h>
 #include <errno.h>
@@ -38,6 +39,7 @@
 #include <glib.h>
 #include "gnet.h"
 #include "gnetconfig.h"
+
 
 #ifndef GNET_WIN32  /*********** Unix specific ***********/
 
@@ -55,8 +57,10 @@
 #include <sys/utsname.h>
 #include <sys/wait.h>
 
+#include <netinet/in_systm.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <netinet/ip.h>		/* Need for TOS */
 #include <arpa/inet.h>
 
 #include <arpa/nameser.h>
@@ -277,8 +281,6 @@ GInetAddr* gnet_private_inetaddr_sockaddr_new(const struct sockaddr sa);
 
 struct sockaddr gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia);
 /* gtk-doc doesn't like this function...  (but it will be fixed.) */
-
-GList* gnet_private_inetaddr_list_interfaces(void);
 
 
 /* TODO: Need to port this to Solaris and Windows.  This also assumes

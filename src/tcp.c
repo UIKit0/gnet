@@ -625,6 +625,58 @@ gnet_tcp_socket_get_port(const GTcpSocket* socket)
 }
 
 
+/* **************************************** */
+
+/**
+ *  gnet_tcp_socket_get_port:
+ *  @socket: GTcpSocket to set the type-of-service of
+ *  @tos: Type of service (in tcp.h)
+ *
+ *  Set the type-of-service of the socket.  Usually, routers don't
+ *  honor this.  Some systems don't support this function.  If the
+ *  operating system does not support it, the function does nothing.
+ *
+ **/
+void
+gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
+{
+  int sotos;
+
+  g_return_if_fail (socket != NULL);
+
+  /* Some systems (e.g. OpenBSD) do not have IPTOS_*.  Other systems
+     have some of them, but not others.  And some systems have them,
+     but with different names (e.g. FreeBSD has IPTOS_MINCOST).  If a
+     system does not have a IPTOS, or any of them, then this function
+     does nothing.  */
+  switch (tos)
+    {
+#ifdef IPTOS_LOWDELAY
+    case GNET_TOS_LOWDELAY:	sotos = IPTOS_LOWDELAY;		break;
+#endif
+#ifdef IPTOS_THROUGHPUT
+    case GNET_TOS_THROUGHPUT:	sotos = IPTOS_THROUGHPUT;	break;
+#endif
+#ifdef IPTOS_RELIABILITY
+    case GNET_TOS_RELIABILITY:	sotos = IPTOS_RELIABILITY;	break;
+#endif
+#ifdef IPTOS_LOWCOST
+    case GNET_TOS_LOWCOST:	sotos = IPTOS_LOWCOST;		break;
+#else
+#ifdef IPTOS_MINCOST	/* Called MINCOST in FreeBSD 4.0 */
+    case GNET_TOS_LOWCOST:	sotos = IPTOS_MINCOST;		break;
+#endif
+#endif
+    default: return;
+    }
+
+#ifdef IP_TOS
+  if (setsockopt(socket->sockfd, IPPROTO_IP, IP_TOS, (void*) &sotos, sizeof(sotos)) != 0)
+    g_warning ("Can't set TOS on TCP socket\n");
+#endif
+
+}
+
 
 /* **************************************** */
 /* Server stuff */
@@ -645,24 +697,51 @@ gnet_tcp_socket_get_port(const GTcpSocket* socket)
 GTcpSocket* 
 gnet_tcp_socket_server_new(const gint port)
 {
-  GTcpSocket* s = g_new0(GTcpSocket, 1);
+  return gnet_tcp_socket_server_new2 (NULL, port);
+}
+
+
+
+/**
+ *  gnet_tcp_socket_server_new2:
+ *  @iface: Interface to bind to (NULL if all interfaces)
+ *  @port: Port number for the socket (0 if you don't care).
+ *
+ *  Create and open a new #GTcpSocket with the specified port number.
+ *  If the interface is specified, it will bind to that interface.
+ *  Otherwise, it will bind to all interfaces.  Use this sort of
+ *  socket when your are a server and you know what the port number
+ *  should be (or pass 0 if you don't care what the port is).
+ *
+ *  WARNING: gnet_tcp_socket_server_new2() will become
+ *  gnet_tcp_socket_server_new() and the old
+ *  gnet_tcp_socket_server_new() will be eliminated in GNet 1.2.
+ *
+ *  Returns: a new #GTcpSocket, or NULL if there was a failure.
+ *
+ **/
+GTcpSocket* 
+gnet_tcp_socket_server_new2 (GInetAddr* iface, const gint port)
+{
+  GTcpSocket* s;
   struct sockaddr_in* sa_in;
   const int on = 1;
   socklen_t socklen;
 
   /* Create socket */
+  s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (s->sockfd < 0)
-    {
-      g_free(s);
-      return NULL;
-    }
+    goto error;
 
   /* Set up address and port for connection */
   sa_in = (struct sockaddr_in*) &s->sa;
   sa_in->sin_family = AF_INET;
-  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+  if (iface)
+    sa_in->sin_addr.s_addr = GNET_SOCKADDR_IN(iface->sa).sin_addr.s_addr;
+  else
+    sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
   sa_in->sin_port = g_htons(port);
 
   /* The socket is set to non-blocking mode later in the Windows
@@ -679,34 +758,35 @@ gnet_tcp_socket_server_new(const gint port)
     /* Get the flags (should all be 0?) */
     flags = fcntl(s->sockfd, F_GETFL, 0);
     if (flags == -1)
-      return NULL;
+      goto error;
 
     /* Make the socket non-blocking */
     if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-      return NULL;
+      goto error;
   }
 #endif
 
   /* Bind */
   if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
-    {
-      g_free(s);
-      return NULL;
-    }
+    goto error;
 
   /* Get the socket name - don't care if it fails */
   socklen = sizeof(s->sa);
-  getsockname(s->sockfd, &s->sa, &socklen);
+  if (getsockname(s->sockfd, &s->sa, &socklen) != 0)
+    goto error;
 
   /* Listen */
   if (listen(s->sockfd, 10) != 0)
-    {
-      g_free(s);
-      return NULL;
-    }
+    goto error;
 
   return s;
+
+ error:
+  if (s)    		g_free(s);
+  return NULL;
 }
+
+
 
 
 #ifndef GNET_WIN32  /*********** Unix code ***********/

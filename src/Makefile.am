@@ -18,13 +18,27 @@ libgnet_la_SOURCES = 		\
 	inetaddr.c		\
 	mcast.c			\
 	tcp.c			\
-	udp.c
+	udp.c			\
+	iochannel.c		\
+	md5.c			\
+	sha.c			\
+	pack.c			\
+	url.c			\
+	conn.c			\
+	server.c
 
 gnetinclude_HEADERS = 		\
 	gnet.h			\
         inetaddr.h              \
         mcast.h           	\
 	tcp.h			\
-        udp.h
+        udp.h			\
+	iochannel.h		\
+	md5.h			\
+	sha.h			\
+	pack.h			\
+	url.h			\
+	conn.h			\
+	server.h
 
 EXTRA_DIST = gnet-private.h
