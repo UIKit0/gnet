@@ -1,3 +1,8 @@
+Fri Aug  3 10:59:15 2001  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_async): Same as
+	   below for Windows version.
+
 Fri Aug  3 10:32:45 2001  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_async): Don't do inet_aton and

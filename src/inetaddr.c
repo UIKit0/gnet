@@ -701,7 +701,6 @@ gnet_inetaddr_new_async(const gchar* name, gint port,
 			GInetAddrNewAsyncFunc func, gpointer data)
 {
 
-  struct in_addr inaddr;
   GInetAddr* ia;
   struct sockaddr_in* sa_in;
   GInetAddrAsyncState* state;
@@ -709,26 +708,6 @@ gnet_inetaddr_new_async(const gchar* name, gint port,
   g_return_val_if_fail(name != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-  /* Try to read the name as if were dotted decimal */
-
-  inaddr.s_addr = inet_addr(name);
-  if (inaddr.s_addr != INADDR_NONE)
-    {
-      GInetAddr* ia = NULL;
-      struct sockaddr_in* sa_in;
-
-      ia = g_new0(GInetAddr, 1);
-      ia->ref_count = 1;
-
-      sa_in = (struct sockaddr_in*) &ia->sa;
-      sa_in->sin_family = AF_INET;
-      sa_in->sin_port = g_htons(port);
-      memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
-
-      (*func)(ia, GINETADDR_ASYNC_STATUS_OK, data);
-      return NULL;
-    }
-	
   /* Create a new InetAddr */
   ia = g_new0(GInetAddr, 1);
   ia->name = g_strdup(name);
