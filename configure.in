@@ -199,6 +199,10 @@ AC_TRY_COMPILE([
 # ****************************************
 # Checks for library functions.
 
+# Check for pthread.  If no pthread, check for fork.
+AC_CHECK_LIB(pthread, pthread_create)
+
+
 # Check if we have gethostbyname_r (we assume that if the user has gethostbyname_r,
 # that they have a similar gethostbyaddr_r).
 AC_CHECK_FUNC(gethostbyname_r,

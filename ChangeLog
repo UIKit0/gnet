@@ -1,9 +1,16 @@
+Wed Jul 25 14:23:16 2001  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c: Added pthread implementation of
+	   gnet_inetaddr_new_async.
+	* src/gnet-private.h (_GInetAddrAsyncState ): "
+	* configure.in: Check for pthreads
+
 Wed Jun 13 11:29:25 2001  Andrew Lanoix <alanoix@umich.edu>
 
-	*gnet.def: update
-	*README.win32: update
-	*tests/Makefile.mingw: Build hash.c
-	*tests/hash.c: Add a note that extra \r's on win32
+	* gnet.def: update
+	* README.win32: update
+	* tests/Makefile.mingw: Build hash.c
+	* tests/hash.c: Add a note that extra \r's on win32
 	  text files will throw off SHA and MD5 if you don't
 	  remove them
   

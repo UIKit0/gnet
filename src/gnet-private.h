@@ -37,6 +37,10 @@
 #include <sys/param.h>
 #endif
 
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
+#endif
+
 #include <glib.h>
 #include "gnet.h"
 #include "gnetconfig.h"
@@ -155,7 +159,11 @@ typedef struct _GInetAddrAsyncState
   GInetAddrNewAsyncFunc func;
   gpointer data;
 #ifndef GNET_WIN32
+#ifdef HAVE_LIBPTHREAD
+  pthread_t pthread;
+#else
   pid_t pid;
+#endif
   int fd;
   guint watch;
   guchar buffer[16];

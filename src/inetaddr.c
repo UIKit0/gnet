@@ -21,6 +21,9 @@
 #include "gnet-private.h"
 #include "inetaddr.h"
 
+#ifdef HAVE_LIBPTHREAD
+#include <pthread.h>
+#endif
 
 
 /* **************************************** */
@@ -413,6 +416,8 @@ gnet_inetaddr_new (const gchar* name, gint port)
 
 #ifndef GNET_WIN32  /*********** Unix code ***********/
 
+static void* gethostbyname_async_child (void* arg);
+
 
 /**
  *  gnet_inetaddr_new_async:
@@ -427,18 +432,19 @@ gnet_inetaddr_new (const gchar* name, gint port)
  *  callback before the function returns.  It will call the callback
  *  if there is a failure.
  *
- *  The Unix version forks and does the lookup, which can cause some
- *  problems.  In general, this will work ok for most programs most of
- *  the time.  It will be slow or even fail when using operating
- *  systems that copy the entire process when forking.
+ *  The Unix version creates a pthread thread which does the lookup.
+ *  If pthreads aren't available, it forks and does the lookup.
+ *  Forking will be slow or even fail when using operating systems
+ *  that copy the entire process when forking.  
  *
- *  If you need to lookup a lot of addresses, we recommend calling
+ *  If you need to lookup hundreds of addresses, we recommend calling
  *  g_main_iteration(FALSE) between calls.  This will help prevent an
- *  explosion of processes.
+ *  explosion of threads or processes.
  *
  *  If you need a more robust library for Unix, look at <ulink
  *  url="http://www.gnu.org/software/adns/adns.html">GNU ADNS</ulink>.
- *  GNU ADNS is under the GNU GPL.
+ *  GNU ADNS is under the GNU GPL.  This library does not use threads
+ *  or processes.
  *
  *  The Windows version should work fine.  Windows has an asynchronous
  *  DNS lookup function.
@@ -452,9 +458,11 @@ GInetAddrNewAsyncID
 gnet_inetaddr_new_async (const gchar* name, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data)
 {
-  pid_t pid = -1;
   int pipes[2];
   struct in_addr inaddr;
+  GInetAddr* ia;
+  struct sockaddr_in* sa_in;
+  GInetAddrAsyncState* state;
 
   g_return_val_if_fail(name != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
@@ -477,7 +485,7 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
       return NULL;
     }
 
-  /* That didn't work - we need to fork */
+  /* That didn't work - we need to do async */
 
   /* Open a pipe */
   if (pipe(pipes) == -1)
@@ -486,88 +494,124 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
       return NULL;
     }
 
-  /* Fork to do the look up. */
- fork_again:
-  errno = 0;
-  if ((pid = fork()) == 0)
+# ifdef HAVE_LIBPTHREAD			/* Pthread */
+  {
+    pthread_t pthread;
+    void* args[2];
+
+    args[0] = (void*) name;
+    args[1] = &pipes[1];
+
+    if (pthread_create (&pthread, NULL/*&pthread_attr*/, gethostbyname_async_child, args))
+      {
+	g_warning ("Pthread_create error\n");
+	return NULL;
+      }
+    state = g_new0(GInetAddrAsyncState, 1);
+    state->pthread = pthread;
+
+  }
+# else 					/* Fork */
+  {
+    pid_t pid = -1;
+
+    /* Fork to do the look up. */
+  fork_again:
+    errno = 0;
+    if ((pid = fork()) == 0)
+      {
+	void* args[2];
+	args[0] = (void*) name;
+	args[1] = &pipes[1];
+
+	gethostbyname_async_child (args);
+
+	/* Exit (we don't want atexit called, so do _exit instead) */
+	_exit(EXIT_SUCCESS);
+      }
+
+    /* Set up state */
+    else if (pid > 0)
+      {
+	state = g_new0(GInetAddrAsyncState, 1);
+	state->pid = pid;
+      }
+
+    /* Try again */
+    else if (errno == EAGAIN)
+      {
+	sleep(0);	/* Yield the processor */
+	goto fork_again;
+      }
+
+    /* Else fork failed completely */
+    else
+      {
+	g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
+	(*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
+	return NULL;
+      }
+  }
+#endif
+
+  /* Create a new InetAddr */
+  ia = g_new0(GInetAddr, 1);
+  ia->name = g_strdup(name);
+  ia->ref_count = 1;
+
+  sa_in = (struct sockaddr_in*) &ia->sa;
+  sa_in->sin_family = AF_INET;
+  sa_in->sin_port = g_htons(port);
+
+  /* Create a structure for the call back */
+  state = g_new0(GInetAddrAsyncState, 1);
+  state->ia = ia;
+  state->func = func;
+  state->data = data;
+  state->fd = pipes[0];
+
+  /* Add a watch */
+  state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
+				(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
+				gnet_inetaddr_new_async_cb, 
+				state);
+
+  return state;
+}
+
+
+
+static void*
+gethostbyname_async_child (void* arg) /* pthread_create friendly */
+{
+  void** args      = (void**) arg;
+  const char* name = (const char*) args[0];
+  int outfd        = *(int*) args[1];
+  struct sockaddr_in sa;
+
+  /* Try to get the host by name (ie, DNS) */
+  if (gnet_gethostbyname(name, &sa, NULL))
     {
-      struct sockaddr_in sa;
-
-      /* Try to get the host by name (ie, DNS) */
-      if (gnet_gethostbyname(name, &sa, NULL))
-	{
-	  guchar size = 4;	/* FIX for IPv6 */
-
-	  if ( (write(pipes[1], &size, sizeof(guchar)) == -1) ||
-	       (write(pipes[1], &sa.sin_addr, size) == -1) )
-	    g_warning ("Problem writing to pipe\n");
-	}
-      else
-	{
-	  /* Write a zero */
-	  guchar zero = 0;
-
-	  if (write(pipes[1], &zero, sizeof(zero)) == -1)
-	    g_warning ("Problem writing to pipe\n");
-	}
-
-      /* Close the socket */
-      close(pipes[1]);
-
-      /* Exit (we don't want atexit called, so do _exit instead) */
-      _exit(EXIT_SUCCESS);
+      guchar size = 4;	/* FIX for IPv6 */
+      
+      if ( (write(outfd, &size, sizeof(guchar)) == -1) ||
+	   (write(outfd, &sa.sin_addr, size) == -1) )
+	g_warning ("Problem writing to pipe\n");
     }
-
-  /* Set up an IOChannel to read from the pipe */
-  else if (pid > 0)
-    {
-      GInetAddr* ia;
-      struct sockaddr_in* sa_in;
-      GInetAddrAsyncState* state;
-
-      /* Create a new InetAddr */
-      ia = g_new0(GInetAddr, 1);
-      ia->name = g_strdup(name);
-      ia->ref_count = 1;
-
-      sa_in = (struct sockaddr_in*) &ia->sa;
-      sa_in->sin_family = AF_INET;
-      sa_in->sin_port = g_htons(port);
-
-      /* Create a structure for the call back */
-      state = g_new0(GInetAddrAsyncState, 1);
-      state->ia = ia;
-      state->func = func;
-      state->data = data;
-      state->pid = pid;
-      state->fd = pipes[0];
-
-      /* Add a watch */
-      state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
-				    (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
-				    gnet_inetaddr_new_async_cb, 
-				    state);
-
-      return state;
-    }
-
-  /* Try again */
-  else if (errno == EAGAIN)
-    {
-      sleep(0);	/* Yield the processor */
-      goto fork_again;
-    }
-
-  /* Else there was a goofy error */
   else
     {
-      g_warning ("Fork error: %s (%d)\n", g_strerror(errno), errno);
-      (*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
+      /* Write a zero */
+      guchar zero = 0;
+
+      if (write(outfd, &zero, sizeof(zero)) == -1)
+	g_warning ("Problem writing to pipe\n");
     }
+
+  /* Close the socket */
+  close(outfd);
 
   return NULL;
 }
-
 
 
 gboolean 
@@ -615,7 +659,11 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 	  /* Call back */
 	  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
 	  close (state->fd);
-	  waitpid (state->pid, NULL, 0);
+#	  ifdef HAVE_LIBPTHREAD
+	    pthread_join (state->pthread, NULL);
+#	  else
+	    waitpid (state->pid, NULL, 0);
+#	  endif
 	  g_free(state);
 	  return FALSE;
 	}
@@ -643,7 +691,7 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
  * 
  */
 void
-gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
+gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id)
 {
   GInetAddrAsyncState* state = (GInetAddrAsyncState*) id;
 
@@ -653,11 +701,17 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
   g_source_remove (state->watch);
 
   close (state->fd);
-  kill (state->pid, SIGKILL);
-  waitpid (state->pid, NULL, 0);
+# ifdef HAVE_LIBPTHREAD
+    pthread_join (state->pthread, NULL);
+# else
+    kill (state->pid, SIGKILL);
+    waitpid (state->pid, NULL, 0);
+# endif
 
   g_free(state);
 }
+
+
 
 
 #else	/*********** Windows code ***********/

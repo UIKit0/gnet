@@ -6,6 +6,7 @@ Changes in Gnet
 
 1.1.1 ("Cornmeal" release, UNRELEASED)
 -----
+* gnet_inetaddr_new_async has pthread implemention
 * gnet_{sha,md5}_clone functions
 * MacOSX port
 
