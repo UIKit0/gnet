@@ -177,7 +177,6 @@ async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
   sin = gnet_tcp_socket_get_iochannel (socket);
   g_io_add_watch (sin, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 		  async_client_sin_iofunc, NULL);
-
   /* Read from stdin */
   in = g_io_channel_unix_new (fileno(stdin));
   g_io_add_watch(in, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 

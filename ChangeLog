@@ -1,3 +1,7 @@
+Tue Dec 11 21:20:43 2001  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: From Mark Ferlatte's patch
+
 Fri Nov 30 17:51:02 2001  Ross Golder  <ross@golder.org>
 
 	* configure.in: Removed gmodule stuff, and exported

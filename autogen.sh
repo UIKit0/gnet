@@ -5,7 +5,7 @@
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 
-(test -f $srcdir/configure.in) || {
+(test -f $srcdir/configure.ac) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
     echo " top-level directory"
     exit 1
@@ -22,7 +22,7 @@ DIE=0
   DIE=1
 }
 
-(grep "^AM_PROG_LIBTOOL" $srcdir/configure.in >/dev/null) && {
+(grep "^AM_PROG_LIBTOOL" $srcdir/configure.ac >/dev/null) && {
   (libtool --version) < /dev/null > /dev/null 2>&1 || {
     echo
     echo "**Error**: You must have \`libtool' installed to compile GNet."
@@ -69,7 +69,7 @@ xlc )
   am_opt=--include-deps;;
 esac
 
-for coin in `find $srcdir -name configure.in -print`
+for coin in `find $srcdir -name configure.ac -print`
 do 
   dr=`dirname $coin`
   if test -f $dr/NO-AUTO-GEN; then
@@ -86,13 +86,25 @@ do
 	##  echo "**Warning**: No such directory \`$k'.  Ignored."
         fi
       done
-      if grep "^AM_PROG_LIBTOOL" configure.in >/dev/null; then
-	echo "Running libtoolize..."
+      if grep "^AM_PROG_LIBTOOL" configure.ac >/dev/null; then
+	echo "Making compatibility symlink for libtool"
+	ln -s configure.ac configure.in
+	echo "Running libtoolize --force --copy..."
 	libtoolize --force --copy
+	echo "Removing compatibility symlink for libtool"
+	rm -f configure.in
       fi
+      # Get new versions of config.sub & config.guess if present,
+      # otherwise we'll stick with the libtool varients
+      # Note that these are provided by the Debian autotools-dev package
+      test -r /usr/share/misc/config.sub &&
+	ln -sf /usr/share/misc/config.sub config.sub
+      test -r /usr/share/misc/config.guess &&
+	ln -sf /usr/share/misc/config.guess config.guess
+	
       echo "Running aclocal $aclocalinclude ..."
       aclocal $aclocalinclude
-      if grep "^AM_CONFIG_HEADER" configure.in >/dev/null; then
+      if grep "^AM_CONFIG_HEADER" configure.ac >/dev/null; then
 	echo "Running autoheader..."
 	autoheader
       fi

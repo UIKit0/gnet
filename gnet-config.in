@@ -2,8 +2,8 @@
 
 # This script was borrowed from Gtk (and Glib)
 
-glib_libs="@glib_libs@"
-glib_cflags="@glib_cflags@"
+glib_libs="@GLIB_LIBS@"
+glib_cflags="@GLIB_CFLAGS@"
 pthread_libs="@pthread_libs@"
 
 prefix=@prefix@
