@@ -29,11 +29,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define GNET_SOCKS_PORT 1080
 
+gboolean   gnet_socks_get_enabled (void);
+void	   gnet_socks_set_enabled (gboolean enabled);
 
-/* SOCKS public interface */
-
-
+GInetAddr* gnet_socks_get_server (void);
+void       gnet_socks_set_server (const GInetAddr* ia);
 
 #ifdef __cplusplus
 }

@@ -22,57 +22,33 @@
 #include "socks-private.h"
 
 
-GInetAddr*
-gnet_private_get_socks_server(void)
-{
-  gchar *ss_name;
-  gint port = 1080;
-  char *tmp, *ep;
-  int i, slen;
-
-  if ((tmp = getenv("SOCKS_SERVER"))) 
-    {
-      slen = strlen(tmp);
-      for (i = 0; (i < slen) && (tmp[i] != ':'); i++);
-      ss_name = (gchar*)malloc(sizeof(gchar)*(i+1));
-      strncpy(ss_name, tmp, i);
-      ss_name[i] = '\0';
-      if (i < slen) {
-	port = (gint)strtoul(tmp+i+1, &ep, 10);
-	/* invalid port representation */
-	if (*ep != '\0')
-	  return NULL;
-      }
-      return gnet_inetaddr_new(ss_name, port);
-    }
-  return NULL;
-}
-
 int
-gnet_private_negotiate_socks_server(GTcpSocket *s, const GInetAddr *dst)
+gnet_private_negotiate_socks_server (GTcpSocket *s, const GInetAddr *dst)
 {
   GIOChannel *ioc;
   int ver, ret;
   char *verc;
 
-  if ((verc = getenv("SOCKS_VERSION"))) 
+  if ((verc = g_getenv("SOCKS_VERSION"))) 
     ver = atoi(verc);
   else
     ver = GNET_DEFAULT_SOCKS_VERSION;
 
   ioc = gnet_tcp_socket_get_iochannel(s);
   if (ver == 5)
-    ret = gnet_private_negotiate_socks5(ioc, dst);
+    ret = gnet_private_negotiate_socks5 (ioc, dst);
   else if (ver == 4)
-    ret = gnet_private_negotiate_socks4(ioc, dst);
+    ret = gnet_private_negotiate_socks4 (ioc, dst);
   else
-    return -1;
+    ret = -1;
   g_io_channel_unref(ioc);
+
   return ret;
 }
 
+
 int
-gnet_private_negotiate_socks5(GIOChannel *ioc, const GInetAddr *dst)
+gnet_private_negotiate_socks5 (GIOChannel *ioc, const GInetAddr *dst)
 {
   unsigned char s5r[3];
   struct socks5_h s5h;
@@ -112,18 +88,18 @@ gnet_private_negotiate_socks5(GIOChannel *ioc, const GInetAddr *dst)
 
 
 int
-gnet_private_negotiate_socks4(GIOChannel *ioc, const GInetAddr *dst)
+gnet_private_negotiate_socks4 (GIOChannel *ioc, const GInetAddr *dst)
 {
   struct socks4_h s4h;
   struct sockaddr_in *sa_in;
   int len;
 
-  sa_in = (struct sockaddr_in*)&dst->sa;
+  sa_in = (struct sockaddr_in*) &dst->sa;
 
   s4h.vn     = 4;
   s4h.cd     = 1;
-  s4h.dport  = (short)sa_in->sin_port;
-  s4h.dip    = (long)sa_in->sin_addr.s_addr;
+  s4h.dport  = (short) sa_in->sin_port;
+  s4h.dip    = (long) sa_in->sin_addr.s_addr;
   s4h.userid = 0;
 
   if (gnet_io_channel_writen(ioc, &s4h, 9, &len) != G_IO_ERROR_NONE)

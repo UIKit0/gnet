@@ -19,6 +19,7 @@
  */
 
 #include "gnet-private.h"
+#include "socks-private.h"
 #include "tcp.h"
 
 
@@ -196,17 +197,24 @@ gnet_tcp_socket_new (const GInetAddr* addr)
 {
   GTcpSocket* s = g_new0(GTcpSocket, 1);
   struct sockaddr_in* sa_in;
+  GInetAddr* ss_addr = NULL;
+  const GInetAddr* addr2   = NULL;
 
   g_return_val_if_fail (addr != NULL, NULL);
+
+  /* If there's a SOCKS server, actually connect to that */
+  ss_addr = gnet_socks_get_server ();
+  if (ss_addr)
+    {
+      addr2 = addr;
+      addr  = ss_addr;
+    }
 
   /* Create socket */
   s->ref_count = 1;
   s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (s->sockfd < 0)
-    {
-      g_free(s);
-      return NULL;
-    }
+    goto error;
 
   /* Set up address and port for connection */
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
@@ -214,12 +222,23 @@ gnet_tcp_socket_new (const GInetAddr* addr)
   sa_in->sin_family = AF_INET;
 
   if (connect(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
+    goto error;
+
+  /* Negotiate SOCKS connection */
+  if (ss_addr)
     {
-      g_free(s);
-      return NULL;
+      if (gnet_private_negotiate_socks_server (s, addr2) < 0)
+	goto error;
+      gnet_inetaddr_delete (ss_addr);
     }
 
   return s;
+
+ error:
+  if (ss_addr) 
+    gnet_inetaddr_delete (ss_addr);
+  g_free (s);
+  return NULL;
 }
 
 
@@ -243,9 +262,9 @@ gnet_tcp_socket_new (const GInetAddr* addr)
  *
  **/
 GTcpSocketNewAsyncID
-gnet_tcp_socket_new_async(const GInetAddr* addr, 
-			  GTcpSocketNewAsyncFunc func,
-			  gpointer data)
+gnet_tcp_socket_new_async (const GInetAddr* addr, 
+			   GTcpSocketNewAsyncFunc func,
+			   gpointer data)
 {
   gint sockfd;
   gint flags;

@@ -38,7 +38,6 @@ main(int argc, char** argv)
 {
   ClientType client_type = NORMAL;
 
-
   if (argc != 3 && argc != 4)
     usage(EXIT_FAILURE);
 

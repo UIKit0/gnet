@@ -235,3 +235,12 @@ gnet_sha_get_digest
 gnet_sha_get_string
 gnet_sha_copy_string
 </SECTION>
+
+<SECTION>
+<FILE>socks</FILE>
+GNET_SOCKS_PORT
+gnet_socks_get_enabled
+gnet_socks_set_enabled
+gnet_socks_get_server
+gnet_socks_set_server
+</SECTION>
