@@ -22,6 +22,7 @@ TARBALL=gnet-$(VERSION).tar.gz
 
 DEBFILE=libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)_$(VERSION)-*_i386.deb
 DEBFILEDEV=libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)-dev_$(VERSION)-*_i386.deb
+DEBSRC=gnet_$(VERSION)-1.tar.gz
 
 RPMFILE=/usr/src/redhat/RPMS/i386/gnet-$(VERSION)-*.i386.rpm
 RPMFILEDEV=/usr/src/redhat/RPMS/i386/gnet-devel-$(VERSION)-*.i386.rpm
@@ -35,6 +36,7 @@ copyweb:
 	-(cd $(WEBPATH); chmod a+r $(DOCS))
 	-cp -f $(TARBALL) $(WEBPATH)/src
 	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)/deb
+	-cp -f debian-temp/$(DEBSRC) $(WEBPATH)/deb
 	-cp -f $(RPMFILE) $(RPMFILEDEV) $(RPMFILESRC) $(WEBPATH)/rpm
 	-chmod a+r $(WEBPATH)/src/* $(WEBPATH)/deb/* $(WEBPATH)/rpm/*
 	-rm -f $(DEBPATH)/dists/unstable/main/binary-i386/libs/libgnet*
