@@ -1,3 +1,12 @@
+Sun Oct  7 17:53:03 2001  David Helder  <dhelder@umich.edu>
+
+	* src/url.[hc]: Integrated David's URL improvements (fragments,
+	query, username, and password handling).  Made many parsing
+	changes to make more sane/RFC-compliant.  Added some docs.
+	* tests/url_test.c: Added.  Uses "make check".
+	* tests/urlparse.c: Added
+	* AUTHORS: Added David Bolcsfoldi
+
 Mon Sep 24 14:07:56 2001  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c: s/Interface/iface

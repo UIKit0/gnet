@@ -7,3 +7,5 @@ unpack
 hash
 dnstest
 hostinfo
+url_test
+urlparse
