@@ -1,3 +1,7 @@
+Mon Mar  1 19:07:26 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* *: Prepare 2.0.5
+
 Sun Feb 15 2004 Tomasz K³oczko <kloczek@pld.org.pl>
 
 	* gnet-2.0.m4: added missing [] quotation first parameter of
