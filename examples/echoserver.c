@@ -114,7 +114,6 @@ normal_echoserver (gint p)
 
   /* Print the address */
   addr = gnet_tcp_socket_get_inetaddr(server);
-  fprintf (stderr, "saddr = %p\n", addr);
   g_assert (addr);
   name = gnet_inetaddr_get_canonical_name (addr);
   g_assert (name);

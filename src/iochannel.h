@@ -74,9 +74,9 @@ typedef enum {
 
 typedef gpointer GNetIOChannelWriteAsyncID;
 
-typedef
-void (*GNetIOChannelWriteAsyncFunc)(GIOChannel* iochannel,
-				    gchar* buffer, /* callee owns */
+  /* callee owns buffer */
+typedef void (*GNetIOChannelWriteAsyncFunc)(GIOChannel* iochannel,
+				    gchar* buffer,
 				    guint length,
 				    guint bytes_writen,
 				    GNetIOChannelWriteAsyncStatus status, 
@@ -104,8 +104,7 @@ typedef enum {
 
 typedef gpointer GNetIOChannelReadAsyncID;
 
-typedef
-gboolean (*GNetIOChannelReadAsyncFunc)(GIOChannel* iochannel, 
+typedef gboolean (*GNetIOChannelReadAsyncFunc)(GIOChannel* iochannel, 
 				       GNetIOChannelReadAsyncStatus status, 
 				       gchar* buffer, guint length, 
 				       gpointer user_data);
@@ -113,8 +112,7 @@ gboolean (*GNetIOChannelReadAsyncFunc)(GIOChannel* iochannel,
 /* ID is invalid if there is an error.  If OK and buffer and length is
    0, then it's an EOF. */
 
-typedef
-gint (*GNetIOChannelReadAsyncCheckFunc)(gchar* buffer, guint length, 
+typedef gint (*GNetIOChannelReadAsyncCheckFunc)(gchar* buffer, guint length, 
 					gpointer user_data);
 /* Return -1 if error, otherwise number of bytes read. */
 
@@ -138,8 +136,7 @@ gint (*GNetIOChannelReadAsyncCheckFunc)(gchar* buffer, guint length,
 */
 
 
-GNetIOChannelReadAsyncID
-gnet_io_channel_read_async (GIOChannel* iochannel, 
+GNetIOChannelReadAsyncID gnet_io_channel_read_async (GIOChannel* iochannel, 
 			    gchar* buffer, guint length, 
 			    guint timeout, 
 			    gboolean read_one_byte_at_a_time, 
