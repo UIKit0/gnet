@@ -59,9 +59,9 @@ GIOChannel* gnet_udp_socket_get_io_channel (GUdpSocket* socket);
 /* ********** */
 
 gint 	 gnet_udp_socket_send (GUdpSocket* socket, const gchar* buffer, 
- 			       guint length, const GInetAddr* dst);
+ 			       gint length, const GInetAddr* dst);
 gint 	 gnet_udp_socket_receive (GUdpSocket* socket, gchar* buffer,
-				  guint length, GInetAddr** src);
+				  gint length, GInetAddr** src);
 gboolean gnet_udp_socket_has_packet (const GUdpSocket* socket);
 
 

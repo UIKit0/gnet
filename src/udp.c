@@ -214,7 +214,7 @@ gnet_udp_socket_get_io_channel (GUdpSocket* socket)
  **/
 gint 
 gnet_udp_socket_send (GUdpSocket* socket, 
-		      const gchar* buffer, guint length, 
+		      const gchar* buffer, gint length, 
 		      const GInetAddr* dst)
 {
   gint bytes_sent;
@@ -251,7 +251,7 @@ gnet_udp_socket_send (GUdpSocket* socket,
  **/
 gint 
 gnet_udp_socket_receive (GUdpSocket* socket, 
-			 gchar* buffer, guint length,
+			 gchar* buffer, gint length,
 			 GInetAddr** src)
 {
   gint bytes_received;

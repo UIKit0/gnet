@@ -29,22 +29,22 @@ extern "C" {
 
 GIOError gnet_io_channel_writen (GIOChannel*   channel, 
 				 gpointer      buffer, 
-				 guint         length,
-				 guint*        bytes_writtenp);
+				 gsize         length,
+				 gsize*        bytes_writtenp);
 
 GIOError gnet_io_channel_readn (GIOChannel*    channel, 
 				 gpointer      buffer, 
-				 guint         length,
-				 guint*        bytes_readp);
+				 gsize         length,
+				 gsize*        bytes_readp);
 
 GIOError gnet_io_channel_readline (GIOChannel* channel, 
 				   gchar*      buffer, 
-				   guint       length,
-				   guint*      bytes_readp);
+				   gsize       length,
+				   gsize*      bytes_readp);
 
 GIOError gnet_io_channel_readline_strdup (GIOChannel*   channel, 
 					  gchar**       bufferp, 
-					  guint*        bytes_readp);
+					  gsize*        bytes_readp);
 
 
 #ifdef __cplusplus

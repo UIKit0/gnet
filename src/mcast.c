@@ -557,7 +557,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
  *
  **/
 gint 
-gnet_mcast_socket_send (GMcastSocket* socket, const gchar* buffer, guint length, 
+gnet_mcast_socket_send (GMcastSocket* socket, const gchar* buffer, gint length, 
 			const GInetAddr* dst)
 {
   return gnet_udp_socket_send((GUdpSocket*) socket, buffer, length, dst);
@@ -579,7 +579,7 @@ gnet_mcast_socket_send (GMcastSocket* socket, const gchar* buffer, guint length,
  *
  **/
 gint 
-gnet_mcast_socket_receive (GMcastSocket* socket, gchar* buffer, guint length,
+gnet_mcast_socket_receive (GMcastSocket* socket, gchar* buffer, gint length,
 			   GInetAddr** src)
 {
   return gnet_udp_socket_receive((GUdpSocket*) socket, buffer, length, src);

@@ -73,9 +73,9 @@ gint 	 gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable);
 /* ********** */
 
 gint     gnet_mcast_socket_send (GMcastSocket* socket, const gchar* buffer, 
-				 guint length, const GInetAddr* dst);
+				 gint length, const GInetAddr* dst);
 gint     gnet_mcast_socket_receive (GMcastSocket* socket, gchar* buffer, 
-				    guint length, GInetAddr** src);
+				    gint length, GInetAddr** src);
 gboolean gnet_mcast_socket_has_packet (const GMcastSocket* socket);
 
 

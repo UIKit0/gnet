@@ -21,8 +21,8 @@
 #include <string.h>
 
 
-static guint strlenn(char* str, guint n);
-static void flipmemcpy(char* dst, char* src, guint n);
+static gsize strlenn(char* str, gsize n);
+static void flipmemcpy(char* dst, char* src, gsize n);
 
 
 #define MEMCPY(D,S,N)				\
@@ -77,10 +77,10 @@ static void flipmemcpy(char* dst, char* src, guint n);
   @str need not be NUL-terminated (which is why we pass @n).
 
 */
-static guint
-strlenn(char* str, guint n)
+static gsize
+strlenn(char* str, gsize n)
 {
-  guint len = 0;
+  gsize len = 0;
 
   while (*str++ && len < n) ++len;
 
@@ -89,7 +89,7 @@ strlenn(char* str, guint n)
 
 
 static void 
-flipmemcpy(char* dst, char* src, guint n)
+flipmemcpy(char* dst, char* src, gsize n)
 {
   int nn = n;
 
@@ -243,7 +243,7 @@ flipmemcpy(char* dst, char* src, guint n)
  *  unpacked easily then).
  *
  *  r is a byte array of NEXT bytes.  NEXT is the next argument passed
- *  to gnet_pack() and is an integer.
+ *  to gnet_pack() and is a gint.
  *
  *  R is a byte array of REPEAT bytes.  REPEAT must be specified.
  *
@@ -263,7 +263,7 @@ flipmemcpy(char* dst, char* src, guint n)
  *
  **/
 gint
-gnet_pack (const gchar* format, gchar* buffer, const guint length, ...)
+gnet_pack (const gchar* format, gchar* buffer, const gint length, ...)
 {
   va_list args;
   gint rv;
@@ -362,9 +362,9 @@ gnet_calcsize (const gchar* format, ...)
 gint
 gnet_vcalcsize (const gchar* format, va_list args)
 {
-  guint n = 0;
+  gint n = 0;
   gchar* p = (gchar*) format;
-  gint mult = 0;
+  guint mult = 0;
   gint sizemode = 0;	/* 1 = little, 2 = big */
 
   if (!format)
@@ -515,9 +515,9 @@ gnet_vcalcsize (const gchar* format, va_list args)
  *
  **/
 gint
-gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args)
+gnet_vpack (const gchar* format, gchar* buffer, const gint length, va_list args)
 {
-  guint n = 0;
+  gint n = 0;
   gchar* p = (gchar*) format;
   guint mult = 0;
   gint sizemode = 0;	/* 1 = little, 2 = big */
@@ -573,7 +573,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
 		gchar* s; 
-		guint slen;
+		gsize slen;
 
 		s = va_arg (args, gchar*);
 		g_return_val_if_fail (s, -1);
@@ -599,7 +599,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
 
 	    if (!mult)
 	      {
-		guint slen;
+		gsize slen;
 
 		slen = strlen(s);
 		g_return_val_if_fail (n + slen <= length, -1);
@@ -670,7 +670,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
 		gchar* s;
-		guint slen;
+		gsize slen;
 
 		s = va_arg (args, char*);
 		g_return_val_if_fail (s, -1);
@@ -820,7 +820,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
  *  are filled in with 0's.  REPEAT must be specified.
  * 
  *  r is a byte array of NEXT bytes.  NEXT is the next argument and is
- *  an integer.  REPEAT is repeat.
+ *  a gint.  REPEAT is repeat.
  * 
  *  R is a byte array of REPEAT bytes.  REPEAT must be specified.
  * 
@@ -833,7 +833,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
  * 
  **/
 gint 
-gnet_unpack (const gchar* format, gchar* buffer, guint length, ...)
+gnet_unpack (const gchar* format, gchar* buffer, gint length, ...)
 {
   va_list args;
   gint rv;
@@ -860,9 +860,9 @@ gnet_unpack (const gchar* format, gchar* buffer, guint length, ...)
  *
  **/
 gint 
-gnet_vunpack (const gchar* format, gchar* buffer, guint length, va_list args)
+gnet_vunpack (const gchar* format, gchar* buffer, gint length, va_list args)
 {
-  guint n = 0;
+  gint n = 0;
   gchar* p = (gchar*) format;
   guint mult = 0;
   gint sizemode = 0;	/* 1 = little, 2 = big */
@@ -916,7 +916,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint length, va_list args)
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
 		gchar** sp; 
-		guint slen;
+		gsize slen;
 
 		sp = va_arg (args, gchar**);
 		g_return_val_if_fail (sp, -1);
@@ -938,7 +938,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint length, va_list args)
 	case 'S':
 	  { 
 	    gchar** sp; 
-	    guint slen;
+	    gsize slen;
 
 	    g_return_val_if_fail (mult, -1);
 

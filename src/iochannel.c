@@ -50,11 +50,11 @@
 GIOError
 gnet_io_channel_writen (GIOChannel* channel, 
 			gpointer    buffer, 
-			guint       length,
-			guint*      bytes_writtenp)
+			gsize       length,
+			gsize*      bytes_writtenp)
 {
-  guint nleft;
-  guint nwritten;
+  gsize nleft;
+  gsize nwritten;
   gchar* ptr;
   GIOError error = G_IO_ERROR_NONE;
 
@@ -112,11 +112,11 @@ gnet_io_channel_writen (GIOChannel* channel,
 GIOError
 gnet_io_channel_readn (GIOChannel* channel, 
 		       gpointer    buffer, 
-		       guint       length,
-		       guint*      bytes_readp)
+		       gsize       length,
+		       gsize*      bytes_readp)
 {
-  guint nleft;
-  guint nread;
+  gsize nleft;
+  gsize nread;
   gchar* ptr;
   GIOError error = G_IO_ERROR_NONE;
 
@@ -188,10 +188,10 @@ gnet_io_channel_readn (GIOChannel* channel,
 GIOError
 gnet_io_channel_readline (GIOChannel* channel, 
 			  gchar*      buffer, 
-			  guint       length,
-			  guint*      bytes_readp)
+			  gsize       length,
+			  gsize*      bytes_readp)
 {
-  guint n, rc;
+  gsize n, rc;
   gchar c, *ptr;
   GIOError error = G_IO_ERROR_NONE;
 
@@ -273,9 +273,9 @@ gnet_io_channel_readline (GIOChannel* channel,
 GIOError
 gnet_io_channel_readline_strdup (GIOChannel* channel, 
 				 gchar**     bufferp, 
-				 guint*      bytes_readp)
+				 gsize*      bytes_readp)
 {
-  guint rc, n, length;
+  gsize rc, n, length;
   gchar c, *ptr, *buf;
   GIOError error = G_IO_ERROR_NONE;
 
