@@ -127,23 +127,24 @@ main (int argc, char* argv[])
   gnet_inetaddr_get_bytes (inetaddr, bytes);
   TEST ("get_bytes addr", !memcmp(bytes, "\x7c\xb\xd5\x8d", 4));
 
+#ifdef HAVE_IPV6
+
   /* IPv4 -> IPv6 via set_bytes */
   gnet_inetaddr_set_bytes (inetaddr, "\x3f\xfe\x0b\x00" "\x0c\x18\x1f\xff"
 			   "\0\0\0\0"         "\0\0\0\x6f", 16);
   cname = gnet_inetaddr_get_canonical_name (inetaddr);
   TEST ("set_bytes cname6", cname);
   TEST ("set_bytes addr6", !strcasecmp("3ffe:b00:c18:1fff::6f", cname));
+  g_free (cname);
   TEST ("set_bytes port6", gnet_inetaddr_get_port (inetaddr) == 2345);
 
   TEST ("new_bytes length6", gnet_inetaddr_get_length (inetaddr) == 16);
 
   gnet_inetaddr_get_bytes (inetaddr, bytes);
-  TEST ("get_bytes addr", !memcmp(bytes, "\x3f\xfe\x0b\x00\x0c\x18\x1f\xff\0\0\0\0\0\0\0\x6f", 16));
+  TEST ("get_bytes addr6", !memcmp(bytes, "\x3f\xfe\x0b\x00\x0c\x18\x1f\xff\0\0\0\0\0\0\0\x6f", 16));
 
-  g_free (cname);
   gnet_inetaddr_delete (inetaddr);
 
-#ifdef HAVE_IPV6
 
   /* **************************************** */
   /* IPv6 tests */
@@ -209,7 +210,6 @@ main (int argc, char* argv[])
 
   /* IPv4 */
   IS_TEST ("IPv4", "141.213.11.124", 	     	  gnet_inetaddr_is_ipv4);
-  IS_TEST ("!IPv4", "3ffe:b00:c18:1fff::6f", 	  !gnet_inetaddr_is_ipv4);
 
   /* IPv4 Loopback */
   IS_TEST ("IPv4 Loopback",  "127.0.0.1",     	  gnet_inetaddr_is_loopback);
@@ -252,6 +252,7 @@ main (int argc, char* argv[])
 
 #ifdef HAVE_IPV6
   /* IPv6 */
+  IS_TEST ("!IPv4", "3ffe:b00:c18:1fff::6f", 	  !gnet_inetaddr_is_ipv4);
   IS_TEST ("IPv6", "3ffe:b00:c18:1fff::6f",  	  gnet_inetaddr_is_ipv6);
   IS_TEST ("!IPv6", "141.213.11.124", 	     	  !gnet_inetaddr_is_ipv6);
 

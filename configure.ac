@@ -142,7 +142,15 @@ if test "x${enable_pthreads}" = "xyes"; then
 	[dash_pthread="-pthread"
 	 AC_MSG_RESULT(yes)],
 	[dash_pthread=""
-	 AC_MSG_RESULT(no)])
+	 AC_MSG_RESULT(no)
+         AC_MSG_CHECKING([for -pthreads])
+         LIBS="$gnet_save_LIBS -pthreads"
+	 AC_LINK_IFELSE([int main() { return 0; }], 
+	   [dash_pthread="-pthreads"
+	   AC_MSG_RESULT(yes)],
+	   [dash_pthread=""
+	   AC_MSG_RESULT(no)])
+	])
   LIBS="$gnet_save_LIBS $dash_pthread"
 
   AC_CHECK_LIB([pthread],
