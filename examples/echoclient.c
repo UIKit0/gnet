@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet/gnet.h>
+#include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
 
 typedef enum { NORMAL, ASYNC, OBJECT} ClientType;
 
@@ -268,7 +268,7 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
   /* Check for socket error */
   if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
     {
-      fprintf (stderr, "Error: Socket error\n");
+      fprintf (stderr, "Error: Socket error: %d (%d %d %d)\n", condition, G_IO_ERR, G_IO_HUP, G_IO_NVAL);
       goto error;
     }
 
@@ -296,6 +296,8 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	  g_io_channel_unref (async_in);
 	  g_io_channel_unref (async_sin);
 	  gnet_tcp_socket_delete (async_socket);
+	  exit (EXIT_SUCCESS);
+	  return FALSE;
 	}
 
       /* Otherwise, print */
@@ -345,9 +347,8 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Check for EOF */
       else if (bytes_read == 0)
 	{
-	  /* Really we should free all our resources here, but
-             whatever */
-	  goto error;
+	  exit (EXIT_SUCCESS);
+	  return FALSE;
 	}
 
       /* Otherwise, write to the socket */
@@ -465,9 +466,8 @@ ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Check for EOF */
       else if (bytes_read == 0)
 	{
-	  /* Really we should free all our resources here, but
-             whatever */
-	  goto error;
+	  exit (EXIT_SUCCESS);
+	  return FALSE;
 	}
 
       /* Otherwise, we read something */

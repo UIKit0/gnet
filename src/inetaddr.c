@@ -593,7 +593,7 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 	state = g_new0(GInetAddrAsyncState, 1);
 	state->pid = pid;
 	state->fd = pipes[0];
-	state->iochannel = g_io_channel_unix_new(pipes[0]);
+	state->iochannel = gnet_private_iochannel_new(pipes[0]);
 	state->watch = g_io_add_watch(state->iochannel,
 				      (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				      gnet_inetaddr_new_async_cb, 
@@ -1323,7 +1323,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 	state = g_new0(GInetAddrReverseAsyncState, 1);
 	state->pid = pid;
 	state->fd = pipes[0];
-	state->iochannel = g_io_channel_unix_new(pipes[0]);
+	state->iochannel = gnet_private_iochannel_new(pipes[0]);
 	state->watch = g_io_add_watch(state->iochannel,
 				      (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				      gnet_inetaddr_get_name_async_cb, 

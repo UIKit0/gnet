@@ -158,7 +158,7 @@ gnet_unix_socket_get_iochannel(GUnixSocket *socket)
   g_return_val_if_fail(socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = GNET_SOCKET_IOCHANNEL_NEW(socket->sockfd);
+    socket->iochannel = gnet_private_iochannel_new(socket->sockfd);
   g_io_channel_ref(socket->iochannel);
   return socket->iochannel;
 }

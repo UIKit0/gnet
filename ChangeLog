@@ -1,3 +1,24 @@
+Mon Sep 23 18:59:39 2002  David Helder  <dhelder@umich.edu>
+
+	* examples/Makefile.am (noinst_PROGRAMS): Make examples 
+	    noinst, not extra.
+	* examples/*: Update include to handle this.
+	
+	* examples/echoclient.c (async_client_sin_iofunc): Return 
+	    FALSE on EOF.  Otherwise we get an error.
+	
+	* src/gnet-private.c (gnet_private_iochannel_new): Added.
+	   Creates iochannel from descriptor in usual way.  If
+	   we're using GLib 2, then it turns off buffering and
+	   encoding.
+
+	* src/tcp.c (gnet_tcp_socket_get_iochannel): Use 
+	    gnet_private_iochannel_new()
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): "
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): "
+	* src/udp.c (gnet_udp_socket_get_iochannel): 
+	* src/unix.c (gnet_unix_socket_get_iochannel): 
+
 Mon Sep 23 15:31:52 2002  David Helder  <dhelder@umich.edu>
 
 	* Makefile.am (EXTRA_DIST): Move more extra dist here.

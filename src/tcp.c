@@ -398,7 +398,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   state->func = func;
   state->data = data;
   state->flags = flags;
-  state->iochannel = GNET_SOCKET_IOCHANNEL_NEW(s->sockfd);
+  state->iochannel = gnet_private_iochannel_new(s->sockfd);
   state->connect_watch = g_io_add_watch(state->iochannel,
 					GNET_ANY_IO_CONDITION,
 					gnet_tcp_socket_new_async_cb, 
@@ -540,10 +540,11 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   state->data = data;
   state->socket->sockfd = sockfd;
 
-  state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
-					G_IO_IN | G_IO_ERR,
-					gnet_tcp_socket_new_async_cb, 
-					state);
+  state->connect_watch = 
+    g_io_add_watch(gnet_private_iochannel_new(s->sockfd),
+		   G_IO_IN | G_IO_ERR,
+		   gnet_tcp_socket_new_async_cb, 
+		   state);
 
 
   if (state->connect_watch <= 0)
@@ -683,7 +684,7 @@ gnet_tcp_socket_get_iochannel(GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = GNET_SOCKET_IOCHANNEL_NEW(socket->sockfd);
+    socket->iochannel = gnet_private_iochannel_new(socket->sockfd);
    
   g_io_channel_ref (socket->iochannel);
 

@@ -23,6 +23,34 @@
 
 
 /**
+ * gnet_private_iochannel_new:
+ * @sockfd: socket descriptor
+ *
+ * Create a new IOChannel from a descriptor.  In GLib 2.0, turn off
+ * encoding and buffering.
+ *
+ * Returns: An iochannel.
+ *
+ **/
+GIOChannel* 
+gnet_private_iochannel_new (int sockfd) 
+{
+  GIOChannel* iochannel;
+
+  iochannel = GNET_SOCKET_IOCHANNEL_NEW(sockfd);
+  if (iochannel == NULL)
+    return NULL;
+
+#if GLIB_MAJOR_VERSION == 2
+  g_io_channel_set_encoding (iochannel, NULL, NULL);
+  g_io_channel_set_buffered (iochannel, FALSE);
+#endif
+
+}
+
+
+
+/**
  *  gnet_private_inetaddr_sockaddr_new:
  *  @sa: sockaddr struct to create InetAddr from.
  *

@@ -258,7 +258,7 @@ AC_TRY_LINK([#include <netdb.h>],
 			     buf);],
 	    [AC_MSG_RESULT([yes])
 	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_HPUX, 1,
-                [Define if HPUX variant of gethostbyname is available])
+               [Define if HPUX variant of gethostbyname is available])
 	     HAVE_GETHOSTBYNAME_R=yes],
 	    [AC_MSG_RESULT([no])])
 

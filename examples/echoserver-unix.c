@@ -25,7 +25,7 @@
 #include <signal.h>
 #include <glib.h>
 #define GNET_EXPERIMENTAL 1
-#include <gnet/gnet.h>
+#include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
 
 typedef enum { NORMAL, ASYNC} ServerType;
 

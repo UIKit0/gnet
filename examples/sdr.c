@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include <glib.h>
-#include <gnet/gnet.h>
+#include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
 
 #define MAXLINE 4096
 
