@@ -2,12 +2,20 @@
 
 @SET_MAKE@
 
+if OS_WIN32
 noinst_PROGRAMS = echoclient       echoserver 			\
 		  echoclient-async echoserver-async 		\
 		  echoclient-gconn echoserver-gserver 		\
 		  echoclient-udp   echoserver-udp 		\
-		  echoclient-unix  echoserver-unix 		\
 		  dnslookup hash hfetch hostinfo sdr
+else
+noinst_PROGRAMS = echoclient       echoserver 			\
+		  echoclient-async echoserver-async 		\
+		  echoclient-gconn echoserver-gserver 		\
+		  echoclient-udp   echoserver-udp 		\
+                  echoclient-unix  echoserver-unix              \
+		  dnslookup hash hfetch hostinfo sdr
+endif
 CLEANFILES     = $(EXTRA_PROGRAMS)
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS)

@@ -1,4 +1,10 @@
-Sun Mar 21 18:04:50.48    Andrew Lanoix <alanoix@umich.edu>
+Wed May 19 21:20:37 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* {tests,examples}/Makefile.am (noinst_PROGRAMS): 
+	   Add Windows-only rules.  
+	   From K. Haley <haleykd@users.sourceforge.net>
+
+Sun Mar 21 18:04:50 2004  Andrew Lanoix <alanoix@umich.edu>
 
 	*src/gnet-private.c(DllMain): If RegisterClassEx() fails, check to see if
 		class was already registered. Uncomment DestroyWindow().
