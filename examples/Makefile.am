@@ -12,7 +12,7 @@ CLEANFILES     = $(EXTRA_PROGRAMS)
 
 AM_CFLAGS = $(GLIB_CFLAGS) $(GTHREAD_CFLAGS)
 INCLUDES  = -I$(top_srcdir)/src 
-LDADD     = $(top_builddir)/src/libgnet.la
+LDADD     = $(top_builddir)/src/libgnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).la
 
 ##########
 

@@ -7,19 +7,7 @@ EXTRA_PROGRAMS = base64_test hash_test inetaddr_test ipv6_test pack_test unpack_
 CLEANFILES = $(EXTRA_PROGRAMS) .client*out .server*out
 
 INCLUDES = -I$(top_srcdir)/src $(GLIB_CFLAGS)
-LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS)
-
-
-
-#####
-
-base64_test_LDADD     = $(top_builddir)/src/libgnet.la
-hash_test_LDADD	      = $(top_builddir)/src/libgnet.la
-inetaddr_test_LDADD   = $(top_builddir)/src/libgnet.la
-ipv6_test_LDADD       = $(top_builddir)/src/libgnet.la
-pack_test_LDADD	      = $(top_builddir)/src/libgnet.la
-unpack_test_LDADD     = $(top_builddir)/src/libgnet.la
-uri_test_LDADD        = $(top_builddir)/src/libgnet.la
+LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS) $(top_builddir)/src/libgnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).la
 
 base64_test_SOURCES   = base64_test.c
 hash_test_SOURCES     = hash_test.c

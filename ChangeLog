@@ -1,3 +1,11 @@
+Fri Feb 14 16:49:10 2003  David Helder  <dhelder@umich.edu>
+
+	* gnet.pc.in: Link against gnet-MAJOR.MINOR, not plain gnet
+	* src/Makefile.am: Build libgnet-1.3
+	* configure.ac (LT_CURRENT): Use GLib's macros.  Yoink!
+	* src/Makefile.am (libgnet_1_3_la_LDFLAGS): Remove revision
+	    from LDFLAGS.
+
 Thu Feb 13 16:24:22 2003  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): Delete

@@ -7,14 +7,13 @@ INCLUDES = -DG_LOG_DOMAIN=\"GNet\" @GNET_DEBUG_FLAGS@ \
 
 gnetincludedir = $(includedir)/gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)
 
-lib_LTLIBRARIES = libgnet.la
+lib_LTLIBRARIES = libgnet-1.3.la
 
-libgnet_la_LDFLAGS = \
+libgnet_1_3_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
-	-release $(LT_RELEASE) \
 	$(GLIB_LIBS) $(GTHREAD_LIBS) 
 
-libgnet_la_SOURCES = 		\
+libgnet_1_3_la_SOURCES = 	\
 	gnet.c			\
 	gnet-private.c		\
 	ipv6.c			\
