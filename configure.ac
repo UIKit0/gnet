@@ -111,6 +111,17 @@ fi
 AC_MSG_RESULT($enable_network_tests)
 
 
+if test "$gnet_native_win32" = "yes"; then
+  if test x$enable_static = xyes -o x$enable_static = x; then
+    AC_MSG_WARN([Disabling static library build, must build as DLL on Windows.])
+    enable_static=no
+  fi
+  if test x$enable_shared = xno; then
+    AC_MSG_WARN([Enabling shared library build, must build as DLL on Windows.])
+  fi
+  enable_shared=yes
+fi
+
 ###############################
 # Check for programs
 AC_PROG_CC

@@ -5,7 +5,7 @@
 
 	* configure.ac: Check for Win32, set automake variable
 	OS_WIN32. Call AC_LIBTOOL_WIN32. Define AM_PATH_GLIB if undefined
-	(calling AC_MSG_ERROR).
+	(calling AC_MSG_ERROR). Disable static library build on Windows.
 
 	* src/Makefile.am: On Win32, use -no-undefined and link with
 	-lws2_32.
