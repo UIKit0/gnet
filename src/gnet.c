@@ -73,7 +73,7 @@ gnet_init (void)
 static gboolean
 ipv6_detect_envvar (void)
 {
-  gchar* envvar;
+  const gchar* envvar;
   char* loc4;
   char* loc6;
   GIPv6Policy policy;

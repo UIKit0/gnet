@@ -70,11 +70,6 @@ gint gnet_udp_socket_get_ttl (const GUdpSocket* us);
 gint gnet_udp_socket_set_ttl (GUdpSocket* us, gint val);
 
 
-
-
-/* GNet 1.1 compatibility functions/macros (DEPRICATED) */
-GIOChannel* gnet_udp_socket_get_iochannel (GUdpSocket* socket);
-
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */

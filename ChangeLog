@@ -1,3 +1,12 @@
+Thu Jan  9 16:35:36 2003  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c (gnet_tcp_socket_get_iochannel): Removed.  I broke so
+	   many interfaces already, why *try* to keep a crappy one?
+	* src/udp.c (gnet_udp_socket_get_iochannel): "
+	* src/udp.c (gnet_unix_socket_get_iochannel): "
+
+	* src/gnet.c (ipv6_detect_envvar): Make envvar const.
+
 Thu Jan  9 16:24:36 2003  David Helder  <dhelder@umich.edu>
 
 	* tests/pack.c: Fixed output in 2 big-ending pointer packing tests

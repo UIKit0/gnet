@@ -734,25 +734,6 @@ gnet_tcp_socket_get_io_channel (GTcpSocket* socket)
 }
 
 
-/* GNet 1.1 compatibility function (DEPRICATED) */
-GIOChannel* 
-gnet_tcp_socket_get_iochannel (GTcpSocket* socket)
-{
-  GIOChannel* iochannel;
-
-  g_return_val_if_fail (socket != NULL, NULL);
-
-  iochannel = gnet_tcp_socket_get_io_channel (socket);
-  if (!iochannel)
-    return NULL;
-
-  g_io_channel_ref (iochannel);
-
-  return iochannel;
-}
-
-
-
 /**
  *  gnet_tcp_socket_get_inetaddr:
  *  @socket: #GTcpSocket to get address of.

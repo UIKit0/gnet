@@ -61,9 +61,6 @@ GUnixSocket* gnet_unix_socket_server_accept (const GUnixSocket *socket);
 GUnixSocket* gnet_unix_socket_server_accept_nonblock (const GUnixSocket *socket);
 
 
-/* GNet 1.1 compatibility macro (DEPRICATED) */
-GIOChannel* gnet_unix_socket_get_iochannel (GUnixSocket* socket);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -173,24 +173,6 @@ gnet_udp_socket_get_io_channel (GUdpSocket* socket)
 
 
 
-/* GNet 1.1 compatibility macro (DEPRICATED) */
-GIOChannel* 
-gnet_udp_socket_get_iochannel (GUdpSocket* socket)
-{
-  GIOChannel* iochannel;
-
-  g_return_val_if_fail (socket != NULL, NULL);
-
-  iochannel = gnet_udp_socket_get_io_channel (socket);
-  if (!iochannel)
-    return NULL;
-
-  g_io_channel_ref (iochannel);
-
-  return iochannel;
-}
-
-
 /**
  *  gnet_udp_socket_unref
  *  @s: #GUdpSocket to unreference
