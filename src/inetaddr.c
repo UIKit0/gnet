@@ -30,7 +30,7 @@ static gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 typedef struct _GInetAddrAsyncState 
 {
   GInetAddr* ia;
-  GInetAddrAsyncFunc func;
+  GInetAddrNewAsyncFunc func;
   gpointer data;
   pid_t pid;
   int fd;
@@ -49,7 +49,7 @@ static gboolean gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 typedef struct _GInetAddrReverseAsyncState 
 {
   GInetAddr* ia;
-  GInetAddrReverseAsyncFunc func;
+  GInetAddrGetNameAsyncFunc func;
   gpointer data;
   pid_t pid;
   int fd;
@@ -356,9 +356,6 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 
 
 
-#define SOCKADDR_IN(s) (*((struct sockaddr_in*) &s))
-
-
 
 /**
  *  gnet_inetaddr_new:
@@ -446,9 +443,9 @@ gnet_inetaddr_new(const gchar* name, const gint port)
  *  success or failure.
  *
  **/
-gpointer
+GInetAddrNewAsyncID
 gnet_inetaddr_new_async(const gchar* name, const gint port, 
-			GInetAddrAsyncFunc func, gpointer data)
+			GInetAddrNewAsyncFunc func, gpointer data)
 {
   pid_t pid = -1;
   int pipes[2];
@@ -623,11 +620,11 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
  *  @id: ID of the lookup
  *
  *  Cancel an asynchronous GInetAddr creation that was started with
- *  gnet_inetaddr_new().
+ *  gnet_inetaddr_new_async().
  * 
  */
 void
-gnet_inetaddr_new_async_cancel(gpointer id)
+gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
 {
   GInetAddrAsyncState* state = (GInetAddrAsyncState*) id;
 
@@ -780,9 +777,9 @@ gnet_inetaddr_get_name(GInetAddr* ia)
  *  immediate success or failure.
  *
  **/
-gpointer
+GInetAddrGetNameAsyncID
 gnet_inetaddr_get_name_async(GInetAddr* ia, 
-			     GInetAddrReverseAsyncFunc func,
+			     GInetAddrGetNameAsyncFunc func,
 			     gpointer data)
 {
   g_return_val_if_fail(ia != NULL, NULL);
@@ -841,7 +838,7 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
 	  else
 	    {
 	      gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-	      guchar* p = (guchar*) &(SOCKADDR_IN(ia->sa).sin_addr);
+	      guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
 
 	      g_snprintf(buffer, sizeof(buffer), 
 			 "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
@@ -910,7 +907,7 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
  * 
  */
 void
-gnet_inetaddr_get_name_async_cancel(gpointer id)
+gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
 
@@ -993,7 +990,7 @@ gchar*
 gnet_inetaddr_get_canonical_name(GInetAddr* ia)
 {
   gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-  guchar* p = (guchar*) &(SOCKADDR_IN(ia->sa).sin_addr);
+  guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
   
   g_return_val_if_fail (ia != NULL, NULL);
 
@@ -1043,7 +1040,7 @@ gnet_inetaddr_set_port(const GInetAddr* ia, guint port)
 
 /**
  *  gnet_inetaddr_hash:
- *  @p: Pointer to an GInetAddr.
+ *  @p: Pointer to an #GInetAddr.
  *
  *  Hash the address.  This is useful for glib containers.
  *
@@ -1072,10 +1069,10 @@ gnet_inetaddr_hash(const gpointer p)
 
 /**
  *  gnet_inetaddr_equal:
- *  @p1: Pointer to first GInetAddr.
- *  @p2: Pointer to second GInetAddr.
+ *  @p1: Pointer to first #GInetAddr.
+ *  @p2: Pointer to second #GInetAddr.
  *
- *  Compare two GInetAddr's.  
+ *  Compare two #GInetAddr's.  
  *
  *  Returns: 1 if they are the same; 0 otherwise.
  *
@@ -1089,10 +1086,10 @@ gnet_inetaddr_equal(const gpointer p1, const gpointer p2)
   g_assert(p1 != NULL && p2 != NULL);
 
   /* Note network byte order doesn't matter */
-  return ((SOCKADDR_IN(ia1->sa).sin_addr.s_addr ==
-	   SOCKADDR_IN(ia2->sa).sin_addr.s_addr) &&
-	  (SOCKADDR_IN(ia1->sa).sin_port ==
-	   SOCKADDR_IN(ia2->sa).sin_port));
+  return ((GNET_SOCKADDR_IN(ia1->sa).sin_addr.s_addr ==
+	   GNET_SOCKADDR_IN(ia2->sa).sin_addr.s_addr) &&
+	  (GNET_SOCKADDR_IN(ia1->sa).sin_port ==
+	   GNET_SOCKADDR_IN(ia2->sa).sin_port));
 }
 
 
@@ -1101,7 +1098,7 @@ gnet_inetaddr_equal(const gpointer p1, const gpointer p2)
  *  @p1: Pointer to first GInetAddr.
  *  @p2: Pointer to second GInetAddr.
  *
- *  Compare two GInetAddr's, but does not compare the port numbers.
+ *  Compare two #GInetAddr's, but does not compare the port numbers.
  *
  *  Returns: 1 if they are the same; 0 otherwise.
  *
@@ -1115,8 +1112,8 @@ gnet_inetaddr_noport_equal(const gpointer p1, const gpointer p2)
   g_assert(p1 != NULL && p2 != NULL);
 
   /* Note network byte order doesn't matter */
-  return (SOCKADDR_IN(ia1->sa).sin_addr.s_addr ==
-	  SOCKADDR_IN(ia2->sa).sin_addr.s_addr);
+  return (GNET_SOCKADDR_IN(ia1->sa).sin_addr.s_addr ==
+	  GNET_SOCKADDR_IN(ia2->sa).sin_addr.s_addr);
 }
 
 
@@ -1152,10 +1149,10 @@ gnet_inetaddr_gethostname(void)
 /**
  *  gnet_inetaddr_gethostaddr:
  * 
- *  Get the primary host's GInetAddr.
+ *  Get the primary host's #GInetAddr.
  *
- *  Returns: the GInetAddr of the host; NULL if there was an error.
- *  The caller is responsible for deleting the returned GInetAddr.
+ *  Returns: the #GInetAddr of the host; NULL if there was an error.
+ *  The caller is responsible for deleting the returned #GInetAddr.
  *
  **/
 GInetAddr* 

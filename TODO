@@ -6,130 +6,131 @@ Below are features we are interested in adding.  Please see HACKING if
 you can help.
 
 
+Features
+- Add more error types
 
-Before 0.2 (first major release):
+- Write a manpage for gnet-config (start with the one for glib).
 
-  Programming
-   - More portability fixes
+- Clean up GIOChannel usage.  
 
-  Documentation
-   - Write a manpage for gnet-config (start with the one for glib).
-   - Go over the docs again and make sure everything is ok.
+    Seeking on a socket should raise an error.  Reading/writing to a
+    UDP socket should raise an error.  Etc.
 
-  Other
+    We'd also like to support UDP/Mcast better.  We use a channel for
+    a UDP socket, though it's not really a channel.  One solution
+    would be to add a GIOMessageSource which supports descrete
+    messages and has all the functions GIOChannel has.  Another
+    solution is to add a send_msg and recv_msg function to GIOChannel
+    (or replace the vtable in GIOChannel with one that also includes
+    these functions).
+
+- Differentiate between creating and connecting.  
+
+    So you'd have:
+
+    tcp_socket_new(void)            (this just calls socket())
+    tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
+
+    The advantage is that we could set options and also allow the user
+    to bind to a specific address if the user is on a multi-homed
+    system.
+
+- Perl-style pack and unpack functions
+
+    These don't have to be exact clones.  There are some things I
+    don't think are needed (like hexidecimal and bit strings).
+    The main features should be network byte order shorts and
+    longs, bytes, and padded strings.  These would be vararg
+    functions and look like printf.
+
+    Jacques Fortier might be working on this.
+
+- Add lightweight intraprocess communication stuff via IOChannel.  I'd
+    like a shared buffer and a message queue.  These should be simple
+    to do.
+
+- Maybe add gnet_inetaddr_canonical_new, which creates a GInetAddr
+    from a canonical name.
+
+- Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
+
+- Better support for multihomed systems (I'm not sure what's needed)
+
+- Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel).  sendfile is
+    available on Linux and Windows, but I'm sure the semantics are
+    different (that's why having this function would be handy).
+
+- Consider adding gnet_io_channel_{readv/writev}.  Stevens says this
+    isn't Posix (yet?) - check how available it is.  We can always
+    fake it if we don't have it.
+
+- Support IPv6.  Someone with an IPv6 system needs to do this and test
+    it.  I don't want to just use IPv6 structures and claim it's IPv6.
+
+- Include more protocols
+
+    The goal here is to add basic implementations of popular file
+    transfer protocols (eg, HTTP, FTP).  Just the basics - nothing
+    fancy.
+
+    I'm hesitant to include more complex protocols (eg, NNTP, SMTP,
+    IRC) because they are more application-focused and have limited
+    use outside their specific application.  For example, someone who
+    wants NNTP is probably implementing a new reader and would be
+    better off implementing it from scratch to get a finer control
+    over the protocol.  On the other hand, if someone had a good
+    implementation of NNTP with a good interface and there was demand
+    for it, I would probably accept it.  (An alternative would be
+    start a gnet-protocol library which would include more complex
+    protocols).
+
+    I would also be more inclined to accept implementations that are
+    in existing, working programs as opposed to from-scratch
+    implementations (for complex protocols).  This is because existing
+    implementations have been tested both in functionality and in
+    interface design.  Moreover, we would be guaranteed at least one
+    user.
+
+- Bindings for other languages
+
+    The GTK doc folks are working on a new standard for describing
+    interfaces.  Use this when it's done.
+
+- It would be nice to support out-of-band data, but I have no idea how
+    it would affect the GLib event loop.
 
 
 
-Long term:
+Internal Improvements
 
-  Features
-    - Build Debian docs package?
-
-    - Add more error types
-
-    - Differentiate between creating and connecting.  
-
-	So you'd have:
-
-	tcp_socket_new(void)            (this just calls socket())
-	tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
-
-	The advantage is that we could set options and also allow the
-	user to bind to a specific address if the user is on a
-	multi-homed system.
-
-    - Perl-style pack and unpack functions
-
-        These don't have to be exact clones.  There are some things I
-        don't think are needed (like hexidecimal and bit strings).
-        The main features should be network byte order shorts and
-        longs, bytes, and padded strings.  These would be vararg
-        functions and look like printf.
-
-    - Better asynchronous DNS
-      * Use pthread's instead of fork where available (or better,
+- Better asynchronous DNS
+    * Use pthread's instead of fork where available (or better,
 	  the new Glib 1.4 threads where available)
-      * Add option to use ADNS? (and update license)
-      * Consider modifying glibc/BIND code?
+    * Add option to use GNU ADNS? (and update license)
+    * Consider modifying glibc/BIND code?
 
-    - Add lightweight intraprocess communication stuff via IOChannel.  I'd
-	like a shared buffer and a message queue.  These should be simple
-	to do.
+- gnet_inetaddr_new will give you localhost if you give it an hostname
+    of "" in Linux.  Is this true on all systems?  If not, we should
+    do a return-on-fail when we get an empty string.
 
-    - Maybe add gnet_inetaddr_canonical_new, which creates a GInetAddr from
-	a canonical name.
-
-    - Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
-
-    - Better support for multihomed systems (I'm not sure what's 
-	needed)
-
-    - Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel).  sendfile
-	is available on Linux and Windows, but I'm sure the semantics
-	are different (that's why having this function would be
-	handy).  We would also want to 
-
-    - gnet_inetaddr_new will give you localhost if you give it an
-	hostname of "" in Linux.  Is this true on all systems?  If
-	not, we should do a return-on-fail when we get an empty
-	string.
-
-    - Consider adding gnet_io_channel_{readv/writev}.  Stevens says
-	this isn't Posix (yet?) - check how available it is.  We can
-	always fake it if we don't have it.
-
-    - Support IPv6
-
-    - Include more protocols
-
-	The goal here is to add basic implementations of popular file
-	transfer protocols (eg, HTTP, FTP).  Just the basics - nothing
-	fancy.
-
-	I'm hesitant to include more complex protocols (eg, NNTP,
-	SMTP, IRC) because they are more application-focused and have
-	limited use outside their specific application.  For example,
-	someone who wants NNTP is probably implementing a new reader
-	and would be better off implementing it from scratch to get a
-	finer control over the protocol.  On the other hand, if
-	someone had a good implementation of NNTP with a good
-	interface and there was demand for it, I would probably accept
-	it.  (An alternative would be start a gnet-protocol library
-	which would include more complex protocols).
-
-	I would also be more inclined to accept implementations that
-	are in existing, working programs as opposed to from-scratch
-	implementations (for complex protocols).  This is because
-	existing implementations have been tested both in
-	functionality and in interface design.  Moreover, we would be
-	guaranteed at least one user.
-
-    - Bindings for other languages
-
-	The GTK doc folks are working on a new standard for describing
-	interfaces.  Use this when it's done.
-
-    - It would be nice to support out-of-band data, but I have no idea
-	how it would affect the GLib event loop.  
-
-    - Some sort of network configuration widget?
-
-   Improvements
-    - Use getnameinfo when available (for IPv6?)
-
-   Other
-    - Port, port, port!
-
-    - More documentation and examples
-
-	Add a beginners guide.  Show more code examples.
-
-    - Clean up Debian packages
-
-	They seems alright, though I'd like someone with more Debian
-	experience to double check them.
+- Use getnameinfo when available (for IPv6?)
 
 
-Never: (things that will probably never become part of gnet)
 
-  - Raw IP (there are other libraries)
+Other
+- Port, port, port!
+
+- More documentation and examples
+
+    Add a beginners guide.  Show more code examples.
+
+- Clean up Debian packages.  Add a Debian docs package?
+
+    The packages seem alright, though I'd like someone with more
+    Debian experience to double check them.
+
+
+
+Never: (things that will probably never become part of GNet)
+
+- Raw IP (there are other libraries)

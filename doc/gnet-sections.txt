@@ -12,7 +12,8 @@ gnet_io_channel_readline_strdup
 gnet_inetaddr_new
 gnet_inetaddr_new_async
 gnet_inetaddr_new_async_cancel
-GInetAddrAsyncFunc
+GInetAddrNewAsyncID
+GInetAddrNewAsyncFunc
 GInetAddrAsyncStatus
 gnet_inetaddr_clone
 gnet_inetaddr_delete
@@ -21,7 +22,8 @@ gnet_inetaddr_unref
 gnet_inetaddr_get_name
 gnet_inetaddr_get_name_async
 gnet_inetaddr_get_name_async_cancel
-GInetAddrReverseAsyncFunc
+GInetAddrGetNameAsyncID
+GInetAddrGetNameAsyncFunc
 gnet_inetaddr_get_canonical_name
 gnet_inetaddr_get_port
 gnet_inetaddr_set_port
@@ -55,13 +57,15 @@ gnet_mcast_socket_to_udp_socket
 gnet_tcp_socket_connect
 gnet_tcp_socket_connect_async
 gnet_tcp_socket_connect_async_cancel
-GTcpSocketConnectFunc
-GTcpSocketConnectStatus
+GTcpSocketConnectAsyncID
+GTcpSocketConnectAsyncFunc
+GTcpSocketConnectAsyncStatus
 gnet_tcp_socket_new
 gnet_tcp_socket_new_async
 gnet_tcp_socket_new_async_cancel
-GTcpSocketAsyncFunc
-GTcpSocketAsyncStatus
+GTcpSocketNewAsyncID
+GTcpSocketNewAsyncFunc
+GTcpSocketNewAsyncStatus
 gnet_tcp_socket_delete
 gnet_tcp_socket_ref
 gnet_tcp_socket_unref
@@ -70,6 +74,7 @@ gnet_tcp_socket_get_inetaddr
 gnet_tcp_socket_get_port
 gnet_tcp_socket_server_new
 gnet_tcp_socket_server_accept
+gnet_tcp_socket_server_accept_nonblock
 </SECTION>
 
 <SECTION>

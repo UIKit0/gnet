@@ -12,15 +12,17 @@ We will always accept bug and portability fixes.  If you are
 interested in doing something more major, please write
 gnet-dev@umich.edu first.  This is so we know what people are doing
 and can offer advice.  Also see the TODO file for ideas on the
-direction we want to take GNet.
+direction we want to take GNet.  We _strongly_ recommend, if you are
+contributing a feature, that you fully implement and test the feature
+in your own program before submitting a patch.  This ensures that the
+feature is tested the interface is reasonably mature.
 
 
 Mailing list
 ------------
 
-gnet-dev@umich.edu is the development mailing list.  To subscribe,
-email dhelder@umich.edu and tell him to add you.  We will setup a
-joinable (majordomo?) mailing list when we get around to it.
+gnet-dev@eecs.umich.edu is the development mailing list.  See the
+README for information on how to subscribe.
 
 
 How to check out GNet anonymously
@@ -41,7 +43,8 @@ How to make code contributions
 We only accept code contributions in the form of a unified diff
 against the latest released version and, preferably, the version in
 CVS.  If you have added to the API, you _must_ provide complete gtkdoc
-style comments in the source.
+style comments in the source.  When appropriate, you should also
+submit a test/example program.
             
 To make a unified diff, please follow these instructions:
    
@@ -69,8 +72,9 @@ To make a unified diff, please follow these instructions:
 
 If you have just patched one or two files, then making patches is even
 easier. For each file, just do:
-cp file.c file.c.orig
-Make changes to file.c ...
-diff -u file.c.orig file.c > /tmp/file.c.patch
+
+  cp file.c file.c.orig
+   [Make changes to file.c ...]
+  diff -u file.c.orig file.c > /tmp/file.c.patch
 
 and just send us the patch: /tmp/file.c.patch.

@@ -103,43 +103,6 @@ GUdpPacket* gnet_udp_packet_send_new(gint8* data, gint length, GInetAddr* addr);
 void gnet_udp_packet_delete(GUdpPacket* packet);
 
 
-
-/* **************************************** */
-/* TO IMPLEMENT?  Write if you need it...    */
-
-/**
-
-   Get port the socket is bound to.  UNIMPLEMENTED
-
-*/
-/* gint udp_socket_get_local_port(const UdpSocket* socket); */
-
-
-/**
-
-   Get the inet address the socket is bound to.  UNIMPLEMENTED
-
-*/
-/* InetAddr* udp_socket_get_local_inetaddr(const UdpSocket* socket); */
-
-
-/**
- 
-   Get the socket's timeout (0 if there isn't one).  Timeout is the
-   number of seconds to wait on a send or receive.  UNIMPLEMENTED 
-
-*/
-/* gint udp_socket_get_timeout(const UdpSocket* socket); */
-
-
-/**
-
-   Set the socket's timeout.  Returns 0 if successful.  UNIMPLEMENTED
-
-*/
-/* gint udp_socket_set_timeout(UdpSocket* socket, const gint timeout); */
-
-
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */

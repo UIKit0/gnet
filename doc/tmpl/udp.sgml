@@ -17,6 +17,11 @@ udp_packet_receive_new or udp_packet_send_new depending on whether you
 plan to use this structure to send or receive the packet.
 </para>
 
+<para>
+If you are writing a new protocol, you probably want to use TCP, not
+UDP.
+</para>
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 

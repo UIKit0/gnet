@@ -26,7 +26,7 @@
  *  
  *  Create and open a new UDP socket with any port.  
  *
- *  Returns: a new GUdpSocket, or NULL if there was a failure.
+ *  Returns: a new #GUdpSocket, or NULL if there was a failure.
  *
  **/
 GUdpSocket* 
@@ -42,7 +42,7 @@ gnet_udp_socket_new(void)
  * 
  *  Create and open a new UDP socket with a specific port.  
  *
- *  Returns: a new GUdpSocket, or NULL if there was a failure.
+ *  Returns: a new #GUdpSocket, or NULL if there was a failure.
  *
  **/
 GUdpSocket* 
@@ -74,7 +74,7 @@ gnet_udp_socket_port_new(gint port)
 
 /**
  *  gnet_udp_socket_delete:
- *  @s: GUdpSocket to delete.
+ *  @s: #GUdpSocket to delete.
  *
  *  Close and delete a UDP socket.
  *
@@ -90,9 +90,9 @@ gnet_udp_socket_delete(GUdpSocket* s)
 
 /**
  *  gnet_udp_socket_ref
- *  @s: GUdpSocket to reference
+ *  @s: #GUdpSocket to reference
  *
- *  Increment the reference counter of the GUdpSocket.
+ *  Increment the reference counter of the #GUdpSocket.
  *
  **/
 void
@@ -106,9 +106,9 @@ gnet_udp_socket_ref(GUdpSocket* s)
 
 /**
  *  gnet_udp_socket_unref
- *  @s: GUdpSocket to unreference
+ *  @s: #GUdpSocket to unreference
  *
- *  Remove a reference from the GUdpSocket.  When reference count
+ *  Remove a reference from the #GUdpSocket.  When reference count
  *  reaches 0, the socket is deleted.
  *
  **/
@@ -134,10 +134,10 @@ gnet_udp_socket_unref(GUdpSocket* s)
 
 /**
  *  gnet_upd_socket_send:
- *  @s: GUdpSocket to use to send.
+ *  @s: #GUdpSocket to use to send.
  *  @packet: Packet to send.
  *
- *  Send the packet using the UDP socket.  
+ *  Send the packet using the #GUdpSocket.
  *
  *  Returns: 0 if successful.
  *
@@ -160,7 +160,7 @@ gnet_udp_socket_send(const GUdpSocket* s, const GUdpPacket* packet)
 
 /**
  *  gnet_udp_socket_receive:
- *  @s: GUdpSocket to receive from.
+ *  @s: #GUdpSocket to receive from.
  *  @packet: Packet to receive.
  *
  *  Receive a packet using the UDP socket.  
@@ -190,9 +190,10 @@ gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet)
 
 /**
  *  gnet_udp_socket_has_packet:
- *  @s: GUdpSocket to check
+ *  @s: #GUdpSocket to check
  *
- *  Test if the socket has a receive packet.  
+ *  Test if the socket has a receive packet.  It'd recommended that
+ *  you use a #GIOChannel with a read watch instead of this function.
  *
  *  Returns: TRUE if there is packet waiting, FALSE otherwise.
  *
@@ -218,9 +219,9 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
 
 /**
  *  gnet_udp_socket_get_iochannel:
- *  @socket: GUdpSocket to get GIOChannel from.
+ *  @socket: #GUdpSocket to get #GIOChannel from.
  *
- *  Get IO Channel from the GUdpSocket.  
+ *  Get a #GIOChannel from the #GUdpSocket.  
  *
  *  THIS IS NOT A NORMAL GIOCHANNEL - DO NOT READ OR WRITE WITH IT.
  *
@@ -235,7 +236,7 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
  *  you are done with it.  However, you should not close the channel -
  *  this is done when you delete the socket.
  *
- *  Returns: A GIOChannel; NULL on failure.
+ *  Returns: A #GIOChannel; NULL on failure.
  *
  **/
 GIOChannel* 
@@ -255,11 +256,11 @@ gnet_udp_socket_get_iochannel(GUdpSocket* socket)
 
 /**
  *  gnet_udp_socket_get_ttl:
- *  @us: GUdpSocket to get TTL from.
+ *  @us: #GUdpSocket to get TTL from.
  *
- *  Get the of the UDP socket.  TTL is the Time To Live - the number
- *  of hops outgoing packets will travel.  This is useful for resource
- *  discovery; for most programs, you don't need to use it.
+ *  Get the TTL of the UDP socket.  TTL is the Time To Live - the
+ *  number of hops outgoing packets will travel.  This is useful for
+ *  resource discovery; for most programs, you don't need to use it.
  *
  *  Returns: the TTL; -1 on failure.
  *

@@ -87,15 +87,13 @@
 </para>
 
 
-<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
+<!-- ##### FUNCTION inetaddr_set_port ##### -->
 <para>
 
 </para>
 
-@addr: 
-@func: 
-@data: 
-@Returns: 
+@ia: 
+@port: 
 
 <!-- ##### FUNCTION udp_socket_send ##### -->
 <para>
@@ -107,13 +105,15 @@
 @Returns: 
 @socket: 
 
-<!-- ##### FUNCTION inetaddr_set_port ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
 <para>
 
 </para>
 
-@ia: 
-@port: 
+@addr: 
+@func: 
+@data: 
+@Returns: 
 
 <!-- ##### FUNCTION inetaddr_clone ##### -->
 <para>
@@ -201,6 +201,12 @@
 @func: 
 @data: 
 
+<!-- ##### ENUM GTcpSocketAsyncStatus ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION mcast_socket_join_group ##### -->
 <para>
 
@@ -209,6 +215,15 @@
 @ms: 
 @ia: 
 @Returns: 
+
+<!-- ##### USER_FUNCTION GInetAddrAsyncFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@data: 
 
 <!-- ##### FUNCTION udp_socket_has_packet ##### -->
 <para>
@@ -276,6 +291,15 @@
 
 @us: 
 @Returns: 
+
+<!-- ##### USER_FUNCTION GTcpSocketAsyncFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
 
 <!-- ##### FUNCTION udp_socket_set_mcast_ttl ##### -->
 <para>
@@ -481,6 +505,12 @@
 @us: 
 @Returns: 
 
+<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION mcast_socket_new ##### -->
 <para>
 
@@ -505,6 +535,16 @@
 @ia: 
 @Returns: 
 
+<!-- ##### USER_FUNCTION GInetAddrReverseAsyncFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@name: 
+@data: 
+
 <!-- ##### FUNCTION udp_socket_new ##### -->
 <para>
 
@@ -528,6 +568,16 @@
 
 @us: 
 @Returns: 
+
+<!-- ##### USER_FUNCTION GTcpSocketConnectFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@ia: 
+@status: 
+@data: 
 
 <!-- ##### FUNCTION udp_socket_set_ttl ##### -->
 <para>

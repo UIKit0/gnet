@@ -1,3 +1,30 @@
+Wed Feb 23 13:27:41 2000  David Helder  <dhelder@umich.edu>
+
+
+Wed Feb 23 10:49:39 2000  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock):
+	   Added.  Theoretically, gnet_tcp_socket_server_accept could
+	   block even if the channel was readable, so I added this.
+
+	* src/tcp.[ch], inetaddr.[ch]: 
+	 
+	 - Renaming:
+	     GTcpSocketAsyncFunc  -> GTcpSocketNewAsyncFunc
+	     GTcpSocketAyncStatus -> GTcpSocketNewAyncStatus
+	     etc...
+
+	 - gpointer ID's given better names:
+	     GTcpSocketNewAsyncID
+	     GTcpSocketConnectAsyncID
+	     GInetAddrNewAsyncID
+	     GInetAddrGetNameAyncID
+
+	* doc/*, src/*, TODO, README, HACKING: Doc cleanups/improvements
+	
+	* libtool*: Upgrade to libtool 1.3.4
+	* auto*: Version set to 0.1.10 (for now)
+
 Tue Feb 15 17:01:39 2000  David A Helder  <dhelder@umich.edu>
 
 	* debian/changelog: Removed middle initial.

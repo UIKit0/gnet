@@ -45,7 +45,13 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @id: 
 
 
-<!-- ##### USER_FUNCTION GInetAddrAsyncFunc ##### -->
+<!-- ##### TYPEDEF GInetAddrNewAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GInetAddrNewAsyncFunc ##### -->
 <para>
 
 </para>
@@ -122,7 +128,13 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @id: 
 
 
-<!-- ##### USER_FUNCTION GInetAddrReverseAsyncFunc ##### -->
+<!-- ##### TYPEDEF GInetAddrGetNameAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GInetAddrGetNameAsyncFunc ##### -->
 <para>
 
 </para>

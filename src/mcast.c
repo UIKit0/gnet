@@ -29,7 +29,7 @@
  *  doesn't matter.  If you want to receive packets from the group,
  *  you will have to join it next.
  *
- *  Returns: a new GMcastSocket, or NULL if there was a failure. 
+ *  Returns: a new #GMcastSocket, or NULL if there was a failure. 
  *
  **/
 GMcastSocket*
@@ -46,14 +46,14 @@ gnet_mcast_socket_new(void)
 
 /**
  *  gnet_mcast_socket_port_new:
- *  @port: Port for the GMcastSocket.
+ *  @port: Port for the #GMcastSocket.
  *
  *  Create a new multicast socket with the given port.  If you know
  *  the port of the group you will join, use this constructor.  If you
  *  want to receive packets from the group, you will have to join it,
  *  using the full address, next.
  *
- *  Returns: a new GMcastSocket, or NULL if there was a failure.  
+ *  Returns: a new #GMcastSocket, or NULL if there was a failure.  
  *
  **/
 GMcastSocket* 
@@ -81,14 +81,14 @@ gnet_mcast_socket_port_new(gint port)
 
 /**
  *  gnet_mcast_socket_inetaddr_new:
- *  @ia: GInetAddr of the multicast group.
+ *  @ia: #GInetAddr of the multicast group.
  *
- *  Create a new multicast socket with the GInetAddr.  If you know the
- *  GInetAddr of the group you will join, use this constructor.  If
- *  you want to receive packets from the group, you will have to join
- *  it next.
+ *  Create a new multicast socket with the #GInetAddr.  If you know
+ *  the #GInetAddr of the group you will join, use this constructor.
+ *  If you want to receive packets from the group, you will have to
+ *  join it next.
  *
- *  Returns: a new GMcastSocket, or NULL if there was a failure.
+ *  Returns: a new #GMcastSocket, or NULL if there was a failure.
  *
  **/
 GMcastSocket* 
@@ -124,7 +124,7 @@ gnet_mcast_socket_inetaddr_new(GInetAddr* ia)
 
 /**
  *  gnet_mcast_socket_delete:
- *  @ms: GMcastSocket to delete.
+ *  @ms: #GMcastSocket to delete.
  *
  *  Close and delete a multicast socket.
  *
@@ -140,9 +140,9 @@ gnet_mcast_socket_delete(GMcastSocket* ms)
 
 /**
  *  gnet_mcast_socket_ref
- *  @s: GMcastSocket to reference
+ *  @s: #GMcastSocket to reference
  *
- *  Increment the reference counter of the GMcastSocket.
+ *  Increment the reference counter of the #GMcastSocket.
  *
  **/
 void
@@ -156,9 +156,9 @@ gnet_mcast_socket_ref(GMcastSocket* s)
 
 /**
  *  gnet_mcast_socket_unref
- *  @s: GMcastSocket to unreference
+ *  @s: #GMcastSocket to unreference
  *
- *  Remove a reference from the GMcastSocket.  When reference count
+ *  Remove a reference from the #GMcastSocket.  When reference count
  *  reaches 0, the socket is deleted.
  *
  **/
@@ -184,7 +184,7 @@ gnet_mcast_socket_unref(GMcastSocket* s)
 
 /**
  *  gnet_mcast_socket_join_group:
- *  @ms: GMcastSocket to use.
+ *  @ms: #GMcastSocket to use.
  *  @ia: Address of the group.
  *
  *  Join the multicast group using the multicast socket.  You should
@@ -212,10 +212,10 @@ gnet_mcast_socket_join_group(GMcastSocket* ms, GInetAddr* ia)
 
 /**
  *  gnet_mcast_socket_leave_group:
- *  @ms: GMcastSocket to use.
+ *  @ms: #GMcastSocket to use.
  *  @ia: Address of the group to leave.
  *
- *  Leave the mulitcast group using the multicast socket.  
+ *  Leave the mulitcast group.
  *
  *  Returns: 0 on success.
  *
@@ -239,10 +239,10 @@ gnet_mcast_socket_leave_group(GMcastSocket* ms, GInetAddr* ia)
 
 /**
  *  gnet_mcast_socket_send:
- *  @ms: GMcastSocket to use to send.
+ *  @ms: #GMcastSocket to use to send.
  *  @packet: Packet to send.
  *
- *  Send the packet using the mcast socket.  
+ *  Send the packet using the multicast socket.  
  *
  *  Returns: 0 if successful.
  *
@@ -256,7 +256,7 @@ gnet_mcast_socket_send(const GMcastSocket* ms, const GUdpPacket* packet)
 
 /**
  *  gnet_mcast_socket_receive:
- *  @ms: GMcastSocket to receive from.
+ *  @ms: #GMcastSocket to receive from.
  *  @packet: Packet to receive.
  *
  *  Receive a packet using the mcast socket.  
@@ -273,7 +273,7 @@ gnet_mcast_socket_receive(const GMcastSocket* ms, GUdpPacket* packet)
 
 /**
  *  gnet_mcast_socket_has_packet:
- *  @s: GMcastSocket to check
+ *  @s: #GMcastSocket to check
  *
  *  Test if the socket has a receive packet.  
  *
@@ -289,10 +289,11 @@ gnet_mcast_socket_has_packet(const GMcastSocket* s)
 
 /**
  *  gnet_mcast_socket_is_loopback:
- *  @ms: GMcastSocket to check.
+ *  @ms: #GMcastSocket to check.
  *
  *  Check if the multicast socket has loopback enabled.  If loopback
- *  is enabled, you receive all the packets you send.
+ *  is enabled, you receive all the packets you send.  Most people
+ *  don't want this.
  *
  *  Returns: 0 if loopback is disabled.
  *
@@ -317,7 +318,7 @@ gnet_mcast_socket_is_loopback(GMcastSocket* ms)
 
 /**
  *  gnet_mcast_socket_set_loopback:
- *  @ms: GMcastSocket to use.
+ *  @ms: #GMcastSocket to use.
  *  @b: Value to set it to (0 or 1)
  *
  *  Turn the loopback on or off.  If loopback is on, when the process

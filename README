@@ -20,23 +20,13 @@ GNet requires Glib 1.2.  You can get this at www.gtk.org.  Or, if you
 have a system with packages (eg, Red Hat or Debian), look for the
 latest glib package.
 
-GNet is BETA software.  Most of the functions have been tested (in the
-examples programs and in Jungle Monkey), but there may still be some
-bugs.  There will be a stable release probably by Spring.  Help is
-always welcome.  Check-out the TODO file too.
-
-Bug reports should be submited through http://bugs.gnome.org.  
-  (see http://bugs.gnome.org/Reporting.html)
-
-Pending bugs can be viewed at http://bugs.gnome.org/db/pa/lgnet.html
-
 Comments and questions should be sent to gnet-dev@umich.edu.
 
 The GNet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet.
 
 
 Install
--------
+=======
 
 Read INSTALL for information on how to install GNet.
 
@@ -46,32 +36,53 @@ In a nutshell:
   > make install
 
 
-License
--------
+Bugs
+====
 
-Read COPYING for information on the license.  GNet is under the GNU
-LGPL.  In a nutshell: You can share GNet with your friends and make
-changes to it, but it's not our fault if it breaks your computer.
+Bug reports should be submited through http://bugs.gnome.org.  
+  (see http://bugs.gnome.org/Reporting.html)
+
+Pending bugs can be viewed at http://bugs.gnome.org/db/pa/lgnet.html
+
+
+Mailing lists
+=============
+
+To join these mailing lists, send an email to
+<name>-request@eecs.umich.edu, where <name> is the name of the mailing
+list, with "subscribe" as the subject.
+
+Name			Purpose
+gnet-announce		Announcements about GNet
+gnet-discuss		Discussion of GNet for users and programmers
+gnet-dev		Discussion of GNet for the developers of GNet
 
 
 Developer info
---------------
+==============
 
 API documentation lives on the GNet homepage (specifically, at
 http://www.eecs.umich.edu/~dhelder/misc/gnet/docs)
 
 
 Hacking
--------
+=======
 
 If you are interested in contributing to GNet, please see 'HACKING'.
 This includes information on how to get GNet from the repository and
 how to submit patches.
 
 
+License
+=======
+
+Read COPYING for information on the license.  GNet is under the GNU
+LGPL.  In a nutshell: You can share GNet with your friends and make
+changes to it, but it's not our fault if it breaks your computer.
+
 
 Applications that use GNet
---------------------------
+==========================
 
 Jungle Monkey	 	http://www.eecs.umich.edu/~dhelder/misc/jm
 
