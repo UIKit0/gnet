@@ -39,19 +39,23 @@ extern "C" {
 typedef struct _GUdpSocket GUdpSocket;
 
 
-/*
-
-  All fields in the GUdpPacket are public.
-
- */
-typedef struct _GUdpPacket  
+/**
+ *  GUdpPacket:
+ *
+ *  GUdpPacket is a simple helper struct.  Its fields are public.  The
+ *  fields 'data' and 'addr' must be deallocated by the programmer if
+ *  necessary when appropriate.
+ *
+ **/
+typedef struct _GUdpPacket GUdpPacket;
+struct _GUdpPacket
 {
   gint8* data;
   guint length;
 
   GInetAddr* addr;
 
-} GUdpPacket;
+};
 
 
 
@@ -60,25 +64,21 @@ typedef struct _GUdpPacket
 /* UDP socket functions				*/
 
 GUdpSocket* gnet_udp_socket_new (void);
-
 GUdpSocket* gnet_udp_socket_port_new (gint port);
-
 GUdpSocket* gnet_udp_socket_new_interface (const GInetAddr* iface);
 
 void gnet_udp_socket_delete (GUdpSocket* s);
 
 void gnet_udp_socket_ref (GUdpSocket* s);
-
 void gnet_udp_socket_unref (GUdpSocket* s);
 
 
 /* ********** */
 
 gint gnet_udp_socket_send (GUdpSocket* s, const GUdpPacket* packet);
-
 gint gnet_udp_socket_receive (GUdpSocket* s, GUdpPacket* packet);
-
 gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
+
 
 /* ********** */
 
@@ -86,11 +86,9 @@ gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
 GIOChannel* gnet_udp_socket_get_iochannel (GUdpSocket* socket);
 
 gint gnet_udp_socket_get_ttl (const GUdpSocket* us);
-
 gint gnet_udp_socket_set_ttl (GUdpSocket* us, int val);
 
 gint gnet_udp_socket_get_mcast_ttl (const GUdpSocket* us);
-
 gint gnet_udp_socket_set_mcast_ttl (GUdpSocket* us, gint val);
 
 
@@ -99,9 +97,7 @@ gint gnet_udp_socket_set_mcast_ttl (GUdpSocket* us, gint val);
 /* UDP packet functions 			*/
 
 GUdpPacket* gnet_udp_packet_receive_new (guint8* data, gint length);
-
 GUdpPacket* gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr);
-
 void gnet_udp_packet_delete (GUdpPacket* packet);
 
 

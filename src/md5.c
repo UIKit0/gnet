@@ -405,7 +405,7 @@ gnet_md5_new_string (const gchar* str)
 
 /** 
  *  gnet_md5_delete:
- *  @ia: #GMD5 to delete
+ *  @gmd5: #GMD5 to delete
  *
  *  Delete a #GMD5.
  *

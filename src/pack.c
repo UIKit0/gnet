@@ -293,6 +293,20 @@ gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
 
 /* **************************************** */
 
+/**
+ *  gnet_calcsize:
+ *  @format: Pack format
+ *  @Varargs: Dynamic variables
+ *
+ *  Calculate the size of the buffer needed to pack the given format.
+ *  Only strings and bytes types (with associated parameters) should
+ *  be passed as arguments.  Specifically: 's', 'S', 'r', 'R', and 'p'
+ *  types.  For example, for 'i', the integer SHOULD NOT be passed.
+ *  For 'R', the raw bytes and the length should be passed.
+ *
+ *  Returns: number of bytes required to pack; -1 if error.
+ *  
+ **/
 gint
 gnet_calcsize (const gchar* format, ...)
 {
@@ -307,6 +321,17 @@ gnet_calcsize (const gchar* format, ...)
 }
 
 
+/**
+ *  gnet_vcalcsize:
+ *  @format: Pack format
+ *  @args: var args
+ *
+ *  Var arg interface to gnet_calcsize().  Size gnet_calcsize() for
+ *  additional information.
+ *
+ *  Returns: number of bytes required to pack; -1 if error.
+ *
+ **/
 gint
 gnet_vcalcsize (const gchar* format, va_list args)
 {
@@ -766,7 +791,8 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
  *  of Perl's unpack.
  * 
  *  Returns: bytes unpacked; -1 if error.
- * */
+ * 
+ **/
 gint 
 gnet_unpack (const gchar* format, gchar* buffer, gint len, ...)
 {

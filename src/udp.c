@@ -64,7 +64,7 @@ gnet_udp_socket_port_new (gint port)
 
 
 /**
- *  gnet_udp_socket_port_new:
+ *  gnet_udp_socket_new_interface:
  *  @iface: Interface to bind to
  * 
  *  Create and open a new UDP socket bound to the specified interface.
@@ -131,7 +131,7 @@ gnet_udp_socket_delete(GUdpSocket* s)
  *
  **/
 void
-gnet_udp_socket_ref(GUdpSocket* s)
+gnet_udp_socket_ref (GUdpSocket* s)
 {
   g_return_if_fail(s != NULL);
 
@@ -148,7 +148,7 @@ gnet_udp_socket_ref(GUdpSocket* s)
  *
  **/
 void
-gnet_udp_socket_unref(GUdpSocket* s)
+gnet_udp_socket_unref (GUdpSocket* s)
 {
   g_return_if_fail(s != NULL);
 
@@ -308,8 +308,8 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
  *
  *  THIS IS NOT A NORMAL GIOCHANNEL - DO NOT READ OR WRITE WITH IT.
  *
- *  Use the channel with g_io_add_watch() to do non-blocking IO (so if
- *  you do not want to do non-blocking IO, you do not need the
+ *  Use the channel with g_io_add_watch() to do asynchronous IO (so if
+ *  you do not want to do asynchronous IO, you do not need the
  *  channel).  If you can read from the channel, use
  *  gnet_udp_socket_receive() to read a packet.  If you can write to
  *  the channel, use gnet_udp_socket_send() to write a packet.
@@ -498,7 +498,8 @@ gnet_udp_socket_set_mcast_ttl(GUdpSocket* us, int val)
  *  @data: A pointer to the buffer to use for the received data.  
  *  @length: The length of this buffer.
  *
- *  Create a packet for receiving.  
+ *  Create a packet for receiving.  @data is a shallow copy and must
+ *  be deallocated by the caller if necessary when appropriate.
  *
  *  Returns: a new GUdpPacket.
  *
@@ -517,7 +518,9 @@ gnet_udp_packet_receive_new (guint8* data, gint length)
  *  @length: The length of this buffer.
  *  @addr: The address to which the packet should be sent.
  *
- *  Create a packet for sending.
+ *  Create a packet for sending.  The fields of the new packet are
+ *  public.  @data and @addr are shallow copies and must be
+ *  deallocated by the caller if necessary when appropriate.
  *
  *  Returns: a new GUdpPacket.
  *
@@ -539,7 +542,9 @@ gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr)
  *  gnet_udp_packet_delete:
  *  @packet: GUdpPacket to delete.
  *
- *  Delete a UDP packet.  The buffer is not deleted.
+ *  Delete a UDP packet.  The fields "data" and "addr" are not deleted
+ *  and should be deallocated by the programmer if necessary when
+ *  appropriate.
  *
  **/
 void 

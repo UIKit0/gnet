@@ -4,9 +4,8 @@ GNet README
 
 GNet is a simple network library.  It is writen in C, object-oriented,
 and built upon glib.  It is intended to be small, fast, easy-to-use,
-and easy to port.  GNet comes with documentation and examples.  The
-interface is similar to the interface for Java's network library.  It
-is licensed under the GNU Library General Public Licence.
+and easy to port.  GNet comes with documentation and examples.  It is
+licensed under the GNU Library General Public Licence.
 
 Features:
   * TCP 'client' sockets
@@ -14,10 +13,14 @@ Features:
   * UDP
   * IP Multicast
   * Internet address abstraction
-  * Non-blocking TCP sockets and address lookup
+  * Asynchronous socket IO
+  * Asynchronous DNS lookup
+  * Byte packing and unpacking
+  * URLs (Experimental)
+  * Server and Conn objects (Experimental)
 
-GNet has been ported to Linux, *BSD, Solaris, and HP.  It may work on
-other flavors of Unix too.  Part of GNet has been ported to Windows.
+GNet has been ported to Linux, *BSD, Solaris, HP, and Windows.  It may
+work on other operating systems also.
 
 GNet requires Glib 1.2.  You can get this at www.gtk.org.  Or, if you
 have a system with packages (eg, Red Hat or Debian), look for the
@@ -42,10 +45,7 @@ In a nutshell:
 Bugs
 ====
 
-Bug reports should be submited through http://bugs.gnome.org.  
-  (see http://bugs.gnome.org/Reporting.html)
-
-Pending bugs can be viewed at http://bugs.gnome.org/db/pa/lgnet.html
+Bug reports should be submited through http://bugzilla.gnome.org.  
 
 
 Mailing lists
@@ -65,7 +65,19 @@ Developer info
 ==============
 
 API documentation lives on the GNet homepage (specifically, at
-http://www.eecs.umich.edu/~dhelder/misc/gnet/docs)
+http://www.gnetlibrary.org//docs)
+
+The URL, Server, and Conn modules are experimental and part of the
+IOChannel module is also experimental.  The GNet development team
+believes these modules are useful and usable, but are not yet
+completely confident in them.  The API to these modules may change and
+there may still be bugs in them.  For example, the URL module is
+incomplete and the new IOChannel functions should be audited again.
+If you are feeling adventurous and want to use these functions, define
+GNET_EXPERIMENTAL.  Otherwise, your compiler should warn or fail if
+they are used.  We welcome bug fixes, improvements, and comments on
+the experimental modules.  Our hope is that adventurous programmers
+will use these modules and help in their further development.
 
 
 Hacking
@@ -95,9 +107,9 @@ Gabber
   messaging/chat program
   http://gabber.sourceforge.net
 
-Helix Gnome Installer and Updater
+Ximian Gnome Installer and Red Carpet
   software package management
-  http://www.helixcode.com
+  http://www.ximian.com
 
 Quest/Epos
   network game and chat

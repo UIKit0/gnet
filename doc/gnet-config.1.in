@@ -1,0 +1,45 @@
+.TH GNET 1 "20 May 2001" Version @VERSION@
+.SH NAME
+gnet-config - script to get information about the installed version of GNet
+.SH SYNOPSIS
+.B  gnet-config [\-\-prefix\fI[=DIR]\fP] [\-\-exec\-prefix\fI[=DIR]\fP] [\-\-version] [\-\-libs] [\-\-cflags] [LIBRARIES]
+.SH DESCRIPTION
+.PP
+\fIgnet-config\fP is a tool that is used to configure to determine
+the compiler and linker flags that should be used to compile
+and link programs that use \fIGNet\fP. It is also used internally
+to the .m4 macros for GNU autoconf that are included with \fIGNet\fP.
+.
+.SH OPTIONS
+.l
+\fIgnet-config\fP accepts the following options:
+.TP 8
+.B  LIBRARIES
+\fIGNet\fP has only the library 'gnet'.  You do not need to specify the
+library.  This is intended for future expansion.
+.TP 8
+.B  \-\-version
+Print the currently installed version of \fIGNet\fP on the standard output.
+.TP 8
+.B  \-\-libs
+Print the linker flags that are necessary to link a \fIGNet\fP program.
+.TP 8
+.B  \-\-cflags
+Print the compiler flags that are necessary to compile a \fIGNet\fP program.
+.TP 8
+.B  \-\-prefix=PREFIX
+If specified, use PREFIX instead of the installation prefix that \fIGNet\fP
+was built with when computing the output for the \-\-cflags and
+\-\-libs options. This option is also used for the exec prefix
+if \-\-exec\-prefix was not specified. This option must be specified
+before any \-\-libs or \-\-cflags options.
+.TP 8
+.B  \-\-exec\-prefix=PREFIX
+If specified, use PREFIX instead of the installation exec prefix that
+\fIGNet\fP was built with when computing the output for the \-\-cflags
+and \-\-libs options.  This option must be specified before any
+\-\-libs or \-\-cflags options.
+.SH SEE ALSO
+.BR glib-config (1)
+.SH COPYRIGHT
+Copyright \(co  2001 David A. Helder

@@ -20,12 +20,35 @@ connected to.  New connections can also by created by a Server.
 
 </para>
 
+@hostname: 
+@port: 
+@ref_count: 
+@connect_id: 
+@new_id: 
+@socket: 
+@inetaddr: 
+@iochannel: 
+@read_watch: 
+@write_watch: 
+@err_watch: 
+@write_id: 
+@queued_writes: 
+@read_id: 
+@timer: 
+@func: 
+@user_data: 
 
 <!-- ##### ENUM GConnStatus ##### -->
 <para>
 
 </para>
 
+@GNET_CONN_STATUS_CONNECT: 
+@GNET_CONN_STATUS_CLOSE: 
+@GNET_CONN_STATUS_READ: 
+@GNET_CONN_STATUS_WRITE: 
+@GNET_CONN_STATUS_TIMEOUT: 
+@GNET_CONN_STATUS_ERROR: 
 
 <!-- ##### USER_FUNCTION GConnFunc ##### -->
 <para>

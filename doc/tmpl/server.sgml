@@ -20,12 +20,21 @@ a new connection.
 
 </para>
 
+@iface: 
+@port: 
+@socket: 
+@iochannel: 
+@watch_id: 
+@func: 
+@user_data: 
 
 <!-- ##### ENUM GServerStatus ##### -->
 <para>
 
 </para>
 
+@GNET_SERVER_STATUS_CONNECT: 
+@GNET_SERVER_STATUS_ERROR: 
 
 <!-- ##### USER_FUNCTION GServerFunc ##### -->
 <para>
@@ -43,12 +52,14 @@ a new connection.
 
 </para>
 
-@interface: 
-@port: 
+@iface: 
 @force_port: 
 @func: 
 @user_data: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@interface: 
+@port: 
 
 
 <!-- ##### FUNCTION gnet_server_delete ##### -->

@@ -4,6 +4,20 @@ GNet NEWS
 
 Changes in Gnet
 
+1.1.0 [UNRELEASED]
+-----
+
+* UDP supports broadcast
+* TCP/UDP supports multiple interfaces
+* Various new internet address helper functions
+    (e.g. autodetect_internet_interface, list_interfaces) 
+* New SHA and MD5 hash modules
+* New Perl/Python-style pack/unpack module
+* New experimental URL, "Server", and "Conn" modules
+* Full Windows port [ANDY?x DETAILS?]
+* Bug fixes in gnet_io_channel_readn, gnet_io_channel_readline_strdup, 
+    thread-safe DNS lookup, 
+
 1.0.4
 -----
 * Small bug fixes

@@ -7,22 +7,25 @@ Standards-Version: 3.0.1
 Package: libgnet@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@-dev
 Architecture: any
 Depends: libgnet@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@ (= ${Source-Version}), libc6-dev, libglib1.2-dev
-Replaces: libgnet0.1-dev
+Replaces: libgnet0.1-dev, libgnet1.0-dev, libgnet-dev
 Description: Developer files for GNet network library
  Development files for GNet
  .
  GNet is a simple network library.  It is writen in C, object-oriented,
  and built upon glib.  It is intended to be small, fast, easy-to-use,
- and easy to port.  The interface is similar to the interface for
- Java's network library.
+ and easy to port.
  .
  Features:
    * TCP 'client' sockets
    * TCP 'server' sockets
-   * Non-blocking TCP sockets
    * UDP
    * IP Multicast
    * Internet address abstraction
+   * Asynchronous socket IO
+   * Asynchronous DNS lookup
+   * Byte packing and unpacking
+   * URLs (Experimental)
+   * Server and Conn objects (Experimental)
 
 Package: libgnet@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@
 Architecture: any
@@ -30,14 +33,17 @@ Depends: libglib1.2
 Replaces: libgnet0.1
 Description: GNet network library
  GNet is a simple network library.  It is writen in C, object-oriented,
- and built upon glib.  It is intended to be small, fast, easy-to-use,
- and easy to port.  The interface is similar to the interface for
- Java's network library.
+ and built upon GLib.  It is intended to be small, fast, easy-to-use,
+ and easy to port.
  .
  Features:
    * TCP 'client' sockets
    * TCP 'server' sockets
-   * Non-blocking TCP sockets
    * UDP
    * IP Multicast
    * Internet address abstraction
+   * Asynchronous socket IO
+   * Asynchronous DNS lookup
+   * Byte packing and unpacking
+   * URLs (Experimental)
+   * Server and Conn objects (Experimental)

@@ -17,6 +17,12 @@ then use the UDP functions.
 
 </para>
 
+<!-- ##### STRUCT GMcastSocket ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION gnet_mcast_socket_new ##### -->
 <para>
 

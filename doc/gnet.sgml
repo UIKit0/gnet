@@ -17,7 +17,7 @@
 
   <bookinfo>
 
-    <title>Gnet Network Library Reference Manual</title>
+    <title>GNet Network Library Reference Manual</title>
 
     <authorgroup>
       <author>
@@ -60,9 +60,9 @@
 
     <abstract>
       <para>
-	This manual documents Gnet, a networking library.  It gives an
-	overview of Gnet, discusses examples that come with Gnet, and
-	includes detailed documentation of the Gnet API.
+	This manual documents GNet, a networking library.  It gives an
+	overview of GNet, discusses examples that come with GNet, and
+	includes detailed documentation of the GNet API.
       </para>
     </abstract>
 
@@ -71,10 +71,10 @@
   <!-- ---------------------------------------- -->
 
   <chapter id="gnet-overview">
-    <title>Gnet Overview</title>
+    <title>GNet Overview</title>
 
     <para>
-      Gnet is a simple networking library.  It is writen in C,
+      GNet is a simple networking library.  It is writen in C,
       object-oriented, and built upon glib.  It is intended to be
       small, fast, easy-to-use, and easy to port.  The interface is
       similar to the interface for Java's network library.  It is
@@ -88,16 +88,18 @@
       <itemizedlist>
 	<listitem><para>TCP 'client' sockets</para></listitem>
         <listitem><para>TCP 'server' sockets</para></listitem>
-        <listitem><para>Non-blocking TCP sockets</para></listitem>
         <listitem><para>UDP</para></listitem>
         <listitem><para>IP Multicast</para></listitem>
         <listitem><para>Internet address abstraction</para></listitem>
-	<listitem><para>Primitive asynchronous DNS lookup</para></listitem>
+        <listitem><para>Asynchronous socket IO</para></listitem>
+	<listitem><para>Asynchronous DNS lookup</para></listitem>
+	<listitem><para>SHA and MD5 hashes</para></listitem>
+	<listitem><para>Byte packing and unpacking</para></listitem>
       </itemizedlist>
     </para>
 
     <para>
-      Gnet is under the GNU Lesser General Public License.  Read
+      GNet is under the GNU Lesser General Public License.  Read
       COPYING for information on the license (this file comes with the
       GNet distribution).  In a nutshell: You can share GNet with your
       friends and make changes to it, but it's not our fault if it
@@ -158,6 +160,15 @@ AM_PATH_GNET(&lt;version number&gt;,
 	versions in <filename>netinet/in.h</filename>.
       </para>
 
+      <para>
+	Non-blocking functions return immediately.  Asynchronous
+	functions are non-blocking, but also call a callback when.
+
+	IO operations on socket IOChannels (e.g., read, write) are not
+	non-blocking
+
+      </para>
+
     </sect1>
 
   </chapter>
@@ -165,11 +176,11 @@ AM_PATH_GNET(&lt;version number&gt;,
   <!-- ---------------------------------------- -->
 
   <chapter id="gnet-examples">
-    <title>Gnet Examples</title>
+    <title>GNet Examples</title>
 
     <para>
-      Gnet comes with several example programs.  They are intented to
-      be used by developers as examples of how to use Gnet.  The
+      GNet comes with several example programs.  They are intented to
+      be used by developers as examples of how to use GNet.  The
       example programs are in the examples directory that comes with
       the source code.  To build the examples, go to this directory
       and type <userinput>make examples</userinput>.  This section
@@ -183,7 +194,8 @@ AM_PATH_GNET(&lt;version number&gt;,
 	The echoclient connects to the echoserver and sends data it
 	reads in from the user.  echoserver then sends it back and
 	echoclient prints it out.  These programs demonstrate how to
-	write a basic TCP-based client and server.
+	write a basic TCP-based client and server.  echoclient-udp and
+	echoserver-udp are the UDP equivalents.
       </para>
 
       <para>
@@ -212,17 +224,19 @@ AM_PATH_GNET(&lt;version number&gt;,
       </para>
 
       <para>
-	A third method, not implemented yet, is to use threads.  The
-	advantage is that it's easier to code.  The disadvantage is
-	it's not as efficient on a single-processor machine or on a
-	machine that doesn't have a good threads implementation (like
-	Linux).  If you feel like implementing this, please email the
-	code and I will include it.
+	(There is also an experimental third object method that uses
+	the Conn and Server modules.  If you are adventurous, you can
+	use this method.  Note that these modules may be buggy and the
+	interfaces may change.)
       </para>
 
       <para>
-	There are also UDP versions of the echoclient and echoserver
-	included.
+	Another method, not implemented yet, is to use threads.  The
+	advantage is that it's easier to code.  The disadvantage is
+	it's not as efficient on a single-processor machine or on a
+	machine that doesn't have a good threads implementation.  If
+	you feel like implementing this, please email us the code and
+	we will include it.
       </para>
 
     </sect1>
@@ -232,7 +246,7 @@ AM_PATH_GNET(&lt;version number&gt;,
 
       <para>
 	hfetch is a simple HTTP file fetcher.  It's braindead -
-	probably not even HTTP version 0.9 compliant.  Please don't
+	possibly not even HTTP version 0.9 compliant.  Please don't
 	let this encourage you to start a project based on hfetch -
 	there are other programs like 'curl' and a billion perl
 	scripts that do this much better.  On the other hand, gnet
@@ -246,16 +260,14 @@ AM_PATH_GNET(&lt;version number&gt;,
       <title>SDR</title>
 
       <para>
-	SDR prints session announcements from the MBone.  SDR will
-	only work if you have MBone/IP Multicast.  It's a good test to
-	see if you're on the MBone - if it prints stuff, you are, if
-	it doesn't, you aren't.
+	SDR prints multimedia session announcements.  It demonstrates
+	how to use multicast sockets in GNet.  SDR will only work if
+	your network supports IP Multicast.  In fact, SDR is a good
+	test for this.  If the network supports multicast, SDR will
+	print announcements after a few seconds, otherwise, it will
+	print nothing.
       </para>
 
-      <para>
-	Programming wise, it demonstrates how to create a mcast_socket
-	for receiving.
-      </para>
     </sect1>
 
 
@@ -270,6 +282,20 @@ AM_PATH_GNET(&lt;version number&gt;,
 	detection and no scoring.
       </para>
 
+    <sect1 id="tests">
+      <title>Various test files</title>
+      
+      <para>
+	The tests directory also has many examples including:
+	<itemizedlist>
+	  <listitem><para>dnstest.c - a DNS and async DNS example</para></listitem>
+	  <listitem><para>hash.c - a SHA/MD5 hash example</para></listitem>
+	  <listitem><para>hostinfo.c - a InetAddr help function example</para></listitem>
+	  <listitem><para>pack.c - a pack example</para></listitem>
+	  <listitem><para>unpack.c - an unpack example</para></listitem>
+	</itemizedlist>
+      </para>
+
     </sect1>
 
   </chapter>
@@ -277,7 +303,7 @@ AM_PATH_GNET(&lt;version number&gt;,
   <!-- ---------------------------------------- -->
 
   <chapter id="libgnet-reference">
-    <title>Gnet Library Reference</title>
+    <title>GNet Library Reference</title>
 
     <para>
       This section contains the API reference for gnet. All the public
@@ -291,12 +317,12 @@ AM_PATH_GNET(&lt;version number&gt;,
     &udp;
     &mcast;
     &iochannel;
-    &url;
-    &conn;
-    &server;
     &pack;
     &md5;
     &sha;
+    &url;
+    &conn;
+    &server;
     
   </chapter>
 </book>

@@ -61,20 +61,14 @@ Helpful functions for use with IOChannels.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_io_channel_win32_new_stream_socket ##### -->
-<para>
-
-</para>
-
-@socket: 
-@Returns: 
-
-
 <!-- ##### ENUM GNetIOChannelWriteAsyncStatus ##### -->
 <para>
 
 </para>
 
+@GNET_IOCHANNEL_WRITE_ASYNC_STATUS_OK: 
+@GNET_IOCHANNEL_WRITE_ASYNC_STATUS_TIMEOUT: 
+@GNET_IOCHANNEL_WRITE_ASYNC_STATUS_ERROR: 
 
 <!-- ##### TYPEDEF GNetIOChannelWriteAsyncID ##### -->
 <para>
@@ -110,6 +104,9 @@ Helpful functions for use with IOChannels.
 
 </para>
 
+@GNET_IOCHANNEL_READ_ASYNC_STATUS_OK: 
+@GNET_IOCHANNEL_READ_ASYNC_STATUS_TIMEOUT: 
+@GNET_IOCHANNEL_READ_ASYNC_STATUS_ERROR: 
 
 <!-- ##### TYPEDEF GNetIOChannelReadAsyncID ##### -->
 <para>

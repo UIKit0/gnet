@@ -161,17 +161,14 @@ void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
 void gnet_tcp_socket_delete (GTcpSocket* s);
 
 void gnet_tcp_socket_ref (GTcpSocket* s);
-
 void gnet_tcp_socket_unref (GTcpSocket* s);
 
 
 /* ********** */
 
 GIOChannel* gnet_tcp_socket_get_iochannel (GTcpSocket* socket);
-
-GInetAddr* gnet_tcp_socket_get_inetaddr (const GTcpSocket* socket);
-
-gint gnet_tcp_socket_get_port (const GTcpSocket* socket);
+GInetAddr*  gnet_tcp_socket_get_inetaddr (const GTcpSocket* socket);
+gint        gnet_tcp_socket_get_port (const GTcpSocket* socket);
 
 
 /* ********** */
@@ -192,14 +189,9 @@ void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
 /* ********** */
 
 GTcpSocket* gnet_tcp_socket_server_new (gint port);
-
-/* DEPRICATED: Use gnet_tcp_socket_interface_new */
-GTcpSocket* gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port);
-
 GTcpSocket* gnet_tcp_socket_server_new_interface (const GInetAddr* iface);
 
 GTcpSocket* gnet_tcp_socket_server_accept (const GTcpSocket* socket);
-
 GTcpSocket* gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket);
 
 

@@ -528,7 +528,7 @@ gnet_sha_new_string (const gchar* str)
 
 /** 
  *  gnet_sha_delete:
- *  @ia: #GSHA to delete
+ *  @gsha: #GSHA to delete
  *
  *  Delete a #GSHA.
  *
@@ -631,7 +631,7 @@ gnet_sha_equal (gconstpointer p1, gconstpointer p2)
 
 /**
  *  gnet_sha_hash
- *  @gsha: GSHA to get hash value of
+ *  @p: GSHA to get hash value of
  *
  *  Hash the GSHA hash value.  This is not the actual SHA hash, but a
  *  hash of this hash.

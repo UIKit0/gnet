@@ -21,6 +21,9 @@
 #ifndef _GNET_URL_H
 #define _GNET_URL_H
 
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
+
 #include <glib.h>
 
 #ifdef __cplusplus
@@ -71,5 +74,7 @@ gchar* 	  gnet_url_get_nice_string (const GURL* url);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
+
+#endif /* GNET_EXPERIMENTAL */
 
 #endif /* _GNET_URL_H */

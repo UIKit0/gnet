@@ -1,3 +1,18 @@
+Sun May 20 22:32:19 2001  David Helder  <dhelder@umich.edu>
+
+	* debian/*: Clean ups for 1.1
+
+	* src/tcp.c (gnet_tcp_socket_server_new2): Removed
+
+        * src/*: conn, server, url, and the new iochannel funcs
+	   are 'EXPERIMENTAL'.  md5, sha, and pack are not.
+	
+	* doc/gnet.sgml, *: More doc cleanups
+	* src/pack.c: Added calcsize docs.
+	* doc/gnet-config.1.in: Added.  Based on Owen's 
+	   glib-config manpage.
+	* debian/rules.in: Install man page
+
 Sun May 20 10:22:29 2001  Andrew Lanoix <alanoix@umich.edu>
 
 	*src/gnet-private.c:[win32 only] workaround for a glib

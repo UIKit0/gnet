@@ -48,7 +48,7 @@ GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel,
 
 /* **************************************** */
 
-/* This section is experimental, buggy, and unstable.  Use at your own risk. */
+/* This part is experimental, buggy, and unstable.  Use at your own risk. */
 #ifdef GNET_EXPERIMENTAL 
 
 

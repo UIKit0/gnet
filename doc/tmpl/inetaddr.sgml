@@ -31,6 +31,14 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_inetaddr_new_any ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
 <para>
 
@@ -85,6 +93,8 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 </para>
 
+@GINETADDR_ASYNC_STATUS_OK: 
+@GINETADDR_ASYNC_STATUS_ERROR: 
 
 <!-- ##### FUNCTION gnet_inetaddr_clone ##### -->
 <para>

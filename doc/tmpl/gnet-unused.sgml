@@ -1,15 +1,45 @@
-<!-- ##### ENUM TcpSocketNonblockStatus ##### -->
+<!-- ##### FUNCTION tcp_socket_get_iochannel ##### -->
 <para>
 
 </para>
 
+@socket: 
+@Returns: 
 
-<!-- ##### FUNCTION gnet_private_inetaddr_sockaddr_new ##### -->
+<!-- ##### FUNCTION mcast_socket_leave_group ##### -->
 <para>
 
 </para>
 
-@sa: 
+@ms: 
+@ia: 
+@Returns: 
+
+<!-- ##### USER_FUNCTION TcpSocketNonblockFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
+
+<!-- ##### USER_FUNCTION GTcpSocketConnectFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@ia: 
+@status: 
+@data: 
+
+<!-- ##### FUNCTION inetaddr_get_name ##### -->
+<para>
+
+</para>
+
+@ia: 
 @Returns: 
 
 <!-- ##### FUNCTION inetaddr_set_port ##### -->
@@ -20,51 +50,23 @@
 @ia: 
 @port: 
 
-<!-- ##### FUNCTION inetaddr_clone ##### -->
+<!-- ##### FUNCTION udp_socket_set_mcast_ttl ##### -->
 <para>
 
 </para>
 
-@ia: 
+@us: 
+@val: 
 @Returns: 
 
-<!-- ##### FUNCTION tcp_socket_get_port ##### -->
+<!-- ##### FUNCTION udp_packet_delete ##### -->
 <para>
 
 </para>
 
-@socket: 
-@Returns: 
+@packet: 
 
-<!-- ##### FUNCTION tcp_socket_server_accept ##### -->
-<para>
-
-</para>
-
-@socket: 
-@Returns: 
-
-<!-- ##### ENUM GTcpSocketAsyncStatus ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### FUNCTION udp_socket_has_packet ##### -->
-<para>
-
-</para>
-
-@s: 
-@Returns: 
-
-<!-- ##### STRUCT GMcastSocket ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### FUNCTION inetaddr_gethostname ##### -->
+<!-- ##### FUNCTION udp_socket_new ##### -->
 <para>
 
 </para>
@@ -79,68 +81,87 @@
 @port: 
 @Returns: 
 
-<!-- ##### ENUM GTcpSocketNonblockStatus ##### -->
+<!-- ##### USER_FUNCTION GTcpSocketNonblockFunc ##### -->
 <para>
 
 </para>
 
-
-<!-- ##### SECTION ./tmpl/gnet-private.sgml:See_Also ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### USER_FUNCTION GInetAddrReverseNonblockFunc ##### -->
-<para>
-
-</para>
-
-@inetaddr: 
+@socket: 
 @status: 
-@name: 
 @data: 
 
-<!-- ##### FUNCTION inetaddr_new_nonblock ##### -->
-<para>
-
-</para>
-
-@name: 
-@port: 
-@func: 
-@data: 
-@Returns: 
-
-<!-- ##### FUNCTION inetaddr_get_name ##### -->
-<para>
-
-</para>
-
-@ia: 
-@Returns: 
-
-<!-- ##### FUNCTION inetaddr_hash ##### -->
-<para>
-
-</para>
-
-@p: 
-@Returns: 
-
-<!-- ##### FUNCTION mcast_socket_delete ##### -->
+<!-- ##### FUNCTION mcast_socket_join_group ##### -->
 <para>
 
 </para>
 
 @ms: 
+@ia: 
+@Returns: 
 
-<!-- ##### FUNCTION inetaddr_sockaddr_new ##### -->
+<!-- ##### ENUM GTcpSocketAsyncStatus ##### -->
 <para>
 
 </para>
 
-@sa: 
+
+<!-- ##### SECTION ./tmpl/gnet-private.sgml:Short_Description ##### -->
+Interfaces for internal use
+
+
+<!-- ##### FUNCTION tcp_socket_server_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_gethostname ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_is_loopback ##### -->
+<para>
+
+</para>
+
+@ms: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_packet_send_new ##### -->
+<para>
+
+</para>
+
+@data: 
+@length: 
+@addr: 
+@Returns: 
+
+<!-- ##### MACRO mcast_socket_to_udp_socket ##### -->
+<para>
+
+</para>
+
+@MS: 
+
+<!-- ##### FUNCTION inetaddr_gethostaddr ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_has_packet ##### -->
+<para>
+
+</para>
+
+@s: 
 @Returns: 
 
 <!-- ##### FUNCTION mcast_socket_receive ##### -->
@@ -153,12 +174,150 @@
 @Returns: 
 @socket: 
 
+<!-- ##### USER_FUNCTION GInetAddrReverseNonblockFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@name: 
+@data: 
+
+<!-- ##### FUNCTION udp_socket_get_mcast_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### USER_FUNCTION GInetAddrNonblockFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@data: 
+
+<!-- ##### FUNCTION tcp_socket_server_accept ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+<!-- ##### ENUM TcpSocketNonblockStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_new2 ##### -->
+<para>
+
+</para>
+
+@iface: 
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_new_nonblock ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@func: 
+@data: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_set_loopback ##### -->
+<para>
+
+</para>
+
+@ms: 
+@b: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_sockaddr_new ##### -->
+<para>
+
+</para>
+
+@sa: 
+@Returns: 
+
+<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION inetaddr_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
 <!-- ##### FUNCTION mcast_socket_new ##### -->
 <para>
 
 </para>
 
 @Returns: 
+
+<!-- ##### ENUM GTcpSocketNonblockStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_connect_nonblock ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@func: 
+@data: 
+
+<!-- ##### USER_FUNCTION GTcpSocketAsyncFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
+
+<!-- ##### USER_FUNCTION GInetAddrReverseAsyncFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@name: 
+@data: 
 
 <!-- ##### SECTION ./tmpl/gnet-private.sgml:Long_Description ##### -->
 <para>
@@ -167,11 +326,20 @@ functions and structures in this module.
 </para>
 
 
-<!-- ##### FUNCTION udp_socket_new ##### -->
+<!-- ##### FUNCTION tcp_socket_new ##### -->
 <para>
 
 </para>
 
+@addr: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_inetaddr_new ##### -->
+<para>
+
+</para>
+
+@ia: 
 @Returns: 
 
 <!-- ##### SECTION ./tmpl/gnet-private.sgml:Title ##### -->
@@ -187,74 +355,29 @@ Internal interfaces
 @val: 
 @Returns: 
 
-<!-- ##### USER_FUNCTION TcpSocketNonblockFunc ##### -->
+<!-- ##### FUNCTION inetaddr_delete ##### -->
+<para>
+
+</para>
+
+@ia: 
+
+<!-- ##### FUNCTION tcp_socket_get_port ##### -->
 <para>
 
 </para>
 
 @socket: 
-@status: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
+<para>
+
+</para>
+
+@ia: 
+@func: 
 @data: 
-
-<!-- ##### FUNCTION inetaddr_equal ##### -->
-<para>
-
-</para>
-
-@p1: 
-@p2: 
-@Returns: 
-
-<!-- ##### FUNCTION mcast_socket_is_loopback ##### -->
-<para>
-
-</para>
-
-@ms: 
-@Returns: 
-
-<!-- ##### FUNCTION mcast_socket_send ##### -->
-<para>
-
-</para>
-
-@ms: 
-@packet: 
-@Returns: 
-@socket: 
-
-<!-- ##### SECTION ./tmpl/gnet-private.sgml:Short_Description ##### -->
-Interfaces for internal use
-
-
-<!-- ##### FUNCTION udp_socket_port_new ##### -->
-<para>
-
-</para>
-
-@port: 
-@Returns: 
-
-<!-- ##### FUNCTION udp_socket_delete ##### -->
-<para>
-
-</para>
-
-@s: 
-@socket: 
-
-<!-- ##### FUNCTION inetaddr_gethostaddr ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-<!-- ##### ENUM GInetAddrNonblockStatus ##### -->
-<para>
-
-</para>
-
 
 <!-- ##### FUNCTION gnet_private_inetaddr_list_interfaces ##### -->
 <para>
@@ -263,14 +386,29 @@ Interfaces for internal use
 
 @Returns: 
 
-<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
+<!-- ##### FUNCTION udp_packet_receive_new ##### -->
 <para>
 
 </para>
 
-@addr: 
-@func: 
 @data: 
+@length: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_private_inetaddr_sockaddr_new ##### -->
+<para>
+
+</para>
+
+@sa: 
 @Returns: 
 
 <!-- ##### FUNCTION udp_socket_send ##### -->
@@ -283,47 +421,11 @@ Interfaces for internal use
 @Returns: 
 @socket: 
 
-<!-- ##### FUNCTION tcp_socket_delete ##### -->
+<!-- ##### ENUM GInetAddrNonblockStatus ##### -->
 <para>
 
 </para>
 
-@s: 
-@socket: 
-
-<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
-<para>
-
-</para>
-
-@ia: 
-@func: 
-@data: 
-
-<!-- ##### FUNCTION tcp_socket_new_nonblock ##### -->
-<para>
-
-</para>
-
-@addr: 
-@func: 
-@data: 
-@Returns: 
-
-<!-- ##### FUNCTION tcp_socket_server_new ##### -->
-<para>
-
-</para>
-
-@port: 
-@Returns: 
-
-<!-- ##### FUNCTION udp_packet_delete ##### -->
-<para>
-
-</para>
-
-@packet: 
 
 <!-- ##### FUNCTION udp_socket_receive ##### -->
 <para>
@@ -335,13 +437,42 @@ Interfaces for internal use
 @Returns: 
 @socket: 
 
-<!-- ##### FUNCTION mcast_socket_join_group ##### -->
+<!-- ##### FUNCTION gnet_io_channel_win32_new_stream_socket ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_delete ##### -->
 <para>
 
 </para>
 
 @ms: 
-@ia: 
+
+<!-- ##### SECTION ./tmpl/gnet-private.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_udp_socket_get_MTU ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_noport_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
 @Returns: 
 
 <!-- ##### USER_FUNCTION GInetAddrAsyncFunc ##### -->
@@ -353,12 +484,46 @@ Interfaces for internal use
 @status: 
 @data: 
 
+<!-- ##### FUNCTION tcp_socket_get_inetaddr ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
 <!-- ##### FUNCTION gnet_inetaddr_sockaddr_new ##### -->
 <para>
 
 </para>
 
 @sa: 
+@Returns: 
+
+<!-- ##### FUNCTION tcp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+@socket: 
+
+<!-- ##### FUNCTION inetaddr_hash ##### -->
+<para>
+
+</para>
+
+@p: 
+@Returns: 
+
+<!-- ##### FUNCTION tcp_socket_new_nonblock ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
 @Returns: 
 
 <!-- ##### FUNCTION inetaddr_get_canonical_name ##### -->
@@ -369,7 +534,49 @@ Interfaces for internal use
 @ia: 
 @Returns: 
 
-<!-- ##### FUNCTION mcast_socket_has_packet ##### -->
+<!-- ##### FUNCTION inetaddr_get_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+@socket: 
+
+<!-- ##### FUNCTION mcast_socket_send ##### -->
+<para>
+
+</para>
+
+@ms: 
+@packet: 
+@Returns: 
+@socket: 
+
+<!-- ##### FUNCTION udp_socket_get_MTU ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_port_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_has_packet ##### -->
 <para>
 
 </para>
@@ -377,48 +584,12 @@ Interfaces for internal use
 @s: 
 @Returns: 
 
-<!-- ##### FUNCTION udp_socket_get_mcast_ttl ##### -->
+<!-- ##### FUNCTION inetaddr_clone ##### -->
 <para>
 
 </para>
 
-@us: 
-@Returns: 
-
-<!-- ##### USER_FUNCTION GTcpSocketAsyncFunc ##### -->
-<para>
-
-</para>
-
-@socket: 
-@status: 
-@data: 
-
-<!-- ##### FUNCTION udp_socket_set_mcast_ttl ##### -->
-<para>
-
-</para>
-
-@us: 
-@val: 
-@Returns: 
-
-<!-- ##### FUNCTION gnet_udp_socket_get_MTU ##### -->
-<para>
-
-</para>
-
-@us: 
-@Returns: 
-
-<!-- ##### FUNCTION udp_packet_send_new ##### -->
-<para>
-
-</para>
-
-@data: 
-@length: 
-@addr: 
+@ia: 
 @Returns: 
 
 <!-- ##### FUNCTION inetaddr_new ##### -->
@@ -429,164 +600,4 @@ Interfaces for internal use
 @name: 
 @port: 
 @Returns: 
-
-<!-- ##### USER_FUNCTION GInetAddrNonblockFunc ##### -->
-<para>
-
-</para>
-
-@inetaddr: 
-@status: 
-@data: 
-
-<!-- ##### FUNCTION mcast_socket_set_loopback ##### -->
-<para>
-
-</para>
-
-@ms: 
-@b: 
-@Returns: 
-
-<!-- ##### FUNCTION mcast_socket_leave_group ##### -->
-<para>
-
-</para>
-
-@ms: 
-@ia: 
-@Returns: 
-
-<!-- ##### USER_FUNCTION GTcpSocketNonblockFunc ##### -->
-<para>
-
-</para>
-
-@socket: 
-@status: 
-@data: 
-
-<!-- ##### FUNCTION inetaddr_delete ##### -->
-<para>
-
-</para>
-
-@ia: 
-
-<!-- ##### FUNCTION tcp_socket_get_iochannel ##### -->
-<para>
-
-</para>
-
-@socket: 
-@Returns: 
-
-<!-- ##### FUNCTION inetaddr_get_port ##### -->
-<para>
-
-</para>
-
-@ia: 
-@Returns: 
-
-<!-- ##### MACRO mcast_socket_to_udp_socket ##### -->
-<para>
-
-</para>
-
-@MS: 
-
-<!-- ##### FUNCTION tcp_socket_new ##### -->
-<para>
-
-</para>
-
-@addr: 
-@Returns: 
-
-<!-- ##### FUNCTION tcp_socket_get_inetaddr ##### -->
-<para>
-
-</para>
-
-@socket: 
-@Returns: 
-
-<!-- ##### FUNCTION gnet_tcp_socket_connect_nonblock ##### -->
-<para>
-
-</para>
-
-@hostname: 
-@port: 
-@func: 
-@data: 
-
-<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### FUNCTION udp_socket_get_MTU ##### -->
-<para>
-
-</para>
-
-@us: 
-@Returns: 
-
-<!-- ##### FUNCTION udp_packet_receive_new ##### -->
-<para>
-
-</para>
-
-@data: 
-@length: 
-@Returns: 
-
-<!-- ##### FUNCTION mcast_socket_inetaddr_new ##### -->
-<para>
-
-</para>
-
-@ia: 
-@Returns: 
-
-<!-- ##### USER_FUNCTION GInetAddrReverseAsyncFunc ##### -->
-<para>
-
-</para>
-
-@inetaddr: 
-@status: 
-@name: 
-@data: 
-
-<!-- ##### FUNCTION inetaddr_noport_equal ##### -->
-<para>
-
-</para>
-
-@p1: 
-@p2: 
-@Returns: 
-
-<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
-<para>
-
-</para>
-
-@us: 
-@Returns: 
-
-<!-- ##### USER_FUNCTION GTcpSocketConnectFunc ##### -->
-<para>
-
-</para>
-
-@socket: 
-@ia: 
-@status: 
-@data: 
 

@@ -4,7 +4,7 @@ SUBDIRS = src examples tests doc
 
 @SET_MAKE@
 
-EXTRA_DIST=TODO HACKING BUGS gnet.m4 gnetconfig.h gnetconfig.h.in
+EXTRA_DIST=TODO HACKING BUGS gnet.m4 gnetconfig.h.in
 
 bin_SCRIPTS=gnet-config
 BUILT_SOURCES=gnet-config
@@ -16,7 +16,7 @@ m4data_DATA = gnet.m4
 configincludedir = $(pkglibdir)/include
 configinclude_DATA = gnetconfig.h
 
-WEBPATH=$(HOME)/public_html/misc/gnet
+WEBPATH=/home/www/gnetlibrary.org/html
 DEBPATH=$(HOME)/public_html/misc/debian
 
 DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING

@@ -7,11 +7,13 @@ you can help.
 
 
 Features
-- UDP cleanup
-    Packet should copy/delete address
 
+- Move udp_mcast_ttl to mcast?
 
-- Write a manpage for gnet-config (start with the one for glib).
+- URL cleanup.  Need to sync with RFC.
+
+- Put include files in gnet-MAJOR.MINOR so multiple development
+    packages can be installed.
 
 - Include more protocols
 
@@ -127,7 +129,7 @@ Undecided (things discussed, but not decided on)
 
 - Add lightweight intraprocess communication stuff via IOChannel.  I'd
     like a shared buffer and a message queue.  These should be simple
-    to do.  (GLib 1.4 might have some of this)
+    to do.  (GLib 1.4/2.0 might have some of this?)
 
 
 Never (things that will probably never become part of GNet)

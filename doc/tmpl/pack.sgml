@@ -42,6 +42,26 @@ of bytes (packing) and back again (unpacking).
 @str: 
 
 
+<!-- ##### FUNCTION gnet_calcsize ##### -->
+<para>
+
+</para>
+
+@format: 
+@Varargs: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_vcalcsize ##### -->
+<para>
+
+</para>
+
+@format: 
+@args: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_vpack ##### -->
 <para>
 

@@ -41,6 +41,15 @@ UDP.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_udp_socket_new_interface ##### -->
+<para>
+
+</para>
+
+@iface: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_udp_socket_port_new ##### -->
 <para>
 
@@ -73,6 +82,15 @@ UDP.
 
 @s: 
 
+
+<!-- ##### STRUCT GUdpPacket ##### -->
+<para>
+
+</para>
+
+@data: 
+@length: 
+@addr: 
 
 <!-- ##### FUNCTION gnet_udp_socket_send ##### -->
 <para>

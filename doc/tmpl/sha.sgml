@@ -54,6 +54,32 @@ SHA Hash
 @gsha: 
 
 
+<!-- ##### FUNCTION gnet_sha_new_incremental ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_sha_update ##### -->
+<para>
+
+</para>
+
+@gsha: 
+@buffer: 
+@length: 
+
+
+<!-- ##### FUNCTION gnet_sha_final ##### -->
+<para>
+
+</para>
+
+@gsha: 
+
+
 <!-- ##### FUNCTION gnet_sha_equal ##### -->
 <para>
 
@@ -69,8 +95,10 @@ SHA Hash
 
 </para>
 
-@gsha: 
+@p: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@gsha: 
 
 
 <!-- ##### FUNCTION gnet_sha_get_digest ##### -->

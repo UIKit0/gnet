@@ -73,6 +73,9 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
+@GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK: 
+@GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR: 
+@GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_new ##### -->
 <para>
@@ -123,6 +126,8 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
+@GTCP_SOCKET_NEW_ASYNC_STATUS_OK: 
+@GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_delete ##### -->
 <para>
@@ -180,6 +185,11 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
+@GNET_TOS_NONE: 
+@GNET_TOS_LOWDELAY: 
+@GNET_TOS_THROUGHPUT: 
+@GNET_TOS_RELIABILITY: 
+@GNET_TOS_LOWCOST: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_set_tos ##### -->
 <para>
@@ -199,13 +209,12 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_tcp_socket_server_new2 ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_server_new_interface ##### -->
 <para>
 
 </para>
 
 @iface: 
-@port: 
 @Returns: 
 
 

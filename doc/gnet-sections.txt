@@ -12,6 +12,7 @@ GNET_CHECK_VERSION
 <FILE>inetaddr</FILE>
 GInetAddr
 gnet_inetaddr_new
+gnet_inetaddr_new_any
 gnet_inetaddr_new_nonblock
 gnet_inetaddr_new_async
 gnet_inetaddr_new_async_cancel
@@ -51,6 +52,7 @@ gnet_inetaddr_noport_equal
 
 <SECTION>
 <FILE>mcast</FILE>
+GMcastSocket
 gnet_mcast_socket_new
 gnet_mcast_socket_port_new
 gnet_mcast_socket_inetaddr_new
@@ -91,7 +93,7 @@ gnet_tcp_socket_get_port
 GNetTOS
 gnet_tcp_socket_set_tos
 gnet_tcp_socket_server_new
-gnet_tcp_socket_server_new2
+gnet_tcp_socket_server_new_interface
 gnet_tcp_socket_server_accept
 gnet_tcp_socket_server_accept_nonblock
 </SECTION>
@@ -100,10 +102,12 @@ gnet_tcp_socket_server_accept_nonblock
 <FILE>udp</FILE>
 GUdpSocket
 gnet_udp_socket_new
+gnet_udp_socket_new_interface
 gnet_udp_socket_port_new
 gnet_udp_socket_delete
 gnet_udp_socket_ref
 gnet_udp_socket_unref
+GUdpPacket
 gnet_udp_socket_send
 gnet_udp_socket_receive
 gnet_udp_socket_has_packet
@@ -123,7 +127,6 @@ gnet_io_channel_writen
 gnet_io_channel_readn
 gnet_io_channel_readline
 gnet_io_channel_readline_strdup
-gnet_io_channel_win32_new_stream_socket
 GNetIOChannelWriteAsyncStatus
 GNetIOChannelWriteAsyncID
 gnet_io_channel_write_async
@@ -192,6 +195,8 @@ gnet_url_set_resource
 <FILE>pack</FILE>
 gnet_pack
 gnet_pack_strdup
+gnet_calcsize
+gnet_vcalcsize
 gnet_vpack
 gnet_unpack
 gnet_vunpack
@@ -204,10 +209,14 @@ GNET_MD5_HASH_LENGTH
 gnet_md5_new
 gnet_md5_new_string
 gnet_md5_delete
+gnet_md5_new_incremental
+gnet_md5_update
+gnet_md5_final
 gnet_md5_equal
 gnet_md5_hash
 gnet_md5_get_digest
 gnet_md5_get_string
+gnet_md5_copy_string
 </SECTION>
 
 <SECTION>
@@ -217,6 +226,9 @@ GNET_SHA_HASH_LENGTH
 gnet_sha_new
 gnet_sha_new_string
 gnet_sha_delete
+gnet_sha_new_incremental
+gnet_sha_update
+gnet_sha_final
 gnet_sha_equal
 gnet_sha_hash
 gnet_sha_get_digest

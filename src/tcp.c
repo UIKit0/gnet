@@ -63,7 +63,7 @@ gnet_tcp_socket_connect (const gchar* hostname, gint port)
  *  @func: Callback function
  *  @data: User data passed when callback function is called.
  *
- *  A quick and easy non-blocking #GTcpSocket constructor.  This
+ *  A quick and easy asynchronous #GTcpSocket constructor.  This
  *  connects to the specified address and port and then calls the
  *  callback with the data.  Use this function when you're a client
  *  connecting to a server and you don't want to block or mess with
@@ -190,9 +190,9 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
  *
  *  Returns a new #GTcpSocket, or NULL if there was a failure.
  *
- */
+ **/
 GTcpSocket* 
-gnet_tcp_socket_new(const GInetAddr* addr)
+gnet_tcp_socket_new (const GInetAddr* addr)
 {
   GTcpSocket* s = g_new0(GTcpSocket, 1);
   struct sockaddr_in* sa_in;
@@ -415,9 +415,9 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   sa_in = (struct sockaddr_in*) &s->sa;
   sa_in->sin_family = AF_INET;
 
-	/* Force the socket into non-blocking mode */
-	arg = 1;
-	ioctlsocket(sockfd, FIONBIO, &arg);
+  /* Force the socket into non-blocking mode */
+  arg = 1;
+  ioctlsocket(sockfd, FIONBIO, &arg);
 
   status = connect(s->sockfd, &s->sa, sizeof(s->sa));
   if (status == SOCKET_ERROR) /* Returning an error is ok, unless.. */
@@ -710,91 +710,6 @@ gnet_tcp_socket_server_new (gint port)
   sa_in->sin_port = g_htons(port);
 
   return gnet_tcp_socket_server_new_interface (&iface);
-}
-
-
-
-/**
- *  gnet_tcp_socket_server_new2:
- *  @iface: Interface to bind to (NULL if all interfaces)
- *  @port: Port number for the socket (0 if you don't care).
- *
- *  Create and open a new #GTcpSocket with the specified port number.
- *  If the interface is specified, it will bind to that interface.
- *  Otherwise, it will bind to all interfaces.  Use this sort of
- *  socket when your are a server and you know what the port number
- *  should be (or pass 0 if you don't care what the port is).
- *
- *  WARNING: gnet_tcp_socket_server_new2() will eliminated in GNet
- *  1.2.  Use gnet_tcp_socket_server_interface_new instead.
- *
- *  Returns: a new #GTcpSocket, or NULL if there was a failure.
- *
- **/
-GTcpSocket* 
-gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port)
-{
-  GTcpSocket* s;
-  struct sockaddr_in* sa_in;
-  const int on = 1;
-  socklen_t socklen;
-
-  /* Create socket */
-  s = g_new0(GTcpSocket, 1);
-  s->ref_count = 1;
-  s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (s->sockfd < 0)
-    goto error;
-
-  /* Set up address and port for connection */
-  sa_in = (struct sockaddr_in*) &s->sa;
-  sa_in->sin_family = AF_INET;
-  if (iface)
-    sa_in->sin_addr.s_addr = GNET_SOCKADDR_IN(iface->sa).sin_addr.s_addr;
-  else
-    sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-  sa_in->sin_port = g_htons(port);
-
-  /* The socket is set to non-blocking mode later in the Windows
-     version.*/
-#ifndef GNET_WIN32
-  {
-    gint flags;
-
-    /* Set REUSEADDR so we can reuse the port */
-    if (setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
-		   (void*) &on, sizeof(on)) != 0)
-      g_warning("Can't set reuse on tcp socket\n");
-
-    /* Get the flags (should all be 0?) */
-    flags = fcntl(s->sockfd, F_GETFL, 0);
-    if (flags == -1)
-      goto error;
-
-    /* Make the socket non-blocking */
-    if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-      goto error;
-  }
-#endif
-
-  /* Bind */
-  if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
-    goto error;
-
-  /* Get the socket name - don't care if it fails */
-  socklen = sizeof(s->sa);
-  if (getsockname(s->sockfd, &s->sa, &socklen) != 0)
-    goto error;
-
-  /* Listen */
-  if (listen(s->sockfd, 10) != 0)
-    goto error;
-
-  return s;
-
- error:
-  if (s)    		g_free(s);
-  return NULL;
 }
 
 

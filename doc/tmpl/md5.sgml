@@ -54,6 +54,32 @@ MD5 Hash
 @gmd5: 
 
 
+<!-- ##### FUNCTION gnet_md5_new_incremental ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_md5_update ##### -->
+<para>
+
+</para>
+
+@gmd5: 
+@buffer: 
+@length: 
+
+
+<!-- ##### FUNCTION gnet_md5_final ##### -->
+<para>
+
+</para>
+
+@gmd5: 
+
+
 <!-- ##### FUNCTION gnet_md5_equal ##### -->
 <para>
 
@@ -69,8 +95,10 @@ MD5 Hash
 
 </para>
 
-@gmd5: 
+@p: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_get_digest ##### -->
@@ -89,5 +117,14 @@ MD5 Hash
 
 @gmd5: 
 @Returns: 
+
+
+<!-- ##### FUNCTION gnet_md5_copy_string ##### -->
+<para>
+
+</para>
+
+@gmd5: 
+@buffer: 
 
 

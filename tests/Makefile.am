@@ -5,14 +5,13 @@
 
 INCLUDES = -I$(top_srcdir)/src
 
-TESTS = 		\
+noinst_PROGRAMS = \
 	dnstest		\
-        hash		\
+	hash		\
 	hostinfo	\
 	pack		\
 	unpack
 
-noinst_PROGRAMS = $(TESTS)
 
 dnstest_LDADD	 = $(top_builddir)/src/libgnet.la
 hash_LDADD	 = $(top_builddir)/src/libgnet.la
