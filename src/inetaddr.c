@@ -1803,7 +1803,7 @@ GInetAddr*
 gnet_inetaddr_autodetect_internet_interface (void)
 {
   GInetAddr* jm_addr;
-  GInetAddr* Interface;
+  GInetAddr* iface;
 
   /* First try to get the interface with a route to
      junglemonkey.net (141.213.11.1).  This uses the connected UDP
@@ -1812,19 +1812,19 @@ gnet_inetaddr_autodetect_internet_interface (void)
   jm_addr = gnet_inetaddr_new_nonblock ("141.213.11.1", 0);
   g_assert (jm_addr);
 
-  Interface = gnet_inetaddr_get_interface_to (jm_addr);
+  iface = gnet_inetaddr_get_interface_to (jm_addr);
   gnet_inetaddr_delete (jm_addr);
 
   /* We want an internet interface */
-  if (Interface && gnet_inetaddr_is_internet(Interface))
-    return Interface;
-  gnet_inetaddr_delete (Interface);
+  if (iface && gnet_inetaddr_is_internet(iface))
+    return iface;
+  gnet_inetaddr_delete (iface);
 
   /* Try getting an internet interface from the list via
      SIOCGIFCONF. (see Stevens UNPv1 pp 428-) */
-  Interface = gnet_inetaddr_get_internet_interface ();
+  iface = gnet_inetaddr_get_internet_interface ();
 
-  return Interface;
+  return iface;
 }
 
 
@@ -1849,7 +1849,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* addr)
   int sockfd;
   struct sockaddr_in myaddr;
   socklen_t len;
-  GInetAddr* Interface;
+  GInetAddr* iface;
 
   g_return_val_if_fail (addr, NULL);
 
@@ -1870,11 +1870,11 @@ gnet_inetaddr_get_interface_to (const GInetAddr* addr)
       return NULL;
     }
 
-  Interface = g_new0 (GInetAddr, 1);
-  Interface->ref_count = 1;
-  memcpy (&Interface->sa, (char*) &myaddr, sizeof (struct sockaddr_in));
+  iface = g_new0 (GInetAddr, 1);
+  iface->ref_count = 1;
+  memcpy (&iface->sa, (char*) &myaddr, sizeof (struct sockaddr_in));
 
-  return Interface;
+  return iface;
 }
 
 
@@ -1896,7 +1896,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* addr)
 GInetAddr* 
 gnet_inetaddr_get_internet_interface (void)
 {
-  GInetAddr* Interface = NULL;
+  GInetAddr* iface = NULL;
   GList* interfaces;
   GList* i;
 
@@ -1914,21 +1914,21 @@ gnet_inetaddr_get_internet_interface (void)
 
       if (gnet_inetaddr_is_internet (ia))
 	{
-	  Interface = gnet_inetaddr_clone (ia);
+	  iface = gnet_inetaddr_clone (ia);
 	  break;
 	}
     }
 
   /* If we didn't find one, return the first interface. */
-  if (Interface == NULL)
-    Interface = gnet_inetaddr_clone ((GInetAddr*) interfaces->data);
+  if (iface == NULL)
+    iface = gnet_inetaddr_clone ((GInetAddr*) interfaces->data);
 
   /* Delete the interface list */
   for (i = interfaces; i != NULL; i = i->next)
     gnet_inetaddr_delete ((GInetAddr*) i->data);
   g_list_free (interfaces);
 
-  return Interface;
+  return iface;
 }
 
 

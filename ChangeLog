@@ -1,3 +1,7 @@
+Mon Sep 24 14:07:56 2001  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c: s/Interface/iface
+
 Fri Sep 21 17:37:50 2001  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_async): In pthread
