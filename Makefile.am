@@ -5,7 +5,8 @@ SUBDIRS = src examples tests doc
 @SET_MAKE@
 
 EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
-	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4
+	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4 \
+	gnet.spec debian
 
 bin_SCRIPTS=gnet-config
 BUILT_SOURCES=gnet-config
@@ -28,9 +29,10 @@ DEBFILE=libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)_$(VERSION)-*_i386.deb
 DEBFILEDEV=libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)-dev_$(VERSION)-*_i386.deb
 DEBSRC=gnet_$(VERSION)-1.tar.gz
 
-RPMFILE=/usr/src/redhat/RPMS/i386/gnet-$(VERSION)-*.i386.rpm
-RPMFILEDEV=/usr/src/redhat/RPMS/i386/gnet-devel-$(VERSION)-*.i386.rpm
-RPMFILESRC=/usr/src/redhat/SRPMS/gnet-$(VERSION)-*.src.rpm
+RPMROOT=/usr/src/redhat
+RPMFILE=$(RPMROOT)/RPMS/i386/gnet-$(VERSION)-*.i386.rpm
+RPMFILEDEV=$(RPMROOT)/RPMS/i386/gnet-devel-$(VERSION)-*.i386.rpm
+RPMFILESRC=$(RPMROOT)/SRPMS/gnet-$(VERSION)-*.src.rpm
 
 
 snapshot:
@@ -62,11 +64,11 @@ deb:
 	echo Running lintian on $(DEBFILEDEV)...
 	lintian debian-temp/$(DEBFILEDEV)
 
+# You don't need to be root, but make sure you
+# do 'make RPMROOT=/home/someone/redhat rpm' if
+# you do not use the default $(RPMROOT).
 rpm:
-	echo Make sure you are root!
-	cp $(TARBALL) /usr/src/redhat/SOURCES
-	rpm -ba gnet.spec
+	rpm -ta $(TARBALL)
 
 clean-local:
 	rm -rf debian-temp
-

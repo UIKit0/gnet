@@ -1,3 +1,8 @@
+Wed Oct 24 10:02:43 2001  Ross Golder  <ross@golder.org>
+
+	* Makefile.am: Updated handling of rpms and spec files.
+	* Makefile.am: Added debian directory to make dist.
+
 Wed Oct 24 15:58:14 2001  David Helder  <dhelder@umich.edu>
 
 	* tests/unpack.c (main): Fix bugs
