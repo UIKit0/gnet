@@ -1,3 +1,10 @@
+Wed Mar 19 09:46:12 2003  David Helder  <dhelder@umich.edu>
+
+	* gnet.m4/gnet-1.3.m4: Rename -> gnet-1.3.m4
+
+	* configure.ac: Use AC_CANONICAL_SYSTEM instead of BUILD
+	   (BSD fix).
+
 Wed Mar  5 18:58:44 2003  David Helder  <dhelder@umich.edu>
 	
 	* BUGS,README: Updates
