@@ -36,8 +36,11 @@
 
 #ifdef GNET_WIN32
 
+static int inet_pton(int af, const char* src, void* dst);
+static const char* inet_ntop(int af, const void *src, char *dst, size_t size);
+
 /* TODO: Use Window's inet_pton/inet_ntop if they ever implement it. */
-int
+static int
 inet_pton(int af, const char* src, void* dst)
 {
   in_addr_t addr;
@@ -50,10 +53,10 @@ inet_pton(int af, const char* src, void* dst)
   return 1;
 }
 
-const char* 
+static const char* 
 inet_ntop(int af, const void *src, char *dst, size_t size)
 {
-  struct in_addr addr = *(struct in_addr*) dst;
+  struct in_addr addr = *(struct in_addr*) src;
   char* buf;
 
   buf = inet_ntoa(addr);
@@ -64,7 +67,6 @@ inet_ntop(int af, const void *src, char *dst, size_t size)
 
   return dst;
 }
-
 
 #endif /* GNET_WIN32 */
 
@@ -2250,8 +2252,6 @@ gnet_inetaddr_set_bytes (GInetAddr* inetaddr,
 gchar* 
 gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
 {
-#ifndef GNET_WIN32
-
   gchar buffer[INET6_ADDRSTRLEN];	/* defined in netinet/in.h */
   
   g_return_val_if_fail (inetaddr != NULL, NULL);
@@ -2261,18 +2261,6 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
 		buffer, sizeof(buffer)) == NULL)
     return NULL;
   return g_strdup(buffer);
-
-#else
-
-  char* buffer;
-
-  buffer = inet_ntoa(GNET_INETADDR_SA4(inetaddr).sin_addr);
-  if (buffer == NULL)
-    return NULL;
-
-  return g_strdup(buffer);
-
-#endif
 }
 
 

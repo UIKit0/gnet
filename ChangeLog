@@ -1,3 +1,12 @@
+Tue May 13 14:58:28 2003  David Helder  <dhelder@umich.edu>
+
+	* README: Added Gnome Jabber.
+
+	* src/inetaddr.c (inet_ntop): Copy from src, not dst.
+
+	* src/inetaddr.c (gnet_inetaddr_get_canonical_name): Remove
+	    Win32 version (we wrote a inet_ntop for it.)
+
 Tue May 13 01:25:12 2003  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (inet_ntop): Add Win32 inet_pton and inet_aton.
