@@ -1,3 +1,17 @@
+Sat Sep 21 21:11:41 2002  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Fixes for autoconf 1.6.
+
+	* acconfig.h.in: Removed this.  Not needed in newer autoconf.
+	
+	* autogen.sh: Include the macros directory in aclocal.
+	    We do not distribute the macros directory.  This
+	    is for developer convience.
+
+	* examples/Makefile.am, src/Makefile.am/, Makefile.am: 
+	    Move EXTRA_DIST to root makefile.  autoconf 1.6 doesn't
+	    like EXTRA_DIST in subdirectories for some reason.
+
 Thu Sep 12 16:13:37 2002  David Helder  <dhelder@umich.edu>
 
 	* tests/Makefile.am (LDADD): Add glib_libs and gthread_libs

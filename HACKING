@@ -37,6 +37,26 @@ Be warned that the repository version of GNet may be instable or may
 not even compile.
 
 
+Building GNet from CVS
+----------------------
+
+AUTOCONF 1.6 IS RECOMMENDED.  It's the future, whether we like it or
+not.
+
+Run autogen.sh in the gnet directory to build GNet.  This script
+requires aclocal, autoheader, libtoolize, automake, and autoconf.
+
+If aclocal isn't finding certain macros, use the environment variable
+ACLOCAL_FLAGS to included the needed directory.  For example, if it's
+not picking up macros in /usr/local/share/aclocal, set ACLOCAL_FLAGS
+to "-I /usr/local/share/aclocal".  Multiple include directories can be
+used.
+
+MIGRATING TO AUTOCONF 1.6 HINT.  Create a macros directory and put the
+old glib.m4, libtool.m4, and pkg.m4 in it (from where ever those were
+before).
+
+
 How to make code contributions
 ------------------------------
 

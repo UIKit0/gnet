@@ -6,11 +6,10 @@ EXTRA_PROGRAMS = echoserver echoclient 	\
 		 echoserver-udp echoclient-udp	\
 		 echoserver-unix echoclient-unix \
 		 hash hfetch sdr
-EXTRA_DIST     = makefile.mingw
 CLEANFILES     = $(EXTRA_PROGRAMS)
 
-INCLUDES += `gnet-config --cflags`
-LDFLAGS  += `gnet-config --libs`
+INCLUDES = `gnet-config --cflags`
+LDFLAGS  = `gnet-config --libs`
 
 
 ##########

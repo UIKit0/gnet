@@ -7,7 +7,7 @@ AC_PREREQ([2.52])
 
 ###############################
 # Init autoconf and automake
-AC_INIT([gnet], [1.1.5], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [1.1.6], [gnet@gnetlibrary.org])
 # CANONICAL_TARGET has to occur before INIT_AUTOMAKE, for reasons I don't
 # fully understand
 AC_CANONICAL_TARGET
@@ -30,9 +30,9 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=1
 GNET_MINOR_VERSION=1
-GNET_MICRO_VERSION=5
+GNET_MICRO_VERSION=6
 GNET_INTERFACE_AGE=0
-GNET_BINARY_AGE=5
+GNET_BINARY_AGE=6
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
@@ -52,11 +52,11 @@ AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 # Define version stuff
-AC_DEFINE_UNQUOTED(GNET_MAJOR_VERSION, $GNET_MAJOR_VERSION)
-AC_DEFINE_UNQUOTED(GNET_MINOR_VERSION, $GNET_MINOR_VERSION)
-AC_DEFINE_UNQUOTED(GNET_MICRO_VERSION, $GNET_MICRO_VERSION)
-AC_DEFINE_UNQUOTED(GNET_INTERFACE_AGE, $GNET_INTERFACE_AGE)
-AC_DEFINE_UNQUOTED(GNET_BINARY_AGE, $GNET_BINARY_AGE)
+AC_DEFINE_UNQUOTED(GNET_MAJOR_VERSION, $GNET_MAJOR_VERSION, [GNet major version])
+AC_DEFINE_UNQUOTED(GNET_MINOR_VERSION, $GNET_MINOR_VERSION, [GNet minor version] )
+AC_DEFINE_UNQUOTED(GNET_MICRO_VERSION, $GNET_MICRO_VERSION, [GNet micro version])
+AC_DEFINE_UNQUOTED(GNET_INTERFACE_AGE, $GNET_INTERFACE_AGE, [GNet interface age])
+AC_DEFINE_UNQUOTED(GNET_BINARY_AGE, $GNET_BINARY_AGE, [GNet binary age])
 
 
 ####################
@@ -115,7 +115,8 @@ AC_CHECK_LIB([c_r],
 	     [pthread_create],
 	     [pthread_libs="-lc_r"])
 if test "$pthread_libs"; then
-	AC_DEFINE(HAVE_LIBPTHREAD, 1)
+	AC_DEFINE(HAVE_LIBPTHREAD, 1,
+		  [Define if pthreads library is available])
 	LIBS="$pthread_libs $LIBS"
 fi
 AC_SUBST(pthread_libs)
@@ -163,8 +164,8 @@ AC_CHECK_HEADERS([sys/sockio.h sys/param.h])
 ###############################
 # Check for structures
 AC_CHECK_MEMBER([struct sockaddr.sa_len],
-		AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1),
-		,
+		AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1, 
+		  [Define if struct sockaddr has sa_len field]),,
 		[#include <sys/types.h>
 		 #include <sys/socket.h>])
 
@@ -223,7 +224,8 @@ AC_TRY_LINK([#include <netdb.h>],
 			     &result,
 			     &h_erropp);],
 	     [AC_MSG_RESULT([yes])
-	      AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIBC)
+	      AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIBC, 1, 
+	         [Define if glibc variant of gethostbyname is available])
 	      HAVE_GETHOSTBYNAME_R=yes],
 	     [AC_MSG_RESULT([no])])
 
@@ -240,7 +242,8 @@ AC_TRY_LINK([#include <netdb.h>],
 			     sizeof(buf),
 			     &h_errnop);],
 	    [AC_MSG_RESULT([yes])
-	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_SOLARIS)
+	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_SOLARIS, 1,
+                [Define if Solaris variant of gethostbyname is available])
 	     HAVE_GETHOSTBYNAME_R=yes],
 	    [AC_MSG_RESULT([no])])
 
@@ -254,13 +257,15 @@ AC_TRY_LINK([#include <netdb.h>],
 			     &result,
 			     buf);],
 	    [AC_MSG_RESULT([yes])
-	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_HPUX)
+	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_HPUX, 1,
+                [Define if HPUX variant of gethostbyname is available])
 	     HAVE_GETHOSTBYNAME_R=yes],
 	    [AC_MSG_RESULT([no])])
 
 # We're stuck without gethostbyname_r.  Use Glib threads.
 if test -z "$HAVE_GETHOSTBYNAME_R" -a "$GTHREAD_CFLAGS"; then
-	AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX)
+	AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX, 1,
+                [Define if gethostbyname requires a mutex for thread safety])
 	HAVE_GETHOSTBYNAME_R=yes
 fi
 

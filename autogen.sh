@@ -17,8 +17,7 @@ DIE=0
 (autoconf --version) < /dev/null > /dev/null 2>&1 || {
   echo
   echo "**Error**: You must have \`autoconf' installed to compile GNet."
-  echo "Download the appropriate package for your distribution,"
-  echo "or get the source tarball at ftp://ftp.gnu.org/pub/gnu/"
+  echo "Get it at ftp://ftp.gnu.org/pub/gnu/autoconf"
   DIE=1
 }
 
@@ -26,8 +25,7 @@ DIE=0
   (libtool --version) < /dev/null > /dev/null 2>&1 || {
     echo
     echo "**Error**: You must have \`libtool' installed to compile GNet."
-    echo "Get ftp://ftp.gnu.org/pub/gnu/libtool-1.2d.tar.gz"
-    echo "(or a newer version if it is available)"
+    echo "Get it at ftp://ftp.gnu.org/pub/gnu/libtool"
     DIE=1
   }
 }
@@ -35,8 +33,7 @@ DIE=0
 (automake --version) < /dev/null > /dev/null 2>&1 || {
   echo
   echo "**Error**: You must have \`automake' installed to compile GNet."
-  echo "Get ftp://ftp.gnu.org/pub/gnu/automake-1.3.tar.gz"
-  echo "(or a newer version if it is available)"
+  echo "Get it at ftp://ftp.gnu.org/pub/gnu/automake"
   DIE=1
   NO_AUTOMAKE=yes
 }
@@ -45,10 +42,9 @@ DIE=0
 # if no automake, don't bother testing for aclocal
 test -n "$NO_AUTOMAKE" || (aclocal --version) < /dev/null > /dev/null 2>&1 || {
   echo
-  echo "**Error**: Missing \`aclocal'.  The version of \`automake'"
-  echo "installed doesn't appear recent enough."
-  echo "Get ftp://ftp.gnu.org/pub/gnu/automake-1.3.tar.gz"
-  echo "(or a newer version if it is available)"
+  echo "**Error**: Missing \`aclocal'."
+  echo "aclocal is included with automake."
+  echo "Get automake at ftp://ftp.gnu.org/pub/gnu/automake"
   DIE=1
 }
 
@@ -78,7 +74,7 @@ do
     echo processing $dr
     macrodirs=`sed -n -e 's,AM_ACLOCAL_INCLUDE(\(.*\)),\1,gp' < $coin`
     ( cd $dr
-      aclocalinclude="$ACLOCAL_FLAGS"
+      aclocalinclude="$ACLOCAL_FLAGS -I ./macros"
       for k in $macrodirs; do
   	if test -d $k; then
           aclocalinclude="$aclocalinclude -I $k"
