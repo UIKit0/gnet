@@ -20,11 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#ifdef G_OS_WIN32
-	#include <gnet.h>
-#else
-	#include <gnet/gnet.h>
-#endif
+#include <gnet/gnet.h>
 
 
 #define DO_REVERSE 0

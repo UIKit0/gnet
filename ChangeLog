@@ -1,4 +1,10 @@
-Mon Oct  3 00:05:33 2000  Andrew Lanoix <alanoix@umich.edu>
+Tue Oct  3 13:26:45 2000  Andrew Lanoix <alanoix@umich.edu>
+
+	* Added: Gnet.dsp (MS VC 6.0 Project File, builds with
+	  Glib 1.2)
+	* Removed references to G_OS_WIN32 in examples
+
+Mon Oct  2 00:05:33 2000  Andrew Lanoix <alanoix@umich.edu>
 
 	* Added: gnetconfig.h.win32, config.h.win32
 	* Code now compiles with both Glib 1.2, 1.3 on Win32

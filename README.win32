@@ -12,6 +12,9 @@ This document contains
 General Win32 Specific Information
 ----------------------------------
 
+There is a know issue with trying to do a callback on a socket giochannel.
+Echoserver with --nonblocking is an example. We are looking into this.
+
 gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
 gnet_private_inetaddr_list_interfaces() does not support more than 10
 interfaces.
@@ -30,8 +33,9 @@ How to compile GNet with MSVC 6.0
 ---------------------------------
 
 Download the latest version of Glib for Win32 and copy the header
-files and glib-X.Y.dll and glib-X.Y.lib to the gnet project folder. A
-.dsp file is provided to build the project.
+files and glib-X.Y.dll and glib-X.Y.lib to your project folder.
+Download the latest version of Gnet for Win32 and a .dsp file is 
+provided to build the project.
 
 
 HACKING/TODO on Win32

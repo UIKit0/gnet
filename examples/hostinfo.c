@@ -21,12 +21,13 @@
 #include <string.h>
 #include <glib.h>
 
-#ifdef G_OS_WIN32
-#  include <gnet.h>
-#  include <gnet-private.h>
-#else
-#  include <gnet/gnet.h>
-#endif
+/* Win32
+#include <gnet.h>
+#include <gnet-private.h>
+*/
+
+#include <gnet/gnet.h>
+
 
 int
 main(int argc, char** argv)
