@@ -1,3 +1,17 @@
+Sun Oct 1 3:48:33:19 2000  Andrew Lanoix  <alanoix@umich.edu>
+
+	* Updated hostinfo.c
+
+Sun Oct 1 3:46:48:28 2000  Andrew Lanoix  <alanoix@umich.edu>
+
+	* Temp patch to get examples to work on Win32
+	  (dnstest.c echoserver.c echoclient.c)
+
+Sun Oct 1 3:41:29:66 2000  Andrew Lanoix  <alanoix@umich.edu>
+
+	* Workaround for win32 linking issue. Moved including 
+	  winsock2 from inetadder.c to inetaddr.h 
+
 Thu Sep 28 23:13:30 2000  David Helder  <dhelder@umich.edu>
 
 	* README.win32: Added.  Writen by Andy.
