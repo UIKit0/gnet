@@ -9,17 +9,16 @@ packages).  Please email me if you can help (dhelder@umich.edu).
 Before 0.2 (first major release):
 
   Programming
-   - More portability fixes (HP-UX)
+   - More portability fixes
 
   Documentation
 
   Other
-    - Move into GNOME repository?
-    - Build Debian docs package
 
 Long term:
 
   Features
+    - Build Debian docs package?
     - Add more error types
     - Allow non-blocking calls to be canceled (return the state?)
     - Perl-style pack and unpack functions
@@ -35,7 +34,7 @@ Long term:
 	  the new Glib 1.4 threads where available)
       * Add option to use ADNS? (and update license)
       * Consider modifying glibc/BIND code?
-    - Fix gnet_udp_socket_get_MTU
+    - Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
     - Better support for multihomed systems (I'm not sure what's 
 	needed)
     - Support IPv6

@@ -69,7 +69,7 @@ static gchar* gnet_gethostbyaddr(const char* addr, size_t length, int type);
 
 /* TODO: Move this to an init function */
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
-static GMutex* gethostbyname_lock = NULL;
+G_LOCK_DEFINE (gethostbyname);
 #endif
 
 /* Thread safe gethostbyname.  The only valid fields are sin_len,
@@ -152,17 +152,38 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
     g_free(buf);
   }
 
+#else
+#ifdef HAVE_GETHOSTBYNAME_R_HPUX
+  {
+    struct hostent result;
+    struct hostent_data buf;
+    int res;
+
+    res = gethostbyname_r (hostname, &result, &buf);
+
+    if (res == 0)
+      {
+	if (sa)
+	  {
+	    sa->sin_family = result.h_addrtype;
+	    memcpy(&sa->sin_addr, result.h_addr_list[0], result.h_length);
+	  }
+	
+	if (nicename && result.h_name)
+	  *nicename = g_strdup(result.h_name);
+
+	rv = TRUE;
+      }
+  }
+
 #else 
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
   {
     struct hostent* he;
 
-    if (gethostbyname_lock == NULL)
-      gethostbyname_lock = g_mutex_new();
-
-    g_mutex_lock (gethostbyname_lock);
+    G_LOCK (gethostbyname);
     he = gethostbyname(hostname);
-    g_mutex_unlock (gethostbyname_lock);
+    G_UNLOCK (gethostbyname);
 
     if (he != NULL && he->h_addr_list[0] != NULL)
       {
@@ -197,6 +218,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 	rv = TRUE;
       }
   }
+#endif
 #endif
 #endif
 #endif
@@ -277,12 +299,9 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
   {
     struct hostent* he;
 
-    if (gethostbyname_lock == NULL)
-      gethostbyname_lock = g_mutex_new();
-
-    g_mutex_lock (gethostbyname_lock);
+    G_LOCK (gethostbyname);
     he = gethostbyaddr(addr, length, type);
-    g_mutex_unlock(gethostbyname_lock);
+    G_UNLOCK (gethostbyname);
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }

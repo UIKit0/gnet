@@ -8,6 +8,7 @@ Authors
 -------
 David Helder 	   <dhelder@umich.edu>		    Original version, Deb's
 Xavier Nicolovici  <nicolovici@club-internet.fr>    FTP protocol, gnet.spec.in
+Soeren Sandmann	   <sandmann@daimi.au.dk>	    HP-UX portability fixes
 
 
 Credits

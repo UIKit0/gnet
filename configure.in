@@ -200,10 +200,10 @@ AC_CHECK_FUNC(gethostbyname_r,
         ], [
 
   dnl  If we don't have glibc gethostbyname_r, check
-  dnl  for Solaris gethostbyname_r
+  dnl  for Solaris/Irix gethostbyname_r
 
   AC_MSG_RESULT(no)
-  AC_MSG_CHECKING(for Solaris gethostbyname_r)
+  AC_MSG_CHECKING(for Solaris/Irix gethostbyname_r)
   AC_TRY_LINK([ #include <netdb.h>],[
 	  struct hostent result;
 	  char buf[1024];
@@ -213,15 +213,34 @@ AC_CHECK_FUNC(gethostbyname_r,
 
 	], [
 
-	  dnl Have Solaris gethostbyname_r
+	  dnl Have Solaris/Irix gethostbyname_r
 
   	  AC_MSG_RESULT(yes)
 	  AC_DEFINE(HAVE_GETHOSTBYNAME_R_SOLARIS)
 	  HAVE_GETHOSTBYNAME_R=yes
 
-	])]
+	], [
+  dnl  If don't have Solaris/Irix gethostbyname_r, check
+  dnl  for HP-UX gethostbyname_r
+
+  AC_MSG_RESULT(no)
+  AC_MSG_CHECKING(for HP-UX gethostbyname_r)
+  AC_TRY_LINK([ #include <netdb.h>],[
+	  struct hostent result;
+	  char buf[1024];
+          gethostbyname_r("localhost", &result, buf);
+        ], [
+        
+          dnl Have HP-UX gethostbyname_r
+
+          AC_MSG_RESULT(yes)
+	  AC_DEFINE(HAVE_GETHOSTBYNAME_R_HPUX)
+	  HAVE_GETHOSTBYNAME_R=yes
+
+	]
+     )]
   )]
-)
+)])
 
 
 dnl If we don't have gethostbyname_r, try to use Glib mutexes
