@@ -1,3 +1,8 @@
+Tue Feb  4 20:05:23 2003  David Helder  <dhelder@umich.edu>
+
+	* tests/Makefile.am (ipv6_test_SOURCES): Fix ipv6_test_SOURCES
+	   rule.
+	
 Tue Feb  4 19:48:35 2003  David Helder  <dhelder@umich.edu>
 
 	* doc/Makefile.am (dist-hook): Don't require gtk-doc to make

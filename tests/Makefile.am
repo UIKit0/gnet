@@ -22,7 +22,7 @@ uri_test_LDADD        = $(top_builddir)/src/libgnet.la
 
 hash_test_SOURCES     = hash_test.c
 inetaddr_test_SOURCES = inetaddr_test.c
-uri_test_SOURCES      = uri_test.c
+ipv6_test_SOURCES     = ipv6_test.c
 pack_test_SOURCES     = pack_test.c
 unpack_test_SOURCES   = unpack_test.c
 uri_test_SOURCES      = uri_test.c
