@@ -23,10 +23,10 @@ joinable (majordomo?) mailing list when we get around to it.
 How to check out GNet anonymously
 ---------------------------------
 
-  > cd <directory I want GNet to go>
-  > setenv CVSROOT :pserver:cvs@mofo.eecs.umich.edu:/z/home/dhelder/repositories/gnet-repository
-  > cvs login	[hit return, then enter password 'cvs']
-  > cvs checkout gnet
+  > cd <directory I want GNet to go in>
+  > setenv CVSROOT :pserver:anonymous@anoncvs.gnome.org:/cvs/gnome
+  > cvs login	[there is no password, hit return if it asks]
+  > cvs -z3 checkout gnet
 
 Be warned that the repository version of GNet may be instable or may
 not even compile.
