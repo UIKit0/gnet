@@ -325,6 +325,9 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 {
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
 
+  /* Remove the watch now in case we don't return immediately */
+  g_source_remove (state->connect_watch);
+
   errno = 0;
   if ((condition & G_IO_IN) || (condition & G_IO_OUT))
     {

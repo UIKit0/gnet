@@ -1,3 +1,12 @@
+Sun Oct  1 19:42:07 2000  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c (gnet_tcp_socket_new_async_cb): Remove the watch
+	   before calling the user's callback.  This prevents it from
+	   being called a second time, which could happen if we run the
+	   main loop before we return.  Joe Shaw found this bug.
+	* src/inetaddr.c (gnet_inetaddr_new_async_cb): "
+	* src/inetaddr.c (gnet_inetaddr_get_name_async_cb): "
+
 Sun Oct  1 13:58:35 2000  David Helder  <dhelder@umich.edu>
 
 	* gnetconfig.h.in: Fixed endif (had string - not ANSI)
@@ -16,7 +25,6 @@ Sun Oct 1 3:41:29:66 2000  Andrew Lanoix  <alanoix@umich.edu>
 	* Workaround for win32 linking issue. Moved including 
 	  winsock2 from inetadder.c to inetaddr.h 
 
->>>>>>> 1.37
 Thu Sep 28 23:13:30 2000  David Helder  <dhelder@umich.edu>
 
 	* README.win32: Added.  Writen by Andy.
