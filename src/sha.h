@@ -25,21 +25,21 @@ typedef struct _GSHA GSHA;
 #define GNET_SHA_HASH_LENGTH	20	/* in bytes */
 
 
-GSHA*           gnet_sha_new (const guint8* buffer, guint length);
-GSHA*		gnet_sha_new_string (const gchar* str);
-void            gnet_sha_delete (GSHA* gsha);
-
-GSHA*		gnet_sha_new_incremental (void);
-void		gnet_sha_update (GSHA* gsha, const guchar* buffer, guint length);
-void		gnet_sha_final (GSHA* gsha);
-
-gint 	    	gnet_sha_equal (const gpointer p1, const gpointer p2);
-guint		gnet_sha_hash (const GSHA* gsha);
-
-guint8*   	gnet_sha_get_digest (const GSHA* gsha);
-gchar*          gnet_sha_get_string (const GSHA* gsha);
-
-void	        gnet_sha_copy_string (const GSHA* gsha, guint8* buffer);
+GSHA*   gnet_sha_new (const guint8* buffer, guint length);
+GSHA*	gnet_sha_new_string (const gchar* str);
+void    gnet_sha_delete (GSHA* gsha);
+	
+GSHA*	gnet_sha_new_incremental (void);
+void	gnet_sha_update (GSHA* gsha, const guchar* buffer, guint length);
+void	gnet_sha_final (GSHA* gsha);
+	
+gint 	gnet_sha_equal (const gpointer p1, const gpointer p2);
+guint	gnet_sha_hash (const GSHA* gsha);
+	
+guint8* gnet_sha_get_digest (const GSHA* gsha);
+gchar*  gnet_sha_get_string (const GSHA* gsha);
+	
+void	gnet_sha_copy_string (const GSHA* gsha, guint8* buffer);
 
 
 #ifdef __cplusplus

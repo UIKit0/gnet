@@ -19,6 +19,7 @@
 
 #include <memory.h>
 #include "server.h"
+#include "gnet-private.h"
 
 
 
@@ -27,8 +28,8 @@ static gboolean server_accept_cb (GIOChannel* listen_iochannel,
 
 
 GServer*  
-gnet_server_new (GInetAddr* iface, gint port, gboolean force_port, 
-		GServerFunc func, gpointer user_data)
+gnet_server_new (const GInetAddr* iface, gboolean force_port, 
+		 GServerFunc func, gpointer user_data)
 {
   GServer* server = NULL;
 
@@ -39,15 +40,18 @@ gnet_server_new (GInetAddr* iface, gint port, gboolean force_port,
   server->user_data = user_data;
 
   /* Create a listening socket */
-  if (port)
-    {
-      server->socket = gnet_tcp_socket_server_new2 (iface, port);
-      if (!server->socket && force_port)
-	goto error;
-    }
+  server->socket = gnet_tcp_socket_server_new_interface (iface);
+  if (!server->socket && force_port)
+    goto error;
 
   if (!server->socket)
-    server->socket = gnet_tcp_socket_server_new2 (iface, 0);
+    {
+      GInetAddr iface_cpy;
+
+      iface_cpy = *iface;
+      GNET_SOCKADDR_IN(iface_cpy.sa).sin_port = 0;
+      server->socket = gnet_tcp_socket_server_new_interface(&iface_cpy);
+    }
 
   if (!server->socket)
     goto error;
