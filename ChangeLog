@@ -1,3 +1,12 @@
+Fri Aug  3 10:32:45 2001  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_async): Don't do inet_aton and
+	   call callback immediately.  This is confusing for the
+	   programmer and can lead to bugs.  Now, either NULL will be
+	   returned or the callback will be called later.  PROGRAMMERS:
+	   For the old semantics, call gnet_inetaddr_new_nonblock and
+	   if it fails, call gnet_inetaddr_new_async.
+	  
 Wed Jul 25 14:23:16 2001  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c: Added pthread implementation of
@@ -25,7 +34,7 @@ Fri Jun  8 16:49:16 2001  David Helder  <dhelder@umich.edu>
 Fri Jun  8 15:26:41 2001  David Helder  <dhelder@umich.edu>
 
 	* examples/echoserver.c (async_server_iofunc): Should be
-	   accept_nonblcok in async_server_iofunc, not accept.
+	   accept_nonblock in async_server_iofunc, not accept.
 	
 	* BUGS: Typo
 

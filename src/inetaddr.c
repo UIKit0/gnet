@@ -366,7 +366,8 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
  *    (eg, 141.213.8.59).  You can delete the after the function is called.
  *  @port: port number (0 if the port doesn't matter)
  * 
- *  Create an internet address from a name and port.  
+ *  Create an internet address from a name and port.  This function
+ *  may block.
  *
  *  Returns: a new #GInetAddr, or NULL if there was a failure.
  *
@@ -429,8 +430,7 @@ static void* gethostbyname_async_child (void* arg);
  * 
  *  Create a GInetAddr from a name and port asynchronously.  Once the
  *  structure is created, it will call the callback.  It may call the
- *  callback before the function returns.  It will call the callback
- *  if there is a failure.
+ *  callback if there is a failure.
  *
  *  The Unix version creates a pthread thread which does the lookup.
  *  If pthreads aren't available, it forks and does the lookup.
@@ -450,8 +450,7 @@ static void* gethostbyname_async_child (void* arg);
  *  DNS lookup function.
  *
  *  Returns: ID of the lookup which can be used with
- *  gnet_inetaddr_new_async_cancel() to cancel it; NULL on immediate
- *  success or failure.
+ *  gnet_inetaddr_new_async_cancel() to cancel it; NULL on failure.
  *
  **/
 GInetAddrNewAsyncID
@@ -466,26 +465,6 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 
   g_return_val_if_fail(name != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
-
-  /* Try to read the name as if were dotted decimal */
-  if (inet_aton(name, &inaddr) != 0)
-    {
-      GInetAddr* ia = NULL;
-      struct sockaddr_in* sa_in;
-
-      ia = g_new0(GInetAddr, 1);
-      ia->ref_count = 1;
-
-      sa_in = (struct sockaddr_in*) &ia->sa;
-      sa_in->sin_family = AF_INET;
-      sa_in->sin_port = g_htons(port);
-      memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
-
-      (*func)(ia, GINETADDR_ASYNC_STATUS_OK, data);
-      return NULL;
-    }
-
-  /* That didn't work - we need to do async */
 
   /* Open a pipe */
   if (pipe(pipes) == -1)
