@@ -93,7 +93,7 @@ if test "$echo_cflags" = "yes"; then
 fi
 
 if test "$echo_libs" = "yes"; then
-      my_glib_libs=@GLIB_LIBS@
+      my_glib_libs="@GLIB_LIBS@"
       libdirs=-L@libdir@
       for i in $glib_libs ; do
         if test $i != -L@libdir@ ; then
