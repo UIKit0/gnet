@@ -1,0 +1,14 @@
+
+Gnet authors and other contributors
+
+
+Authors
+-------
+David Helder 	   <dhelder@umich.edu>		    Original version, Deb's
+Xavier Nicolovici  <x-nicolovici@club-internet.fr>  FTP protocol, gnet.spec.in
+
+
+Credits
+-------
+Owen Taylor				            Based gnet.m4, gnet-config on
+						      his glib/gtk versions

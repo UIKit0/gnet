@@ -1,0 +1,11 @@
+libgnet0 README.Debian
+
+This packet includes the files necessary to use a program that uses
+GNet.  If you want to _build_ a program using GNet, you will need the
+libgnet-dev package.
+
+This is my first time building a Debian package.  Please send me any
+bugs you find with this package.
+
+David Helder (dhelder@umich.edu)
+

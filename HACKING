@@ -1,0 +1,73 @@
+
+Information for potential GNet hackers
+
+
+What to do (in general)
+-----------------------
+
+We will always accept bug and portability fixes.  If you are
+interested in doing something more major, please write
+gnet-dev@umich.edu first.  This is so we know what people are doing
+and can offer advice.  Also see the TODO file for ideas on the
+direction we want to take GNet.
+
+
+Mailing list
+------------
+
+gnet-dev@umich.edu is the development mailing list.  To subscribe,
+email dhelder@umich.edu and tell him to add you.  We will setup a
+joinable (majordomo?) mailing list when we get around to it.
+
+
+How to check out GNet anonymously
+---------------------------------
+
+  > cd <directory I want GNet to go>
+  > setenv CVSROOT :pserver:cvs@mofo.eecs.umich.edu:/z/home/dhelder/repositories/gnet-repository
+  > cvs login	[hit return, then enter password 'cvs']
+  > cvs checkout gnet
+
+Be warned that the repository version of GNet may be instable or may
+not even compile.
+
+
+How to make code contributions
+------------------------------
+
+We only accept code contributions in the form of a unified diff
+against the latest released version and, preferably, the version in
+CVS.  If you have added to the API, you _must_ provide complete gtkdoc
+style comments in the source.
+            
+To make a unified diff, please follow these instructions:
+   
+1. Remove temporary files:
+    make distclean
+
+2. Rename your source tree:
+    cd ..
+    mv gnet-0.1.4 gnet-0.1.4-snazzy-feature
+
+3. Unpack the original gnet library source alongside it:
+    tar zxf /tmp/gnet-0.1.4.tar.gz
+
+4. Generate the diffs:
+   diff -urNb gnet-0.1.4 gnet-0.1.4-snazzy-feature > /tmp/gnet.patch
+
+5. Check the patch and remove any unnecessary patches from the file.
+
+6. If you've added several features, it's best to send them as
+   several independent patches if you can.
+
+7. Don't forget to add your name and email address to AUTHORS so that
+   you assert copyright over GNet and help to keep GNet free!
+
+
+If you have just patched one or two files, then making patches is even
+easier. For each file, just do:
+cp file.c file.c.orig
+Make changes to file.c ...
+diff -u file.c.orig file.c > /tmp/file.c.patch
+
+and just send us the patch: /tmp/file.c.patch.

@@ -1,0 +1,12 @@
+Makefile
+scratch
+.deps
+.libs
+gnet.lo
+gnet-private.lo
+inetaddr.lo
+mcast.lo
+tcp.lo
+udp.lo
+libgnet.la
+ftp.lo

@@ -1,0 +1,173 @@
+<!-- ##### SECTION Title ##### -->
+Internet address module
+
+<!-- ##### SECTION Short_Description ##### -->
+Internet address functions.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+InetAddr represents an internet address.  Currently, only IP version 4
+addresses are used (eg, addresses in the form 141.213.8.59).
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gnet_inetaddr_new ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@func: 
+@data: 
+
+
+<!-- ##### USER_FUNCTION GInetAddrNonblockFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@data: 
+
+
+<!-- ##### ENUM GInetAddrNonblockStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_inetaddr_clone ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_delete ##### -->
+<para>
+
+</para>
+
+@ia: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_name ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
+<para>
+
+</para>
+
+@ia: 
+@func: 
+@data: 
+
+
+<!-- ##### USER_FUNCTION GInetAddrReverseNonblockFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@name: 
+@data: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_canonical_name ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_set_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@port: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_gethostname ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_gethostaddr ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_hash ##### -->
+<para>
+
+</para>
+
+@p: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_noport_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+

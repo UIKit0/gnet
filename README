@@ -1,0 +1,73 @@
+
+GNet, a network library
+------------------------------
+
+GNet is a simple network library.  It is writen in C, object-oriented,
+and built upon glib.  It is intended to be small, fast, easy-to-use,
+and easy to port.  The interface is similar to the interface for
+Java's network library.
+
+Features:
+  * TCP 'client' sockets
+  * TCP 'server' sockets
+  * Non-blocking TCP sockets
+  * UDP
+  * IP Multicast
+  * Internet address abstraction
+
+GNet requires Glib 1.2.  You can get this at www.gtk.org.  Or, if you
+have a system with packages (eg, Red Hat or Debian), look for the
+latest glib package.
+
+GNet is BETA software.  Most of the functions have been tested (in the
+examples programs and in Jungle Monkey), but there may still be some
+bugs.  It also been compiled and tested on Linux and Solaris only, so
+may require some hacking to get it working on other systems.  Help is
+always welcome.  Check-out the TODO file too.
+
+Comments, questions, and bug reports should be sent to
+gnet-dev@umich.edu.
+
+The GNet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet.
+
+
+Install
+-------
+
+Read INSTALL for information on how to install GNet.
+
+In a nutshell: 
+  > ./configure
+  > make
+  > make install
+
+
+License
+-------
+
+Read COPYING for information on the license.  GNet is under the GNU
+LGPL.  In a nutshell: You can share GNet with your friends and make
+changes to it, but it's not our fault if it breaks your computer.
+
+
+Developer info
+--------------
+
+API documentation lives on the GNet homepage (specifically, at
+http://www.eecs.umich.edu/~dhelder/misc/gnet/docs)
+
+
+Hacking
+-------
+
+If you are interested in contributing to GNet, please see 'HACKING'.
+This includes information on how to get GNet from the repository and
+how to submit patches.
+
+
+
+Applications that use GNet
+--------------------------
+
+Jungle Monkey	 	http://www.eecs.umich.edu/~dhelder/misc/jm
+

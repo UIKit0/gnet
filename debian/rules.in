@@ -1,0 +1,81 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This is the debhelper compatability version to use.
+export DH_COMPAT=1
+
+# Clear the library path
+export LD_LIBRARY_PATH=
+export LD_RUN_PATH=
+
+version=@GNET_VERSION@
+major=@GNET_MAJOR_VERSION@
+minor=@GNET_MINOR_VERSION@
+micro=@GNET_MICRO_VERSION@
+lt_current=@LT_CURRENT@
+lt=@LT_CURRENT@.@LT_AGE@.@LT_REVISION@
+
+LIBGNET=libgnet$(major).$(minor)
+LIBGNETDEV=libgnet$(major).$(minor)-dev
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
+	$(MAKE)
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	-$(MAKE) distclean
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+	$(MAKE) install prefix=`pwd`/debian/tmp/usr
+#	rm -f debian/tmp/usr/share/doc/$(LIBGNET)/html/index.html
+#	(cd debian/tmp/usr/share/doc/$(LIBGNET)/html; ln -s book1.html index.html)
+
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_movefiles -p$(LIBGNET)					\
+		usr/lib/libgnet-$(major).$(minor).so.$(lt)		\
+		usr/lib/libgnet-$(major).$(minor).so.$(lt_current)	\
+		usr/lib/libgnet.so
+#	dh_installdebconf	
+	dh_installdocs --all
+	dh_installexamples examples/*.[ch] examples/Makefile
+	dh_undocumented gnet-config.3
+	dh_installchangelogs ChangeLog
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+# You may want to make some executables suid here.
+	dh_suidregister
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

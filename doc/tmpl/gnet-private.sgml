@@ -1,0 +1,34 @@
+<!-- ##### SECTION Title ##### -->
+Internal interfaces
+
+<!-- ##### SECTION Short_Description ##### -->
+Interfaces for internal use
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+This module contains interfaces for internal use only.  Do not use the
+functions and structures in this module.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gnet_private_inetaddr_sockaddr_new ##### -->
+<para>
+
+</para>
+
+@sa: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_private_inetaddr_list_interfaces ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+

@@ -1,0 +1,154 @@
+<!-- ##### SECTION Title ##### -->
+UDP module
+
+<!-- ##### SECTION Short_Description ##### -->
+UDP (datagram) functions.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+A UdpSocket represents an open UDP (or datagram) socket.  Create a
+UdpSocket by calling udp_socket_new() or udp_socket_port_new().
+</para>
+
+<para>
+A UdpPacket represents a packet that can be sent or received via a
+UdpSocket (or McastSocket).  Create a UdpPacket by calling
+udp_packet_receive_new or udp_packet_send_new depending on whether you
+plan to use this structure to send or receive the packet.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gnet_udp_socket_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_port_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_send ##### -->
+<para>
+
+</para>
+
+@s: 
+@packet: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_receive ##### -->
+<para>
+
+</para>
+
+@s: 
+@packet: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_has_packet ##### -->
+<para>
+
+</para>
+
+@s: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_get_iochannel ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_get_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_set_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@val: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_get_mcast_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_set_mcast_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@val: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_packet_receive_new ##### -->
+<para>
+
+</para>
+
+@data: 
+@length: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_packet_send_new ##### -->
+<para>
+
+</para>
+
+@data: 
+@length: 
+@addr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_udp_packet_delete ##### -->
+<para>
+
+</para>
+
+@packet: 
+
+

@@ -1,0 +1,134 @@
+Thu Jan 20 11:41:17 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/*.[ch]: Moved most includes and definitions to
+	    gnet-private.h.  This will make porting easier.
+
+Wed Jan 19 15:48:29 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/gnet.c (gnet_io_channel_writen, gnet_io_channel_readn): 
+	    Don't count bytes read/written if there was an error.
+	* src/gnet.c (gnet_io_channel_readline): Try reading again if
+	    we get G_IO_ERROR_AGAIN.
+	
+Tue Jan 18 13:59:57 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_nonblock): Fixed
+	    bug in handling large addresses.
+	* src/inetaddr.c: Fixed bugs in internal gnet_gethostby*
+	    functions.  Changed them around a bit.
+
+Tue Jan 18 12:50:38 2000  David A Helder  <dhelder@umich.edu>
+
+	* debian/changelog: Updated to 0.1.5
+	* debian/rules.in: Handle libtool naming correctly
+	* debian/libgnet0.1.docs: Added (was just 'docs')
+
+Tue Jan 18 12:12:13 2000  David A Helder  <dhelder@umich.edu>
+
+	* configure.in: Added tests for variants of gethostbyname_r.
+	                Define _REENTRANT
+	* src/inetaddr.c: Added gnet_gethostbyname and gnet_gethostbyaddr
+	    which use appropriate function based on config.h
+	* TODO: Remove this improvement from list
+	
+	* src/gnet-private.h: Changed include to sys/socket.h
+	* src/inetaddr.[ch]: Portablity fixed (thought I did these
+	    on the 10th - oops)
+
+	* configure.in: Upped version to 0.1.5 (not released yet)
+	* src/ftp.[ch]: Added note that it was experimental
+
+Mon Jan 17 11:16:39 2000  David A Helder  <dhelder@umich.edu>
+
+	* HACKING: Added (based on Xavier's SUBMIT-PATCH)
+	* TODO: Added more details
+	* src/ftp.[ch]: Added (contributed by Xavier Nicolovici)
+	* gnet.spec.in: Added (contributed by Xavier Nicolovici)
+
+	* Makefile.am: Added HACKING
+	* configure.in: Added gnet.spec
+	* auto*: Brought up-to-date
+	* debian/changelog: Upped to debian version 2
+	
+Fri Jan 14 10:15:53 2000  David A Helder  <dhelder@umich.edu>
+
+	* examples/Makefile.am: Use gnet-config, not ../src
+	* examples/*: Include gnet/gnet.h, not gnet.h
+	* TODO: Added "Build Debian docs package"
+	* AUTHORS: Added Xavier Nicolovici to AUTHORS
+
+Thu Jan 13 15:20:36 2000  David A Helder  <dhelder@umich.edu>
+
+	* doc/Makefile.am: Docs now put in prefix/share/doc/libgnet0.1-dev
+	* Makefile.am: Added deb rule that builds .debs
+	* debian/*: Added debian package building stuff
+
+Wed Jan 12 15:59:29 2000  David A Helder  <dhelder@umich.edu>
+
+	* ALL: Release 0.1.4
+	* TODO: Updates
+	* examples/sdr.c: Added additional tests of mcast sockets
+	* src/udp.c (gnet_udp_socket_get_mcast_ttl): Fix type of
+	  ttl (wasn't broken in Linux as I thought).
+	* src/mcast.c (gnet_mcast_socket_is_loopback): Fix type of
+	  flag (wasn't broken in Linux as I thought).
+	* src/udp.c: gnet_udp_socket_get_MTU removed until we
+	  can fix it and port it to Solaris.
+	* src/udp.c: Include sys/sockio.h if we have it.
+	* src/{mcast,udp}.c: Cast 4th arg to *sockopt to (void*).
+	* src/{tcp,mcast,udp}.c: Define socklen_t if necessary.
+	* src/inetaddr.c: Include resolv.h, arpa/nameserv.h,
+	  Define INET_ADDRSTRLEN and INET6_ADDRSTRLEN if
+	  necessary.
+
+Wed Jan 12 11:28:34 2000  David A Helder  <dhelder@umich.edu>
+
+	* .cvsignore: Added .cvsignore files
+
+Mon Jan 10 18:16:32 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/gnet-private.c: Include sys/sockio.h if we have it.
+	* configure.in: Check for sys/sockio.h
+
+Mon Jan 10 12:40:55 2000  David A Helder  <dhelder@umich.edu>
+
+	* ALL: More docs, release 0.1.3
+	* TODO: Updates
+	* AUTHORS: Credited Owen Taylor for gnet.m4 and gnet-config
+	* doc/gnet.sgml: Added how-to-compile section
+	* src/inetaddr.c (gnet_inetaddr_get_name): Added
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): Now returns void
+	* examples/dnstest.c: Demonstrates gnet_inetaddr_get_name
+	* examples/ljoust.c: Added Llama Joust
+
+Sun Jan  9 16:40:26 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/gnet.[ch], configure.in: Added gnet_*_version
+	* Makefile.am: Added m4 files for install
+	* acconfig.h: Added
+	* src/Makefile.am (libgnet_la_LDFLAGS): Fixed \ problem
+	
+Sun Jan  9 16:08:11 2000  David A Helder  <dhelder@umich.edu>
+
+	* ALL: Prefixed functions with gnet_
+	* src/gnet-private.[ch]: Move private functions here
+	* TODO: Cleaned up, removed some
+	* gnet.m4: Added
+	* gnet-config.in: Added
+	* configure.in: Added to it (from glib, gtk)
+
+Thu Jan  6 15:25:39 2000  David A Helder  <dhelder@umich.edu>
+
+	* TODO: Added more notes
+	* NEWS: Fixed this
+	* README: Added more notes
+	* src/inetaddr.c (inetaddr_new_nonblock): Use _exit instead of exit
+
+Thu Jan  6 13:26:09 2000  David A Helder  <dhelder@umich.edu>
+
+	* doc/gnet.sgml: Added info on dnstest
+	* configure.in (GNET_MICRO_VERSION): Upped to 1
+	* TODO: Added a few more TODO's based on emails
+	* README: Added info on how to checkout Gnet
+	* src/inetaddr.[hc]: Added inetaddr_new_nonblock
+	* examples/dnstest.c: Added inetaddr_new_nonblock test.

@@ -1,0 +1,39 @@
+
+Changes in Gnet
+
+0.1.5
+-----
+* Library now reentrant (including calls to gethostbyname)
+* Portability fixes
+* Now build RPMS and DEBS
+* Xavier Nicolovici added to AUTHORS
+
+0.1.4
+-----
+* Portability fixes
+* Fixed potential bugs in gnet_udp_socket_get_mcast_ttl and
+    gnet_mcast_socket_is_loopback
+* Removed gnet_udp_socket_get_MTU until we can fix it and port it to
+    Solaris. (It's commented out in gnet-private for now)
+
+0.1.3
+-----
+* Added gnet_tcp_socket_connect and gnet_tcp_socket_connect_nonblock
+* Added gnet_inetaddr_get_name_nonblock
+* Added gnet_udp_socket_get_iochannel
+* Added ljoust (Network Llama Joust) example
+* Improved and cleaned-up inetaddr_new_nonblock
+
+0.1.2
+-----
+* Functions now prefixed with "gnet_"
+* Some interfaces now hidden in gnet-private.[ch]
+* Added gnet.m4 and gnet-config files
+
+0.1.1
+-----
+* Added inetaddr_new_nonblock, an asynchronous DNS lookup function.
+
+0.1.0
+-----
+* Initial release

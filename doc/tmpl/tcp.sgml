@@ -1,0 +1,144 @@
+<!-- ##### SECTION Title ##### -->
+TCP module
+
+<!-- ##### SECTION Short_Description ##### -->
+Tcp socket (stream) functions.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+TcpSocket represents an open TCP (stream) socket. Create a TcpSocket
+by calling tcp_socket_new or tcp_socket_port_new.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gnet_tcp_socket_connect ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_connect_nonblock ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@func: 
+@data: 
+
+
+<!-- ##### USER_FUNCTION GTcpSocketConnectFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@ia: 
+@status: 
+@data: 
+
+
+<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new ##### -->
+<para>
+
+</para>
+
+@addr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION GTcpSocketNonblockFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
+
+
+<!-- ##### ENUM GTcpSocketNonblockStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_get_iochannel ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_get_inetaddr ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_get_port ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_accept ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+

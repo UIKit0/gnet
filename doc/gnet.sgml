@@ -1,0 +1,329 @@
+<!doctype book PUBLIC "-//Davenport//DTD DocBook V3.0//EN" [
+<!entity gnet SYSTEM "sgml/gnet.sgml">
+<!entity inetaddr SYSTEM "sgml/inetaddr.sgml">
+<!entity mcast SYSTEM "sgml/mcast.sgml">
+<!entity tcp SYSTEM "sgml/tcp.sgml">
+<!entity udp SYSTEM "sgml/udp.sgml">
+]>
+
+<book>
+
+  <bookinfo>
+
+    <title>Gnet Network Library Reference Manual</title>
+
+    <authorgroup>
+      <author>
+        <firstname>David</firstname>
+        <surname>Helder</surname>
+        <affiliation>
+	  <address>
+	    <email>dhelder@umich.edu</email>
+	  </address>
+        </affiliation>
+      </author>
+    </authorgroup>
+
+    <copyright>
+      <year>2000</year>
+      <holder>David Helder</holder>
+    </copyright>	
+
+    <legalnotice>
+      <para>
+	Permission is granted to make and distribute verbatim copies
+	of this manual provided the copyright notice and this
+	permission notice are preserved on all copies.
+      </para>
+
+      <para>
+	Permission is granted to copy and distribute modified versions
+	of this manual under the conditions for verbatim copying,
+	provided also that the entire resulting derived work is
+	distributed under the terms of a permission notice identical
+	to this one.
+      </para>
+
+      <para>
+	Permission is granted to copy and distribute translations of
+	this manual into another language, under the above conditions
+	for modified versions.
+      </para>
+    </legalnotice>
+
+    <abstract>
+      <para>
+	This manual documents Gnet, a networking library.  It gives an
+	overview of Gnet, discusses examples that come with Gnet, and
+	includes detailed documentation of the Gnet API.
+      </para>
+    </abstract>
+
+  </bookinfo>
+
+  <!-- ---------------------------------------- -->
+
+  <chapter id="gnet-overview">
+    <title>Gnet Overview</title>
+
+    <para>
+      Gnet is a simple networking library.  It is writen in C,
+      object-oriented, and built upon glib.  It is intended to be
+      small, fast, easy-to-use, and easy to port.  The interface is
+      similar to the interface for Java's network library.  It is
+      somewhere between being wrappers over the standard network
+      sockets library and providing high-level client and server
+      abstractions.
+    </para>
+
+    <para>
+      Features:
+      <itemizedlist>
+	<listitem><para>TCP 'client' sockets</para></listitem>
+        <listitem><para>TCP 'server' sockets</para></listitem>
+        <listitem><para>Non-blocking TCP sockets</para></listitem>
+        <listitem><para>UDP</para></listitem>
+        <listitem><para>IP Multicast</para></listitem>
+        <listitem><para>Internet address abstraction</para></listitem>
+	<listitem><para>Primitive asynchronous DNS lookup</para></listitem>
+      </itemizedlist>
+    </para>
+
+    <para>
+      Gnet is under the GNU Lesser General Public License.  Read
+      COPYING for information on the license (this file comes with the
+      GNet distribution).  In a nutshell: You can share GNet with your
+      friends and make changes to it, but it's not our fault if it
+      breaks your computer.
+    </para>
+
+  </chapter>
+
+  <!-- ---------------------------------------- -->
+
+  <chapter id="gnet-developers">
+    <title>GNet for developers</title>
+
+    <sect1 id="gnet-developers-compiling">
+      <title>Compiling programs with GNet</title>
+
+      <para>
+	If you are a developer and you want to use GNet in your
+	program, you can use the gnet-config script to figure out
+	which flags need to set when compiling.  For example, type
+	<userinput>gcc main.c `gnet-config --cflags -libs`</userinput>
+	to compile the program main.c with GNet and link it to GNet.
+      </para>
+
+      <para>
+	If you use autoconf and automake, you can use the
+	<filename>gnet.m4</filename> macros to set the appropriate
+	variables.  Just add this to your configure.in:
+      
+	<programlisting>
+dnl Need GNet
+AM_PATH_GNET(0.1.2,
+  [LIBS="$LIBS $GNET_LIBS" CFLAGS="$CFLAGS $GNET_CFLAGS"],
+  AC_MSG_ERROR(Cannot find GNet: Is gnet-config in path?))
+	</programlisting>
+      </para>
+    </sect1>
+
+    <sect1 id="gnet-developers-tips">
+      <title>Other tips and tricks</title>
+
+      <para>
+	GNet was designed so that most of the implementation is hidden
+	from the programmer.  You should not have to include any
+	network header files other than
+	<filename>gnet/gnet.h</filename>.
+      </para>
+      
+      <para>
+	GLib includes the functions <function>g_ntohs</function>,
+	<function>g_htons</function>, <function>g_ntohl</function>,
+	and <function>g_htonl</function>.  Use these instead of the
+	versions in <filename>netinet/in.h</filename>.
+      </para>
+
+    </sect1>
+
+  </chapter>
+
+  <!-- ---------------------------------------- -->
+
+  <chapter id="gnet-examples">
+    <title>Gnet Examples</title>
+
+    <para>
+      Gnet comes with several example programs.  They are intented to
+      be used by developers as examples of how to use Gnet.  The
+      example programs are in the examples directory that comes with
+      the source code.  To build the examples, go to this directory
+      and type <userinput>make examples</userinput>.  This section
+      describes what each of the example programs does.
+    </para>
+
+    <sect1 id="echo">
+      <title>echoclient and echoserver</title>
+
+      <para>
+	The echoclient connects to the echoserver and sends data it
+	reads in from the user.  echoserver then sends it back and
+	echoclient prints it out.  These programs demonstrate how to
+	write a basic TCP-based client and server.
+      </para>
+
+      <para>
+	There are two methods of writing an server demonstrated:
+	blocking and non-blocking.  The blocking methods accepts a
+	connection and reads and writes to the socket until the socket
+	is closed.  No more than one echoclient can be connected at
+	once.  A good, robust server wouldn't use this method, but it
+	is suitable for many simple applications.
+      </para>
+
+      <para>
+	The second method is the non-blocking method.  The server does
+	not block while reading or writing to a socket or waiting for
+	a connect.  Since it's never blocked, it can accept new
+	connects when it isn't reading or writing to another socket.
+	Really it could block a little bit on those reads or writes,
+	but since it only reads when there's something to be read and
+	writes when there's buffer space to write into, this is rare.
+      </para>
+
+      <para>
+	The advantage of the non-blocking method is that multiple
+	clients can be served at once.  It's generally the best method
+	to use.  We use the glib event loop and GIOChannels for this.
+      </para>
+
+      <para>
+	A third method, not implemented yet, is to use threads.  The
+	advantage is that it's easier to code.  The disadvantage is
+	it's not as efficient on a single-processor machine or on a
+	machine that doesn't have a good threads implementation (like
+	Linux).  If you feel like implementing this, please email the
+	code and I will include it.
+      </para>
+
+    </sect1>
+
+    <sect1 id="hfetch">
+      <title>hfetch</title>
+
+      <para>
+	hfetch is a simple HTTP file fetcher.  It's braindead -
+	probably not even HTTP version 0.9 compliant.  Please don't
+	let this encourage you to start a project based on hfetch -
+	there are other programs like 'curl' and a billion perl
+	scripts that do this much better.  On the other hand, gnet
+	could use a good http module.
+      </para>
+
+    </sect1>
+
+
+    <sect1 id="sdr">
+      <title>SDR</title>
+
+      <para>
+	SDR prints session announcements from the MBone.  SDR will
+	only work if you have MBone/IP Multicast.  It's a good test to
+	see if you're on the MBone - if it prints stuff, you are, if
+	it doesn't, you aren't.
+      </para>
+
+      <para>
+	Programming wise, it demonstrates how to create a mcast_socket
+	for receiving.  It would be neat if someone wrote a good SDR
+	program - the only ok one I know of is written in TCL (and I
+	wrote one in Java, but it's barely ok, though usable - see the
+	<ulink url="http://www.eecs.umich.edu/~dhelder/jsd"> JSD
+	homepage</ulink>).  No, wait, don't - Jungle Monkey could
+	easily be improved to do everything SDR does.
+      </para>
+    </sect1>
+
+
+    <sect1 id="ljoust">
+      <title>ljoust</title>
+
+      <para>
+	ljoust is Networked Llama Joust.  You control a flying llama
+	and can fly around the screen and bounce off things.  It's
+	networked, so you can play with your friends.  The game in
+	incomplete - there is no llama-to-llama collision detection
+	and no scoring.
+      </para>
+
+      <para>
+	To compile ljoust, type <userinput>make ljoust</userinput> in
+	the example directory.  You will need GTK to compile it.  It
+	is very incomplete and there is probably a better way to do
+	the graphics.  Really it needs some sort of variable frame
+	rate (right now it tries to update.  Feel free to use it as a
+	base for your own game.
+      </para>
+    </sect1>
+
+    <sect1 id="dnstest">
+      <title>dnstest</title>
+
+      <para>
+	dnstest demonstrates how to use
+	<function>inetaddr_new_nonblock</function> and
+	<function>inetaddr_get_name_nonblock</function>.
+      </para>
+    </sect1>
+
+
+    <sect1 id="jmtransfer">
+      <title>jmtransfer programs</title>
+
+      <para>
+	jmtransfer is used for sending and receiving a stream reliably
+	using IP Multicast.  jmtransfer is made up of two programs:
+	jmsend and jmreceive.  They demonstrate how to use
+	mcast_sockets.  jmtransfer used to be used by Jungle Monkey.
+	Warning: These programs will require a lot of tuning before
+	they should be used by real programs.  They are basically a
+	naive implementation of Scalable Reliable Multicast.
+      </para>
+    </sect1>
+
+    <sect1 id="hostinfo">
+      <title>hostinfo</title>
+
+      <para>
+	hostinfo prints information about the host such as the host's
+	address and interfaces.  This requires
+	inetaddr_list_interfaces, which is static in inetaddr.  If you
+	want to play with this, you'll need to make it global and then
+	recompile.
+      </para>
+    </sect1>
+
+  </chapter>
+
+  <!-- ---------------------------------------- -->
+
+  <chapter id="libgnet-reference">
+    <title>Gnet Library Reference</title>
+
+    <para>
+      This section contains the API reference for gnet. All the public
+      interfaces are documented here. This reference guide is built by
+      extracting comments from the code sources.
+    </para>
+
+    &gnet;
+    &inetaddr;
+    &mcast;
+    &tcp;
+    &udp;
+    
+  </chapter>
+</book>
+

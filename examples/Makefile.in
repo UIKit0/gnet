@@ -1,0 +1,440 @@
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
+CC = @CC@
+DLLTOOL = @DLLTOOL@
+GLIB_CFLAGS = @GLIB_CFLAGS@
+GLIB_CONFIG = @GLIB_CONFIG@
+GLIB_LIBS = @GLIB_LIBS@
+GNET_BINARY_AGE = @GNET_BINARY_AGE@
+GNET_DEBUG_FLAGS = @GNET_DEBUG_FLAGS@
+GNET_INTERFACE_AGE = @GNET_INTERFACE_AGE@
+GNET_MAJOR_VERSION = @GNET_MAJOR_VERSION@
+GNET_MICRO_VERSION = @GNET_MICRO_VERSION@
+GNET_MINOR_VERSION = @GNET_MINOR_VERSION@
+GNET_VERSION = @GNET_VERSION@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+LT_AGE = @LT_AGE@
+LT_CURRENT = @LT_CURRENT@
+LT_RELEASE = @LT_RELEASE@
+LT_REVISION = @LT_REVISION@
+MAINT = @MAINT@
+MAKEINFO = @MAKEINFO@
+NM = @NM@
+OBJDUMP = @OBJDUMP@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+glib_cflags = @glib_cflags@
+glib_libs = @glib_libs@
+
+EXTRA_PROGRAMS = sdr jmsend jmreceive hfetch echoserver echoclient 		 hostinfo dnstest ljoust
+
+
+CLEANFILES = sdr jmsend jmreceive hfetch echoserver echoclient 	     hostinfo dnstest ljoust
+
+
+INCLUDES =  `gnet-config --cflags`
+LDFLAGS =  `gnet-config --libs`
+
+##########
+# Main examples
+
+sdr_SOURCES =  	sdr.c
+
+
+hfetch_SOURCES =  	hfetch.c
+
+
+echoserver_SOURCES =  	echoserver.c
+
+
+echoclient_SOURCES =  	echoclient.c
+
+
+dnstest_SOURCES =  	dnstest.c
+
+
+##########
+# jmtransfer examples
+
+jmsend_SOURCES =  	jmsend.c 		jmtransfer.c		jmtransfer.h
+
+
+jmreceive_SOURCES =  	jmreceive.c		jmtransfer.c		jmtransfer.h
+
+
+##########
+# hostinfo is out-of-date
+
+hostinfo_SOURCES =  	hostinfo.c
+
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../config.h
+CONFIG_CLEAN_FILES = 
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I..
+CPPFLAGS = @CPPFLAGS@
+LIBS = @LIBS@
+sdr_OBJECTS =  sdr.o
+sdr_LDADD = $(LDADD)
+sdr_DEPENDENCIES = 
+sdr_LDFLAGS = 
+jmsend_OBJECTS =  jmsend.o jmtransfer.o
+jmsend_LDADD = $(LDADD)
+jmsend_DEPENDENCIES = 
+jmsend_LDFLAGS = 
+jmreceive_OBJECTS =  jmreceive.o jmtransfer.o
+jmreceive_LDADD = $(LDADD)
+jmreceive_DEPENDENCIES = 
+jmreceive_LDFLAGS = 
+hfetch_OBJECTS =  hfetch.o
+hfetch_LDADD = $(LDADD)
+hfetch_DEPENDENCIES = 
+hfetch_LDFLAGS = 
+echoserver_OBJECTS =  echoserver.o
+echoserver_LDADD = $(LDADD)
+echoserver_DEPENDENCIES = 
+echoserver_LDFLAGS = 
+echoclient_OBJECTS =  echoclient.o
+echoclient_LDADD = $(LDADD)
+echoclient_DEPENDENCIES = 
+echoclient_LDFLAGS = 
+hostinfo_OBJECTS =  hostinfo.o
+hostinfo_LDADD = $(LDADD)
+hostinfo_DEPENDENCIES = 
+hostinfo_LDFLAGS = 
+dnstest_OBJECTS =  dnstest.o
+dnstest_LDADD = $(LDADD)
+dnstest_DEPENDENCIES = 
+dnstest_LDFLAGS = 
+ljoust_SOURCES = ljoust.c
+ljoust_OBJECTS =  ljoust.o
+ljoust_LDADD = $(LDADD)
+ljoust_DEPENDENCIES = 
+ljoust_LDFLAGS = 
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP_ENV = --best
+DEP_FILES =  .deps/dnstest.P .deps/echoclient.P .deps/echoserver.P \
+.deps/hfetch.P .deps/hostinfo.P .deps/jmreceive.P .deps/jmsend.P \
+.deps/jmtransfer.P .deps/ljoust.P .deps/sdr.P
+SOURCES = $(sdr_SOURCES) $(jmsend_SOURCES) $(jmreceive_SOURCES) $(hfetch_SOURCES) $(echoserver_SOURCES) $(echoclient_SOURCES) $(hostinfo_SOURCES) $(dnstest_SOURCES) ljoust.c
+OBJECTS = $(sdr_OBJECTS) $(jmsend_OBJECTS) $(jmreceive_OBJECTS) $(hfetch_OBJECTS) $(echoserver_OBJECTS) $(echoclient_OBJECTS) $(hostinfo_OBJECTS) $(dnstest_OBJECTS) ljoust.o
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .lo .o .s
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu examples/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+sdr: $(sdr_OBJECTS) $(sdr_DEPENDENCIES)
+	@rm -f sdr
+	$(LINK) $(sdr_LDFLAGS) $(sdr_OBJECTS) $(sdr_LDADD) $(LIBS)
+
+jmsend: $(jmsend_OBJECTS) $(jmsend_DEPENDENCIES)
+	@rm -f jmsend
+	$(LINK) $(jmsend_LDFLAGS) $(jmsend_OBJECTS) $(jmsend_LDADD) $(LIBS)
+
+jmreceive: $(jmreceive_OBJECTS) $(jmreceive_DEPENDENCIES)
+	@rm -f jmreceive
+	$(LINK) $(jmreceive_LDFLAGS) $(jmreceive_OBJECTS) $(jmreceive_LDADD) $(LIBS)
+
+hfetch: $(hfetch_OBJECTS) $(hfetch_DEPENDENCIES)
+	@rm -f hfetch
+	$(LINK) $(hfetch_LDFLAGS) $(hfetch_OBJECTS) $(hfetch_LDADD) $(LIBS)
+
+echoserver: $(echoserver_OBJECTS) $(echoserver_DEPENDENCIES)
+	@rm -f echoserver
+	$(LINK) $(echoserver_LDFLAGS) $(echoserver_OBJECTS) $(echoserver_LDADD) $(LIBS)
+
+echoclient: $(echoclient_OBJECTS) $(echoclient_DEPENDENCIES)
+	@rm -f echoclient
+	$(LINK) $(echoclient_LDFLAGS) $(echoclient_OBJECTS) $(echoclient_LDADD) $(LIBS)
+
+hostinfo: $(hostinfo_OBJECTS) $(hostinfo_DEPENDENCIES)
+	@rm -f hostinfo
+	$(LINK) $(hostinfo_LDFLAGS) $(hostinfo_OBJECTS) $(hostinfo_LDADD) $(LIBS)
+
+dnstest: $(dnstest_OBJECTS) $(dnstest_DEPENDENCIES)
+	@rm -f dnstest
+	$(LINK) $(dnstest_LDFLAGS) $(dnstest_OBJECTS) $(dnstest_LDADD) $(LIBS)
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = examples
+
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu examples/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-compile mostlyclean-libtool \
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-compile clean-libtool clean-tags clean-depend \
+		clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-compile distclean-libtool distclean-tags \
+		distclean-depend distclean-generic clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool tags mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir \
+mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
+
+
+@SET_MAKE@
+
+##########
+# ljoust requires gtk
+
+ljoust:
+	$(CC) ljoust.c -o ljoust `gtk-config --cflags --libs` `gnet-config --cflags --libs`
+
+########################################
+
+examples: echoserver echoclient hfetch sdr dnstest
+
+jmtransfer: jmreceive jmsend
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

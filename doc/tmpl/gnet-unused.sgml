@@ -1,0 +1,455 @@
+<!-- ##### FUNCTION inetaddr_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_is_loopback ##### -->
+<para>
+
+</para>
+
+@ms: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_send ##### -->
+<para>
+
+</para>
+
+@ms: 
+@packet: 
+@Returns: 
+@socket: 
+
+<!-- ##### ENUM TcpSocketNonblockStatus ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GUdpSocket ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION udp_socket_port_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+@socket: 
+
+<!-- ##### FUNCTION inetaddr_gethostaddr ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### STRUCT GTcpSocket ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION inetaddr_set_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@port: 
+
+<!-- ##### FUNCTION udp_socket_send ##### -->
+<para>
+
+</para>
+
+@s: 
+@packet: 
+@Returns: 
+@socket: 
+
+<!-- ##### FUNCTION inetaddr_clone ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION tcp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+@socket: 
+
+<!-- ##### FUNCTION tcp_socket_new_nonblock ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
+@Returns: 
+
+<!-- ##### FUNCTION tcp_socket_server_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION tcp_socket_get_port ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_packet_delete ##### -->
+<para>
+
+</para>
+
+@packet: 
+
+<!-- ##### FUNCTION udp_socket_receive ##### -->
+<para>
+
+</para>
+
+@s: 
+@packet: 
+@Returns: 
+@socket: 
+
+<!-- ##### FUNCTION tcp_socket_server_accept ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_join_group ##### -->
+<para>
+
+</para>
+
+@ms: 
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_has_packet ##### -->
+<para>
+
+</para>
+
+@s: 
+@Returns: 
+
+<!-- ##### STRUCT GMcastSocket ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION inetaddr_gethostname ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gnet_inetaddr_sockaddr_new ##### -->
+<para>
+
+</para>
+
+@sa: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_port_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_get_canonical_name ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_has_packet ##### -->
+<para>
+
+</para>
+
+@s: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_get_mcast_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_set_mcast_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@val: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_udp_socket_get_MTU ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_packet_send_new ##### -->
+<para>
+
+</para>
+
+@data: 
+@length: 
+@addr: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_new ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_set_loopback ##### -->
+<para>
+
+</para>
+
+@ms: 
+@b: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_leave_group ##### -->
+<para>
+
+</para>
+
+@ms: 
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_delete ##### -->
+<para>
+
+</para>
+
+@ia: 
+
+<!-- ##### FUNCTION tcp_socket_get_iochannel ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_new_nonblock ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@func: 
+@data: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_get_name ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_get_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_hash ##### -->
+<para>
+
+</para>
+
+@p: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_delete ##### -->
+<para>
+
+</para>
+
+@ms: 
+
+<!-- ##### MACRO mcast_socket_to_udp_socket ##### -->
+<para>
+
+</para>
+
+@MS: 
+
+<!-- ##### STRUCT GInetAddr ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION tcp_socket_new ##### -->
+<para>
+
+</para>
+
+@addr: 
+@Returns: 
+
+<!-- ##### FUNCTION tcp_socket_get_inetaddr ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_sockaddr_new ##### -->
+<para>
+
+</para>
+
+@sa: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_receive ##### -->
+<para>
+
+</para>
+
+@ms: 
+@packet: 
+@Returns: 
+@socket: 
+
+<!-- ##### FUNCTION udp_socket_get_MTU ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION udp_packet_receive_new ##### -->
+<para>
+
+</para>
+
+@data: 
+@length: 
+@Returns: 
+
+<!-- ##### FUNCTION mcast_socket_inetaddr_new ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@Returns: 
+
+<!-- ##### FUNCTION inetaddr_noport_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_set_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
+@val: 
+@Returns: 
+
+<!-- ##### USER_FUNCTION TcpSocketNonblockFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
+
