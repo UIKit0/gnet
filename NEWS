@@ -4,13 +4,19 @@ GNet NEWS
 
 Changes in Gnet
 
+1.1.2 ("Cornmeal 2" release)
+-----
+* gnet_inetaddr_get_name_async has pthread implementation
+* Asynchronous DNS bug fixes
+
+
 1.1.1 ("Cornmeal" release)
 -----
 * Experimental Unix sockets support
 * Experimental SOCKS support
 * URLs support username, password, query, and fragment 
 * New gnet_tcp_socket_server_accept_async function
-* gnet_inetaddr_new_async has pthread implemention,
+* gnet_inetaddr_new_async has pthread implementation,
     no longer succeeds immediately
 * New gnet_{sha,md5}_clone functions
 * MacOSX port

@@ -172,7 +172,8 @@ typedef struct _GInetAddrAsyncState
   GInetAddr* ia;
   GInetAddrNewAsyncFunc func;
   gpointer data;
-#ifndef GNET_WIN32
+  gboolean in_callback;
+#ifndef GNET_WIN32		/* UNIX */
 #ifdef HAVE_LIBPTHREAD
   pthread_t pthread;
 #else
@@ -182,7 +183,7 @@ typedef struct _GInetAddrAsyncState
   guint watch;
   guchar buffer[16];
   int len;
-#else
+#else				/* WINDOWS */
   int WSAhandle;
   char hostentBuffer[MAXGETHOSTSTRUCT];
   int errorcode;
@@ -201,8 +202,13 @@ typedef struct _GInetAddrReverseAsyncState
   GInetAddr* ia;
   GInetAddrGetNameAsyncFunc func;
   gpointer data;
-#ifndef GNET_WIN32
+  gboolean in_callback;
+#ifndef GNET_WIN32		/* UNIX */
+#ifdef HAVE_LIBPTHREAD
+  pthread_t pthread;
+#else
   pid_t pid;
+#endif				/* WINDOWS */
   int fd;
   guint watch;
   guchar buffer[256 + 1];/* I think a domain name can only be 256 characters... */

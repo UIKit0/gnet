@@ -24,7 +24,7 @@
 #include <gnet.h>
 
 
-#define DO_REVERSE 1
+#define DO_REVERSE 0
 #define VERBOSE 1
 
 void lookup_block(void);

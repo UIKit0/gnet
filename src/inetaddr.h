@@ -82,6 +82,8 @@ typedef gpointer GInetAddrNewAsyncID;
  *   @status: Status of the lookup
  *   @data: User data
  *   
+ *   Caller owns the address; the callee should copy it if necessary.
+ *
  *   Callback for gnet_inetaddr_new_async().
  *
  **/
@@ -111,7 +113,9 @@ typedef gpointer GInetAddrGetNameAsyncID;
  *   @data: User data
  *   
  *   Callback for gnet_inetaddr_get_name_async().  Delete the name
- *   when you're done with it.
+ *   when you're done with it.  The GInetAddr is the GInetAddr passed
+ *   to gnet_inetaddr_get_name_async() -- the address is not copied.
+ *   (FIX: In 1.2.0, don't pass the InetAddr.)
  *
  **/
 typedef void (*GInetAddrGetNameAsyncFunc)(GInetAddr* inetaddr, 

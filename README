@@ -16,8 +16,9 @@ Features:
   * Byte packing and unpacking
   * URLs (Experimental)
   * Server and Conn objects (Experimental)
+  * SOCKS support (Experimental)
 
-GNet has been ported to Linux, *BSD, Solaris, HP, MacOS X, and
+GNet has been ported to Linux, *BSD, MacOSX, Solaris, HP, MacOS X, and
 Windows.  It may work on other operating systems also.
 
 GNet requires GLib 1.2, available at www.gtk.org.  Or, if you have a
@@ -80,6 +81,13 @@ compiler should warn or fail if they are used.  We welcome bug fixes,
 improvements, and comments on the experimental modules.  Our hope is
 that adventurous programmers will use these modules and help in their
 further development.
+
+The Nylon SOCKS server is required for SOCKS server socket support.
+SOCKS server sockets are weird.  Marius, a Nylon and GNet developer,
+changed the semantics in Nylon to make SOCKS integration in GNet
+easier/possible.  GNet SOCKS clients should work with any SOCKS
+server.  The Nylon homepage is
+<http://mesh.eecs.umich.edu/projects/nylon/>.
 
 
 Hacking
