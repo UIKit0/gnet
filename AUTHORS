@@ -7,16 +7,15 @@ GNet authors and other contributors
 Authors
 -------
 David Helder 	   <dhelder@umich.edu>		 Original version, Deb's
-Xavier Nicolovici  <nicolovi@club-internet.fr>   FTP protocol, gnet.spec.in
+Xavier Nicolovici  <nicolovi@club-internet.fr>   gnet.spec.in
 Soeren Sandmann	   <sandmann@daimi.au.dk>	 HP-UX portability fixes
-Jacques Fortier    <jfortier@seul.org>		 gnet_iochannel_readline_strdup()
+Jacques Fortier    <jfortier@seul.org>		 iochannel_readline_strdup()
 Andrew Lanoix      <alanoix@umich.edu>		 Win32 port
 Eric Cronin	   <ecronin@umich.edu>		 MacOSX port
 David Bolcsfoldi   <david.bolcsfoldi@telia.com>	 URL improvements
 Marius Eriksen	   <marius@umich.edu>		 SOCKS support
+Mark Ferlatte      <ferlatte@cryptio.net>	 Unix sockets
 
 Credits
 -------
-Owen Taylor				         Based gnet.m4, gnet-config,
-						   gnet-config.1 on his glib/gtk 
-						   versions
+Owen Taylor	   Config files based on his GLib/Gtk versions

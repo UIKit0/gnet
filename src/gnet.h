@@ -37,6 +37,10 @@
 #include "md5.h"
 #include "sha.h"
 
+#ifndef GNET_WIN32
+#  include "unix.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

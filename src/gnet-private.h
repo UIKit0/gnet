@@ -55,7 +55,8 @@
 #include <sys/sockio.h>
 #endif
 #include <sys/time.h>
-
+#include <sys/stat.h>
+#include <sys/un.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 
@@ -128,6 +129,15 @@ struct _GTcpSocket
   struct sockaddr sa;		/* Why not an InetAddr? */
   guint ref_count;
   GIOChannel* iochannel;
+};
+
+struct _GUnixSocket
+{
+  gint sockfd;
+  struct sockaddr sa;
+  guint ref_count;
+  gboolean server;
+  GIOChannel *iochannel;
 };
 
 struct _GMcastSocket

@@ -20,6 +20,7 @@ libgnet_la_SOURCES = 		\
 	inetaddr.c		\
 	mcast.c			\
 	tcp.c			\
+	unix.c			\
 	udp.c			\
 	iochannel.c		\
 	socks.c			\
@@ -36,6 +37,7 @@ gnetinclude_HEADERS = 		\
         inetaddr.h              \
         mcast.h           	\
 	tcp.h			\
+	unix.h			\
         udp.h			\
 	iochannel.h		\
 	socks.h			\

@@ -6,6 +6,7 @@ Changes in Gnet
 
 1.1.1 ("Cornmeal" release, UNRELEASED)
 -----
+* Experimental Unix sockets support
 * Experimental SOCKS support
 * URLs support username, password, query, and fragment 
 * gnet_inetaddr_new_async has pthread implemention,

@@ -4,6 +4,7 @@
 
 EXTRA_PROGRAMS = echoserver echoclient 	\
 		 echoserver-udp echoclient-udp	\
+		 echoserver-unix echoclient-unix \
 		 hfetch sdr ljoust
 EXTRA_DIST     = ljoust.c makefile.mingw
 CLEANFILES     = $(EXTRA_PROGRAMS) ljoust
@@ -27,6 +28,12 @@ echoserver_udp_SOURCES = \
 echoclient_udp_SOURCES = \
 	echoclient-udp.c
 
+echoserver_unix_SOURCES = \
+	echoserver-unix.c
+
+echoclient_unix_SOURCES = \
+	echoclient-unix.c
+
 sdr_SOURCES = \
 	sdr.c
 
@@ -40,7 +47,7 @@ ljoust:
 
 ########################################
 
-examples: echoserver echoclient 	\
-	  echoserver-udp echoclient-udp \
-	  hfetch sdr			\
-	  dnstest
+examples: echoserver echoclient 	  \
+	  echoserver-udp echoclient-udp   \
+	  echoserver-unix echoclient-unix \
+	  hfetch sdr			  \

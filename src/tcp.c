@@ -788,7 +788,7 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
  *  @port: Port number for the socket (0 if you don't care).
  *
  *  Create and open a new #GTcpSocket with the specified port number.
- *  Use this sort of socket when your are a server and you know what
+ *  Use this sort of socket when you are a server and you know what
  *  the port number should be (or pass 0 if you don't care what the
  *  port is).
  *
