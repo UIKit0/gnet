@@ -8,7 +8,7 @@ Wed Oct 17 16:48:03 2001  David Helder  <dhelder@umich.edu>
 	    parsing code.
 	
 	* tests/socksclient.c: Added
-
+ 
 Sun Oct  7 23:04:29 2001  David Helder  <dhelder@umich.edu>
 
 	* NEWS: Added SOCKS
