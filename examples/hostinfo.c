@@ -18,7 +18,7 @@
 
 /*
 
-  WARNING: THIS FILE IS OUT-OF-DATE.
+  WARNING: THIS FILE HAS NOT BEEN TEST UNDER *NIX 
 
  */
 
@@ -27,11 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet/gnet.h>
-
-/* Hidden in gnet/gnet-private.h */
-GList* gnet_private_inetaddr_list_interfaces(void);
-
+#ifdef G_OS_WIN32
+	#include <gnet.h>
+	#include <gnet-private.h>
+#else
+	#include <gnet/gnet.h>
+#endif
 
 int
 main(int argc, char** argv)
@@ -39,17 +40,17 @@ main(int argc, char** argv)
 
   GList* interfaces;
   GList* i;
-  InetAddr* ia;
+  GInetAddr* ia;
   gchar* cname;
   gchar* name;
 
   /* Print info about me */
-  ia = inetaddr_gethostaddr();
+  ia = gnet_inetaddr_gethostaddr();
   g_assert (ia != NULL);
 
-  name = inetaddr_get_name(ia);
+  name = gnet_inetaddr_get_name(ia);
   g_assert (name != NULL);
-  cname = inetaddr_get_canonical_name(ia);
+  cname = gnet_inetaddr_get_canonical_name(ia);
   g_assert (cname != NULL);
 
   g_print ("hostname is %s (%s)\n", name, cname);
@@ -60,17 +61,17 @@ main(int argc, char** argv)
   /* Print interfaces */
   g_print ("interfaces:\n");
 
-  interfaces = inetaddr_list_interfaces();
+  interfaces = gnet_private_inetaddr_list_interfaces();
 
   for (i = interfaces; i != NULL; i = g_list_next(i))
     {
-      ia = (InetAddr*) i->data;
+      ia = (GInetAddr*) i->data;
       g_assert (ia != NULL);
 
-      name = inetaddr_get_name(ia);
+      name = gnet_inetaddr_get_name(ia);
       g_assert (name != NULL);
 
-      cname = inetaddr_get_canonical_name(ia);
+      cname = gnet_inetaddr_get_canonical_name(ia);
       g_assert (cname != NULL);
 
       g_print ("%s (%s)\n", name, cname);
