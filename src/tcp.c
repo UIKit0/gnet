@@ -262,7 +262,7 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
   rv = connect(sockfd, &s->sa, sizeof(s->sa));
   if (rv != 0)
     {
-      close (sockfd);
+      GNET_CLOSE_SOCKET(s->sockfd);
       g_free (s);
       return NULL;
     }

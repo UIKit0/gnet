@@ -323,9 +323,6 @@ gnet_io_channel_readline_strdup (GIOChannel    *channel,
 }
 
 
-/* **************************************** */
-
-
 /* ************************************************************ */
 
 typedef struct _GNetIOChannelWriteAsyncState
@@ -339,8 +336,11 @@ typedef struct _GNetIOChannelWriteAsyncState
   GNetIOChannelWriteAsyncFunc func;
   gpointer user_data;
 
+  gboolean in_upcall;		/* Set before upcall to prevent accidental double deletion */
+
 } GNetIOChannelWriteAsyncState;
 
+static void write_async_cancel (GNetIOChannelWriteAsyncState* state);
 static gboolean write_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data);
 static gboolean write_async_timeout_cb (gpointer data);
 
@@ -379,12 +379,13 @@ gnet_io_channel_write_async (GIOChannel* iochannel,
 		  write_async_cb, state);
 
   if (timeout > 0)
-    g_timeout_add(timeout, write_async_timeout_cb, state);
+    g_timeout_add (timeout, write_async_timeout_cb, state);
 
   return state;
 }
 
 
+/* called in user code and in user upcalls */
 void
 gnet_io_channel_write_async_cancel (GNetIOChannelWriteAsyncID id, 
 				    gboolean delete_buffer)
@@ -398,6 +399,23 @@ gnet_io_channel_write_async_cancel (GNetIOChannelWriteAsyncID id,
   if (delete_buffer)
     g_free(state->buffer);
 
+  /* Don't delete state if we're in an upcall.  We'll do it after the
+     upcall. */
+  if (state->in_upcall)
+    return;
+
+  while (g_source_remove_by_user_data(state))
+    ;
+
+  g_free(state);
+}
+
+
+
+/* called internally only */
+static void
+write_async_cancel (GNetIOChannelWriteAsyncState* state)
+{
   while (g_source_remove_by_user_data(state))
     ;
 
@@ -420,9 +438,11 @@ write_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
   if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
     {
 
+      state->in_upcall = TRUE;
       (state->func)(iochannel, state->buffer, state->length, state->n,
 		    GNET_IOCHANNEL_WRITE_ASYNC_STATUS_ERROR, state->user_data);
-      gnet_io_channel_write_async_cancel (state, FALSE);
+      state->in_upcall = FALSE;
+      write_async_cancel (state);
 
       return FALSE;
     }
@@ -437,9 +457,11 @@ write_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 			     state->length - state->n,
 			     &bytes_written) != G_IO_ERROR_NONE)
 	{
+	  state->in_upcall = TRUE;
 	  state->func(iochannel, state->buffer, state->length, state->n,
 		      GNET_IOCHANNEL_WRITE_ASYNC_STATUS_ERROR, state->user_data);
-	  gnet_io_channel_write_async_cancel(state, FALSE);
+	  state->in_upcall = FALSE;
+	  write_async_cancel (state);
 	  return FALSE;
 	}
 
@@ -447,9 +469,12 @@ write_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 
       if (state->n == state->length)
 	{
+	  state->in_upcall = TRUE; /* delay user cancelation */
 	  state->func(iochannel, state->buffer, state->length, state->n,
 		      GNET_IOCHANNEL_WRITE_ASYNC_STATUS_OK, state->user_data);
-	  gnet_io_channel_write_async_cancel(state, FALSE);
+	  state->in_upcall = FALSE;
+	  write_async_cancel (state);
+
 	  return FALSE;
 	}
 
@@ -469,9 +494,11 @@ write_async_timeout_cb (gpointer data)
 
   g_return_val_if_fail (state != NULL, FALSE);
 
+  state->in_upcall = TRUE;
   state->func(state->iochannel, state->buffer, state->length, state->n,
 	      GNET_IOCHANNEL_WRITE_ASYNC_STATUS_TIMEOUT, state->user_data);
-  gnet_io_channel_write_async_cancel(state, FALSE);
+  state->in_upcall = FALSE;
+  write_async_cancel(state);
 
   return FALSE;
 }
@@ -499,6 +526,8 @@ typedef struct _GNetIOChannelReadAsyncState
 
   GNetIOChannelReadAsyncFunc func;
   gpointer user_data;
+
+  gboolean in_upcall;
 
 } GNetIOChannelReadAsyncState;
 
@@ -556,12 +585,13 @@ gnet_io_channel_read_async (GIOChannel* iochannel,
 
   state->timeout = timeout;
   if (timeout > 0)
-    state->timer = g_timeout_add(timeout, read_async_timeout_cb, state);
+    state->timer = g_timeout_add (timeout, read_async_timeout_cb, state);
 
   return state;
 }
 
 
+/* called by user, possibly during upcalls */
 void
 gnet_io_channel_read_async_cancel (GNetIOChannelReadAsyncID id)
 {
@@ -571,6 +601,24 @@ gnet_io_channel_read_async_cancel (GNetIOChannelReadAsyncID id)
 
   state = (GNetIOChannelReadAsyncState*) id;
 
+  if (state->in_upcall)
+    return;
+
+  g_source_remove (state->watch);
+  if (state->timer)
+    g_source_remove (state->timer);
+
+  if (state->my_buffer)
+    g_free(state->buffer);
+
+  g_free(state);
+}
+
+
+/* used internally */
+static void
+read_async_cancel (GNetIOChannelReadAsyncState* state)
+{
   g_source_remove (state->watch);
   if (state->timer)
     g_source_remove (state->timer);
@@ -600,9 +648,11 @@ read_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 
   if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
     {
+      state->in_upcall = TRUE;
       (state->func)(iochannel, GNET_IOCHANNEL_READ_ASYNC_STATUS_ERROR, 
 		    NULL, 0, state->user_data);
-      gnet_io_channel_read_async_cancel(state);
+      state->in_upcall = FALSE;
+      read_async_cancel(state);
 
       return FALSE;
     }
@@ -640,9 +690,11 @@ read_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 
       else if (error != G_IO_ERROR_NONE)
 	{
+	  state->in_upcall = TRUE;
 	  state->func (iochannel, GNET_IOCHANNEL_READ_ASYNC_STATUS_ERROR, 
 		       NULL, 0, state->user_data);
-	  gnet_io_channel_read_async_cancel (state);
+	  state->in_upcall = FALSE;
+	  read_async_cancel (state);
 	  return FALSE;
 	}
 
@@ -650,9 +702,11 @@ read_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 	 not send anything that might be in the buffer */
       else if (bytes_read == 0)
 	{
+	  state->in_upcall = TRUE;
 	  state->func (iochannel, GNET_IOCHANNEL_READ_ASYNC_STATUS_OK, 
 		       NULL, 0, state->user_data);
-	  gnet_io_channel_read_async_cancel (state);
+	  state->in_upcall = FALSE;
+	  read_async_cancel (state);
 	  return FALSE;
 	}
 
@@ -661,12 +715,19 @@ read_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
       bytes_processed = (state->check_func)(state->buffer, state->offset, state->check_user_data);
       if (bytes_processed)
 	{
+	  state->in_upcall = TRUE;
 	  if (!state->func (iochannel, GNET_IOCHANNEL_READ_ASYNC_STATUS_OK, 
 			    state->buffer, bytes_processed, state->user_data))
 	    {
-	      gnet_io_channel_read_async_cancel (state);
+	      state->in_upcall = FALSE;
+	      read_async_cancel (state);
 	      return FALSE;
 	    }
+	  state->in_upcall = FALSE;
+
+	  /* It is a programmer error if they called
+	     g_io_channel_read_async_cancel() in the upcall and
+	     returned TRUE (read more). */
 
 	  /* Move it over */
 	  g_memmove (state->buffer, &state->buffer[bytes_processed], 
@@ -679,9 +740,11 @@ read_async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
       /* Check if we hit the max length.  If so, it's an error. */
       if (state->offset >= state->max_len)
 	{
+	  state->in_upcall = TRUE;
 	  state->func(iochannel, GNET_IOCHANNEL_READ_ASYNC_STATUS_ERROR, 
 		      state->buffer, state->offset, state->user_data);
-	  gnet_io_channel_read_async_cancel (state);
+	  state->in_upcall = FALSE;
+	  read_async_cancel (state);
 	  return FALSE;
 	}
 
@@ -712,9 +775,11 @@ read_async_timeout_cb (gpointer data)
 
   g_return_val_if_fail (state, FALSE);
 
+  state->in_upcall = TRUE;
   (state->func)(state->iochannel, GNET_IOCHANNEL_READ_ASYNC_STATUS_TIMEOUT, 
 		NULL, 0, state->user_data);
-  gnet_io_channel_read_async_cancel (state);
+  state->in_upcall = FALSE;
+  read_async_cancel (state);
 
   return FALSE;
 }

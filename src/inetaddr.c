@@ -661,7 +661,7 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id)
   g_return_if_fail (state);
 
   /* We don't use in_callback because we'd have to get the mutex to
-     access it and if we we're in the callback we'd already have the
+     access it and if we're in the callback we'd already have the
      mutex and deadlock.  in_callback was mostly meant to prevent
      programmer error.  */
 

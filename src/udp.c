@@ -77,17 +77,20 @@ gnet_udp_socket_port_new (gint port)
 GUdpSocket* 
 gnet_udp_socket_new_interface (const GInetAddr* iface)
 {
-  GUdpSocket* s;
-  const int on = 1;
+  int 			sockfd;
+  GUdpSocket* 		s;
+  const int 		on = 1;
 
   g_return_val_if_fail (iface, NULL);
 
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockfd < 0)
+    return NULL;
+
   /* Create socket */
   s = g_new0 (GUdpSocket, 1);
+  s->sockfd = sockfd;
   s->ref_count = 1;
-  s->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-  if (s->sockfd < 0)
-    return NULL;
 
   /* Set broadcast option.  This allows the user to broadcast packets.
      It has not affect otherwise. */
@@ -95,12 +98,17 @@ gnet_udp_socket_new_interface (const GInetAddr* iface)
 		 (void*) &on, sizeof(on)) != 0)
     {
       GNET_CLOSE_SOCKET(s->sockfd);
+      g_free (s);
       return NULL;
     }
 
   /* Bind to the socket to some local address and port */
   if (bind(s->sockfd, &iface->sa, sizeof(iface->sa)) != 0)
-    return NULL;
+    {
+      GNET_CLOSE_SOCKET(s->sockfd);
+      g_free (s);
+      return NULL;
+    }
 
   return s;
 }

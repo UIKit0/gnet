@@ -67,7 +67,7 @@ gnet_mcast_socket_port_new(gint port)
   saip = (struct sockaddr_in*) &sa;
 
   saip->sin_family = AF_INET;
-  saip->sin_addr.s_addr = INADDR_ANY;
+  saip->sin_addr.s_addr = g_htonl(INADDR_ANY);
   saip->sin_port = g_htons(port);
 
   ia = gnet_private_inetaddr_sockaddr_new(sa);

@@ -74,7 +74,7 @@ typedef enum {
  *  allocated by the gnet_conn_read() caller (so is GConnFunc callee
  *  owned).  The callee should return TRUE if they want to continue
  *  reading data.  If gnet_conn_write() completes, the callback is
- *  called with status WRITE and the buffer is set the the buffer
+ *  called with status WRITE and the buffer is set to the buffer
  *  passed to gnet_conn_write().  If the gnet_conn_timeout() timer
  *  expires, the callback is called with status TIMEOUT.  If an error
  *  ever occurs, the callback is called with status ERROR.
