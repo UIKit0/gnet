@@ -1,3 +1,15 @@
+Thu Oct 19 23:44:17 2000  David Helder  <dhelder@umich.edu>
+
+	* *: Merged GNET_1_0_4_STABLE_BRANCH into HEAD
+
+Thu Oct 19 22:48:21 2000  David Helder  <dhelder@umich.edu>
+
+	* *: Release 1.0.4 on GNET_1_0_4_STABLE_BRANCH branch
+
+	* README.win32: Updates
+
+	* gnet-config.in (lib_gnet): Fix gnet-config.in
+	
 Sat Oct 14 11:54:30 2000  David Helder  <dhelder@umich.edu>
 
 	* gnet-config.in (lib_gnet): Fixed cflags for non-/usr prefix

@@ -16,11 +16,14 @@ Features:
   * Internet address abstraction
   * Non-blocking TCP sockets and address lookup
 
+GNet has been ported to Linux, *BSD, Solaris, and HP.  It may work on
+other flavors of Unix too.  Part of GNet has been ported to Windows.
+
 GNet requires Glib 1.2.  You can get this at www.gtk.org.  Or, if you
 have a system with packages (eg, Red Hat or Debian), look for the
 latest glib package.
 
-Comments and questions should be sent to gnet-dev@umich.edu.
+Comments and questions should be sent to gnet-dev@eecs.umich.edu.
 
 The GNet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet.
 
@@ -84,5 +87,20 @@ changes to it, but it's not our fault if it breaks your computer.
 Applications that use GNet
 ==========================
 
-Jungle Monkey	 	http://www.junglemonkey.net
+Jungle Monkey	 	
+  distributed file sharing program
+  http://www.junglemonkey.net
+
+Gabber			
+  messaging/chat program
+  http://gabber.sourceforge.net
+
+Helix Gnome Installer and Updater
+  software package management
+  http://www.helixcode.com
+
+Quest/Epos
+  network game and chat
+  http://quest.sourceforge.net
+				
 
