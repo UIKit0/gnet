@@ -1,3 +1,9 @@
+Fri Nov 30 17:51:02 2001  Ross Golder  <ross@golder.org>
+
+	* configure.in: Removed gmodule stuff, and exported
+	    GTHREAD_* even if empty.
+	* src/Makefile.am: Made use of GTHREAD_*
+
 Sat Nov 10 18:37:01 2001  Ross Golder  <ross@golder.org>
 
 	* configure.in: Switched to using PKG_CHECK_MODULES to

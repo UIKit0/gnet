@@ -3,7 +3,7 @@
 @SET_MAKE@
 
 INCLUDES = -DG_LOG_DOMAIN=\"GNet\" @GNET_DEBUG_FLAGS@ \
-	$(GLIB_CFLAGS)
+	$(GLIB_CFLAGS) $(GTHREAD_CFLAGS)
 
 gnetincludedir = $(includedir)/gnet
 
@@ -14,7 +14,7 @@ lib_LTLIBRARIES = libgnet.la
 libgnet_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	-release $(LT_RELEASE) \
-	$(GLIB_LIBS)
+	$(GLIB_LIBS) $(GTHREAD_CFLAGS)
 
 libgnet_la_SOURCES = 		\
 	gnet.c			\

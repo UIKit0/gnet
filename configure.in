@@ -149,9 +149,6 @@ if test "x${PKGCONFIG}" = "xyes"; then
 	PKG_CHECK_MODULES(GLIB, glib-2.0, ,[
 		PKG_CHECK_MODULES(GLIB, glib)
 	])
-	PKG_CHECK_MODULES(GMODULE, gmodule-2.0, ,[
-		PKG_CHECK_MODULES(GMODULE, gmodule)
-	])
 	PKG_CHECK_MODULES(GTHREAD, gthread-2.0, ,[
 		PKG_CHECK_MODULES(GTHREAD, gthread)
 	])
@@ -159,8 +156,6 @@ if test "x${PKGCONFIG}" = "xyes"; then
 	# Export flags	
 	AC_SUBST(GLIB_CFLAGS)
 	AC_SUBST(GLIB_LIBS)
-	AC_SUBST(GMODULE_CFLAGS)
-	AC_SUBST(GMODULE_LIBS)
 	AC_SUBST(GTHREAD_CFLAGS)
 	AC_SUBST(GTHREAD_LIBS)
 fi
@@ -171,12 +166,14 @@ if test "x${GLIB_CFLAGS}" = "x"; then
 	dnl AM_PATH_GLIB_2_0([1.3.9],,
 		AM_PATH_GLIB([1.2.10],,[
 			AC_MSG_ERROR(glib could not be found)
-		],[gmodule gthread])
-	dnl ],[gmodule gthread])
+		],[gthread])
+	dnl ],[gthread])
 
 	# Export flags	
 	AC_SUBST(GLIB_CFLAGS)
 	AC_SUBST(GLIB_LIBS)
+	AC_SUBST(GTHREAD_CFLAGS)
+	AC_SUBST(GTHREAD_LIBS)
 fi
 
 # Need network libraries
