@@ -1,3 +1,8 @@
+Tue Apr 15 13:37:38 2003  David Helder  <dhelder@umich.edu>
+
+	* src/gnet-private.h: define sockaddr_storage if not defined.
+	* configure.ac: Check for sockaddr_storage
+
 Tue Apr 15 11:07:52 2003  David Helder  <dhelder@umich.edu>
 
 	* src/gnet.c (ipv6_detect_envvar): s/index/strchr/

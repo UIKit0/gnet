@@ -239,6 +239,17 @@ AC_CHECK_MEMBER([struct sockaddr.sa_len],
 		[#include <sys/types.h>
 		 #include <sys/socket.h>])
 
+AC_MSG_CHECKING([for struct sockaddr_storage])
+AC_TRY_COMPILE([ #include <sys/types.h>
+#include <sys/socket.h>], [struct sockaddr_storage s; s],
+  have_sockaddr_storage=yes, have_sockaddr_storage=no)
+if test "$have_sockaddr_storage" = yes; then
+  AC_DEFINE(HAVE_SOCKADDR_STORAGE,1,[Whether you have struct sockaddr_storage])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
 
 ###############################
 # Compiler characteristics

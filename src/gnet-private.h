@@ -70,6 +70,18 @@
 #include <resolv.h>
 #include <netdb.h>
 
+#ifndef HAVE_SOCKADDR_STORAGE
+typedef struct {
+#ifdef HAVE_SOCKADDR_LEN
+		unsigned char ss_len;
+		unsigned char ss_family;
+#else
+        unsigned short ss_family;
+#endif
+        char info[126];
+} sockaddr_storage;
+#endif
+
 #ifndef socklen_t
 #  ifdef GNET_APPLE_DARWIN
 #    define socklen_t int	/* socklen_t is int in Darwin */
