@@ -66,14 +66,6 @@
 </para>
 
 
-<!-- ##### FUNCTION inetaddr_set_port ##### -->
-<para>
-
-</para>
-
-@ia: 
-@port: 
-
 <!-- ##### FUNCTION udp_socket_send ##### -->
 <para>
 
@@ -83,6 +75,14 @@
 @packet: 
 @Returns: 
 @socket: 
+
+<!-- ##### FUNCTION inetaddr_set_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@port: 
 
 <!-- ##### FUNCTION inetaddr_clone ##### -->
 <para>
@@ -118,6 +118,13 @@
 @port: 
 @Returns: 
 
+<!-- ##### FUNCTION udp_packet_delete ##### -->
+<para>
+
+</para>
+
+@packet: 
+
 <!-- ##### FUNCTION tcp_socket_get_port ##### -->
 <para>
 
@@ -125,13 +132,6 @@
 
 @socket: 
 @Returns: 
-
-<!-- ##### FUNCTION udp_packet_delete ##### -->
-<para>
-
-</para>
-
-@packet: 
 
 <!-- ##### FUNCTION udp_socket_receive ##### -->
 <para>
@@ -418,14 +418,6 @@
 
 @Returns: 
 
-<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
-<para>
-
-</para>
-
-@us: 
-@Returns: 
-
 <!-- ##### FUNCTION inetaddr_noport_equal ##### -->
 <para>
 
@@ -433,6 +425,14 @@
 
 @p1: 
 @p2: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
 @Returns: 
 
 <!-- ##### FUNCTION udp_socket_set_ttl ##### -->

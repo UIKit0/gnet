@@ -15,20 +15,27 @@ m4data_DATA = gnet.m4
 
 WEBPATH=$(HOME)/public_html/misc/gnet
 
+DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING
+
 TARBALL=gnet-$(VERSION).tar.gz
+
 DEBFILE=libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)_$(VERSION)-*_i386.deb
 DEBFILEDEV=libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)-dev_$(VERSION)-*_i386.deb
+
+RPMFILE=/usr/src/redhat/RPMS/i386/gnet-$(VERSION)-*.i386.rpm
+RPMFILEDEV=/usr/src/redhat/RPMS/i386/gnet-devel-$(VERSION)-*.i386.rpm
+RPMFILESRC=/usr/src/redhat/SRPMS/gnet-$(VERSION)-*.src.rpm
 
 snapshot:
 	$(MAKE) dist distdir=$(PACKAGE)`date +"%y%m%d"`
 
 copyweb:
-	-cp -f README TODO NEWS ChangeLog COPYING AUTHORS HACKING $(WEBPATH)
-	-cp -f $(TARBALL) $(WEBPATH)
-	-(cd $(WEBPATH); chmod a+r README TODO NEWS ChangeLog \
-		COPYING AUTHORS HACKING $(TARBALL))
-	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)
-	-chmod a+r $(WEBPATH)/*.deb
+	-cp -f $(DOCS) $(WEBPATH)
+	-(cd $(WEBPATH); chmod a+r $(DOCS))
+	-cp -f $(TARBALL) $(WEBPATH)/src
+	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)/deb
+	-cp -f $(RPMFILE) $(RPMFILEDEV) $(RPMFILESRC) $(WEBPATH)/rpm
+	-chmod a+r $(WEBPATH)/src/* $(WEBPATH)/deb/* $(WEBPATH)/rpm/*
 
 deb:
 	rm -rf debian-temp
@@ -41,6 +48,11 @@ deb:
 	lintian debian-temp/$(DEBFILE)
 	echo Running lintian on $(DEBFILEDEV)...
 	lintian debian-temp/$(DEBFILEDEV)
+
+rpm:
+	echo Make sure you are root!
+	cp $(TARBALL) /usr/src/redhat/SOURCES
+	rpm -ba gnet.spec
 
 clean-local:
 	rm -rf debian-temp

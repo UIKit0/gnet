@@ -1,0 +1,7 @@
+.cvsignore
+Makefile
+html
+sgml
+gnet-decl-list.txt
+gnet-decl.txt
+gnet-unused.txt

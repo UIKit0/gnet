@@ -1,3 +1,9 @@
+
+Thu Jan 20 12:23:38 2000  David A Helder  <dhelder@umich.edu>
+
+	* doc/.cvsignore, debian/.cvsignore: Added
+	* Makefile.am: Cleaned up and Added RPMs to copyweb rule.
+
 Thu Jan 20 12:05:36 2000  David A Helder  <dhelder@umich.edu>
 
 	* HACKING: Updated "How to check out GNet anonymously"
