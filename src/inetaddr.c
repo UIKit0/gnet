@@ -20,9 +20,6 @@
 #include "gnet-private.h"
 #include "inetaddr.h"
 
-#include <config.h>
-
-
 
 
 /* **************************************** */
