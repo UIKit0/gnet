@@ -1,3 +1,8 @@
+Sun Oct  5 14:29:03 2003  David Helder  <dhelder@umich.edu>
+
+	* README (Features): Added Mail Notify, Sussen.  Remove Gabber,
+	   Ximian Red Carpet
+
 Sat Oct 4 2003 Andrew Lanoix <alanoix@umich.edu>
 
 	* src/gnet-private.h: Define SOCKET as guint for non-windows platforms,

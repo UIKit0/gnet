@@ -133,10 +133,6 @@ eDonkey2000 GTK frontend
   eDonkey2000 (DFS) frontend
   http://ed2k-gtk-gui.sourceforge.net
 
-Gabber			
-  instant messaging and chat
-  http://gabber.sourceforge.net
-
 Gnome Chinese Checkers
   board game
   http://gchch.sourceforge.net/
@@ -149,8 +145,13 @@ Jungle Monkey
   distributed file sharing program
   http://www.junglemonkey.net
 
-MSI <http://msi.sourceforge.net> 
+Mail Notify
+  mail notification applet
+  http://www.nongnu.org/mailnotify/
+
+MSI 
   multi-simulation interface
+  http://msi.sourceforge.net>
 
 PAN
   Gnome newsreader
@@ -160,7 +161,6 @@ PreViking
   telephony middleware
   http://www.bellworldwide.net/previking/
 
-Ximian Gnome Installer and Red Carpet
-  software package management
-  http://www.ximian.com
-
+Sussen
+  network scanner
+  http://sussen.sourceforge.net/
