@@ -1290,7 +1290,7 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   ia->name = g_strdup(hostname);
   ia->ref_count = 1;
 
-  sa_in = (struct sockaddr_in*) &ia->sa;	  /* FIX (Andy) */
+  sa_in = (struct sockaddr_in*) &ia->sa;	  /* WINFIX */
   sa_in->sin_family = AF_INET;
   sa_in->sin_port = g_htons(port);
 
@@ -2778,6 +2778,9 @@ gnet_inetaddr_get_host_addr (void)
 
 /* **************************************** */
 
+static GInetAddr* autodetect_internet_interface_ipv4 (void);
+static GInetAddr* autodetect_internet_interface_ipv6 (void);
+
 
 /**
  *  gnet_inetaddr_autodetect_internet_interface
@@ -2794,31 +2797,89 @@ gnet_inetaddr_get_host_addr (void)
 GInetAddr* 
 gnet_inetaddr_autodetect_internet_interface (void)
 {
-  GInetAddr* jm_addr;
+  GInetAddr* iface = NULL;
+  GIPv6Policy policy;
+  policy = gnet_ipv6_get_policy();
+  switch (policy)
+    {
+    case GIPV6_POLICY_IPV4_THEN_IPV6:
+      {
+	iface = autodetect_internet_interface_ipv4();
+	if (iface) break;
+	iface = autodetect_internet_interface_ipv6();
+	break;
+      }
+    case GIPV6_POLICY_IPV6_THEN_IPV4:
+      {
+	iface = autodetect_internet_interface_ipv6();
+	if (iface) break;
+	iface = autodetect_internet_interface_ipv4();
+	break;
+      }
+    case GIPV6_POLICY_IPV4_ONLY:
+      {
+	iface = autodetect_internet_interface_ipv4();
+	break;
+      }
+    case GIPV6_POLICY_IPV6_ONLY:
+      {
+	iface = autodetect_internet_interface_ipv6();
+	break;
+      }
+    }
+
+  /* If that didn't work, return the first Internet interface. */
+  if (!iface)
+    iface = gnet_inetaddr_get_internet_interface ();
+
+  return iface;
+}
+
+
+static GInetAddr* 
+autodetect_internet_interface_ipv4 (void)
+{
+  GInetAddr* ia;
   GInetAddr* iface;
 
   /* First try to get the interface with a route to
-     junglemonkey.net (141.213.11.1).  This uses the connected UDP
+     junglemonkey.net (141.213.11.223).  This uses the connected UDP
      socket method described by Stevens.  It does not work on all
      systems.  (see Stevens UNPv1 pp 231-3) */
-  jm_addr = gnet_inetaddr_new_nonblock ("141.213.11.1", 0);
-  g_assert (jm_addr);
+  ia = gnet_inetaddr_new_nonblock ("141.213.11.223", 0);
+  g_assert (ia);
 
-  iface = gnet_inetaddr_get_interface_to (jm_addr);
-  gnet_inetaddr_delete (jm_addr);
+  iface = gnet_inetaddr_get_interface_to (ia);
+  gnet_inetaddr_delete (ia);
 
   /* We want an internet interface */
   if (iface && gnet_inetaddr_is_internet(iface))
     return iface;
   gnet_inetaddr_delete (iface);
 
-  /* FIX: IPv6 version */
+  return NULL;
+}
 
-  /* Try getting an internet interface from the list via
-     SIOCGIFCONF. (see Stevens UNPv1 pp 428-) */
-  iface = gnet_inetaddr_get_internet_interface ();
 
-  return iface;
+static GInetAddr* 
+autodetect_internet_interface_ipv6 (void)
+{
+  GInetAddr* ia;
+  GInetAddr* iface;
+
+  /* Try IPv6 using kame.net's address */
+  ia = gnet_inetaddr_new_nonblock("3FFE:501:4819:2000:210:F3FF:FE03:4D0", 0);
+  g_assert (ia);
+
+  iface = gnet_inetaddr_get_interface_to (ia);
+  gnet_inetaddr_delete (ia);
+
+  /* We want an internet interface */
+  if (iface && gnet_inetaddr_is_internet(iface))
+    return iface;
+  gnet_inetaddr_delete (iface);
+
+  return NULL;
 }
 
 
@@ -2876,30 +2937,33 @@ gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr)
 /**
  *  gnet_inetaddr_get_internet_interface
  *
- *  Find an Internet interface.  This just calls
- *  gnet_inetinetaddr_list_interfaces() and returns the first one that
- *  passes gnet_inetaddr_is_internet().  This works well on some
- *  systems, but not so well on others.  We recommend using
- *  gnet_inetaddr_autodetect_internet_interface() to find an Internet
- *  interface since it's more likely to work.
+ *  Finds an internet interface.  This function finds the first
+ *  interface that is an internet address.  IPv6 policy is followed.
  *
- *  Returns: Address of an Internet interface; NULL if there is no
- *  such interface or the system does not support this check.
+ *  This function does not work on some systems.  We recommend using
+ *  gnet_inetaddr_autodetect_internet_interface(), which performs
+ *  additional checks.
+ *
+ *  Returns: the address of an internet interface; NULL if no internet
+ *  interfaces or on error.
  *
  **/
 GInetAddr* 
 gnet_inetaddr_get_internet_interface (void)
 {
-  GInetAddr* iface = NULL;
   GList* interfaces;
   GList* i;
+  GInetAddr* ipv4_addr = NULL;
+  GInetAddr* ipv6_addr = NULL;
+  GInetAddr* iface = NULL;
+  GIPv6Policy policy;
 
   /* Get a list of interfaces */
   interfaces = gnet_inetaddr_list_interfaces ();
   if (interfaces == NULL)
     return NULL;
 
-  /* Find the first interface that's an internet interface */
+  /* Find the first IPv4 and IPv6 interfaces */
   for (i = interfaces; i != NULL; i = i->next)
     {
       GInetAddr* ia;
@@ -2908,14 +2972,48 @@ gnet_inetaddr_get_internet_interface (void)
 
       if (gnet_inetaddr_is_internet (ia))
 	{
-	  iface = gnet_inetaddr_clone (ia);
-	  break;
+	  if (ipv4_addr == NULL && gnet_inetaddr_is_ipv4 (ia))
+	    ipv4_addr = ia;
+	  else if (ipv6_addr == NULL && gnet_inetaddr_is_ipv6 (ia))
+	    ipv6_addr = ia;
 	}
     }
 
-  /* If we didn't find one, return the first interface. */
-  if (iface == NULL)
-    iface = gnet_inetaddr_clone ((GInetAddr*) interfaces->data);
+  /* Choose one based on policy */
+  policy = gnet_ipv6_get_policy();
+  switch (policy)
+    {
+    case GIPV6_POLICY_IPV4_THEN_IPV6:
+      {
+	if (ipv4_addr)
+	  iface = ipv4_addr;
+	else
+	  iface = ipv6_addr;
+	break;
+      }
+    case GIPV6_POLICY_IPV6_THEN_IPV4:
+      {
+	if (ipv6_addr)
+	  iface = ipv6_addr;
+	else
+	  iface = ipv4_addr;
+	break;
+      }
+    case GIPV6_POLICY_IPV4_ONLY:
+      {
+	iface = ipv4_addr;
+	break;
+      }
+    case GIPV6_POLICY_IPV6_ONLY:
+      {
+	iface = ipv6_addr;
+	break;
+      }
+    }
+
+  /* Copy the interface */
+  if (iface != NULL)
+    iface = gnet_inetaddr_clone (iface);
 
   /* Delete the interface list */
   for (i = interfaces; i != NULL; i = i->next)
@@ -2926,18 +3024,14 @@ gnet_inetaddr_get_internet_interface (void)
 }
 
 
-
-
-
-/* FIX : hostname */
 /**
  *  gnet_inetaddr_is_internet_domainname:
- *  @hostname: name
+ *  @name: name
  *
- *  Checks if a domain name is a sensible internet domain name.  This
- *  function uses heuristics and does not use DNS (or even block).
+ *  Checks if a name is a sensible internet domain name.  This
+ *  function uses heuristics. It does not use DNS and will not block.
  *  For example, "localhost" and "10.10.23.42" are not sensible
- *  Internet domain names.  (10.10.23.42 is a network address, but not
+ *  internet domain names.  (10.10.23.42 is a network address, but not
  *  accessible to the internet at large.)
  *
  *  Returns: TRUE if @name is a sensible Internet domain name; FALSE
@@ -2945,27 +3039,27 @@ gnet_inetaddr_get_internet_interface (void)
  *
  **/
 gboolean
-gnet_inetaddr_is_internet_domainname (const gchar* hostname)
+gnet_inetaddr_is_internet_domainname (const gchar* name)
 {
   GInetAddr* addr;
 
-  g_return_val_if_fail (hostname, FALSE);
+  g_return_val_if_fail (name, FALSE);
 
   /* The name can't be localhost or localhost.localdomain */
-  if (!strcmp(hostname, "localhost") || 
-      !strcmp(hostname, "localhost.localdomain"))
+  if (!strcmp(name, "localhost") || 
+      !strcmp(name, "localhost.localdomain"))
     {
       return FALSE;
     }
 
   /* The name must have a dot in it */
-  if (!strchr(hostname, '.'))
+  if (!strchr(name, '.'))
     {
       return FALSE;
     }
 	
   /* If it's dotted decimal, make sure it's valid */
-  addr = gnet_inetaddr_new_nonblock (hostname, 0);
+  addr = gnet_inetaddr_new_nonblock (name, 0);
   if (addr)
     {
       gboolean rv;
@@ -2989,14 +3083,16 @@ gnet_inetaddr_is_internet_domainname (const gchar* hostname)
 #ifndef GNET_WIN32		/* Unix specific version */
 
 /**
- *  gnet_inetaddr_list_interfaces:
+ *  gnet_inetaddr_list_interfaces
  *
- *  Get a list of #GInetAddr interfaces's on this host.  This list
+ *  Gets a list of #GInetAddr interfaces's on this host.  This list
  *  includes all "up" Internet interfaces and the loopback interface,
  *  if it exists.
  *
  *  Note that the Windows version supports a maximum of 10 interfaces.
  *  In Windows NT, Service Pack 4 (or higher) is required.
+ *
+ *  This function may not work on some systems.
  *
  *  Returns: A list of #GInetAddr's representing available interfaces.
  *  The caller should delete the list and the addresses.
@@ -3132,8 +3228,6 @@ gnet_inetaddr_list_interfaces (void)
       if (ifr->ifr_addr.sa_family != AF_INET &&
 	  ifr->ifr_addr.sa_family != AF_INET6 )
 	continue;
-
-      /* FIX: Skip colons in name?  Can happen if aliases, maybe. */
 
       /* Save the address - the next call will clobber it */
       memcpy(&addr, &ifr->ifr_addr, sizeof(addr));

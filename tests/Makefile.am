@@ -2,9 +2,9 @@
 
 @SET_MAKE@
 
-TESTS = hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test
-EXTRA_PROGRAMS = $(TESTS)
-CLEANFILES = $(TESTS)
+TESTS = hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test $(NETWORK_TESTS)
+EXTRA_PROGRAMS = hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test
+CLEANFILES = $(EXTRA_PROGRAMS) .client*out .server*out
 
 INCLUDES = -I$(top_srcdir)/src $(GLIB_CFLAGS)
 LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS)

@@ -31,7 +31,6 @@ gboolean do_reverse = FALSE;
 gboolean do_async = FALSE;
 gboolean do_single = FALSE;
 
-int    verbose = 1;
 gint   num_runs = 1;
 gint   runs_done = 0;
 
@@ -103,7 +102,6 @@ main(int argc, char** argv)
     {
       int i;
 
-      g_print ("Using blocking DNS\n");
       for (i = 0; i < num_runs; ++i)
 	{
 	  if (do_single)
@@ -116,8 +114,6 @@ main(int argc, char** argv)
     {
       int i;
       GMainLoop* main_loop = NULL;
-
-      g_print ("Using asynchronous DNS\n");
 
       main_loop = g_main_new(FALSE);
 
@@ -147,10 +143,10 @@ lookup_block_single (int run)
   GInetAddr* ia;
   gchar* name;
 
-  ia = gnet_inetaddr_new(host, PORT);
+  ia = gnet_inetaddr_new (host, PORT);
   if (ia == NULL)
     {
-      g_print ("DNS lookup for %s failed\n", host);
+      fprintf (stderr, "DNS lookup for %s failed\n", host);
       exit (EXIT_FAILURE);
     }
 
@@ -160,11 +156,9 @@ lookup_block_single (int run)
     name = gnet_inetaddr_get_name(ia);
   else
     name = gnet_inetaddr_get_canonical_name(ia);
-
   g_assert (name != NULL);
 
-  if (verbose)
-    g_print ("%d: %s -> %s\n", run, host, name);
+  g_print ("%d: %s -> %s\n", run, host, name);
 
   g_free (name);
 
@@ -201,8 +195,7 @@ lookup_block_list (int run)
 
       g_assert (name != NULL);
 
-      if (verbose)
-	g_print ("%d: %s -> %s\n", run, host, name);
+      g_print ("%d: %s -> %s\n", run, host, name);
 
       g_free (name);
       gnet_inetaddr_delete (ia);
@@ -240,14 +233,13 @@ inetaddr_cb(GInetAddr* ia, gpointer data)
 	  exit (EXIT_FAILURE);
 	}
 
-      if (verbose)
-	g_print ("%d: %s -> %s\n", i, host, cname);
+      g_print ("%d: %s -> %s\n", i, host, cname);
 
       g_free (cname);
     }
 
-  else if (verbose)
-    g_print("%d: DNS lookup failed\n", i);
+  else
+    g_print ("%d: DNS lookup failed\n", i);
 
   runs_done++;
 
@@ -285,16 +277,15 @@ list_cb(GList* ialist, gpointer data)
 	  cname = gnet_inetaddr_get_canonical_name(ia);
 	  g_assert (cname);
 
-	  if (verbose)
-	    g_print ("%d: %s -> %s\n", run, host, cname);
+	  g_print ("%d: %s -> %s\n", run, host, cname);
 
 	  g_free (cname);
 	  gnet_inetaddr_delete (ia);
 	}
     }
 
-  else if (verbose)
-    g_print("%d: DNS lookup failed\n", run);
+  else
+    g_print ("%d: DNS lookup failed\n", run);
 
   runs_done++;
 
@@ -315,8 +306,7 @@ lookup_async_reverse (int run)
   ia = gnet_inetaddr_new(host, 0);
   if (ia == NULL)
     {
-      if (verbose)
-	g_print ("DNS lookup for %s failed\n", host);
+      g_print ("DNS lookup for %s failed\n", host);
       exit (EXIT_FAILURE);
     }
 
@@ -345,13 +335,12 @@ reverse_inetaddr_cb (gchar* name, gpointer data)
 	  exit (EXIT_FAILURE);
 	}
 
-      if (verbose)
-	g_print ("%d: %s -> %s (reverse)\n", rs->num, cname, name);
+      g_print ("%d: %s -> %s (reverse)\n", rs->num, cname, name);
 
       g_free(cname);
     }
-  else if (verbose)
-    g_print("%d: error\n", rs->num);
+  else
+    g_print ("%d: error\n", rs->num);
 
   gnet_inetaddr_delete (rs->ia);
   g_free (rs);

@@ -92,7 +92,7 @@ GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
 GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr);
 GInetAddr* gnet_inetaddr_get_internet_interface (void);
 
-gboolean   gnet_inetaddr_is_internet_domainname (const gchar* hostname);
+gboolean   gnet_inetaddr_is_internet_domainname (const gchar* name);
 
 GList*     gnet_inetaddr_list_interfaces (void);
 

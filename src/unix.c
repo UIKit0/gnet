@@ -54,7 +54,7 @@ gnet_unix_socket_new (const gchar* path)
   }
   memcpy(sa_un->sun_path, path, strlen(path));
   sa_un->sun_family = AF_UNIX;
-  if (connect(s->sockfd, &s->sa, sizeof(s->sa)) != 0) {
+  if (connect(s->sockfd, (struct sockaddr*) &s->sa, sizeof(s->sa)) != 0) {
     g_free(s);
     return NULL;
   }
@@ -212,12 +212,12 @@ gnet_unix_socket_server_new (const gchar *path)
   if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
     goto error;
 
-  if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
+  if (bind(s->sockfd, (struct sockaddr*) &s->sa, sizeof(s->sa)) != 0)
     goto error;
 
   n = sizeof(s->sa);
-  /* Get the socket name FIXME: why? */
-  if (getsockname(s->sockfd, &s->sa, &n) != 0)
+  /* Get the socket name FIXME (why? -DAH) */
+  if (getsockname(s->sockfd, (struct sockaddr*) &s->sa, &n) != 0)
     goto error;
 
   if (listen(s->sockfd, 10) != 0)

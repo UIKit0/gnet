@@ -4,13 +4,27 @@ SUBDIRS = src examples tests doc
 
 @SET_MAKE@
 
-EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
-	README.win32 GNET.DSP config.h.win32 gnet.def gnet.m4 \
-	gnet.spec gnet.spec.in gnet.pc.in \
-	examples/makefile.mingw src/makefile.mingw \
-	src/gnet-private.h src/socks-private.h \
-	src/usagi_ifaddrs.h tests/makefile.mingw
-
+EXTRA_DIST= 					\
+	TODO 					\
+	HACKING 				\
+	BUGS   					\
+	README.macosx  				\
+	gnetconfig.h.in 			\
+	README.win32  				\
+	GNET.DSP  				\
+	config.h.win32  			\
+	gnet.def  				\
+	gnet.m4 				\
+	gnet.spec  				\
+	gnet.spec.in 				\
+	gnet.pc.in 				\
+	examples/makefile.mingw 		\
+	src/makefile.mingw 			\
+	src/gnet-private.h  			\
+	src/socks-private.h 			\
+	src/usagi_ifaddrs.h  			\
+	tests/makefile.mingw			\
+	tests/client_server_test.pl
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet.m4

@@ -1,3 +1,29 @@
+Tue Feb  4 19:48:35 2003  David Helder  <dhelder@umich.edu>
+
+	* doc/Makefile.am (dist-hook): Don't require gtk-doc to make
+	   dist.  Otherwise we need to write our own custom dist
+	   rule in the main Makefile.
+
+	* tests/Makefile.am: Add $(NETWORK_TESTS)
+	* configure.ac: Add --enable-network-tests flag
+	* autogen.sh: network tests enabled by default via autogen.sh
+
+	* src/conn.c: Add asserts for conn->func on functions
+	    that use callbacks.
+
+	* examples/hostinfo.c (main): Autodetect interface check.
+
+	* src/inetaddr.c (gnet_inetaddr_get_internet_interface): 
+	    Use policy.  Do not return a non-internet inteface,
+	    when there no internet interface.  (We did this before,
+	    but this did not match the docs).
+
+	* src/inetaddr.c (gnet_inetaddr_autodetect_internet_interface): 
+	    IPv6-ize.
+
+	* src/gnet-private.h (struct _GUnixSocket): Use sockaddr_un.
+	* src/unix.c (gnet_unix_socket_server_new): Add some casts.
+
 Tue Feb  4 15:20:46 2003  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): Use INETADDR

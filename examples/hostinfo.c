@@ -27,37 +27,44 @@
 int
 main(int argc, char** argv)
 {
-
+  GInetAddr* ia;
+  GInetAddr* autoia;
   GList* interfaces;
   GList* i;
-  GInetAddr* ia;
-  gchar* cname;
-  gchar* name;
 
   gnet_init ();
 
   /* Print info about me */
   ia = gnet_inetaddr_get_host_addr();
-  g_assert (ia != NULL);
+  if (ia != NULL)
+    {
+      gchar* cname;
+      gchar* name;
 
-  name = gnet_inetaddr_get_name(ia);
-  g_assert (name != NULL);
-  cname = gnet_inetaddr_get_canonical_name(ia);
-  g_assert (cname != NULL);
+      name = gnet_inetaddr_get_name(ia);
+      if (!name)
+	name = g_strdup ("<none>");
+      cname = gnet_inetaddr_get_canonical_name(ia);
+      g_assert (cname != NULL);
 
-  g_print ("hostname is %s (%s)\n", name, cname);
-  gnet_inetaddr_delete (ia);
-  g_free(name);
-  g_free(cname);
-
+      g_print ("Host name is %s (%s)\n", name, cname);
+      gnet_inetaddr_delete (ia);
+      g_free(name);
+      g_free(cname);
+    }
+  else
+    g_print ("Host name is <none> (<none>)\n");
 
   /* Print interfaces */
-  g_print ("interfaces:\n");
+  g_print ("Interfaces:\n");
 
   interfaces = gnet_inetaddr_list_interfaces();
 
   for (i = interfaces; i != NULL; i = g_list_next(i))
     {
+      gchar* name;
+      gchar* cname;
+
       ia = (GInetAddr*) i->data;
       g_assert (ia != NULL);
 
@@ -74,6 +81,31 @@ main(int argc, char** argv)
 
   g_list_free(interfaces);
 
+  autoia = gnet_inetaddr_get_internet_interface();
+  g_print ("Internet inteface: ");
+  if (autoia)
+    {
+      gchar* cname;
+
+      cname = gnet_inetaddr_get_canonical_name (autoia);
+      g_print ("%s\n", cname);
+      g_free (cname);
+    }
+  else
+    g_print ("<none>\n");
+
+  autoia = gnet_inetaddr_autodetect_internet_interface();
+  g_print ("Auto-detected internet inteface: ");
+  if (autoia)
+    {
+      gchar* cname;
+
+      cname = gnet_inetaddr_get_canonical_name (autoia);
+      g_print ("%s\n", cname);
+      g_free (cname);
+    }
+  else
+    g_print ("<none>\n");
 
   exit(EXIT_SUCCESS);
 }

@@ -12,6 +12,7 @@ my $testfile = 'testfile';
 
 my @pids = ();
 
+my $failed = 0;
 
 
 $| = 1;
@@ -23,7 +24,7 @@ system ("rm -f .client* .server* core*");
 if ($#ARGV == 2)
 {
     test ($ARGV[0], $ARGV[1], $ARGV[2]);
-    exit 0;
+    exit $failed;
 }
 elsif ($#ARGV != -1)
 {
@@ -83,7 +84,7 @@ test ("echoserver-udp",     "echoclient-udp", 2);
 test ("echoserver-udp",     "echoclient-udp", 16);
 test ("echoserver-udp",     "echoclient-udp", 32);
 
-exit 0;
+exit $failed;
 
 
 ########################################
@@ -163,13 +164,13 @@ sub test
 
     if ($fail)
     {
-	print "FAIL$fail_reason";
+	print "FAIL$fail_reason\n";
+	$failed = 1;
     }
     else
     {
-	print "PASS";
+	print "PASS\n";
     }
-    print "\n";
 
     return $fail;
 }

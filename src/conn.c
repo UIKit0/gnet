@@ -322,6 +322,7 @@ void
 gnet_conn_connect (GConn* conn)
 {
   g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
 
   /* Ignore if connected or connection pending */
   if (conn->connect_id || conn->new_id || conn->socket)
@@ -565,11 +566,8 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 
   if (condition & G_IO_OUT)
     {
-      /* FIX: check readable */
-
       ref_internal (conn);
 
-      /* Upcall */
       /* Upcall */
       if (conn->watch_writable)		/* WRITABLE */
 	{
@@ -617,6 +615,9 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 void
 gnet_conn_read (GConn* conn)
 {
+  g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
+
   conn_read_full (conn, 0);
 }
 
@@ -635,6 +636,8 @@ gnet_conn_read (GConn* conn)
 void
 gnet_conn_readn (GConn* conn, gint n)
 {
+  g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
   g_return_if_fail (n > 0);
 
   conn_read_full (conn, n);
@@ -658,6 +661,9 @@ gnet_conn_readn (GConn* conn, gint n)
 void
 gnet_conn_readline (GConn* conn)
 {
+  g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
+
   conn_read_full (conn, -1);
 }
 
@@ -685,21 +691,6 @@ conn_read_full (GConn* conn, gint mode)
 
   /* Check the read queue */
   conn_check_read_queue (conn);
-
-  /* FIX: The problem is conn_check_read_queue() gets in a call to the
-     conn_func in a call to read_async_cb.  conn_check_read_queue()
-     thinks it can read something and schedules a
-     process_buffer_timeout.  This is bogus because that data is about
-     to be processed by read_async_cb.
-     
-     Probably need another flag to signify we are in this callback and
-     to not do anything.  Checking ref_count_internal > 0 doesn't
-     work.  write_async_cb() sets this too and we may want to schedule
-     process_buffer_timeout during
-     write_async_cb->conn_func->read_full call sequence.
-
-  */
-
 }
 
 
@@ -1105,6 +1096,7 @@ gnet_conn_write (GConn* conn, gchar* buffer, gint length)
   Write* write;
 
   g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
 
   /* Add to queue */
   write = g_new0 (Write, 1);
@@ -1210,6 +1202,7 @@ void
 gnet_conn_set_watch_readable (GConn* conn, gboolean enable)
 {
   g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
 
   conn->watch_readable = enable;
   if (enable)
@@ -1234,7 +1227,7 @@ void
 gnet_conn_set_watch_writable (GConn* conn, gboolean enable)
 {
   g_return_if_fail (conn);
-
+  g_return_if_fail (conn->func);
 
   conn->watch_writable = enable;
   if (enable)
@@ -1262,6 +1255,7 @@ void
 gnet_conn_timeout (GConn* conn, guint timeout)
 {
   g_return_if_fail (conn);
+  g_return_if_fail (conn->func);
 
   if (conn->timer)
     {

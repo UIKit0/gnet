@@ -189,7 +189,7 @@ struct _GUnixSocket
   gint sockfd;
   guint ref_count;
   GIOChannel *iochannel;
-  struct sockaddr sa;	/* FIX?  sockaddr_un? */
+  struct sockaddr_un sa;
 
   gboolean server;
 };
@@ -304,8 +304,6 @@ typedef struct _GTcpSocketAsyncState
 #ifdef GNET_WIN32
   gint 			 errorcode;
 #endif
-  /* FIX: Add in_callback */
-
 } GTcpSocketAsyncState;
 
 #ifdef GNET_WIN32

@@ -957,7 +957,7 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
   if (bind(sockfd, &GNET_SOCKADDR_SA(sa), GNET_SOCKADDR_LEN(sa)) != 0)
     goto error;
   
-  /* Get the socket name */		/* FIX? */
+  /* Get the socket name */
   socklen = GNET_SOCKADDR_LEN(sa);
   if (getsockname(sockfd, &GNET_SOCKADDR_SA(sa), &socklen) != 0)
     goto error;

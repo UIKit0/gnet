@@ -525,10 +525,10 @@ be used to automatically configure peer-to-peer applications.
 
 </para>
 
-@hostname: 
+@name: 
 @Returns: 
 <!-- # Unused Parameters # -->
-@name: 
+@hostname: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_list_interfaces ##### -->

@@ -82,6 +82,20 @@ AC_SUBST(GNET_DEBUG_FLAGS)
 AC_MSG_RESULT($enable_debug)
 
 
+# Network tests
+AC_MSG_CHECKING([network tests])
+AC_ARG_ENABLE(network_tests, 
+	      AC_HELP_STRING([--enable-network-tests],
+			     [enable tests that use the network]),
+	      ,
+              [enable_network_tests=no])
+if test "x${enable_network_tests}" = "xyes"; then
+   NETWORK_TESTS="client_server_test.pl"
+   AC_SUBST(NETWORK_TESTS)
+fi
+AC_MSG_RESULT($enable_network_tests)
+
+
 ###############################
 # Check for programs
 AC_PROG_CC
