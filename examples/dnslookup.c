@@ -282,7 +282,6 @@ list_cb(GList* ialist, gpointer data)
 	  g_free (cname);
 	  gnet_inetaddr_delete (ia);
 	}
-
       g_list_free (ialist);
     }
 

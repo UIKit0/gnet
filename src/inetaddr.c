@@ -325,6 +325,9 @@ ialist_free (GList* ialist)
 {
   GList* i;
 
+  if (!ialist)
+    return;
+
   for (i = ialist; i != NULL; i = i->next)
     g_free ((GInetAddr*) i->data);
   g_list_free (ialist);
@@ -924,13 +927,13 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
 		bufp += size;
 	      }
 	    *bufp = '\0';
+	    ialist_free (ialist);
 
 	    /* Write buffer */
 	    rv = writen (outfd, buf, buflen);
 	    if (rv != buflen)
 	      g_warning ("Error writing to pipe: %s\n", 
 			 g_strerror(errno));
-	    ialist_free (ialist);
 	    close (outfd);
 	  }
 	else
@@ -1230,8 +1233,9 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 	  /* Make callback (callee owns list) */
 	  state->in_callback = TRUE;
 	  (*state->func)(state->ias, state->data);
+	  state->ias = NULL;
 	  state->in_callback = FALSE;
-	  gnet_inetaddr_new_async_cancel (state);
+	  gnet_inetaddr_new_list_async_cancel (state);
 	  return FALSE;
 	}
       /* otherwise, there was an error.  we shouldn't read 0 - we'll
@@ -1242,7 +1246,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
   state->in_callback = TRUE;
   (*state->func)(NULL, state->data);
   state->in_callback = FALSE;
-  gnet_inetaddr_new_async_cancel(state);
+  gnet_inetaddr_new_list_async_cancel(state);
   return FALSE;
 }
 
@@ -1690,13 +1694,13 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
 
     /* Fork to do the look up. */
   fork_again:
+    errno = 0;
     if ((pid = fork()) == 0)
       {
 	int outfd = pipes[1];
 	gchar* name;
 	guchar len;
 	
-
 	close (pipes[0]);
 
 	if (inetaddr->name)
@@ -1725,11 +1729,13 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
 	  }
 	else
 	  {
-	    gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-	    guchar* p = (guchar*) &(GNET_SOCKADDR_IN(inetaddr->sa).sin_addr);
+	    char buffer[INET6_ADDRSTRLEN];
+	    const char* rv;
 
-	    g_snprintf(buffer, sizeof(buffer), 
-		       "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
+	    rv = inet_ntop(GNET_INETADDR_FAMILY(inetaddr), 
+			   GNET_INETADDR_ADDRP(inetaddr),
+			   buffer, sizeof(buffer));
+	    g_assert (rv);
 	    len = strlen(buffer);
 
 	    if ((write(outfd, &len, sizeof(len)) == -1) ||
@@ -1966,6 +1972,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
 	  /* Remove the watch now in case we don't return immediately */
 	  g_source_remove (state->watch);
+	  state->watch = 0;
 
 	  /* Call back */
 	  state->in_callback = TRUE;
@@ -1989,7 +1996,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
 
 void
-gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
+gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
 
@@ -1999,9 +2006,8 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
     return;
 
   gnet_inetaddr_delete (state->ia);
-  g_source_remove (state->watch);
-  g_io_channel_unref (state->iochannel);
-
+  if (state->watch)
+    g_source_remove (state->watch);
   close (state->fd);
   kill (state->pid, SIGKILL);
   waitpid (state->pid, NULL, 0);

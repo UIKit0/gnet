@@ -215,7 +215,6 @@ sub good_dns_lookup
 	return \@res;
     }
 
-
     my $resolver = Net::DNS::Resolver->new;
     my $query = $resolver->search($hostname, $type);
     if ($query) 
@@ -254,7 +253,7 @@ sub gnet_dns_lookup
     $num = 0;
     $num = 23 if ($args =~ /-n/);
 
-    my @lines = `$dnslookup $args $hostname 2>1`;
+    my @lines = `$dnslookup $args $hostname`;
     return undef if $?;
 
     foreach my $line (@lines)

@@ -163,7 +163,7 @@ gnet_socks_get_version (void)
     version = socks_version;
   else
     {
-      gchar* env;
+      const gchar* env;
 
       /* Use environment variable */
       env = g_getenv("SOCKS_VERSION");

@@ -1,3 +1,26 @@
+Thu Feb 13 16:24:22 2003  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): Delete
+	    using new_list_async_cancel, not new_async_cancel.  Bug!
+
+	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): Don't
+	    delete the ias after callback.  They are callee owned.
+	    This fixes a bug.
+
+	* src/inetaddr.c (gnet_inetaddr_new_list_async): Move ialist_free
+   	    up.  (shouldn't matter)
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async_cancel): Remove
+	    watch only if set (we can remove it above).
+	* src/inetaddr.c (gnet_inetaddr_get_name_async_cb): Set
+	    watch to 0 afer it is removed.  This avoids gettting a
+	    warning maybe.
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): IPv6-ize fork()
+	    version.
+
+	* src/socks.c (gnet_socks_get_version): Make env const.
+
 Wed Feb 12 15:53:44 2003  David Helder  <dhelder@umich.edu>
 
 	* tests/dns_test.pl: Add.
