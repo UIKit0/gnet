@@ -271,6 +271,7 @@ AC_OUTPUT([
 	doc/Makefile 
 	debian/rules
 	debian/control
+	config-win32.h
 	gnet.spec ],
     [chmod +x gnet-config debian/rules
 ])

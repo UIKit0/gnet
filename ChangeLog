@@ -1,3 +1,8 @@
+Wed Sep 27 01:01:49 2000  David Helder  <dhelder@umich.edu>
+
+	* *: First pass at merging in Andy's Win32 port.  Compiles in
+	  Unix, but untested in Unix and Windows.
+
 Tue Apr 11 16:59:11 2000  David Helder  <dhelder@umich.edu>
 
 	* *: Release 1.0.3

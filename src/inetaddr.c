@@ -23,43 +23,6 @@
 #include <config.h>
 
 
-static gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel, 
-					    GIOCondition condition, 
-					    gpointer data);
-
-typedef struct _GInetAddrAsyncState 
-{
-  GInetAddr* ia;
-  GInetAddrNewAsyncFunc func;
-  gpointer data;
-  pid_t pid;
-  int fd;
-  guint watch;
-  guchar buffer[16];
-  int len;
-
-} GInetAddrAsyncState;
-
-
-
-static gboolean gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
-						 GIOCondition condition, 
-						 gpointer data);
-
-typedef struct _GInetAddrReverseAsyncState 
-{
-  GInetAddr* ia;
-  GInetAddrGetNameAsyncFunc func;
-  gpointer data;
-  pid_t pid;
-  int fd;
-  guint watch;
-  guchar buffer[256 + 1];	/* I think a domain name can only be 256 characters... */
-  int len;
-
-} GInetAddrReverseAsyncState;
-
-
 /* **************************************** */
 
 static gboolean gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicename);
@@ -202,6 +165,30 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
       }
   }
 #else
+#ifdef G_OS_WIN32
+  {
+    struct hostent *result;
+
+    WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
+    result = gethostbyname(hostname);
+
+    if (result != NULL)
+      {
+	if (sa)
+	  {
+	    sa->sin_family = result->h_addrtype;
+	    memcpy(&sa->sin_addr, result->h_addr_list[0], result->h_length);
+	  }
+	
+	if (nicename && result->h_name)
+	  *nicename = g_strdup(result->h_name);
+
+	ReleaseMutex(gnet_hostent_Mutex);
+	rv = TRUE;
+   
+      }
+  }
+#else
   {
     struct hostent* he;
 
@@ -220,6 +207,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 	rv = TRUE;
       }
   }
+#endif
 #endif
 #endif
 #endif
@@ -321,6 +309,17 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
       rv = g_strdup(he->h_name);
   }
 #else
+#ifdef G_OS_WIN32
+  {
+    struct hostent* he;
+
+    WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
+    he = gethostbyaddr(addr, length, type);
+    if (he != NULL && he->h_name != NULL)
+      rv = g_strdup(he->h_name);
+    ReleaseMutex(gnet_hostent_Mutex);
+  }
+#else
   {
     struct hostent* he;
 
@@ -328,6 +327,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }
+#endif
 #endif
 #endif
 #endif
@@ -411,6 +411,8 @@ gnet_inetaddr_new(const gchar* name, const gint port)
 }
 
 
+#ifndef G_OS_WIN  /*********** Unix code ***********/
+
 
 /**
  *  gnet_inetaddr_new_async:
@@ -425,18 +427,21 @@ gnet_inetaddr_new(const gchar* name, const gint port)
  *  callback before the function returns.  It will call the callback
  *  if there is a failure.
  *
- *  This is EXPERIMENTAL.  It is based on forking, which can cause
- *  some problems.  In general, this will work ok for most programs
- *  most of the time.  It will be slow or even fail when using
- *  operating systems that copy the entire process when forking.
+ *  The Unix version forks and does the lookup, which can cause some
+ *  problems.  In general, this will work ok for most programs most of
+ *  the time.  It will be slow or even fail when using operating
+ *  systems that copy the entire process when forking.
  *
- *  If you need to lookup a lot of addresses, I recommend calling
+ *  If you need to lookup a lot of addresses, we recommend calling
  *  g_main_iteration(FALSE) between calls.  This will help prevent an
  *  explosion of processes.
  *
- *  If you need a more robust library, look at <ulink
+ *  If you need a more robust library for Unix, look at <ulink
  *  url="http://www.gnu.org/software/adns/adns.html">GNU ADNS</ulink>.
  *  GNU ADNS is under the GNU GPL.
+ *
+ *  The Windows version should work fine.  Windows has an asynchronous
+ *  DNS lookup function.
  *
  *  Returns: ID of the lookup which can be used with
  *  gnet_inetaddr_new_async_cancel() to cancel it; NULL on immediate
@@ -565,7 +570,7 @@ gnet_inetaddr_new_async(const gchar* name, const gint port,
 
 
 
-static gboolean 
+gboolean 
 gnet_inetaddr_new_async_cb (GIOChannel* iochannel, 
 			    GIOCondition condition, 
 			    gpointer data)
@@ -649,6 +654,127 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
 
   g_free(state);
 }
+
+
+#else	/*********** Windows code ***********/
+
+
+GInetAddrNewAsyncID
+gnet_inetaddr_new_async(const gchar* name, const gint port,
+			GInetAddrNewAsyncFunc func, gpointer data)
+{
+
+	struct in_addr inaddr;
+	GInetAddr* ia;
+  struct sockaddr_in* sa_in;
+  GInetAddrAsyncState* state;
+
+  g_return_val_if_fail(name != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
+
+  /* Try to read the name as if were dotted decimal */
+
+	inaddr.s_addr = inet_addr(name);
+  if (inaddr.s_addr != INADDR_NONE)
+  {
+      GInetAddr* ia = NULL;
+      struct sockaddr_in* sa_in;
+
+      ia = g_new0(GInetAddr, 1);
+      ia->ref_count = 1;
+
+      sa_in = (struct sockaddr_in*) &ia->sa;
+      sa_in->sin_family = AF_INET;
+      sa_in->sin_port = g_htons(port);
+      memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
+
+      (*func)(ia, GINETADDR_ASYNC_STATUS_OK, data);
+      return NULL;
+    }
+	
+  /* Create a new InetAddr */
+  ia = g_new0(GInetAddr, 1);
+  ia->name = g_strdup(name);
+  ia->ref_count = 1;
+
+	sa_in = (struct sockaddr_in*) &ia->sa;
+  sa_in->sin_family = AF_INET;
+  sa_in->sin_port = g_htons(port);
+
+	/* Create a structure for the call back */
+  state = g_new0(GInetAddrAsyncState, 1);
+  state->ia = ia;
+  state->func = func;
+  state->data = data;
+
+	state->WSAhandle = (int) WSAAsyncGetHostByName(
+			gnet_hWnd, IA_NEW_MSG, name, state->hostentBuffer, sizeof(state->hostentBuffer));
+
+	if (!state->WSAhandle)
+	{
+		g_free(state);
+		(*func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, data);
+    return NULL;
+	}
+
+	/*get a lock and insert the state into the hash */
+	WaitForSingleObject(gnet_Mutex, INFINITE);
+	g_hash_table_insert(gnet_hash, (gpointer)state->WSAhandle, (gpointer)state);
+	ReleaseMutex(gnet_Mutex);
+
+	return state;
+}
+
+gboolean
+gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
+			    GIOCondition condition,
+			    gpointer data)
+{
+
+	GInetAddrAsyncState* state = (GInetAddrAsyncState*) data;
+	struct hostent *result;
+	struct sockaddr_in *sa_in;
+
+	if (state->errorcode)
+	{
+		(*state->func)(state->ia, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+		g_free(state);
+		return FALSE;
+	}
+
+	result = (struct hostent*)state->hostentBuffer;
+
+	sa_in = (struct sockaddr_in*) &state->ia->sa;
+	memcpy(&sa_in->sin_addr, result->h_addr_list[0], result->h_length);
+
+	state->ia->name = g_strdup(result->h_name);
+
+	(*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
+	g_free(state);
+
+	return FALSE;
+}
+
+
+gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
+{
+  GInetAddrAsyncState* state = (GInetAddrAsyncState*) id;
+
+	g_return_if_fail(state != NULL);
+
+  gnet_inetaddr_delete (state->ia);
+	WSACancelAsyncRequest((HANDLE)state->WSAhandle);
+
+	/*get a lock and remove the hash entry */
+	WaitForSingleObject(gnet_Mutex, INFINITE);
+	g_hash_table_remove(gnet_hash, (gpointer)state->WSAhandle);
+	ReleaseMutex(gnet_Mutex);
+	g_free(state);
+}
+
+
+#endif		/*********** End Windows code ***********/
+
 
 
 
@@ -767,6 +893,8 @@ gnet_inetaddr_get_name(GInetAddr* ia)
 }
 
 
+#ifndef G_OS_WIN  /*********** Unix code ***********/
+
 
 /**
  *  gnet_inetaddr_get_name_async:
@@ -779,8 +907,9 @@ gnet_inetaddr_get_name(GInetAddr* ia)
  *  It may even call the callback before it returns.  The callback
  *  will be called if there is an error.
  *
- *  This is EXPERIMENTAL.  It uses the same mechanism as
- *  gnet_inetaddr_new_async() - see the notes for that function.
+ *  The Unix version forks and does the reverse lookup.  This has
+ *  problems.  See the notes for gnet_inetaddr_new_async().  The
+ *  Windows version should work fine.
  *
  *  Returns: ID of the lookup which can be used with
  *  gnet_inetaddrr_get_name_async_cancel() to cancel it; NULL on
@@ -908,7 +1037,7 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
 
 
 
-static gboolean 
+gboolean 
 gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
 				 GIOCondition condition, 
 				 gpointer data)
@@ -986,6 +1115,106 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 
   g_free(state);
 }
+
+
+#else	/*********** Windows code ***********/
+
+
+GInetAddrGetNameAsyncID
+gnet_inetaddr_get_name_async(GInetAddr* ia,
+			     GInetAddrGetNameAsyncFunc func,
+			     gpointer data)
+{
+
+  GInetAddrReverseAsyncState* state;
+  struct sockaddr_in* sa_in;
+
+  g_return_val_if_fail(ia != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
+
+  /* If we already know the name, just copy that */
+  if (ia->name != NULL)
+    {
+      (func)(ia, GINETADDR_ASYNC_STATUS_OK, g_strdup(ia->name), data);
+    }
+
+  /* Create a structure for the call back */
+  state = g_new0(GInetAddrReverseAsyncState, 1);
+  state->ia = ia;
+  state->func = func;
+  state->data = data;
+
+  sa_in = (struct sockaddr_in*)&ia->sa;
+	
+  state->WSAhandle = (int) WSAAsyncGetHostByAddr(gnet_hWnd, GET_NAME_MSG,
+						 (const char*)&sa_in->sin_addr,
+						 (int) (sizeof(&sa_in->sin_addr)),
+						 (int)&sa_in->sin_family,
+						 state->hostentBuffer,
+						 sizeof(state->hostentBuffer));
+
+  if (!state->WSAhandle)
+    {
+      g_free(state);
+      (func)(ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, data);
+      return NULL;
+    }
+	
+  /*get a lock and insert the state into the hash */
+  WaitForSingleObject(gnet_Mutex, INFINITE);
+  g_hash_table_insert(gnet_hash, (gpointer)state->WSAhandle, (gpointer)state);
+  ReleaseMutex(gnet_Mutex);
+
+  return state;
+}
+
+gboolean
+gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
+				 GIOCondition condition,
+				 gpointer data)
+{
+  GInetAddrReverseAsyncState* state;
+  gchar* name;
+  struct hostent* result;
+  state = (GInetAddrReverseAsyncState*) data;
+
+
+  result = (struct hostent*)state->hostentBuffer;
+
+  if (state->errorcode)
+    {
+      (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, state->data);
+      return FALSE;
+    }
+
+  state->ia->name = g_strdup(result->h_name);
+  name = NULL;
+  name = g_strdup(state->ia->name);
+
+  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, name, state->data);
+
+  g_free(state);
+  return FALSE;
+}
+
+
+void
+gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
+{
+  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
+
+  g_return_if_fail(state != NULL);
+
+  gnet_inetaddr_delete (state->ia);
+  WSACancelAsyncRequest((HANDLE)state->WSAhandle);
+  /*get a lock and remove the hash entry */
+  WaitForSingleObject(gnet_Mutex, INFINITE);
+  g_hash_table_remove(gnet_hash, (gpointer)state->WSAhandle);
+  ReleaseMutex(gnet_Mutex);
+  g_free(state);
+}
+
+#endif		/*********** End Windows code ***********/
 
 
 
@@ -1135,6 +1364,7 @@ gnet_inetaddr_noport_equal(const gpointer p1, const gpointer p2)
 
 /* **************************************** */
 
+#ifndef G_OS_WIN  /*********** Unix code ***********/
 
 /**
  *  gnet_inetaddr_gethostname:
@@ -1148,8 +1378,8 @@ gnet_inetaddr_noport_equal(const gpointer p1, const gpointer p2)
 gchar*
 gnet_inetaddr_gethostname(void)
 {
-  struct utsname myname;
   gchar* name = NULL;
+  struct utsname myname;
 
   if (uname(&myname) < 0)
     return NULL;
@@ -1159,6 +1389,29 @@ gnet_inetaddr_gethostname(void)
 
   return name;
 }
+
+
+#else	/*********** Windows code ***********/
+/* (Windows doesn't have uname */
+
+gchar*
+gnet_inetaddr_gethostname(void)
+{
+  gchar* name = NULL;
+  int error = 0;
+
+  name = g_new0(char, 256);
+  error = gethostname(name, 256);
+  if (error)
+    {
+      g_free(name);
+      return NULL;
+    }
+
+  return name;
+}
+
+#endif		/*********** End Windows code ***********/
 
 
 /**

@@ -10,6 +10,7 @@ David Helder 	   <dhelder@umich.edu>		    Original version, Deb's
 Xavier Nicolovici  <nicolovi@club-internet.fr>      FTP protocol, gnet.spec.in
 Soeren Sandmann	   <sandmann@daimi.au.dk>	    HP-UX portability fixes
 Jacques Fortier    <jfortier@seul.org>		    gnet_iochannel_readline_strdup()
+Andrew Lanoix      <alanoix@umich.edu>		    Win32 port
 
 
 Credits

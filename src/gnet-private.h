@@ -25,9 +25,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <sys/types.h>
+#include <errno.h>
+#include <signal.h>
+#include <fcntl.h>
+
+/* **************************************** */
+#ifndef G_OS_WIN32		/* Unix specific include */
+
+#include <unistd.h>
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
@@ -40,10 +47,6 @@
 
 #include <sys/utsname.h>
 #include <sys/wait.h>
-#include <signal.h>
-
-#include <errno.h>
-#include <fcntl.h>
 
 #include <net/if.h>
 #include <netinet/in.h>
@@ -53,13 +56,33 @@
 #include <resolv.h>
 #include <netdb.h>
 
-#include <glib.h>
-#include "gnet.h"
-
-
 #ifndef socklen_t
 #define socklen_t size_t
 #endif
+
+#define GNET_CLOSE_SOCKET(SOCKFD) close(SOCKFD)
+#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
+
+/* **************************************** */
+#else	/* Windows specific includes */
+
+#include "config-win32.h"
+#include <windows.h>
+#include <winbase.h>
+#include <winuser.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#define socklen_t gint32	/* Windows doesn't like size_t */
+
+#define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
+#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_win32_new_stream_socket(SOCKFD)
+
+#endif	/* end Window */
+/* **************************************** */
+
+#include <glib.h>
+#include "gnet.h"
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16
@@ -73,7 +96,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 
 /**
@@ -118,6 +140,139 @@ struct _GInetAddr
 };
 
 
+/* **************************************** */
+/* Async functions			*/
+
+gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel, 
+				     GIOCondition condition, 
+				     gpointer data);
+
+typedef struct _GInetAddrAsyncState 
+{
+  GInetAddr* ia;
+  GInetAddrNewAsyncFunc func;
+  gpointer data;
+#ifndef G_OS_WIN32
+  pid_t pid;
+  int fd;
+  guint watch;
+  guchar buffer[16];
+  int len;
+#else
+  int WSAhandle;
+  char hostentBuffer[MAXGETHOSTSTRUCT];
+  int errorcode;
+#endif
+
+} GInetAddrAsyncState;
+
+
+
+gboolean gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
+					  GIOCondition condition, 
+					  gpointer data);
+
+typedef struct _GInetAddrReverseAsyncState 
+{
+  GInetAddr* ia;
+  GInetAddrGetNameAsyncFunc func;
+  gpointer data;
+#ifndef G_OS_WIN32
+  pid_t pid;
+  int fd;
+  guint watch;
+  guchar buffer[256 + 1];/* I think a domain name can only be 256 characters... */
+  int len;
+#else
+  int WSAhandle;
+  char hostentBuffer[MAXGETHOSTSTRUCT];
+  int errorcode;
+#endif
+
+} GInetAddrReverseAsyncState;
+
+
+gboolean gnet_tcp_socket_new_async_cb (GIOChannel* iochannel, 
+				       GIOCondition condition, 
+				       gpointer data);
+
+typedef struct _GTcpSocketAsyncState 
+{
+  GTcpSocket* socket;
+  GTcpSocketNewAsyncFunc func;
+  gpointer data;
+  gint flags;
+  guint connect_watch;
+#ifdef G_OS_WIN32
+  gint errorcode;
+#endif
+
+} GTcpSocketAsyncState;
+
+
+void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
+					 GInetAddrAsyncStatus status, 
+					 gpointer data);
+
+void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
+				    GTcpSocketConnectAsyncStatus status, 
+				    gpointer data);
+
+typedef struct _GTcpSocketConnectState 
+{
+  GInetAddr* ia;
+  GTcpSocketConnectAsyncFunc func;
+  gpointer data;
+
+  gpointer inetaddr_id;
+  gpointer tcp_id;
+
+} GTcpSocketConnectState;
+
+
+/* **************************************** 	*/
+/* More Windows specific stuff 			*/
+
+#ifdef G_OS_WIN32
+
+extern WNDCLASSEX gnetWndClass;
+extern HWND  gnet_hWnd; 
+extern guint gnet_io_watch_ID;
+extern GIOChannel *gnet_iochannel;
+	
+extern GHashTable *gnet_hash;
+extern GHashTable *gnet_select_hash; /* gnet_tcp_socket_new_async needs its own hash */
+extern HANDLE gnet_Mutex; 
+extern HANDLE gnet_select_Mutex;
+extern HANDLE gnet_hostent_Mutex;
+	
+#define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
+#define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
+#define TCP_SOCK_MSG 102	/* gnet_tcp_socket_new_async  */
+
+/* Windows does not have inet_aton, but it does have inet_addr.  TODO:
+   We should write a better inet_aton because inet_addr doesn't catch
+   255.255.255.255 properly. */
+
+static int
+inet_aton(const char *cp, struct in_addr *inp)
+{
+  inp->s_addr = inet_addr(cp);
+  if (inp->s_addr == INADDR_NONE)
+    return 0;
+  return 1;
+}
+
+
+#endif
+
+
+
+/* ************************************************************ */
+
+/* Private/Experimental functions */
+
+
 GInetAddr* gnet_private_inetaddr_sockaddr_new(const struct sockaddr sa);
 
 struct sockaddr gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia);
@@ -130,6 +285,8 @@ GList* gnet_private_inetaddr_list_interfaces(void);
    need to get the name of the interface of the socket) */
 
 /*gint gnet_udp_socket_get_MTU(GUdpSocket* us);*/
+
+
 
 
 #ifdef __cplusplus

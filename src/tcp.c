@@ -21,41 +21,6 @@
 #include "tcp.h"
 
 
-static gboolean gnet_tcp_socket_new_async_cb (GIOChannel* iochannel, 
-					      GIOCondition condition, 
-					      gpointer data);
-
-typedef struct _GTcpSocketAsyncState 
-{
-  GTcpSocket* socket;
-  GTcpSocketNewAsyncFunc func;
-  gpointer data;
-  gint flags;
-  guint connect_watch;
-
-} GTcpSocketAsyncState;
-
-
-static void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
-						GInetAddrAsyncStatus status, 
-						gpointer data);
-
-static void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
-					   GTcpSocketConnectAsyncStatus status, 
-					   gpointer data);
-
-typedef struct _GTcpSocketConnectState 
-{
-  GInetAddr* ia;
-  GTcpSocketConnectAsyncFunc func;
-  gpointer data;
-
-  gpointer inetaddr_id;
-  gpointer tcp_id;
-
-} GTcpSocketConnectState;
-
-
 
 /**
  *  gnet_tcp_socket_connect:
@@ -142,7 +107,7 @@ gnet_tcp_socket_connect_async(gchar* hostname, gint port,
 
 
 
-static void
+void
 gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr, 
 				     GInetAddrAsyncStatus status, 
 				     gpointer data)
@@ -168,7 +133,7 @@ gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr,
 }
 
 
-static void 
+void 
 gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
 			       GTcpSocketConnectAsyncStatus status, 
 			       gpointer data)
@@ -255,6 +220,9 @@ gnet_tcp_socket_new(const GInetAddr* addr)
 
   return s;
 }
+
+
+#ifndef G_OS_WIN  /*********** Unix code ***********/
 
 
 /**
@@ -350,7 +318,7 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
 }
 
 
-static gboolean 
+gboolean 
 gnet_tcp_socket_new_async_cb (GIOChannel* iochannel, 
 			      GIOCondition condition, 
 			      gpointer data)
@@ -407,6 +375,114 @@ gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
   g_free (state);
 }
 
+#else	/*********** Windows code ***********/
+
+
+GTcpSocketNewAsyncID
+gnet_tcp_socket_new_async(const GInetAddr* addr,
+			  GTcpSocketNewAsyncFunc func,
+			  gpointer data)
+{
+  gint sockfd;
+  gint status;
+  GTcpSocket* s;
+  struct sockaddr_in* sa_in;
+  GTcpSocketAsyncState* state;
+
+  g_return_val_if_fail(addr != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
+
+  /* Create socket */
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd == INVALID_SOCKET)
+    {
+      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+      return NULL;
+    }
+	
+  /* Note: WSAAsunc automatically sets the socket to noblocking mode */
+  status = WSAAsyncSelect(sockfd, gnet_hWnd, TCP_SOCK_MSG, FD_CONNECT);
+
+  if (status == SOCKET_ERROR)
+    {
+      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+      return NULL;
+    }
+
+  /* Create our structure */
+  s = g_new0(GTcpSocket, 1);
+  s->ref_count = 1;
+  s->sockfd = sockfd;
+
+  /* Set up address and port for connection */
+  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
+  sa_in = (struct sockaddr_in*) &s->sa;
+  sa_in->sin_family = AF_INET;
+
+  status = connect(s->sockfd, &s->sa, sizeof(s->sa));
+  if (status == SOCKET_ERROR) /* Returning an error is ok, unless.. */
+    {
+      status = WSAGetLastError();
+      if (status != WSAEWOULDBLOCK)
+	{
+	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+	  g_free(s);
+	  return NULL;
+	}
+    }
+  /* Wait for the connection */
+  state = g_new0(GTcpSocketAsyncState, 1);
+  state->socket = s;
+  state->func = func;
+  state->data = data;
+  state->socket->sockfd = sockfd;
+
+  WaitForSingleObject(gnet_select_Mutex, INFINITE);
+  /*using sockfd as the key into the 'select' hash */
+  g_hash_table_insert(gnet_select_hash, 
+		      (gpointer) state->socket->sockfd, 
+		      (gpointer) state);
+  ReleaseMutex(gnet_select_Mutex);
+
+  return state;
+}
+
+
+
+gboolean
+gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
+			      GIOCondition condition,
+			      gpointer data)
+{
+  GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
+
+  if (state->errorcode)
+    {
+      (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, 
+		     state->data);
+      g_free(state);
+      return FALSE;
+    }
+
+  (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
+  g_free(state);
+  return FALSE;
+}
+
+
+void
+gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
+{
+  GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
+	
+  /* Cancel event posting on the socket */
+  WSAAsyncSelect(state->socket->sockfd, gnet_hWnd, 0, 0);
+  gnet_tcp_socket_delete(state->socket);
+  g_free (state);
+}
+
+#endif		/*********** End Windows code ***********/
+
 
 
 /**
@@ -458,7 +534,7 @@ gnet_tcp_socket_unref(GTcpSocket* s)
 
   if (s->ref_count == 0)
     {
-      close(s->sockfd);	/* Don't care if this fails... */
+      GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
 
       if (s->iochannel)
 	g_io_channel_unref(s->iochannel);
@@ -496,7 +572,7 @@ gnet_tcp_socket_get_iochannel(GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = g_io_channel_unix_new(socket->sockfd);
+    socket->iochannel = GNET_SOCKET_IOCHANNEL_NEW(socket->sockfd);
   
   g_io_channel_ref (socket->iochannel);
 
@@ -570,8 +646,6 @@ gnet_tcp_socket_server_new(const gint port)
   struct sockaddr_in* sa_in;
   const int on = 1;
   socklen_t socklen;
-  gint flags;
-
 
   /* Create socket */
   s->ref_count = 1;
@@ -588,19 +662,27 @@ gnet_tcp_socket_server_new(const gint port)
   sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
   sa_in->sin_port = g_htons(port);
 
-  /* Set REUSEADDR so we can reuse the port */
-  if (setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
-		     (void*) &on, sizeof(on)) != 0)
-    g_warning("Can't set reuse on tcp socket\n");
+  /* The socket is set to non-blocking mode later in the Windows
+     version.*/
+#ifndef G_OS_WIN32
+  {
+    gint flags;
 
-  /* Get the flags (should all be 0?) */
-  flags = fcntl(s->sockfd, F_GETFL, 0);
-  if (flags == -1)
-    return NULL;
+    /* Set REUSEADDR so we can reuse the port */
+    if (setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
+		   (void*) &on, sizeof(on)) != 0)
+      g_warning("Can't set reuse on tcp socket\n");
 
-  /* Make the socket non-blocking */
-  if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-    return NULL;
+    /* Get the flags (should all be 0?) */
+    flags = fcntl(s->sockfd, F_GETFL, 0);
+    if (flags == -1)
+      return NULL;
+
+    /* Make the socket non-blocking */
+    if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
+      return NULL;
+  }
+#endif
 
   /* Bind */
   if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
@@ -622,6 +704,9 @@ gnet_tcp_socket_server_new(const gint port)
 
   return s;
 }
+
+
+#ifndef G_OS_WIN  /*********** Unix code ***********/
 
 
 /**
@@ -746,3 +831,93 @@ gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket)
 
   return s;
 }
+
+
+#else	/*********** Windows code ***********/
+
+
+GTcpSocket*
+gnet_tcp_socket_server_accept(GTcpSocket* socket)
+{
+  gint sockfd;
+  struct sockaddr sa;
+  gint n;
+  fd_set fdset;
+  GTcpSocket* s;
+  u_long arg;
+
+  g_return_val_if_fail (socket != NULL, NULL);
+
+	
+  FD_ZERO(&fdset);
+  FD_SET((unsigned)socket->sockfd, &fdset);
+
+  if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
+    {
+      return NULL;
+    }
+
+  /* make sure the socket is in blocking mode */
+
+  arg = 0;
+  if(ioctlsocket(socket->sockfd, FIONBIO, &arg))
+    return NULL;
+
+  sockfd = accept(socket->sockfd, &sa, NULL);
+  /* if it fails, looping isn't going to help */
+
+  if (sockfd == INVALID_SOCKET)
+    {
+      return NULL;
+    }
+
+  s = g_new0(GTcpSocket, 1);
+  s->ref_count = 1;
+  s->sockfd = sockfd;
+  memcpy(&s->sa, &sa, sizeof(s->sa));
+
+  return s;
+}
+
+GTcpSocket*
+gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket)
+{
+  gint sockfd;
+  struct sockaddr sa;
+
+  fd_set fdset;
+  GTcpSocket* s;
+  u_long arg;
+
+  g_return_val_if_fail (socket != NULL, NULL);
+  FD_ZERO(&fdset);
+  FD_SET((unsigned)socket->sockfd, &fdset);
+
+  if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
+    {
+      return NULL;
+    }
+  /* make sure the socket is in non-blocking mode */
+
+  arg = 1;
+  if(ioctlsocket(socket->sockfd, FIONBIO, &arg))
+    return NULL;
+
+  sockfd = accept(socket->sockfd, &sa, NULL);
+  /* if it fails, looping isn't going to help */
+
+  if (sockfd == INVALID_SOCKET)
+    {
+      return NULL;
+    }
+
+  s = g_new0(GTcpSocket, 1);
+  s->ref_count = 1;
+  s->sockfd = sockfd;
+  memcpy(&s->sa, &sa, sizeof(s->sa));
+
+  return s;
+}
+
+
+#endif		/*********** End Windows code ***********/

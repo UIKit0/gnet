@@ -121,7 +121,7 @@ gnet_udp_socket_unref(GUdpSocket* s)
 
   if (s->ref_count == 0)
     {
-      close(s->sockfd);	/* Don't care if this fails... */
+      GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
 
       if (s->iochannel)
 	g_io_channel_unref(s->iochannel);
@@ -188,12 +188,16 @@ gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet)
 }
 
 
+#ifndef G_OS_WIN  /*********** Unix code ***********/
+
+
 /**
  *  gnet_udp_socket_has_packet:
  *  @s: #GUdpSocket to check
  *
- *  Test if the socket has a receive packet.  It'd recommended that
- *  you use a #GIOChannel with a read watch instead of this function.
+ *  Test if the socket has a receive packet.  It's strongly
+ *  recommended that you use a #GIOChannel with a read watch instead
+ *  of this function.
  *
  *  Returns: TRUE if there is packet waiting, FALSE otherwise.
  *
@@ -215,6 +219,50 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
 
   return FALSE;
 }
+
+
+#else	/*********** Windows code ***********/
+
+
+gboolean
+gnet_udp_socket_has_packet(const GUdpSocket* s)
+{
+  gint bytes_received;
+  gchar data[1];
+  guint packetlength;
+  gint arg;
+  gint error;
+
+  arg = 1;
+  ioctlsocket(s->sockfd, FIONBIO, &arg); /* set to non-blocking mode */
+
+  packetlength = 1;
+  bytes_received = recvfrom(s->sockfd, (void*) data, packetlength, 
+			    MSG_PEEK, NULL, NULL);
+
+  error = WSAGetLastError();
+
+  arg = 0;
+  ioctlsocket(s->sockfd, FIONBIO, &arg); /* set blocking mode */
+
+  if (bytes_received == SOCKET_ERROR)
+    {
+      if (WSAEMSGSIZE != error)
+	{
+	  return FALSE;
+	}
+      /* else, the buffer was not big enough, which is fine since we
+	 just want to see if a packet is there..*/
+    }
+
+  if (bytes_received)
+    return TRUE;
+
+  return FALSE;
+}
+	
+#endif		/*********** End Windows code ***********/
+
 
 
 /**
@@ -245,7 +293,7 @@ gnet_udp_socket_get_iochannel(GUdpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = g_io_channel_unix_new(socket->sockfd);
+    socket->iochannel = GNET_SOCKET_IOCHANNEL_NEW(socket->sockfd);
   
   g_io_channel_ref (socket->iochannel);
 

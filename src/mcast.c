@@ -171,7 +171,7 @@ gnet_mcast_socket_unref(GMcastSocket* s)
 
   if (s->ref_count == 0)
     {
-      close(s->sockfd);	/* Don't care if this fails... */
+      GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
 
       if (s->iochannel)
 	g_io_channel_unref(s->iochannel);
