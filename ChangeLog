@@ -1,3 +1,12 @@
+Mon Apr  9 17:10:09 2001  David Helder  <dhelder@umich.edu>
+
+	* src/iochannel.c (gnet_io_channel_readn): Bug fix from Wolfgang
+	   Borgert.
+
+Fri Mar 30 11:57:21 2001  David Helder  <dhelder@umich.edu>
+
+	* configure.in: Checking for param.h incorrectly
+
 Tue Mar  6 15:31:13 2001  David Helder  <dhelder@umich.edu>
 
 	* src/iochannel.c (gnet_io_channel_readline_strdup): 

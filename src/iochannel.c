@@ -116,7 +116,7 @@ gnet_io_channel_readn (GIOChannel    *channel,
 
   while (nleft > 0)
     {
-      if ((error = g_io_channel_read(channel, buf, nleft, &nread))
+      if ((error = g_io_channel_read(channel, ptr, nleft, &nread))
 	  !=  G_IO_ERROR_NONE)
 	{
 	  if (error == G_IO_ERROR_AGAIN)
