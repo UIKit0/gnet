@@ -49,7 +49,7 @@ main (int argc, char* argv[])
       policy_str = "GIPV6_POLICY_IPV4_ONLY";
       break;
     case GIPV6_POLICY_IPV6_ONLY:
-      policy_str = "GIPV6_POLICY_IPV6_ONLY"
+      policy_str = "GIPV6_POLICY_IPV6_ONLY";
       break;
     default:
       failed = 1;

@@ -11,3 +11,5 @@ echoclient-socks
 url_test
 urlparse
 uri_test
+ipv6_test
+inetaddr_test

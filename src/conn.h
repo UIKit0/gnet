@@ -90,21 +90,20 @@ typedef gboolean (*GConnFunc)(GConn* conn, GConnStatus status,
 
 struct _GConn
 {
+  /* Public */
   gchar*			hostname;
   gint				port;
-
-  guint				ref_count;
-
-  GTcpSocketConnectAsyncID 	connect_id;
-  GTcpSocketNewAsyncID 		new_id;
 
   GTcpSocket* 			socket;
   GInetAddr*			inetaddr;
   GIOChannel* 			iochannel;
 
-  guint				read_watch;	/* DEPRICATED */
-  guint				write_watch;	/* DEPRICATED */
-  guint				err_watch;	/* DEPRICATED */
+  /* Private */
+  guint				ref_count;
+
+  GTcpSocketConnectAsyncID 	connect_id;
+  GTcpSocketNewAsyncID 		new_id;
+  guint				connect_timeout;
 
   GNetIOChannelWriteAsyncID 	write_id;
   GList*			queued_writes;

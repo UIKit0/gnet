@@ -130,10 +130,16 @@ gnet_gethostbyname(const char* hostname)
     struct addrinfo hints;
     struct addrinfo* res;
     int rv;
+    GIPv6Policy policy;
+
+    policy = gnet_ipv6_get_policy();
 
     memset (&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
-    /*hints.ai_family = AF_INET;*/ 	/* FIX */
+    if (policy == GIPV6_POLICY_IPV4_ONLY)
+      hints.ai_family = AF_INET;
+    else if (policy == GIPV6_POLICY_IPV6_ONLY)
+      hints.ai_family = AF_INET6;
 
     /* If GLIB_MUTEX is not defined, either getaddrinfo() is
        thread-safe, or we don't have mutexes. */
@@ -145,7 +151,9 @@ gnet_gethostbyname(const char* hostname)
     if (rv == 0)
       {
 	struct addrinfo* i;
-
+	GList* ipv4_list = NULL;
+	GList* ipv6_list = NULL;
+	
 	for (i = res; i != NULL; i = i->ai_next)
 	  {
 	    GInetAddr* ia;
@@ -154,7 +162,33 @@ gnet_gethostbyname(const char* hostname)
 	    ia->ref_count = 1;
 	    memcpy (&ia->sa, i->ai_addr, i->ai_addrlen);
 
-	    list = g_list_prepend (list, ia);
+	    if (i->ai_family == PF_INET)
+	      ipv4_list = g_list_prepend (ipv4_list, ia);
+	    else if (i->ai_family == PF_INET6)
+	      ipv6_list = g_list_prepend (ipv6_list, ia);
+	    else
+	      g_free (ia);
+	  }
+
+	if (policy == GIPV6_POLICY_IPV4_ONLY)
+	  {
+	    list = ipv4_list;
+	    g_list_free (ipv6_list);
+	  }
+	else if (policy == GIPV6_POLICY_IPV4_THEN_IPV6)
+	  {
+	    list = g_list_concat (ipv6_list, ipv4_list);
+	    /* list will be reversed below */
+	  }
+	else if (policy == GIPV6_POLICY_IPV6_ONLY)
+	  {
+	    list = ipv6_list;
+	    g_list_free (ipv4_list);
+	  }
+	else if (policy == GIPV6_POLICY_IPV6_THEN_IPV4)
+	  {
+	    list = g_list_concat (ipv4_list, ipv6_list);
+	    /* list will be reversed below */
 	  }
 
 	freeaddrinfo (res);
@@ -293,7 +327,6 @@ ialist_free (GList* ialist)
 
   for (i = ialist; i != NULL; i = i->next)
     g_free ((GInetAddr*) i->data);
-
   g_list_free (ialist);
 }
 

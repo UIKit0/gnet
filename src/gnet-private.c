@@ -22,6 +22,65 @@
 #include "gnet.h"
 
 
+/* 
+
+   Super-function.
+
+   When creating a listening socket, we need to create the appropriate
+   socket and set-up an address for binding.  These operations depend
+   on the particular interface, or on IPv6 policy if there is no interface.
+
+ */
+int
+gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
+{
+  int family;
+  int sockfd;
+
+  if (iface)
+    {
+      family = GNET_INETADDR_FAMILY(iface);
+      memcpy (sa, &iface->sa, sizeof(*sa));
+      GNET_SOCKADDR_PORT(*sa) = g_htons(port);
+    }
+  else
+    {
+      GIPv6Policy ipv6_policy;
+
+      ipv6_policy = gnet_ipv6_get_policy();
+      if (ipv6_policy == GIPV6_POLICY_IPV4_ONLY)	/* IPv4 */
+	{
+	  struct sockaddr_in* sa_in;
+
+	  family = AF_INET;
+
+	  sa_in = (struct sockaddr_in*) sa;
+	  sa_in->sin_family = AF_INET;
+	  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+	  sa_in->sin_port = g_htons(port);
+	}
+      else						/* IPv6 */
+	{
+	  struct sockaddr_in6* sa_in6;
+
+	  family = AF_INET6;
+
+	  sa_in6 = (struct sockaddr_in6*) sa;
+	  sa_in6->sin6_family = AF_INET6;
+	  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
+	  sa_in6->sin6_port = g_htons(port);
+	}
+    }
+
+  sockfd = socket(family, type, 0);
+
+  return sockfd;
+}
+
+
+
+
+
 /**
  * gnet_private_io_channel_new:
  * @sockfd: socket descriptor

@@ -25,16 +25,14 @@
 
 
 
-typedef enum { NORMAL} ServerType;
-
-static void normal_echoserver (gint port);
-
-
 int
 main(int argc, char** argv)
 {
-  ServerType server_type = NORMAL;
   int port = 0;
+  GUdpSocket* server;
+  gchar buffer[1024];
+  gint ttl;
+  gint rv;
 
   gnet_init ();
 
@@ -43,18 +41,39 @@ main(int argc, char** argv)
       g_print ("usage: echoserver-udp <port> \n");
       exit(EXIT_FAILURE);
     }
-
-
   port = atoi(argv[argc - 1]);
 
-  switch (server_type)
+  /* Create the server */
+  server = gnet_udp_socket_new_with_port (port);
+  g_assert (server);
+
+  /* Get the TTL (for fun) */
+  ttl = gnet_udp_socket_get_ttl (server);
+  g_assert (ttl >= -1);
+
+  /* Set the TTL to 64 (the default on many systems) */
+  rv = gnet_udp_socket_set_ttl (server, 64);
+  g_assert (rv == 0);
+
+  ttl = gnet_udp_socket_get_ttl (server);
+  g_assert (ttl == 64);
+
+
+  while (1)
     {
-    case NORMAL:
-      g_print ("Normal echo server running\n");
-      normal_echoserver(port);
-      break;
-    default:
-      g_assert_not_reached();
+      gint bytes_received;
+      gint rv;
+      GInetAddr* addr;
+
+      bytes_received = gnet_udp_socket_receive (server, buffer, sizeof(buffer), 
+						&addr);
+      if (bytes_received == -1)
+	continue;
+
+      rv = gnet_udp_socket_send (server, buffer, bytes_received, addr);
+      g_assert (rv == 0);
+
+      gnet_inetaddr_delete (addr);
     }
 
   return 0;
@@ -62,36 +81,3 @@ main(int argc, char** argv)
 }
 
 
-/* ************************************************************ */
-
-void
-normal_echoserver (gint port)
-{
-  GUdpSocket* server;
-  GUdpPacket* packet;
-  gchar buffer[1024];
-
-  /* Create the server */
-  server = gnet_udp_socket_new_with_port (port);
-  g_assert (server);
-
-  /* Create a packet */
-  packet = gnet_udp_packet_new(buffer, sizeof(buffer));
-  g_assert (packet);
-
-  while (1)
-    {
-      guint n;
-      GUdpPacket* packet_out;
-
-      n = gnet_udp_socket_receive(server, packet);
-      if (n == 0)
-	continue;
-
-      packet_out = gnet_udp_packet_new_with_address (buffer, n, packet->addr);
-      
-      g_assert (gnet_udp_socket_send(server, packet_out) == 0);
-
-      gnet_udp_packet_delete (packet_out);
-    }
-}

@@ -31,7 +31,6 @@
 int
 main(int argc, char** argv)
 {
-  GUdpPacket* packet;
   gchar buf[MAXLINE + 1];
   gint n;
 
@@ -48,42 +47,34 @@ main(int argc, char** argv)
   gnet_init ();
 
   /* Create a multicast socket */
-  ms = gnet_mcast_socket_port_new(9875);
+  ms = gnet_mcast_socket_new_with_port (9875);
   g_assert(ms != NULL);
 
   /* Get address of our group */
-  ia = gnet_inetaddr_new("sap.mcast.net", 9875);
+  ia = gnet_inetaddr_new ("sap.mcast.net", 9875);
   g_assert(ia != NULL);
 
   /* Join the group */
-  rv = gnet_mcast_socket_join_group(ms, ia);
+  rv = gnet_mcast_socket_join_group (ms, ia);
   g_assert(rv == 0);
 
   printf("Joined %s:%d...\n", gnet_inetaddr_get_name(ia), gnet_inetaddr_get_port(ia));
 
   /* Print some information about our multicast socket */
   g_print ("My addresss: %s\n", gnet_inetaddr_gethostname());
-  g_print ("Loopback: %d\n", gnet_mcast_socket_is_loopback(ms));
-  g_print ("TTL: %d\n", 
-	   gnet_udp_socket_get_ttl(gnet_mcast_socket_to_udp_socket(ms)));
-  g_print ("Mcast TTL: %d\n", 
-	   gnet_udp_socket_get_mcast_ttl(gnet_mcast_socket_to_udp_socket(ms)));
-/*    g_print ("MTU: %d\n",  */
-/*  	   gnet_udp_socket_get_MTU(gnet_mcast_socket_to_udp_socket(ms))); */
+  g_print ("Loopback: %d\n", gnet_mcast_socket_is_loopback (ms));
+  g_print ("Mcast TTL: %d\n", gnet_mcast_socket_get_ttl(ms));
 
-  /* Change the loopback */
-  rv = gnet_mcast_socket_set_loopback(ms, 0);
+  /* Turn off loopback */
+  rv = gnet_mcast_socket_set_loopback (ms, 0);
   g_assert (rv == 0);
-
-  /* Create a packet for receiving */
-  packet = gnet_udp_packet_new (buf, MAXLINE);
 
   for(;;)
     {
-      g_print("Waiting for packet...\n");
+      g_print ("Waiting for packet...\n");
 
       /* Receive packet */
-      n = gnet_mcast_socket_receive(ms, packet);
+      n = gnet_mcast_socket_receive (ms, buf, MAXLINE, NULL);
       buf[n] = 0;
 
       sapptr = (struct sap_packet*) buf;
@@ -91,11 +82,11 @@ main(int argc, char** argv)
       n -= 2 * sizeof(guint32);
       if (n <= 0)
 	{
-	  g_warning("SAP packet too small");
+	  g_warning ("SAP packet too small");
 	  continue;
 	}
 
-      g_print("%s\n", sapptr->sap_data);
+      g_print ("%s\n", sapptr->sap_data);
 
     }
 }

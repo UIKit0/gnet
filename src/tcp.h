@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000-3  David Helder
  * Copyright (C) 2000  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
@@ -75,7 +75,6 @@ typedef enum {
 /**
  *   GTcpSocketConnectAsyncFunc:
  *   @socket: TcpSocket that was connecting (callee owned)
- *   @ia: InetAddr of the TcpSocket (callee owned)
  *   @status: Status of the connection
  *   @data: User data
  *   
@@ -83,7 +82,6 @@ typedef enum {
  *
  **/
 typedef void (*GTcpSocketConnectAsyncFunc)(GTcpSocket* socket, 
-					   GInetAddr* ia,
 					   GTcpSocketConnectAsyncStatus status, 
 					   gpointer data);
 

@@ -23,33 +23,68 @@
 #include <glib.h>
 #include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
 
-typedef enum { NORMAL} ClientType;
-
 
 static void usage (int status);
-
-static void normal_echoclient (gchar* hostname, gint port);
 
 
 int
 main(int argc, char** argv)
 {
-  ClientType client_type = NORMAL;
+  gchar* hostname;
+  gint port;
+  GInetAddr* addr = NULL;
+  GUdpSocket* socket = NULL;
+  gint ttl;
+  gint rv;
+  gchar buffer[1024];
+  guint n;
 
   gnet_init ();
 
   if (argc != 3)
-    usage(EXIT_FAILURE);
+    usage (EXIT_FAILURE);
+  hostname = argv[argc-2];
+  port = atoi(argv[argc-1]);
 
-  switch (client_type)
+  /* Create the address */
+  addr = gnet_inetaddr_new (hostname, port);
+  g_assert (addr != NULL);
+
+  /* Create the socket */
+  socket = gnet_udp_socket_new ();
+  g_assert (socket != NULL);
+
+  /* Get the TTL */
+  ttl = gnet_udp_socket_get_ttl (socket);
+  g_assert (ttl >= -1);
+
+  /* Set the TTL to 64 (the default on many systems) */
+  rv = gnet_udp_socket_set_ttl (socket, 64);
+  g_assert (rv == 0);
+
+  /* Make sure that worked */
+  ttl = gnet_udp_socket_get_ttl (socket);
+  g_assert (ttl == 64);
+
+  while (fgets(buffer, sizeof(buffer), stdin) != 0)
     {
-    case NORMAL:
-      g_print ("Normal echo client running\n");
-      normal_echoclient(argv[argc-2], atoi(argv[argc-1]));
-      break;
-    default:
-      g_assert_not_reached();
+      gint rv;
+
+      /* Send packet */
+      n = strlen(buffer);
+      rv = gnet_udp_socket_send (socket, buffer, n, addr);
+      g_assert (rv == 0);
+
+      /* Receive packet */
+      n = gnet_udp_socket_receive (socket, buffer, sizeof(buffer), NULL);
+      if (n == -1) break;
+
+      /* Write out */
+      fwrite (buffer, n, 1, stdout);
     }
+
+  gnet_inetaddr_delete (addr);
+  gnet_udp_socket_delete (socket);
 
   return 0;
 }
@@ -61,54 +96,3 @@ usage (int status)
   g_print ("usage: echoclient-udp <server> <port>\n");
   exit(status);
 }
-
-
-
-/* ************************************************************ */
-
-
-static void
-normal_echoclient(gchar* hostname, gint port)
-{
-  GInetAddr* addr = NULL;
-  GUdpSocket* socket = NULL;
-  gchar buffer[1024];
-  guint n;
-
-  /* Create the address */
-  addr = gnet_inetaddr_new (hostname, port);
-  g_assert (addr != NULL);
-
-  /* Create the socket */
-  socket = gnet_udp_socket_new();
-  g_assert (socket != NULL);
-
-  while (fgets(buffer, sizeof(buffer), stdin) != 0)
-    {
-      GUdpPacket* packet;
-      gint rv;
-
-      /* Create packet */
-      n = strlen(buffer);
-      packet = gnet_udp_packet_new_with_address (buffer, n, addr);
-
-      /* Send packet */
-      rv = gnet_udp_socket_send(socket, packet);
-      g_assert (rv == 0);
-      gnet_udp_packet_delete (packet);
-
-      /* Receive packet */
-      packet = gnet_udp_packet_new (buffer, sizeof(buffer));
-      n = gnet_udp_socket_receive (socket, packet);
-      if (n == 0) break;
-      gnet_inetaddr_delete (packet->addr);
-      gnet_udp_packet_delete (packet);
-
-      /* Write out */
-      fwrite(buffer, n, 1, stdout);
-    }
-
-  gnet_inetaddr_delete (addr);
-  gnet_udp_socket_delete (socket);
-}
-

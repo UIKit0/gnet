@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000-3  David Helder
  * Copyright (C) 2000  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
@@ -40,15 +40,27 @@
 GTcpSocket*
 gnet_tcp_socket_connect (const gchar* hostname, gint port)
 {
-  GInetAddr* ia;
+  GList* ia_list;
+  GList* i;
   GTcpSocket* socket;
 
-  ia = gnet_inetaddr_new(hostname, port);
-  if (ia == NULL)
+  ia_list = gnet_inetaddr_new_list (hostname, port);
+  if (ia_list == NULL)
     return NULL;
 
-  socket = gnet_tcp_socket_new(ia);
-  gnet_inetaddr_delete(ia);
+  socket = NULL;
+  for (i = ia_list; i != NULL; i = i->next)
+    {
+      GInetAddr* ia;
+
+      ia = (GInetAddr*) i->data;
+      socket = gnet_tcp_socket_new (ia);
+      if (socket)
+	break;
+    }
+  for (i = ia_list; i != NULL; i = i->next)
+    gnet_inetaddr_delete ((GInetAddr*) i->data);
+  g_list_free (ia_list);
 
   return socket;
 }
@@ -88,12 +100,12 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
   state->data = data;
 
   state->inetaddr_id = 
-    gnet_inetaddr_new_async (hostname, port,  
-			     gnet_tcp_socket_connect_inetaddr_cb, 
-			     state);
+    gnet_inetaddr_new_list_async (hostname, port,  
+				  gnet_tcp_socket_connect_inetaddr_cb, 
+				  state);
 
-  /* On failure, gnet_inetaddr_new_async() returns NULL.  It will not
-     call the callback before it returns. */
+  /* On failure, gnet_inetaddr_new_list_async() returns NULL.  It will
+     not call the callback before it returns. */
   if (state->inetaddr_id == NULL)
     {
       g_free (state);
@@ -106,36 +118,61 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
 
 
 void
-gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr, 
+gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list,
 				     GInetAddrAsyncStatus status, 
 				     gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
-  if (status == GINETADDR_ASYNC_STATUS_OK)
+  if (status == GINETADDR_ASYNC_STATUS_OK) /* Success */
     {
-      gpointer tcp_id;
+      GList* i;
 
-      state->ia = gnet_inetaddr_clone (inetaddr);
+      g_assert (ia_list);
 
       state->inetaddr_id = NULL;
+      state->ia_list = ia_list;
+      state->ia_next = ia_list;
 
-      tcp_id = gnet_tcp_socket_new_async (inetaddr, 
-					  gnet_tcp_socket_connect_tcp_cb, 
-					  state);
-      gnet_inetaddr_delete (inetaddr);
+      while (state->ia_next != NULL)
+	{
+	  GInetAddr* ia;
+	  gpointer tcp_id;
 
-      /* gnet_tcp_socket_new_async() may call the callback before it
-	 returns.  state may have been deleted. */
-      if (tcp_id)
-	state->tcp_id = tcp_id;
-    }
-  else
-    {
-      (*state->func)(NULL, NULL, 
-		     GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR, 
+	  ia = (GInetAddr*) state->ia_next->data;
+	  state->ia_next = state->ia_next->next;
+
+	  tcp_id = gnet_tcp_socket_new_async (ia, 
+					      gnet_tcp_socket_connect_tcp_cb, 
+					      state);
+	  if (tcp_id)	/* Success */
+	    {
+	      state->tcp_id = tcp_id;
+	      return;
+	    }
+	}
+
+      /* Failure: We could not async connect to any address.
+         In practice, new_async() rarely fails immediately.  */
+      for (i = state->ia_list; i != NULL; i = i->next)
+	gnet_inetaddr_delete ((GInetAddr*) i->data);
+      g_list_free (state->ia_list);
+
+      state->in_callback = TRUE;
+      (*state->func)(NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR, 
 		     state->data);
-      g_free(state);
+      state->in_callback = FALSE;
+
+      gnet_tcp_socket_connect_async_cancel (state);
+    }
+  else /* Failure */
+    {
+      state->in_callback = TRUE;
+      (*state->func)(NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR, 
+		     state->data);
+      state->in_callback = FALSE;
+
+      gnet_tcp_socket_connect_async_cancel (state);
     }
 }
 
@@ -147,19 +184,49 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket,
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
+  g_return_if_fail (state != NULL);
+
+  state->tcp_id = NULL;
+
+  /* Success */
   if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
     {
-      (*state->func)(socket, state->ia, 
-		     GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK, state->data);
-    }
-  else
-    {
-      (*state->func)(NULL, NULL, 
-		     GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR, state->data);
-      gnet_inetaddr_delete (state->ia);
+      state->in_callback = TRUE;
+      (*state->func)(socket, GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK, state->data);
+      state->in_callback = FALSE;
+
+      gnet_tcp_socket_connect_async_cancel (state);
+
+      return;
     }
 
-  g_free (state);
+  /* Failure: Could not connect to address */
+
+  /* Try other addresses */
+  while (state->ia_next != NULL)
+    {
+      GInetAddr* ia;
+      gpointer tcp_id = NULL;
+
+      ia = (GInetAddr*) state->ia_next->data;
+      state->ia_next = state->ia_next->next;
+
+      tcp_id = gnet_tcp_socket_new_async (ia, 
+					  gnet_tcp_socket_connect_tcp_cb, 
+					  state);
+      if (tcp_id)	/* Success */
+	{
+	  state->tcp_id = tcp_id;
+	  return;
+	}
+    }
+
+  /* Failure: No more addresses */
+  state->in_callback = TRUE;
+  (*state->func)(NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR, state->data);
+  state->in_callback = FALSE;
+
+  gnet_tcp_socket_connect_async_cancel (state);
 }
 
 
@@ -178,17 +245,28 @@ gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id)
 
   g_return_if_fail (state != NULL);
 
+  /* Ignore if user called in the middle of a callback */
+  if (state->in_callback)
+    return;
+
+  if (state->ia_list)
+    {
+      GList* i;
+      
+      for (i = state->ia_list; i != NULL; i = i->next)
+	gnet_inetaddr_delete ((GInetAddr*) i->data);
+      g_list_free (state->ia_list);
+    }
+
   if (state->inetaddr_id)
     {
       gnet_inetaddr_new_async_cancel(state->inetaddr_id);
     }
-  else if (state->tcp_id)
+
+  if (state->tcp_id)
     {
-      gnet_inetaddr_delete (state->ia);
       gnet_tcp_socket_new_async_cancel (state->tcp_id);
     }
-  else
-    g_assert_not_reached();
 
   g_free (state);
 }
@@ -701,7 +779,7 @@ gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   ia = g_new0(GInetAddr, 1);
-  memcpy (&ia->sa, &socket->sa, sizeof(socket->sa));
+  memcpy (&ia->sa, &socket->sa, sizeof(ia->sa));
   ia->ref_count = 1;
 
   return ia;
@@ -819,6 +897,8 @@ gnet_tcp_socket_server_new (gint port)
 GTcpSocket* 
 gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
 {
+  int sockfd = 0;
+  struct sockaddr_storage sa;
   GTcpSocket* s;
   socklen_t socklen;
 
@@ -826,53 +906,10 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
   if (!iface && gnet_socks_get_enabled())
     return gnet_private_socks_tcp_socket_server_new (port);
 
-  /* Create socket */
-  s = g_new0(GTcpSocket, 1);
-  s->ref_count = 1;
-
-  /* Set up address and port for connection */
-  if (iface)
-    {
-      s->sockfd = socket(GNET_INETADDR_FAMILY(iface), SOCK_STREAM, 0);
-      if (s->sockfd < 0)
-	goto error;
-      memcpy (&s->sa, &iface->sa, sizeof(s->sa));
-      GNET_SOCKADDR_PORT(s->sa) = g_htons(port);
-    }
-  else
-    {
-      GIPv6Policy ipv6_policy;
-
-      /* FIX: I still don't like this */
-
-      ipv6_policy = gnet_ipv6_get_policy();
-      if (ipv6_policy == GIPV6_POLICY_IPV4_ONLY)	/* IPv4 */
-	{
-	  struct sockaddr_in* sa_in;
-
-	  s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	  if (s->sockfd < 0)
-	    goto error;
-
-	  sa_in = (struct sockaddr_in*) &s->sa;
-	  sa_in->sin_family = AF_INET;
-	  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-	  sa_in->sin_port = g_htons(port);
-	}
-      else						/* IPv6 */
-	{
-	  struct sockaddr_in6* sa_in6;
-
-	  s->sockfd = socket(AF_INET6, SOCK_STREAM, 0);
-	  if (s->sockfd < 0)
-	    goto error;
-
-	  sa_in6 = (struct sockaddr_in6*) &s->sa;
-	  sa_in6->sin6_family = AF_INET6;
-	  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
-	  sa_in6->sin6_port = g_htons(port);
-	}
-    }
+  /* Create sockfd and address */
+  sockfd = gnet_private_create_listen_socket (SOCK_STREAM, iface, port, &sa);
+  if (sockfd < 0)
+    return NULL;
 
   /* The socket is set to non-blocking mode later in the Windows
      version.*/
@@ -881,39 +918,46 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
     gint flags;
     const int on = 1;
     /* Set REUSEADDR so we can reuse the port */
-    if (setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, 
 		   (void*) &on, sizeof(on)) != 0)
       g_warning("Can't set reuse on tcp socket\n");
 
     /* Get the flags (should all be 0?) */
-    flags = fcntl(s->sockfd, F_GETFL, 0);
+    flags = fcntl(sockfd, F_GETFL, 0);
     if (flags == -1)
       goto error;
     
     /* Make the socket non-blocking */
-    if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
+    if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
       goto error;
   }
 #endif
 
   /* Bind */
-  if (bind(s->sockfd, &GNET_SOCKADDR_SA(s->sa), 
-	   GNET_SOCKADDR_LEN(s->sa)) != 0)
+  if (bind(sockfd, &GNET_SOCKADDR_SA(sa), GNET_SOCKADDR_LEN(sa)) != 0)
     goto error;
   
   /* Get the socket name */
-  socklen = GNET_SOCKADDR_LEN(s->sa);
-  if (getsockname(s->sockfd, &GNET_SOCKADDR_SA(s->sa), &socklen) != 0)
+  socklen = GNET_SOCKADDR_LEN(sa);
+  if (getsockname(sockfd, &GNET_SOCKADDR_SA(sa), &socklen) != 0)
     goto error;
   
   /* Listen */
-  if (listen(s->sockfd, 10) != 0)
+  if (listen(sockfd, 10) != 0)
     goto error;
   
+  /* Create TcpSocket */
+  s = g_new0(GTcpSocket, 1);
+  s->sockfd = sockfd;
+  memcpy (&s->sa, &sa, sizeof(sa));
+  s->ref_count = 1;
+
   return s;
   
  error:
-  if (s)    		g_free(s);
+  if (sockfd)    		
+    GNET_CLOSE_SOCKET(sockfd);
+
   return NULL;
 }
 

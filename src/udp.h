@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000, 2002-3  David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -39,26 +39,6 @@ extern "C" {
 typedef struct _GUdpSocket GUdpSocket;
 
 
-/**
- *  GUdpPacket:
- *
- *  GUdpPacket is a simple helper struct.  Its fields are public.  The
- *  fields 'data' and 'addr' must be deallocated by the programmer if
- *  necessary when appropriate.
- *
- **/
-typedef struct _GUdpPacket GUdpPacket;
-struct _GUdpPacket
-{
-  gint8* data;
-  guint length;
-
-  GInetAddr* addr;
-
-};
-
-
-
 
 /* ******************************************** */
 /* UDP socket functions				*/
@@ -67,38 +47,29 @@ GUdpSocket* gnet_udp_socket_new (void);
 GUdpSocket* gnet_udp_socket_new_with_port (gint port);
 GUdpSocket* gnet_udp_socket_new_full (const GInetAddr* iface, gint port);
 
-void gnet_udp_socket_delete (GUdpSocket* s);
+void 	    gnet_udp_socket_delete (GUdpSocket* s);
 
-void gnet_udp_socket_ref (GUdpSocket* s);
-void gnet_udp_socket_unref (GUdpSocket* s);
+void 	    gnet_udp_socket_ref (GUdpSocket* s);
+void 	    gnet_udp_socket_unref (GUdpSocket* s);
+
+GIOChannel* gnet_udp_socket_get_io_channel (GUdpSocket* socket);
 
 
 /* ********** */
 
-gint gnet_udp_socket_send (GUdpSocket* s, const GUdpPacket* packet);
-gint gnet_udp_socket_receive (GUdpSocket* s, GUdpPacket* packet);
+gint 	 gnet_udp_socket_send (GUdpSocket* s, const gint8* data, 
+ 			       guint length, const GInetAddr* dst);
+gint 	 gnet_udp_socket_receive (GUdpSocket* s, gint8* data, 
+				  guint length, GInetAddr** src);
 gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
 
 
 /* ********** */
 
-/* Do not read or write from the iochannel - it's for watches only */
-GIOChannel* gnet_udp_socket_get_io_channel (GUdpSocket* socket);
-
 gint gnet_udp_socket_get_ttl (const GUdpSocket* us);
-gint gnet_udp_socket_set_ttl (GUdpSocket* us, int val);
-
-gint gnet_udp_socket_get_mcast_ttl (const GUdpSocket* us);
-gint gnet_udp_socket_set_mcast_ttl (GUdpSocket* us, gint val);
+gint gnet_udp_socket_set_ttl (GUdpSocket* us, gint val);
 
 
-
-/* ******************************************** */
-/* UDP packet functions 			*/
-
-GUdpPacket* gnet_udp_packet_new (guint8* data, gint length);
-GUdpPacket* gnet_udp_packet_new_with_address (guint8* data, gint length, GInetAddr* addr);
-void        gnet_udp_packet_delete (GUdpPacket* packet);
 
 
 /* GNet 1.1 compatibility functions/macros (DEPRICATED) */

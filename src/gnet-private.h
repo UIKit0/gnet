@@ -126,13 +126,13 @@
                                   sizeof(struct sockaddr_in):\
                                   sizeof(struct sockaddr_in6))
 
-#define GNET_INETADDR_SA(i)     GNET_SOCKADDR_SA(i->sa)
-#define GNET_INETADDR_SA4(i)    GNET_SOCKADDR_SA4(i->sa)
-#define GNET_INETADDR_SA6(i)    GNET_SOCKADDR_SA6(i->sa) 
-#define GNET_INETADDR_FAMILY(i) GNET_SOCKADDR_FAMILY(i->sa)
-#define GNET_INETADDR_ADDRP(i)  GNET_SOCKADDR_ADDRP(i->sa)
-#define GNET_INETADDR_PORT(i)   GNET_SOCKADDR_PORT(i->sa)
-#define GNET_INETADDR_LEN(i)    GNET_SOCKADDR_LEN(i->sa)
+#define GNET_INETADDR_SA(i)     GNET_SOCKADDR_SA((i)->sa)
+#define GNET_INETADDR_SA4(i)    GNET_SOCKADDR_SA4((i)->sa)
+#define GNET_INETADDR_SA6(i)    GNET_SOCKADDR_SA6((i)->sa) 
+#define GNET_INETADDR_FAMILY(i) GNET_SOCKADDR_FAMILY((i)->sa)
+#define GNET_INETADDR_ADDRP(i)  GNET_SOCKADDR_ADDRP((i)->sa)
+#define GNET_INETADDR_PORT(i)   GNET_SOCKADDR_PORT((i)->sa)
+#define GNET_INETADDR_LEN(i)    GNET_SOCKADDR_LEN((i)->sa)
 
 
 #define GNET_ANY_IO_CONDITION   (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
@@ -151,6 +151,7 @@ extern "C" {
    GNet developers.
 
 */
+
 
 
 struct _GUdpSocket
@@ -292,15 +293,16 @@ gboolean gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 
 typedef struct _GTcpSocketAsyncState 
 {
-  GTcpSocket* socket;
+  GTcpSocket* 		 socket;
   GTcpSocketNewAsyncFunc func;
-  gpointer data;
-  gint flags;
-  GIOChannel* iochannel;
-  guint connect_watch;
+  gpointer 		 data;
+  gint 			 flags;
+  GIOChannel* 		 iochannel;
+  guint 		 connect_watch;
 #ifdef GNET_WIN32
-  gint errorcode;
+  gint 			 errorcode;
 #endif
+  /* FIX: Add in_callback */
 
 } GTcpSocketAsyncState;
 
@@ -321,9 +323,9 @@ typedef struct _SocketWatchAsyncState
 } SocketWatchAsyncState;
 #endif
 
-void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
-					 GInetAddrAsyncStatus status, 
-					 gpointer data);
+void gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list,
+					  GInetAddrAsyncStatus status, 
+					  gpointer data);
 
 void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
 				    GTcpSocketConnectAsyncStatus status, 
@@ -331,12 +333,16 @@ void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket,
 
 typedef struct _GTcpSocketConnectState 
 {
-  GInetAddr* ia;
-  GTcpSocketConnectAsyncFunc func;
-  gpointer data;
+  GList* ia_list;
+  GList* ia_next;
 
   gpointer inetaddr_id;
   gpointer tcp_id;
+
+  gboolean in_callback;
+
+  GTcpSocketConnectAsyncFunc func;
+  gpointer data;
 
 } GTcpSocketConnectState;
 
@@ -366,8 +372,9 @@ extern HANDLE gnet_hostent_Mutex;
 
 /* Private/Experimental functions */
 
-
 GIOChannel* gnet_private_io_channel_new (int sockfd);
+
+int gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
 
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
-n
-GNet 1.4
+
+GNet 1.4 (or 2.0)
 
 Please email gnet-dev@gnetlibrary.org with your comments.
 
@@ -13,6 +13,7 @@ API cleanup
 
     Clean UDP API.  The packet stuff is inconsistent for send vs. receive.
 
+
 Experimental changes
 
 - conn/server and iochannel become "normal"
@@ -25,7 +26,7 @@ Docs and examples
 
 - Document iochannel functions.
 
-- Add server example that uses pthreads.
+- Add server example that uses pthreads or gthreads.
 
 
 New features
@@ -38,51 +39,14 @@ New features
     COMPATIBLE: New API
 
 
-- IPv6 support
-
-    Hard.
-
-    Use getaddrinfo() in gnet_gethostbyname() to add IPv6
-    compatibility.  Update GInetAddr and GNet functions
-    accordingly.
-    
-    ISSUE: getaddrinfo() will now do two DNS lookups (A and AAAA),
-    which adds latency.  I don't think this is a major problem.
-    We could add a function that disables IPv6 lookups
-    (gnet_ipv6_{get/set}_enabled).  It would be enabled by
-    default.  Let me know if you want this.
-    
-    BINARY INCOMPATIBLE: GNet will use IPv6 in situations where IPv4
-    was used before. (?)
-
-    TODO:
-	- how should binding work?
-	- fix mcast join
-	- fix everything marked FIX
-
-   - inetaddr_equal - can a ipv4 address equal an ipv6 address?  [No.]
-	[We don't have functions for mapping IPv4 addresses to IPv6.
-	Maybe we want these too.]
-	
-
-    ISSUE: getaddrinfo() returns IPv6 addresses before IPv4
-    addresses.  If gnet_inetaddr_new() uses
-    gnet_inetaddr_new_list(), this may break compatibility.
-
-
-    BINARY INCOMPATIBLE: Will use IPv6 in situations where IPv4
-    was used before.
-
-    references:
-    Basic Socket Interface Extensions for IPv6	
-	ftp://ftp.isi.edu/in-notes/rfc2553.txt
-
+Possible changes
 
 - New Inetaddr functions:
     
     gint 
-    gnet_inetaddr_name_to_port (gchar* service, gchar* proto)	    [Uses getservbyname()]
-    
+    gnet_inetaddr_name_to_port (gchar* service, gchar* proto)	    
+        [Uses getservbyname()]
+
     Maps the service-protocol pair to a port number.  @proto can be
     "tcp", "udp", or NULL.  Usually, the port numbers for the TCP and
     UDP service are identical.  On Unix systems, functionality depends
@@ -90,65 +54,19 @@ New features
     
 
     gchar*    
-    gnet_inetaddr_port_to_name (int port, gchar* proto)		[Uses getservbyport()]
-
-    XXX
-
-    
-
-Possible changes
-
-- Derive TcpSocket/UdpSocket from IOChannel
-
-    There's a one-to-one correspondence between the two.  A socket is
-    a type of IO channel.  It may be easier for new users to learn and
-    use the library if we do this.  It does add a layer of indirection
-    which could hurt performance.
-
-    MOSTLY-COMPATIBLE: socket_get_iochannel would be needed.
-
-    Likewise, derive server and conn from TcpSocket [But a conn may
-	open several sockets.
-	
-
-
-- Differentiate between creating and connecting.  
-
-    So you'd have:
-
-    tcp_socket_new(void)            (this just calls socket())
-    tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
-
-    The advantage is that we could set options and also allow the user
-    to bind to a specific address if the user is on a multi-homed
-    system.
-
-    Or, add tcp_socket_new_bind() and have tcp_socket_new call it.
-    You shouldn't have to bind a connecting socket, so this may not be
-    needed.  (Well, sometimes you do for UDP.)
-
-    GConn does this to an extent, so it may not be necessary.
-
-    SOURCE-CODE INCOMPATIBLE: Easy to update.
-
+    gnet_inetaddr_port_to_name (int port, gchar* proto)		
+        [Uses getservbyport()]
 
 
 ========================================
 DONE
 
-- gnet_unpack semantics change.
+- IPv6 support.  IPv6 policy.
 
-      Unpacking with format code "S" changed.
+- Renamed gnet_udp_{get,set}_mcast_ttl() to gnet_mcast_{get,set}_ttl().
 
-      gnet_unpack ("8S8S", "hello\0\0\0world\0\0\0", s1, s2)
-
-      In GNet 1.1:
-          yielded
-        s1 = "hello\0\0\0"
-	s2 = "\0\0world\0"
-
-      In GNet 1.4, this 
-
+- gnet_udp_socket_get_ttl returns -1 if the kernel default is being
+    used.  Before -1 signified error.  Now < -1 signified error.
 
 - New function: gnet_inetaddr_new_bytes().  Creates a GInetAddr from
     raw bytes.
@@ -213,12 +131,47 @@ DONE
 
 
 
+
 ========================================
 
 NOT DONE
 
-- Move udp_mcast_ttl to mcast?
 
-   No.  UDP sockets can be used to send multicast packets.  UDP
-   sockets are multicast sockets anyway.
+- Derive TcpSocket/UdpSocket from IOChannel
 
+    There's a one-to-one correspondence between the two.  A socket is
+    a type of IO channel.  It may be easier for new users to learn and
+    use the library if we do this.  It does add a layer of indirection
+    which could hurt performance.
+
+    ***REJECTED*** So much of GIOChannel is private that I don't think
+    it can be done easily.
+
+
+
+- Differentiate between creating and connecting.  
+
+    So you'd have:
+
+    tcp_socket_new(void)            (this just calls socket())
+    tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
+
+    The advantage is that we could set options and also allow the user
+    to bind to a specific address if the user is on a multi-homed
+    system.
+
+    Or, add tcp_socket_new_bind() and have tcp_socket_new call it.
+    You shouldn't have to bind a connecting socket, so this may not be
+    needed.  (Well, sometimes you do for UDP.)
+
+    GConn does this to an extent, so it may not be necessary.
+
+    SOURCE-CODE INCOMPATIBLE: Easy to update.
+
+
+    ***REJECTED***: We'd need to know whether the socket is IPv4 or
+    IPv6 (e.g., we'd need tcp_socket_new_ipv4() and
+    tcp_socket_new_ipv6()).  This makes it more complicated.  Or, we'd
+    need to defer socket creation and keep track of what options have
+    been set, which is messy and bug-prone.  Binding a socket for an
+    outgoing connection is rarely needed.

@@ -134,7 +134,7 @@ void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id);
 
 
 GList*     gnet_inetaddr_new_list (const gchar* name, gint port);
-
+void	   gnet_inetaddr_delete_list (GList* ia_list);
 
 GInetAddrNewListAsyncID 
            gnet_inetaddr_new_list_async (const gchar* name, gint port, 

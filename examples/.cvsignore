@@ -16,3 +16,7 @@ echoclient-udp
 echoclient-unix
 echoserver-unix
 hash
+echoclient-async
+echoclient-gconn
+echoserver-async
+echoserver-gserver

@@ -1,3 +1,54 @@
+Thu Jan  9 15:09:16 2003  David Helder  <dhelder@umich.edu>
+
+	* tests/client_server_test.pl, testfile: New echoclient/echoserver tester.
+
+	* examples/echoserver-async.c: Fix bug where we tried to read into
+	   a zero length buffer, read 0, and thought it was an EOF.
+	* examples/echoclient-{async,gconn}.c: If we get an EOF before
+	   we've gotten the lines back, then keep waiting.   This makes
+	   automated testing easier - otherwise we quit too soon.
+	
+	* examples/echoclient,echoserver.c: Break up into more files.
+
+	* src/conn.c: Implement connect timeout.
+
+	* src/tcp.h: Remove inetaddr from GTcpSocketConnectAsyncFunc.
+	    The user can get this from the socket.
+	* src/tcp.c (gnet_tcp_socket_connect, etc...): Use
+	    gnet_inetaddr_new_list().
+	* src/gnet-private.h (_GTcpSocketConnectState ): Add in_callback
+	    flag to guard deletion.
+
+	* src/inetaddr.c (gnet_gethostbyname): Handle ipv6 policy.
+
+	* src/mcast.c (gnet_mcast_socket_get_io_channel): Added.
+
+	* src/mcast.c (gnet_mcast_socket_{get/set}_ttl): Move
+	   from udp.c to here.
+
+	* src/udp.c (gnet_udp_socket_{set/get}_*_ttl): IPv6-ify.
+	* src/udp.c (gnet_udp_socket_get_ttl): Interface change:
+	   -1 means "kernel default".  < -1 means error.
+	* src/udp.c (gnet_udp_socket_get_mcast_ttl): "
+
+	* src/udp.c (gnet_udp_socket_get_ttl): Make ttl an int.
+	
+	* src/udp.c (gnet_udp_socket_set_ttl): Make ttl an gint.
+
+	* src/gnet.c (gnet_init): Use IPv4 before IPv6.  Check
+	GNET_IPV6_POLICY and IPV6_POLICY environment variable.  Create
+	sockets to get policy - don't list interfaces.
+
+	* src/gnet-private.c (gnet_private_create_listen_socket): New
+	    helper function.  Used in tcp and udp.
+
+	* src/udp.c (gnet_udp_socket_send): Change prototype.  Send to
+	dst, not to socket!.
+	* src/udp.c (gnet_udp_socket_receive): "
+	* src/udp.c: Get rid of GUdpPacket.
+	* src/mcast.c: Updates.
+	* examples/echoserver-udp.c (normal_echoserver): Update
+
 Wed Jan  1 17:14:54 2003  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Output clean-ups.

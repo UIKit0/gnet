@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000, 2002-3  David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -43,13 +43,15 @@ typedef struct _GMcastSocket GMcastSocket;
 /* ********** */
 
 GMcastSocket* gnet_mcast_socket_new(void);
-GMcastSocket* gnet_mcast_socket_port_new (gint port);
-GMcastSocket* gnet_mcast_socket_inetaddr_new (const GInetAddr* ia);
+GMcastSocket* gnet_mcast_socket_new_with_port (gint port);
+GMcastSocket* gnet_mcast_socket_new_full (const GInetAddr* ia, gint port);
 
-void gnet_mcast_socket_delete (GMcastSocket* ms);
+void          gnet_mcast_socket_delete (GMcastSocket* ms);
 
-void gnet_mcast_socket_ref (GMcastSocket* s);
-void gnet_mcast_socket_unref (GMcastSocket* s);
+void 	      gnet_mcast_socket_ref (GMcastSocket* s);
+void 	      gnet_mcast_socket_unref (GMcastSocket* s);
+
+GIOChannel*   gnet_mcast_socket_get_io_channel (GMcastSocket* socket);
 
 
 /* ********** */
@@ -57,15 +59,20 @@ void gnet_mcast_socket_unref (GMcastSocket* s);
 gint 	 gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia);
 gint 	 gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia);
 
-gint 	 gnet_mcast_socket_send (GMcastSocket* ms, const GUdpPacket* packet);
-gint 	 gnet_mcast_socket_receive (GMcastSocket* ms, GUdpPacket* packet);
+gint 	 gnet_mcast_socket_get_ttl (const GMcastSocket* us);
+gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* us, gint val);
+
+gint     gnet_mcast_socket_send (GMcastSocket* ms, const gint8* data, 
+				 guint length, const GInetAddr* dst);
+gint     gnet_mcast_socket_receive (GMcastSocket* ms, gint8* data, 
+				    guint length, GInetAddr** src);
 gboolean gnet_mcast_socket_has_packet (const GMcastSocket* s);
 
 
 /* ********** */
 
-gint gnet_mcast_socket_is_loopback (const GMcastSocket* ms);
-gint gnet_mcast_socket_set_loopback (GMcastSocket* ms, gint b);
+gint 	 gnet_mcast_socket_is_loopback (const GMcastSocket* ms);
+gint 	 gnet_mcast_socket_set_loopback (GMcastSocket* ms, gint b);
 
 /* ********** */
 
