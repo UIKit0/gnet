@@ -1,3 +1,25 @@
+2005-02-04  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* AUTHORS:
+	  Fix my e-mail address
+	  
+	* acinclude.m4:
+	* autogen.sh:
+	* configure.ac:
+	  Use GTK_DOC_CHECK macro
+	  
+	* doc/Makefile.am:
+	  Update gtk-doc build magic
+	  
+	* doc/gnet-docs.sgml:
+	  Fix build issue with some jade versions: add xml header, 
+	  change to OASIS/DTD DocBook XML V4.1.2 and fix entities 
+	  and comments accordingly; update copyright to include 2005.
+	
+	* src/mcast.c:
+	  Properly quote arguments to HTML tags in inline docs to fix 
+	  build issues.
+
 2005-02-01  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/base64.c: (gnet_base64_encode):

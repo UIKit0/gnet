@@ -1,4 +1,6 @@
-<!doctype book PUBLIC "-//Davenport//DTD DocBook V3.0//EN" [
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY gnet-gnet SYSTEM "xml/gnet.xml">
 <!ENTITY gnet-inetaddr SYSTEM "xml/inetaddr.xml">
 <!ENTITY gnet-mcast SYSTEM "xml/mcast.xml">
@@ -16,13 +18,13 @@
 <!ENTITY gnet-unix SYSTEM "xml/unix.xml">
 <!ENTITY gnet-ipv6 SYSTEM "xml/ipv6.xml">
 <!ENTITY gnet-base64 SYSTEM "xml/base64.xml">
-<!ENTITY hash     CDATA "#">
-<!ENTITY at       CDATA "@">
-<!ENTITY percent  CDATA "%">
-<!ENTITY parens   CDATA "()">
-<!ENTITY space    CDATA " ">
-<!ENTITY comstart CDATA "/*">
-<!ENTITY comend   CDATA "*/">
+<!ENTITY hash     "#">
+<!ENTITY at       "@">
+<!ENTITY percent  "&percnt;">
+<!ENTITY parens   "()">
+<!ENTITY space    " ">
+<!ENTITY comstart "/*">
+<!ENTITY comend   "*/">
 ]>
 
 <book>
@@ -44,7 +46,7 @@
     </authorgroup>
 
     <copyright>
-      <year>2000-2003</year>
+      <year>2000-2005</year>
       <holder>David Helder</holder>
     </copyright>	
 
@@ -80,7 +82,7 @@
 
   </bookinfo>
 
-  <!-- ---------------------------------------- -->
+  <!-- ******************************************* -->
 
   <chapter id="gnet-overview">
     <title>GNet Overview</title>
@@ -119,7 +121,7 @@
 
   </chapter>
 
-  <!-- ---------------------------------------- -->
+  <!-- ******************************************* -->
 
   <chapter id="gnet-developers">
     <title>GNet for developers</title>
@@ -220,7 +222,7 @@ PKG_CHECK_MODULES(GNET, gnet &gt; 2.0.0,
 
   </chapter>
 
-  <!-- ---------------------------------------- -->
+  <!-- ******************************************* -->
 
   <chapter id="gnet-examples">
     <title>GNet Examples</title>
@@ -322,7 +324,7 @@ PKG_CHECK_MODULES(GNET, gnet &gt; 2.0.0,
 
   </chapter>
 
-  <!-- ---------------------------------------- -->
+  <!-- ******************************************* -->
 
   <chapter id="libgnet-reference">
     <title>GNet Library Reference</title>
@@ -350,6 +352,6 @@ PKG_CHECK_MODULES(GNET, gnet &gt; 2.0.0,
     &gnet-unix;
     &gnet-ipv6;
     &gnet-socks;
-    
+
   </chapter>
 </book>

@@ -335,7 +335,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
  *
  *  <table>
  *    <title>TTL and scope</title>
- *    <tgroup cols=2 align=left>
+ *    <tgroup cols="2" align="left">
  *    <thead>
  *      <row>
  *        <entry>TTL</entry>
