@@ -89,6 +89,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
     Hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
 	pfn_getaddrinfo(NULL, port_buff, &Hints, &AddrInfo);
 	memcpy(sa_in6, AddrInfo->ai_addr, AddrInfo->ai_addrlen);
+	pfn_freeaddrinfo(AddrInfo);
 
   #endif
 	}
