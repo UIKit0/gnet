@@ -35,7 +35,7 @@ extern "C" {
  *
  *  GUdpSocket is a UDP socket.  UDP data transfer is unordered and
  *  unreliable.  Use TCP if your protocol requires data transfered
- *  reliably and in order - most do.
+ *  reliably and in order.  Most do.
  *
  **/
 typedef struct _GUdpSocket GUdpSocket;
@@ -68,8 +68,8 @@ gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
 
 /* ********** */
 
-gint gnet_udp_socket_get_ttl (const GUdpSocket* us);
-gint gnet_udp_socket_set_ttl (GUdpSocket* us, gint val);
+gint 	 gnet_udp_socket_get_ttl (const GUdpSocket* us);
+gint 	 gnet_udp_socket_set_ttl (GUdpSocket* us, gint val);
 
 
 #ifdef __cplusplus

@@ -4,13 +4,10 @@ Base64
 <!-- ##### SECTION Short_Description ##### -->
 Base64 encoding and decoding
 
-
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 <informalexample>
 <programlisting>
-#include &lt;gnet/base64.h&gt;
-
 gchar* binary_stream = "Hello World!";
 gchar* base64_stream;
 gint   base64_len;
@@ -32,12 +29,10 @@ readable. A 65-character subset ([A-Za-z0-9+/=]) of US-ASCII is used,
 enabling 6 bits to be represented per printable character.
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
-
 
 <!-- ##### FUNCTION gnet_base64_encode ##### -->
 <para>

@@ -100,7 +100,7 @@ typedef struct _GConnEvent
  *  @user_data: private
  *
  *  TCP Connection.  This is an easier to use interface than
- *  GTcpSocket.  Some of the fields are public and can be read but
+ *  #GTcpSocket.  Some of the fields are public and can be read but
  *  should not be written to.
  *
  **/

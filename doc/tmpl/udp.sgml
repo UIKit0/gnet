@@ -1,13 +1,44 @@
 <!-- ##### SECTION Title ##### -->
-udp
+UDP
 
 <!-- ##### SECTION Short_Description ##### -->
+UDP socket
 
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-
+This module provides support for UDP sockets.  UDP is an internet
+protocol that transfers packets by best-effort.  Packets may be lost
+or arrive out-of-order.  Use TCP if your protocol requires data
+transfered reliably and in-order -- most do.
 </para>
+
+<para>
+A UDP socket is represented by a #GUDPSocket object.  Call
+gnet_udp_socket_new(), gnet_udp_socket_new_with_port(), or
+gnet_udp_socket_new_full() to create a #GUDPSocket.  None of these
+functions block.
+</para>
+
+<para>
+Packets can be sent by calling gnet_udp_socket_send() and received by
+calling gnet_udp_socket_receive().  gnet_udp_socket_receive() will
+block until there is a packet available to receive.  To determine
+whether a packet is available immediately, call
+gnet_udp_socket_has_packet().  A better method is to get the
+#GIOChannel and add a watch.  The callback will be called when a
+packet is available.  Note that a UDP socket's #GIOChannel is not a
+normal #GIOChannel -- it cannot be written to or read from directly.
+</para>
+
+<para>
+Packets have a time-to-live (TTL) field.  This field is decremented
+before a router forwards the packet.  If the TTL reaches zero, the
+packet is dropped.  The TTL can be set by calling
+gnet_udp_socket_get_ttl().  The default value is sufficient for most
+applications.
+</para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>

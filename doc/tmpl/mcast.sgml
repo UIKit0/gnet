@@ -1,13 +1,31 @@
 <!-- ##### SECTION Title ##### -->
-mcast
+Mcast
 
 <!-- ##### SECTION Short_Description ##### -->
-
+IP Multicast socket
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-
+The Mcast module provides support for IP Multicast sockets.  IP
+Multicast allows you to send one packet to many receivers at once.
+Unfortunately, IP Multicast is not widely available.  IP Multicast is
+built on UDP.
 </para>
+
+<para>
+Create a #GMcastSocket by calling gnet_mcast_socket_new(),
+gnet_mcast_socket_new_with_port(), or gnet_mcast_socket_new_full().
+Then call gnet_mcast_socket_join_group() to join a multicast group.
+The #GMcastSocket object is essentially a #GUdpSocket.  It can be
+safely cast to a #GUdpSocket and the functions in the UDP module can
+be used.
+</para>
+
+<para>
+Use gnet_mcast_socket_set_loopback() to set whether packets sent
+should also be received.  By default.... FIX
+</para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>

@@ -15,6 +15,19 @@ provides functions for creating and manipulating URIs.
 
 </para>
 
+<!-- ##### STRUCT GURI ##### -->
+<para>
+
+</para>
+
+@scheme: 
+@userinfo: 
+@hostname: 
+@port: 
+@path: 
+@query: 
+@fragment: 
+
 <!-- ##### FUNCTION gnet_uri_new ##### -->
 <para>
 

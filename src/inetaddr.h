@@ -224,7 +224,7 @@ gboolean   gnet_inetaddr_is_internet_domainname (const gchar* name);
 
 /* ********** */
 
-GList* gnet_inetaddr_list_interfaces (void);
+GList*     gnet_inetaddr_list_interfaces (void);
 
 
 #ifdef __cplusplus

@@ -1,14 +1,47 @@
 <!-- ##### SECTION Title ##### -->
-GConn
+Connection
 
 <!-- ##### SECTION Short_Description ##### -->
-conn short description
+TCP connection object
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-conn long description
-
+A GConn represents a TCP connection.  GConns are created directly by
+calling gnet_conn_new() or gnet_conn_new_inetaddr().  Call
+gnet_conn_connect() to connect to the host and gnet_conn_disconnect()
+to disconnect.  Alternately, GConns are created by the GServer when a
+client connects.  Call gnet_conn_set_callback() to set the GConn
+callback after it is created by the GServer.  These GConns are already
+connected.  Call gnet_conn_delete() to disconnect and delete the
+GConn.
 </para>
+
+<para>
+The iochannel field and GIOChannel functions can be used to read from
+or write to the socket.  GIOChannel functions block.  For asynchronous
+reads and writes, call gnet_conn_read() and gnet_conn_write().  The
+callback then is called when a read or write completes.  
+</para>
+
+<para>
+Use gnet_conn_set_watch_readable() and gnet_conn_set_watch_writable()
+to get events when the connection is readable or writable.  These can
+be used to implement custom I/O handling.  For example, consider
+writing from a memmap()'ed file.  gnet_conn_write() will allocate
+memory for a buffer and copy part of the file into the buffer.  To
+avoid the copy, use gnet_conn_set_watch_writable() to catch the
+writable event and then write directly from memory to the socket.
+</para>
+
+<para>
+gnet_conn_timeout() sets a timeout on the GConn.  The
+GNET_CONN_TIMEOUT event occurs when the timer expires.  For example,
+the timer may be set before connecting to the host.  If the connection
+is made, the GNET_CONN_CONNECT event occurs. The timer can then be
+reset by setting the timeout to 0.  Otherwise, the GNET_CONN_TIMEOUT
+event will eventually occur.
+</para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>

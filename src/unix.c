@@ -54,7 +54,7 @@ gnet_unix_socket_connect(const gchar *path)
  *
  **/
 GUnixSocket *
-gnet_unix_socket_new(const gchar *path)
+gnet_unix_socket_new (const gchar *path)
 {
   GUnixSocket *s = g_new0(GUnixSocket, 1);
   struct sockaddr_un *sa_un;

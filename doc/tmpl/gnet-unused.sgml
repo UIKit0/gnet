@@ -98,12 +98,6 @@ url
 @GINETADDR_ASYNC_STATUS_OK: 
 @GINETADDR_ASYNC_STATUS_ERROR: 
 
-<!-- ##### MACRO GNET_EXPORT ##### -->
-<para>
-
-</para>
-
-
 <!-- ##### USER_FUNCTION GNetIOChannelReadAsyncCheckFunc ##### -->
 <para>
 

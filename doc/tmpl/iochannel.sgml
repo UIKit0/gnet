@@ -1,12 +1,13 @@
 <!-- ##### SECTION Title ##### -->
-iochannel
+IOChannel
 
 <!-- ##### SECTION Short_Description ##### -->
-
+GIOChannel utility functions
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-
+The IOChannel module provides utility functions for working with
+GIOChannels.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->

@@ -47,6 +47,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * GNET_EXPORT:
+ *
+ * Declares variable exported.  Used interally.
+ *
+ **/
 #ifdef GNET_WIN32
 #  define GNET_EXPORT extern __declspec(dllimport)
 #else

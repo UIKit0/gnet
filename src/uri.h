@@ -28,18 +28,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/* 
-   TODO: 
-
-   Handle base URIs.  (e.g. gnet_new_uri_from_base (base, path).)
-
-   See RFC: http://www.ietf.org/rfc/rfc2396.txt
-
-*/
-
 /**
- *
- *  GURI
+ *  GURI:
  *  @scheme: Scheme (or protocol)
  *  @userinfo: User info
  *  @hostname: Host name
@@ -52,7 +42,9 @@ extern "C" {
  *  structure are publicly readable.
  *
  **/
-typedef struct _GURI
+typedef struct _GURI GURI;
+
+struct _GURI
 {
   gchar* scheme;
   gchar* userinfo;
@@ -62,6 +54,7 @@ typedef struct _GURI
   gchar* query;
   gchar* fragment;
 } GURI;
+
 
 
 GURI*     gnet_uri_new (const gchar* uri);

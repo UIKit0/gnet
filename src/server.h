@@ -33,6 +33,19 @@ extern "C" {
 
 
 
+/**
+ *  GServer
+ *  @iface: Interface address
+ *  @port: Port number
+ *  @socket: TCP server socket
+ *  @func: Callback function
+ *  @user_data: User data for callback function
+ *
+ *  #GServer is a high-level interface to a TCP server socket.  The
+ *  callback is called with a #GConn whenever a new connection is
+ *  made.
+ *
+ **/
 typedef struct _GServer GServer;
 
 
