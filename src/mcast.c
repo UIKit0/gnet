@@ -96,11 +96,13 @@ gnet_mcast_socket_inetaddr_new (const GInetAddr* ia)
   GMcastSocket* ms;
   const int on = 1;
 
+  g_return_val_if_fail (ia != NULL, NULL);
+
   ms = g_new0(GMcastSocket, 1);
 
   /* Create socket */
   ms->ref_count = 1;
-  ms->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  ms->sockfd = socket(GNET_INETADDR_FAMILY(ia), SOCK_DGRAM, 0);
   if (ms->sockfd < 0)
     return NULL;
 

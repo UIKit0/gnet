@@ -90,7 +90,7 @@ struct _GServer
 };
 
 
-GServer*  gnet_server_new (const GInetAddr* iface, gboolean force_port, 
+GServer*  gnet_server_new (const GInetAddr* iface, gint port, 
 			   GServerFunc func, gpointer user_data);
 
 void      gnet_server_delete (GServer* server);

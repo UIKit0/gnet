@@ -76,7 +76,7 @@ main(int argc, char** argv)
   g_assert (rv == 0);
 
   /* Create a packet for receiving */
-  packet = gnet_udp_packet_receive_new(buf, MAXLINE);
+  packet = gnet_udp_packet_new (buf, MAXLINE);
 
   for(;;)
     {

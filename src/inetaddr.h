@@ -145,13 +145,14 @@ void       gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID async_id
 
 GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
 
+GInetAddr* gnet_inetaddr_new_bytes (const guint8* addr, const guint length);
 
 GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
 
 void       gnet_inetaddr_delete (GInetAddr* ia);
 
-void gnet_inetaddr_ref (GInetAddr* ia);
-void gnet_inetaddr_unref (GInetAddr* ia);
+void 	   gnet_inetaddr_ref (GInetAddr* ia);
+void 	   gnet_inetaddr_unref (GInetAddr* ia);
 
 
 /* ********** */
@@ -194,13 +195,17 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 			      GInetAddrGetNameAsyncFunc func,
 			      gpointer data);
 
-void gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID async_id);
+void    gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID async_id);
 
-gchar* gnet_inetaddr_get_canonical_name (const GInetAddr* ia);
 
-gint gnet_inetaddr_get_port (const GInetAddr* ia);
+gchar*  gnet_inetaddr_get_canonical_name (const GInetAddr* ia);
 
-void gnet_inetaddr_set_port (const GInetAddr* ia, guint port);
+gint 	gnet_inetaddr_get_port (const GInetAddr* ia);
+void 	gnet_inetaddr_set_port (const GInetAddr* ia, guint port);
+
+/* FIX: Implement */
+/*  guint8* gnet_inetaddr_get_bytes (const GInetAddr* ia); */
+/*  void    gnet_inetaddr_set_bytes (const GInetAddr* ia, const guint8* addr, const guint length); */
 
 
 /* ********** */

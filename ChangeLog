@@ -1,3 +1,45 @@
+Tue Dec 17 20:25:23 2002  David Helder  <dhelder@umich.edu>
+
+	* src/udp.c (gnet_udp_socket_new_full): Rename.  Was
+	  gnet_udp_socket_new_interface() 
+	* src/udp.c (gnet_udp_socket_new_with_port): Rename.  Was
+	  gnet_udp_socket_port_new()
+	* src/udp.c (gnet_udp_packet_new): Rename.  Was
+	  gnet_udp_packet_receive_new().
+	* src/udp.c (gnet_udp_packet_new_with_address): Rename Was
+	  gnet_udp_packet_send_new().
+	* examples/echo*-udp.c: Updated.  Need to fix packet API.
+	
+	* src/tcp.c (gnet_tcp_socket_server_new_interface): Add port
+	   argument back.  A NULL iface now means INADDR_ANY or
+	   IN6ADDR_ANY_INIT.  Rather than adding two inetaddr constructors
+	   for these, we use IPv6 policy to determine which (or whether
+	   both) should be tried.
+	* src/server.c (gnet_server_new): "
+	* examples/echoserver.c (object_echoserver): "
+	* src/tcp.c (gnet_tcp_socket_server_new_interface): Use IPv6 policy.
+
+	* src/inetaddr.c (gnet_inetaddr_new_bytes): Added
+
+	* src/inetaddr.c (gnet_inetaddr_get_interface_to): Use family when
+	   creating socket.
+	* src/tcp.c (gnet_tcp_socket_new_direct): "
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): "
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): "
+	* src/tcp.c (gnet_tcp_socket_server_new_interface): ".  But, use
+	   IPv4 by default.  TODO: Fix this and use policy.
+
+	* tests/inetaddr_test.c: Added
+	* tests/Makefile.am: "
+
+	* src/inetaddr.c (gnet_inetaddr_is_loopback): Add IPv6 implementation.
+	* src/inetaddr.c (gnet_inetaddr_is_multicast): Use in.h IN_MULTICAST macro.
+	* src/inetaddr.c (gnet_inetaddr_equal): Use IN6_ARE_ADDR_EQUAL macro.
+	* src/inetaddr.c (gnet_inetaddr_is_broadcast): Compare with
+	    INADDR_BROADCAST.  There is no broadcast in IPv6 - only multicast.
+
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): Bug: Set family.
+
 Thu Dec 12 14:03:05 2002  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c: Fix compile warnings.

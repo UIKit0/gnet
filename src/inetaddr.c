@@ -1234,8 +1234,7 @@ gnet_inetaddr_new_list_async (const gchar* name, gint port,
   ia->name = g_strdup(name);
   ia->ref_count = 1;
 
-  /* FIX */
-  sa_in = (struct sockaddr_in*) &ia->sa;
+  sa_in = (struct sockaddr_in*) &ia->sa;	  /* FIX (Andy) */
   sa_in->sin_family = AF_INET;
   sa_in->sin_port = g_htons(port);
 
@@ -1354,6 +1353,7 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
       ia->ref_count = 1;
       sa_inp = (struct sockaddr_in*) &ia->sa;
 
+      sa_inp->sin_family = AF_INET;
       memcpy(&sa_inp->sin_addr, (char*) &inaddr, sizeof(inaddr));
       sa_inp->sin_port = g_htons(port);
     }
@@ -1365,6 +1365,7 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
       ia->ref_count = 1;
       sa_inp = (struct sockaddr_in6*) &ia->sa;
 
+      sa_inp->sin6_family = AF_INET6;
       memcpy(&sa_inp->sin6_addr, (char*) &in6addr, sizeof(in6addr));
       sa_inp->sin6_port = g_htons(port);
     }
@@ -1374,6 +1375,41 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
   return ia;
 }
 
+
+
+/**
+ *  gnet_inetaddr_new_bytes
+ *  @addr: Address in raw bytes
+ *  @length: Length of address (4 if IPv4, 16 if IPv6)
+ * 
+ *  Create an internet address from raw bytes.  The bytes should be in
+ *  network byte order (big endian).  There should be 4 bytes if it's
+ *  an IPv4 address and 16 bytees if it's an IPv6 address.  The port
+ *  is set to 0.
+ *
+ *  Returns: a new #GInetAddr, or NULL if there was a failure.
+ *
+ **/
+GInetAddr* 
+gnet_inetaddr_new_bytes (const guint8* addr, const guint length)
+{
+  GInetAddr* ia = NULL;
+
+  g_return_val_if_fail (addr, NULL);
+
+  if (length != 4 && length != 16)
+    return NULL;
+
+  ia = g_new0 (GInetAddr, 1);
+  ia->ref_count = 1;
+  if (length == 4)
+    GNET_INETADDR_FAMILY(ia) = AF_INET;
+  else
+    GNET_INETADDR_FAMILY(ia) = AF_INET6;
+  memcpy(GNET_INETADDR_ADDRP(ia), addr, length);
+
+  return ia;
+}
 
 
 /**
@@ -2142,13 +2178,16 @@ gnet_inetaddr_is_internet (const GInetAddr* inetaddr)
  *  @inetaddr: Address to check
  *
  *  Check if the address is an address reserved for private networks
- *  or something else.  This includes:
+ *  or something else.  For IPv4, this includes:
  *
  *   10.0.0.0        -   10.255.255.255  (10/8 prefix)
  *   172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
  *   192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
  *
  *  (from RFC 1918.  See also draft-manning-dsua-02.txt)
+ *
+ *  For IPv6, this includes link local addresses (fe80::/64) and site
+ *  local addresses (fec0::/64).
  * 
  *  Returns: TRUE if the address is reserved for private networks;
  *  FALSE otherwise.
@@ -2157,21 +2196,30 @@ gnet_inetaddr_is_internet (const GInetAddr* inetaddr)
 gboolean
 gnet_inetaddr_is_private (const GInetAddr* inetaddr)
 {
-  guint addr;
-
   g_return_val_if_fail (inetaddr != NULL, FALSE);
 
-  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr; /* FIX */
-  addr = g_ntohl(addr);
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
+    {
+      guint32 addr;
 
-  if ((addr & 0xFF000000) == (10 << 24))
-    return TRUE;
+      addr = GNET_INETADDR_SA4(inetaddr).sin_addr.s_addr;
+      addr = g_ntohl(addr);
 
-  if ((addr & 0xFFF00000) == 0xAC100000)
-    return TRUE;
+      if ((addr & 0xFF000000) == (10 << 24))
+	return TRUE;
 
-  if ((addr & 0xFFFF0000) == 0xC0A80000)
-    return TRUE;
+      if ((addr & 0xFFF00000) == 0xAC100000)
+	return TRUE;
+
+      if ((addr & 0xFFFF0000) == 0xC0A80000)
+	return TRUE;
+    }
+  else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
+    {
+      if (IN6_IS_ADDR_LINKLOCAL(&GNET_INETADDR_SA6(inetaddr).sin6_addr) ||
+	  IN6_IS_ADDR_SITELOCAL(&GNET_INETADDR_SA6(inetaddr).sin6_addr))
+	return TRUE;
+    }
 
   return FALSE;
 }
@@ -2184,9 +2232,12 @@ gnet_inetaddr_is_private (const GInetAddr* inetaddr)
  *  Check if the address is reserved for 'something'.  This excludes
  *  address reserved for private networks.
  *
- *  We check for:
+ *  For IPv4, we check for:
  *    0.0.0.0/16  (top 16 bits are 0's)
  *    Class E (top 5 bits are 11110)
+ *
+ *  For IPv6, we check for the 00000000 prefix.
+ *    
  *
  *  Returns: TRUE if the address is reserved for something; FALSE
  *  otherwise.
@@ -2195,18 +2246,31 @@ gnet_inetaddr_is_private (const GInetAddr* inetaddr)
 gboolean
 gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
 {
-  guint addr;
-
   g_return_val_if_fail (inetaddr != NULL, FALSE);
 
-  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr; /* FIX */
-  addr = g_ntohl(addr);
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
+    {
+      guint32 addr;
 
-  if ((addr & 0xFFFF0000) == 0)
-    return TRUE;
+      addr = GNET_INETADDR_SA4(inetaddr).sin_addr.s_addr;
+      addr = g_ntohl(addr);
 
-  if ((addr & 0xF8000000) == 0xF0000000)
-    return TRUE;
+      if ((addr & 0xFFFF0000) == 0)
+	return TRUE;
+
+      if ((addr & 0xF8000000) == 0xF0000000)
+	return TRUE;
+    }
+  else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
+    {
+      guint32 high_addr;
+
+      high_addr = GNET_INETADDR_SA6(inetaddr).sin6_addr.s6_addr32[0];
+      high_addr = g_ntohl(high_addr);
+
+      if ((high_addr & 0xFFFF0000) == 0)	/* 0000 0000 prefix */
+	return TRUE;
+    }
 
   return FALSE;
 }
@@ -2217,8 +2281,9 @@ gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
  *  gnet_inetaddr_is_loopback:
  *  @inetaddr: Address to check
  *
- *  Check if the address is a loopback address.  Loopback addresses
- *  have the prefix 127.0.0.1/16.
+ *  Check if the address is a loopback address.  The IPv4 loopback
+ *  address have prefix 127.0.0.1/24.  The IPv6 loopback address is
+ *  ::1.
  * 
  *  Returns: TRUE if the address is a loopback address; FALSE
  *  otherwise.
@@ -2227,15 +2292,23 @@ gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
 gboolean
 gnet_inetaddr_is_loopback (const GInetAddr* inetaddr)
 {
-  guint addr;
-
   g_return_val_if_fail (inetaddr != NULL, FALSE);
 
-  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr; /* FIX */
-  addr = g_ntohl(addr);
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
+    {
+      guint32 addr;
 
-  if ((addr & 0xFF000000) == (127 << 24))
-    return TRUE;
+      addr = GNET_INETADDR_SA4(inetaddr).sin_addr.s_addr;
+      addr = g_ntohl(addr);
+
+      if ((addr & 0xFF000000) == (IN_LOOPBACKNET << 24))
+	return TRUE;
+    }
+  else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
+    {
+      if (IN6_IS_ADDR_LOOPBACK(&GNET_INETADDR_SA6(inetaddr).sin6_addr))
+	return TRUE;
+    }
 
   return FALSE;
 }
@@ -2245,9 +2318,10 @@ gnet_inetaddr_is_loopback (const GInetAddr* inetaddr)
  *  gnet_inetaddr_is_multicast:
  *  @inetaddr: Address to check
  *
- *  Check if the address is a multicast address.  Multicast address
- *  are in the range 224.0.0.1 - 239.255.255.255 (ie, the top four
- *  bits are 1110).
+ *  Check if the address is a multicast address.  IPv4 multicast
+ *  addresses are in the range 224.0.0.0 - 239.255.255.255 (ie, the
+ *  top four bits are 1110).  IPv6 multicast addresses are in the
+ *  format FF::*
  * 
  *  Returns: TRUE if the address is a multicast address; FALSE
  *  otherwise.
@@ -2256,15 +2330,18 @@ gnet_inetaddr_is_loopback (const GInetAddr* inetaddr)
 gboolean 
 gnet_inetaddr_is_multicast (const GInetAddr* inetaddr)
 {
-  guint addr;
-
   g_return_val_if_fail (inetaddr != NULL, FALSE);
 
-  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr; /* FIX */
-  addr = g_htonl(addr);
-
-  if ((addr & 0xF0000000) == 0xE0000000)
-    return TRUE;
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
+    {
+      if (IN_MULTICAST(g_htonl(GNET_INETADDR_SA4(inetaddr).sin_addr.s_addr)))
+	return TRUE;
+    }
+  else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
+    {
+      if (IN6_IS_ADDR_MULTICAST(&GNET_INETADDR_SA6(inetaddr).sin6_addr))
+	return TRUE;
+    }
 
   return FALSE;
 }
@@ -2285,14 +2362,14 @@ gnet_inetaddr_is_multicast (const GInetAddr* inetaddr)
 gboolean 
 gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr)
 {
-  guint addr;
-
   g_return_val_if_fail (inetaddr != NULL, FALSE);
 
-  addr = GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr; /* FIX */
-
-  if (addr == 0xFFFFFFFF)
-    return TRUE;
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
+    {
+      if (g_htonl(GNET_SOCKADDR_IN(inetaddr->sa).sin_addr.s_addr) == INADDR_BROADCAST)
+	return TRUE;
+    }
+  /* There is no IPv6 broadcast address */
 
   return FALSE;
 }
@@ -2376,7 +2453,6 @@ gnet_inetaddr_hash (gconstpointer p)
     {
       struct sockaddr_in6* sa_in6 = (struct sockaddr_in6*) &ia->sa;
 
-      /* FIX: Is NBO right here? */
       addr = g_ntohl(sa_in6->sin6_addr.s6_addr32[0]) ^
 	g_ntohl(sa_in6->sin6_addr.s6_addr32[1]) ^
 	g_ntohl(sa_in6->sin6_addr.s6_addr32[2]) ^
@@ -2420,23 +2496,18 @@ gnet_inetaddr_equal(gconstpointer p1, gconstpointer p2)
       struct sockaddr_in* sa_in1 = (struct sockaddr_in*) &ia1->sa;
       struct sockaddr_in* sa_in2 = (struct sockaddr_in*) &ia2->sa;
 
-      return ((sa_in1->sin_addr.s_addr == sa_in2->sin_addr.s_addr) &&
-	      (sa_in1->sin_port == sa_in2->sin_port));
+      if ((sa_in1->sin_addr.s_addr == sa_in2->sin_addr.s_addr) &&
+	  (sa_in1->sin_port == sa_in2->sin_port))
+	return 1;
     }
   else if (GNET_INETADDR_FAMILY(ia1) == AF_INET6)
     {
       struct sockaddr_in6* sa_in1 = (struct sockaddr_in6*) &ia1->sa;
       struct sockaddr_in6* sa_in2 = (struct sockaddr_in6*) &ia2->sa;
 
-      return ((sa_in1->sin6_addr.s6_addr32[0] == 
-	       sa_in2->sin6_addr.s6_addr32[0]) &&
-	      (sa_in1->sin6_addr.s6_addr32[1] == 
-	       sa_in2->sin6_addr.s6_addr32[1]) &&
-	      (sa_in1->sin6_addr.s6_addr32[2] == 
-	       sa_in2->sin6_addr.s6_addr32[2]) &&
-	      (sa_in1->sin6_addr.s6_addr32[3] == 
-	       sa_in2->sin6_addr.s6_addr32[3]) &&
-	      (sa_in1->sin6_port == sa_in2->sin6_port));
+      if (IN6_ARE_ADDR_EQUAL(&sa_in1->sin6_addr, &sa_in2->sin6_addr) &&
+	  (sa_in1->sin6_port == sa_in2->sin6_port))
+	return 1;
     }
   else
     g_assert_not_reached();
@@ -2568,7 +2639,7 @@ gnet_inetaddr_gethostname(void)
  *
  **/
 GInetAddr* 
-gnet_inetaddr_gethostaddr(void)
+gnet_inetaddr_gethostaddr (void)
 {
   gchar* name;
   GInetAddr* ia = NULL;
@@ -2650,6 +2721,8 @@ gnet_inetaddr_autodetect_internet_interface (void)
     return iface;
   gnet_inetaddr_delete (iface);
 
+  /* FIX: IPv6 version */
+
   /* Try getting an internet interface from the list via
      SIOCGIFCONF. (see Stevens UNPv1 pp 428-) */
   iface = gnet_inetaddr_get_internet_interface ();
@@ -2683,7 +2756,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* addr)
 
   g_return_val_if_fail (addr, NULL);
 
-  sockfd = socket (AF_INET, SOCK_DGRAM, 0);
+  sockfd = socket (GNET_INETADDR_FAMILY(addr), SOCK_DGRAM, 0);
   if (sockfd == -1)
     return NULL;
 
@@ -2957,7 +3030,7 @@ gnet_inetaddr_list_interfaces (void)
 #endif
 )
     {
-      struct sockaddr addr;
+      struct sockaddr_storage addr;
       int rv;
       GInetAddr* ia;
 
@@ -3014,7 +3087,7 @@ gnet_inetaddr_list_interfaces (void)
   INTERFACE_INFO localAddr[10];  /* Assumes there will be no more than 10 IP interfaces */
   int numLocalAddr; 
   int i;
-  struct sockaddr addr;
+  struct sockaddr_storage addr;
   GInetAddr *ia;
   /*SOCKADDR_IN* pAddrInet2; */	/* For testing */
 

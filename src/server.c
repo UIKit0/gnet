@@ -28,74 +28,45 @@ static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpo
 
 /**
  *  gnet_server_new:
- *  @iface: Interface to bind to (NULL if any)
- *  @force_port: Fail if can't get requested port
+ *  @iface: Interface to bind to (NULL for any interface)
+ *  @port: Port to bind to (0 for any port)
  *  @func: Callback to call when a connection is accepted
  *  @user_data: Data to pass to callback.
  *
  *  Create a new #GServer object representing a server.  The interface
  *  is specified as in gnet_tcp_socket_server_new_interface().
- *  Usually, iface is NULL or the iface is created by
- *  gnet_inetaddr_new_any() and the port is set to a specific port.
+ *  Usually, @iface is NULL and the port is set to a specific port.
  *  The callback is called whenever a new connection arrives or if the
  *  socket fails.
- *
- *  FIX: Remove force_port.  It's easier for someone to call
- *  gnet_server_new again than for me to explain how force port works.
- *  (If force_port is TRUE, and the socket with the specified port
- *  cannot be created, this function fails.  If force_port is FALSE,
- *  the function reattempts to create a socket but lets the OS choose
- *  the port.
  *
  *  Returns: A new #GServer.
  *
  **/
 GServer*
-gnet_server_new (const GInetAddr* iface, gboolean force_port, 
+gnet_server_new (const GInetAddr* iface, gint port, 
 		 GServerFunc func, gpointer user_data)
 {
+  GTcpSocket* socket;
   GServer* server = NULL;
 
   g_return_val_if_fail (func, NULL);
 
+  socket = gnet_tcp_socket_server_new_interface (iface, port);
+  if (!socket)
+    return NULL;
+
   server = g_new0 (GServer, 1);
   server->func = func;
   server->user_data = user_data;
-
-  /* Create a listening socket */
-  server->socket = gnet_tcp_socket_server_new_interface (iface);
-  if (!server->socket && force_port)
-    goto error;
-
-  if (!server->socket && iface)
-    {
-      GInetAddr iface_cpy;
-
-      iface_cpy = *iface;
-      GNET_SOCKADDR_IN(iface_cpy.sa).sin_port = 0;
-      server->socket = gnet_tcp_socket_server_new_interface(&iface_cpy);
-    }
-
-  if (!server->socket)
-    goto error;
-
-  /* Get the port number */
-  server->port = gnet_tcp_socket_get_port (server->socket);
-  if (server->port == 0)
-    goto error;
-
-  /* Get the address */
+  server->socket = socket;
   server->iface = gnet_tcp_socket_get_inetaddr (server->socket);
+  server->port  = gnet_tcp_socket_get_port (server->socket);
 
   /* Wait for new connections */
   gnet_tcp_socket_server_accept_async (server->socket, 
 				       server_accept_cb, server);
 
   return server;
-
- error:
-  gnet_server_delete (server);
-  return NULL;
 }
 
 

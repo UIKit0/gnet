@@ -72,11 +72,11 @@ normal_echoserver (gint port)
   gchar buffer[1024];
 
   /* Create the server */
-  server = gnet_udp_socket_port_new (port);
+  server = gnet_udp_socket_new_with_port (port);
   g_assert (server);
 
   /* Create a packet */
-  packet = gnet_udp_packet_receive_new(buffer, sizeof(buffer));
+  packet = gnet_udp_packet_new(buffer, sizeof(buffer));
   g_assert (packet);
 
   while (1)
@@ -88,7 +88,7 @@ normal_echoserver (gint port)
       if (n == 0)
 	continue;
 
-      packet_out = gnet_udp_packet_send_new (buffer, n, packet->addr);
+      packet_out = gnet_udp_packet_new_with_address (buffer, n, packet->addr);
       
       g_assert (gnet_udp_socket_send(server, packet_out) == 0);
 

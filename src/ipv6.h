@@ -40,26 +40,25 @@ extern "C" {
  *
  *   gnet_init() attempts to set a reasonable default based on the
  *   interfaces available on the host.  If there are only IPv4
- *   interfaces, the policy is set to %GNET_IPV6_POLICY_IPV4_ONLY.  If
+ *   interfaces, the policy is set to %GIPV6_POLICY_IPV4_ONLY.  If
  *   there are only IPv6 interfaces, the policy is set to
- *   %GNET_IPV6_POLICY_IPV6_ONLY.  If there are both, the policy is
- *   set to %GNET_IPV6_POLICY_SYSTEM_DEFAULT.
+ *   %GIPV6_POLICY_IPV6_ONLY.  If there are both, the policy is
+ *   set to %GIPV6_POLICY_SYSTEM_DEFAULT.
  *
  **/
 typedef enum {
-  GNET_IPV6_POLICY_SYSTEM_DEFAULT,
-  GNET_IPV6_POLICY_IPV4_THEN_IPV6,
-  GNET_IPV6_POLICY_IPV6_THEN_IPV4,
-  GNET_IPV6_POLICY_IPV4_ONLY,
-  GNET_IPV6_POLICY_IPV6_ONLY
-} GNetIPv6Policy;
+  GIPV6_POLICY_IPV4_THEN_IPV6,
+  GIPV6_POLICY_IPV6_THEN_IPV4,
+  GIPV6_POLICY_IPV4_ONLY,
+  GIPV6_POLICY_IPV6_ONLY
+} GIPv6Policy;
 
 
-GNetIPv6Policy	gnet_ipv6_get_policy (void);
-void       	gnet_ipv6_set_policy (GNetIPv6Policy policy);
+GIPv6Policy	gnet_ipv6_get_policy (void);
+void       	gnet_ipv6_set_policy (GIPv6Policy policy);
 
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
 
-#endif /* _GNET_SOCKS_H */
+#endif /* _GNET_IPV6_H */

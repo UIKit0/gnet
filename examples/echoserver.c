@@ -146,7 +146,6 @@ normal_echoserver (gint p)
 	}
 
       if (error != G_IO_ERROR_NONE)
-	fprintf (stderr, "\nReceived error %d (closing socket).\n", error);
       gnet_tcp_socket_delete (client);
 
       g_print ("Connection from %s:%d closed\n", name, port);
@@ -431,18 +430,13 @@ static void
 object_echoserver (gint port)
 {
   GMainLoop* main_loop;
-  GInetAddr* addr;
   GServer* server;
 
   /* Create the main loop */
   main_loop = g_main_new(FALSE);
 
-  /* Create the interface */
-  addr = gnet_inetaddr_new_any ();
-  gnet_inetaddr_set_port (addr, port);
-
   /* Create the server */
-  server = gnet_server_new (addr, TRUE, ob_server_func, NULL);
+  server = gnet_server_new (NULL, port, ob_server_func, NULL);
   if (!server)
     {
       fprintf (stderr, "Error: Could not start server\n");

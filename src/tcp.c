@@ -244,7 +244,7 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
   g_return_val_if_fail (addr != NULL, NULL);
 
   /* Create socket */
-  sockfd = socket (AF_INET, SOCK_STREAM, 0);
+  sockfd = socket (GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd < 0)
     return NULL;
 
@@ -336,7 +336,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   g_return_val_if_fail(func != NULL, NULL);
 
   /* Create socket */
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd < 0)
     return NULL;
 
@@ -473,7 +473,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   g_return_val_if_fail(func != NULL, NULL);
 
   /* Create socket */
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd == INVALID_SOCKET)
     {
       (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
@@ -785,12 +785,11 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
 
 /**
  *  gnet_tcp_socket_server_new:
- *  @port: Port number for the socket (0 if you don't care).
+ *  @port: Port to use (0 for an arbitrary port)
  *
- *  Create and open a new #GTcpSocket with the specified port number.
- *  Use this sort of socket when you are a server and you know what
- *  the port number should be (or pass 0 if you don't care what the
- *  port is).  SOCKS is used if SOCKS is enabled.
+ *  Create and open a new #GTcpSocket bound to all interfaces and port
+ *  @port.  If @port is 0, an arbitrary port will be used.  SOCKS is
+ *  used if SOCKS is enabled.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -798,78 +797,86 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
 GTcpSocket* 
 gnet_tcp_socket_server_new (gint port)
 {
-  GInetAddr iface;
-  struct sockaddr_in* sa_in;
-  
-  /* Use SOCKS if enabled */
-  if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_new (port);
-
-  /* Set up address and port (any address, any port) */
-  /* Default is to use IPv4.  FIX */
-  memset (&iface, 0, sizeof(iface));
-  sa_in = (struct sockaddr_in*) &iface.sa;
-  sa_in->sin_family = AF_INET;
-  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-  sa_in->sin_port = g_htons(port);
-
-  return gnet_tcp_socket_server_new_interface (&iface);
+  return gnet_tcp_socket_server_new_interface (NULL, port);
 }
 
 
 /**
  *  gnet_tcp_socket_server_new_interface:
- *  @iface: Interface to bind to
+ *  @iface: Interface to bind to (NULL for all interfaces)
+ *  @port: Port to bind to (0 for an arbitrary port)
  *
- *  Create and open a new #GTcpSocket bound to the specified
- *  interface.  Use this sort of socket when your are a server and
- *  have a specific address the server must be bound to.  If the port
- *  number of the interface address is 0, the OS will use the
- *  interface specified but choose the port itself.  If the interface
- *  address is NULL, the OS will choose both the interface and port.
- *  If the interface address was created by gnet_inetaddr_new_any(),
- *  the OS will use all interfaces.  If the port number is also set,
- *  it will use that port number.  SOCKS is used if SOCKS is enabled
+ *  Create and open a new #GTcpSocket bound to interface @iface and
+ *  port @port.  Use this sort of socket when creating a server socket
+ *  and there is a specific address the server must be bound to.  If
+ *  @iface is NULL, all interfaces will be used.  If @port is 0, an
+ *  arbitrary port will be used.  SOCKS is used if SOCKS is enabled
  *  and the interface is NULL.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
+gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
 {
   GTcpSocket* s;
   socklen_t socklen;
 
   /* Use SOCKS if enabled */
   if (!iface && gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_new (0);
+    return gnet_private_socks_tcp_socket_server_new (port);
 
   /* Create socket */
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
-  s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (s->sockfd < 0)
-    goto error;
 
   /* Set up address and port for connection */
   if (iface)
     {
+      s->sockfd = socket(GNET_INETADDR_FAMILY(iface), SOCK_STREAM, 0);
+      if (s->sockfd < 0)
+	goto error;
       memcpy (&s->sa, &iface->sa, sizeof(s->sa));
+      GNET_SOCKADDR_PORT(s->sa) = g_htons(port);
     }
-  else /* Default is to use IPv4 - FIX */
+  else
     {
-      struct sockaddr_in* sa_in;
+      GIPv6Policy ipv6_policy;
 
-      sa_in = (struct sockaddr_in*) &s->sa;
-      sa_in->sin_family = AF_INET;
-      sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-      sa_in->sin_port = 0;
+      /* FIX: I still don't like this */
+
+      ipv6_policy = gnet_ipv6_get_policy();
+      if (ipv6_policy == GIPV6_POLICY_IPV4_ONLY)	/* IPv4 */
+	{
+	  struct sockaddr_in* sa_in;
+
+	  s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	  if (s->sockfd < 0)
+	    goto error;
+
+	  sa_in = (struct sockaddr_in*) &s->sa;
+	  sa_in->sin_family = AF_INET;
+	  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+	  sa_in->sin_port = g_htons(port);
+	}
+      else						/* IPv6 */
+	{
+	  struct sockaddr_in6* sa_in6;
+
+	  s->sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+	  if (s->sockfd < 0)
+	    goto error;
+
+	  sa_in6 = (struct sockaddr_in6*) &s->sa;
+	  sa_in6->sin6_family = AF_INET6;
+	  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
+	  sa_in6->sin6_port = g_htons(port);
+	}
     }
 
   /* The socket is set to non-blocking mode later in the Windows
      version.*/
-#ifndef GNET_WIN32
+#ifndef GNET_WIN32		/* Unix */
   {
     gint flags;
     const int on = 1;
@@ -934,7 +941,7 @@ GTcpSocket*
 gnet_tcp_socket_server_accept (GTcpSocket* socket)
 {
   gint sockfd;
-  struct sockaddr sa;
+  struct sockaddr_storage sa;
   socklen_t n;
   fd_set fdset;
   GTcpSocket* s;
@@ -959,7 +966,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
 
   n = sizeof(s->sa);
   
-  if ((sockfd = accept(socket->sockfd, &sa, &n)) == -1)
+  if ((sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n)) == -1)
     {
       if (errno == EWOULDBLOCK || 
 	  errno == ECONNABORTED ||
@@ -1003,7 +1010,7 @@ GTcpSocket*
 gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
 {
   gint sockfd;
-  struct sockaddr sa;
+  struct sockaddr_storage sa;
   socklen_t n;
   fd_set fdset;
   GTcpSocket* s;
@@ -1028,7 +1035,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
     }
 
   n = sizeof(sa);
-  if ((sockfd = accept(socket->sockfd, &sa, &n)) == -1)
+  if ((sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n)) == -1)
     {
       /* If we get an error, return.  We don't want to try again as we
          do in gnet_tcp_socket_server_accept() - it might cause a
@@ -1053,7 +1060,7 @@ GTcpSocket*
 gnet_tcp_socket_server_accept (GTcpSocket* socket)
 {
   gint sockfd;
-  struct sockaddr sa;
+  struct sockaddr_storage sa;
   fd_set fdset;
   GTcpSocket* s;
 
@@ -1093,7 +1100,7 @@ GTcpSocket*
 gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
 {
   gint sockfd;
-  struct sockaddr sa;
+  struct sockaddr_storage sa;
 
   fd_set fdset;
   GTcpSocket* s;

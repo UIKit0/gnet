@@ -64,8 +64,8 @@ struct _GUdpPacket
 /* UDP socket functions				*/
 
 GUdpSocket* gnet_udp_socket_new (void);
-GUdpSocket* gnet_udp_socket_port_new (gint port);
-GUdpSocket* gnet_udp_socket_new_interface (const GInetAddr* iface);
+GUdpSocket* gnet_udp_socket_new_with_port (gint port);
+GUdpSocket* gnet_udp_socket_new_full (const GInetAddr* iface, gint port);
 
 void gnet_udp_socket_delete (GUdpSocket* s);
 
@@ -96,12 +96,12 @@ gint gnet_udp_socket_set_mcast_ttl (GUdpSocket* us, gint val);
 /* ******************************************** */
 /* UDP packet functions 			*/
 
-GUdpPacket* gnet_udp_packet_receive_new (guint8* data, gint length);
-GUdpPacket* gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr);
-void gnet_udp_packet_delete (GUdpPacket* packet);
+GUdpPacket* gnet_udp_packet_new (guint8* data, gint length);
+GUdpPacket* gnet_udp_packet_new_with_address (guint8* data, gint length, GInetAddr* addr);
+void        gnet_udp_packet_delete (GUdpPacket* packet);
 
 
-/* GNet 1.1 compatibility macro (DEPRICATED) */
+/* GNet 1.1 compatibility functions/macros (DEPRICATED) */
 GIOChannel* gnet_udp_socket_get_iochannel (GUdpSocket* socket);
 
 #ifdef __cplusplus

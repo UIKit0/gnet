@@ -39,6 +39,14 @@ const guint gnet_binary_age = GNET_BINARY_AGE;
 void
 gnet_init (void)
 {
+  GList* ifaces;
+  GList* i;
+  gboolean have_ipv4 = FALSE;
+  gboolean have_ipv6 = FALSE;
+  GIPv6Policy ipv6_policy;
+
+
+
 #ifdef G_THREADS_ENABLED
 #ifndef GNET_WIN32 
   if (!g_thread_supported ()) 
@@ -46,6 +54,36 @@ gnet_init (void)
 #endif
 #endif /* G_THREADS_ENABLED */
 
-  /* Set sensible IPv6 policy */	/* FIX */
+  /* FIX: Check environment variable */
 
+  /* Set sensible IPv6 policy.
+
+     We get the list the interfaces.  If we have both IPv4 and IPv6,
+     then we use IPV6_THEN_IPV4.  Otherwise, we only use what's available. 
+
+
+   */
+  ipv6_policy = GIPV6_POLICY_IPV4_ONLY;	/* default policy is IPv4 only */
+
+  ifaces = gnet_inetaddr_list_interfaces ();
+  for (i = ifaces; i != NULL; i = i->next)
+    {
+      GInetAddr* iface = (GInetAddr*) i->data;
+
+      if (gnet_inetaddr_is_ipv4(iface))
+	have_ipv4 = TRUE;
+      else if (gnet_inetaddr_is_ipv6(iface))
+	have_ipv6 = TRUE;
+
+      gnet_inetaddr_delete (iface);
+    }
+
+  if (have_ipv4 && have_ipv6)
+    ipv6_policy = GIPV6_POLICY_IPV6_THEN_IPV4;
+  else if (have_ipv4 && !have_ipv6)
+    ipv6_policy = GIPV6_POLICY_IPV4_ONLY;
+  else if (!have_ipv4 && have_ipv6)
+    ipv6_policy = GIPV6_POLICY_IPV6_ONLY;
+
+  gnet_ipv6_set_policy (ipv6_policy);
 }

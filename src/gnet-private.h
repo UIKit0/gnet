@@ -106,6 +106,8 @@
 #define GNET_SOCKADDR_IN(s)    	(*((struct sockaddr_in*) &s))
 
 #define GNET_SOCKADDR_SA(s)	(*((struct sockaddr*) &s))
+#define GNET_SOCKADDR_SA4(s)	(*((struct sockaddr_in*) &s))
+#define GNET_SOCKADDR_SA6(s)	(*((struct sockaddr_in6*) &s))
 #define GNET_SOCKADDR_FAMILY(s) ((s).ss_family)
 #define GNET_SOCKADDR_ADDRP(s)	(((s).ss_family == AF_INET)?\
                                   (void*)&((struct sockaddr_in*)&s)->sin_addr:\
@@ -120,7 +122,9 @@
                                   sizeof(struct sockaddr_in):\
                                   sizeof(struct sockaddr_in6))
 
-#define GNET_INETADDR_SA(i)     (*((struct sockaddr*) &i->sa))
+#define GNET_INETADDR_SA(i)     GNET_SOCKADDR_SA(i->sa)
+#define GNET_INETADDR_SA4(i)    GNET_SOCKADDR_SA4(i->sa)
+#define GNET_INETADDR_SA6(i)    GNET_SOCKADDR_SA6(i->sa) 
 #define GNET_INETADDR_FAMILY(i) GNET_SOCKADDR_FAMILY(i->sa)
 #define GNET_INETADDR_ADDRP(i)  GNET_SOCKADDR_ADDRP(i->sa)
 #define GNET_INETADDR_PORT(i)   GNET_SOCKADDR_PORT(i->sa)

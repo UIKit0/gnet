@@ -17,6 +17,7 @@ libgnet_la_LDFLAGS = \
 libgnet_la_SOURCES = 		\
 	gnet.c			\
 	gnet-private.c		\
+	ipv6.c			\
 	inetaddr.c		\
 	mcast.c			\
 	tcp.c			\
@@ -35,6 +36,7 @@ libgnet_la_SOURCES = 		\
 
 gnetinclude_HEADERS = 		\
 	gnet.h			\
+	ipv6.h			\
         inetaddr.h              \
         mcast.h           	\
 	tcp.h			\

@@ -189,7 +189,7 @@ void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
 /* ********** */
 
 GTcpSocket* gnet_tcp_socket_server_new (gint port);
-GTcpSocket* gnet_tcp_socket_server_new_interface (const GInetAddr* iface);
+GTcpSocket* gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port);
 
 GTcpSocket* gnet_tcp_socket_server_accept (GTcpSocket* socket);
 GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);

@@ -25,7 +25,8 @@
 /**
  *  gnet_udp_socket_new:
  *  
- *  Create and open a new UDP socket with any port.  
+ *  Create and open a new UDP socket bound to all interfaces and an
+ *  arbitrary port.
  *
  *  Returns: a new #GUdpSocket, or NULL if there was a failure.
  *
@@ -33,53 +34,41 @@
 GUdpSocket* 
 gnet_udp_socket_new (void)
 {
-  return gnet_udp_socket_port_new(0);
+  return gnet_udp_socket_new_full (NULL, 0);
 }
 
 
 /**
- *  gnet_udp_socket_port_new:
- *  @port: port number for the socket.
+ *  gnet_udp_socket_new_with_port:
+ *  @port: Port to use (0 for an arbitrary port)
  * 
- *  Create and open a new UDP socket with a specific port.  
+ *  Create and open a new #GUdpSocket bound to all interfaces and port
+ *  @port.  If @port is 0, an arbitrary port will be used.
  *
  *  Returns: a new #GUdpSocket, or NULL if there was a failure.
  *
  **/
 GUdpSocket* 
-gnet_udp_socket_port_new (gint port)
+gnet_udp_socket_new_with_port (gint port)
 {
-  GInetAddr inetaddr;
-  struct sockaddr_in* sa_in;
-  GUdpSocket* us;
-
-  /* Set up address and port (any address, any port) */
-  /* Default is to use IPv4.  FIX */
-  memset (&inetaddr, 0, sizeof(inetaddr));
-  sa_in = (struct sockaddr_in*) &inetaddr.sa;
-  sa_in->sin_family = AF_INET;
-  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-  sa_in->sin_port = g_htons(port);
-
-  us = gnet_udp_socket_new_interface (&inetaddr);
-
-  return us;
+  return gnet_udp_socket_new_full (NULL, port);
 }
 
 
 /**
- *  gnet_udp_socket_new_interface:
- *  @iface: Interface to bind to
+ *  gnet_udp_socket_new_full:
+ *  @iface: Interface to bind to (NULL for all interfaces)
+ *  @port: Port to bind to (0 for an arbitrary port)
  * 
- *  Create and open a new UDP socket bound to the specified interface.
- *  If the interface address's port number is 0, the OS will choose
- *  the port.
+ *  Create and open a new #GUdpSocket bound to interface @iface and
+ *  port @port.  If @iface is NULL, all interfaces will be used.  If
+ *  @port is 0, an arbitrary port will be used.
  *
  *  Returns: a new #GUdpSocket, or NULL if there was a failure.
  *
  **/
 GUdpSocket* 
-gnet_udp_socket_new_interface (const GInetAddr* iface)
+gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 {
   int 			sockfd;
   GUdpSocket* 		s;
@@ -87,7 +76,7 @@ gnet_udp_socket_new_interface (const GInetAddr* iface)
 
   g_return_val_if_fail (iface, NULL);
 
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  sockfd = socket(GNET_INETADDR_FAMILY(iface), SOCK_DGRAM, 0);
   if (sockfd < 0)
     return NULL;
 
@@ -97,7 +86,7 @@ gnet_udp_socket_new_interface (const GInetAddr* iface)
   s->ref_count = 1;
 
   /* Set broadcast option.  This allows the user to broadcast packets.
-     It has not affect otherwise. */
+     It has no effect otherwise. */
   if (setsockopt(s->sockfd, SOL_SOCKET, SO_BROADCAST, 
 		 (void*) &on, sizeof(on)) != 0)
     {
@@ -128,7 +117,7 @@ gnet_udp_socket_new_interface (const GInetAddr* iface)
  *
  **/
 void
-gnet_udp_socket_delete(GUdpSocket* s)
+gnet_udp_socket_delete (GUdpSocket* s)
 {
   if (s != NULL)
     gnet_udp_socket_unref(s);
@@ -274,7 +263,7 @@ gnet_udp_socket_has_packet (const GUdpSocket* s)
 
 
 gboolean
-gnet_udp_socket_has_packet(const GUdpSocket* s)
+gnet_udp_socket_has_packet (const GUdpSocket* s)
 {
   gint bytes_received;
   gchar data[1];
@@ -336,7 +325,7 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
  *
  **/
 GIOChannel* 
-gnet_udp_socket_get_io_channel(GUdpSocket* socket)
+gnet_udp_socket_get_io_channel (GUdpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, NULL);
 
@@ -405,7 +394,7 @@ gnet_udp_socket_get_ttl (const GUdpSocket* us)
  *
  **/
 gint
-gnet_udp_socket_set_ttl(GUdpSocket* us, int val)
+gnet_udp_socket_set_ttl (GUdpSocket* us, int val)
 {
   int ttl;
 
@@ -505,7 +494,7 @@ gnet_udp_socket_get_mcast_ttl (const GUdpSocket* us)
  *
  **/
 gint
-gnet_udp_socket_set_mcast_ttl(GUdpSocket* us, int val)
+gnet_udp_socket_set_mcast_ttl (GUdpSocket* us, int val)
 {
   guchar ttl;
 
@@ -523,7 +512,7 @@ gnet_udp_socket_set_mcast_ttl(GUdpSocket* us, int val)
 
 
 /**
- *  gnet_udp_packet_receive_new:
+ *  gnet_udp_packet_new:
  *  @data: A pointer to the buffer to use for the received data.  
  *  @length: The length of this buffer.
  *
@@ -534,15 +523,15 @@ gnet_udp_socket_set_mcast_ttl(GUdpSocket* us, int val)
  *
  **/
 GUdpPacket* 
-gnet_udp_packet_receive_new (guint8* data, gint length)
+gnet_udp_packet_new (guint8* data, gint length)
 {
   /* A receive packet is the same as a send packet without an address */
-  return gnet_udp_packet_send_new (data, length, NULL);
+  return gnet_udp_packet_new_with_address (data, length, NULL);
 }
 
 
 /**
- *  gnet_udp_packet_send_new:
+ *  gnet_udp_packet_new_with_address:
  *  @data: A pointer to the buffer which contains the data to send. 
  *  @length: The length of this buffer.
  *  @addr: The address to which the packet should be sent.
@@ -555,7 +544,7 @@ gnet_udp_packet_receive_new (guint8* data, gint length)
  *
  **/
 GUdpPacket* 
-gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr)
+gnet_udp_packet_new_with_address (guint8* data, gint length, GInetAddr* addr)
 {
   GUdpPacket* packet = g_new(GUdpPacket, 1);
 
@@ -579,5 +568,5 @@ gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr)
 void 
 gnet_udp_packet_delete (GUdpPacket* packet)
 {
-  g_free(packet);
+  g_free (packet);
 }

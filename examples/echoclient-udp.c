@@ -90,7 +90,7 @@ normal_echoclient(gchar* hostname, gint port)
 
       /* Create packet */
       n = strlen(buffer);
-      packet = gnet_udp_packet_send_new (buffer, n, addr);
+      packet = gnet_udp_packet_new_with_address (buffer, n, addr);
 
       /* Send packet */
       rv = gnet_udp_socket_send(socket, packet);
@@ -98,7 +98,7 @@ normal_echoclient(gchar* hostname, gint port)
       gnet_udp_packet_delete (packet);
 
       /* Receive packet */
-      packet = gnet_udp_packet_receive_new (buffer, sizeof(buffer));
+      packet = gnet_udp_packet_new (buffer, sizeof(buffer));
       n = gnet_udp_socket_receive (socket, packet);
       if (n == 0) break;
       gnet_inetaddr_delete (packet->addr);

@@ -1,4 +1,4 @@
-
+n
 GNet 1.4
 
 Please email gnet-dev@gnetlibrary.org with your comments.
@@ -6,11 +6,12 @@ Please email gnet-dev@gnetlibrary.org with your comments.
 
 API cleanup
 
-- Move udp_mcast_ttl to mcast?
+    Do inetaddr async funcs need an error status?  Isn't NULL enough?
 
-   Check: what's the difference between IP_TTL and IP_MULTICAST_TTL
-   anyway?
+    Rename: new_X -> new_with_X
+    Rename: port_new to new_with_port
 
+    Clean UDP API.  The packet stuff is inconsistent for send vs. receive.
 
 Experimental changes
 
@@ -57,33 +58,18 @@ New features
     TODO:
 	- how should binding work?
 	- fix mcast join
-	- fix gnet_inetaddr_is_*()
-	- check storage format for in6_addr
 	- fix everything marked FIX
 
-   - inetaddr_equal - can a ipv4 address equal an ipv6 address?
-
-
-- New Inetaddr functions:
+   - inetaddr_equal - can a ipv4 address equal an ipv6 address?  [No.]
+	[We don't have functions for mapping IPv4 addresses to IPv6.
+	Maybe we want these too.]
+	
 
     ISSUE: getaddrinfo() returns IPv6 addresses before IPv4
     addresses.  If gnet_inetaddr_new() uses
     gnet_inetaddr_new_list(), this may break compatibility.
-    
-    inetaddr_bytes_new(const guint8* addr, const gint length);
-    
-    gint 
-    gnet_inetaddr_get_service (gchar* service, gchar* proto)
-    
-    Uses getservbyname() to map (service, proto) to a port
-    number.  @proto can be "tcp", "udp", or NULL.  Usually, the
-    port numbers for the TCP and UDP service are identical.  Some
-    people use this.  Functionality depends on the
-    /etc/services file.
-    
-    ISSUE: Should there be a inetaddr_get_service_name() too.
-    (Maps port to string).
-    
+
+
     BINARY INCOMPATIBLE: Will use IPv6 in situations where IPv4
     was used before.
 
@@ -92,8 +78,23 @@ New features
 	ftp://ftp.isi.edu/in-notes/rfc2553.txt
 
 
-    Do inetaddr async funcs need an error status?  Isn't NULL enough?
+- New Inetaddr functions:
+    
+    gint 
+    gnet_inetaddr_name_to_port (gchar* service, gchar* proto)	    [Uses getservbyname()]
+    
+    Maps the service-protocol pair to a port number.  @proto can be
+    "tcp", "udp", or NULL.  Usually, the port numbers for the TCP and
+    UDP service are identical.  On Unix systems, functionality depends
+    on the /etc/services file.
+    
 
+    gchar*    
+    gnet_inetaddr_port_to_name (int port, gchar* proto)		[Uses getservbyport()]
+
+    XXX
+
+    
 
 Possible changes
 
@@ -106,7 +107,9 @@ Possible changes
 
     MOSTLY-COMPATIBLE: socket_get_iochannel would be needed.
 
-    Likewise, derive server and conn from TcpSocket
+    Likewise, derive server and conn from TcpSocket [But a conn may
+	open several sockets.
+	
 
 
 - Differentiate between creating and connecting.  
@@ -132,6 +135,9 @@ Possible changes
 
 ========================================
 DONE
+
+- New function: gnet_inetaddr_new_bytes().  Creates a GInetAddr from
+    raw bytes.
 
 - New functions: gnet_inetaddr_new_list() and
     gnet_inetaddr_new_list_async().  These return GLists of
@@ -190,4 +196,15 @@ DONE
     BINARY INCOMPATIBLE: Check for unnecessary g_io_channel_unref()'s.
 
 - URI module is no longer experimental.
+
+
+
+========================================
+
+NOT DONE
+
+- Move udp_mcast_ttl to mcast?
+
+   No.  UDP sockets can be used to send multicast packets.  UDP
+   sockets are multicast sockets anyway.
 
