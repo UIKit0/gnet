@@ -1,3 +1,17 @@
+Thu Nov  2 19:26:47 2000  Andrew Lanoix  <alanoix@umich.edu>
+
+	* src/tcp.c: gnet_tcp_socket_new_async_cancel() Win32 version
+            did not cleanup properly
+	* src/gnet-private.c: Removed debug code
+	* gnetconfig.h.win32: Defined GNET_WIN32 here if not defined
+	* src/iochannel.[hc]:
+	* src/gnet-private.[hc]:
+	    Added Glib of Win32 GIOChannel Socket FIX
+	* src/tcp.c: gnet_tcp_server_accept() Don't force the socket
+	    in the Win32 version into blocking mode.
+	* gnet.def: Added g_io_channel_win32_new_stream_socket()
+	* README.win32: Updates
+
 Thu Nov  2 15:24:04 2000  David Helder  <dhelder@umich.edu>
 
 	* src/*.h: Added #ifdef GNET_EXPERIMENTAL around experimental
