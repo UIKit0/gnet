@@ -1,3 +1,7 @@
+Mon Oct  2 11:19:12 2000  David Helder  <dhelder@umich.edu>
+
+	* src/gnet-private.c: Remove include config.h 
+
 Mon Oct  2 11:15:19 2000  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c: Remove include of config.h.  Already

@@ -20,8 +20,6 @@
 #include "gnet-private.h"
 #include "gnet.h"
 
-#include <config.h>
-
 
 
 /**
