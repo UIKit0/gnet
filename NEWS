@@ -5,6 +5,11 @@ GNet NEWS
 Changes in Gnet
 
 
+1.1.7 (Square meal 2" release)
+-----
+* Fixed major bug in IO channel code from 1.1.6
+
+
 1.1.6 ("Square meal" release)
 -----
 * IOChannels are non-buffering, non-encoded by default (for GLib 2.0)

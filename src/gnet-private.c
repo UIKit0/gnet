@@ -46,6 +46,7 @@ gnet_private_iochannel_new (int sockfd)
   g_io_channel_set_buffered (iochannel, FALSE);
 #endif
 
+  return iochannel;
 }
 
 
