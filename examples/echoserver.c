@@ -363,7 +363,7 @@ object_echoserver (gint port)
   main_loop = g_main_new(FALSE);
 
   /* Create the server */
-  server = gnet_server_new (NULL, port, TRUE, ob_server_func, NULL);
+  server = gnet_server_new (NULL, port, ob_server_func, NULL);
   g_assert (server);
 
   /* Start the main loop */
