@@ -1,3 +1,9 @@
+gnet (1.0.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- David Helder <dhelder@umich.edu>  Sun,  5 Mar 2000 14:23:04 -0500
+
 gnet (1.0.0-2) unstable; urgency=low
 
   * Added "Replaces: libgnet0.1 

@@ -4,10 +4,9 @@ GNet NEWS
 
 Changes in Gnet
 
-1.0.1 (unreleased)
+1.0.1
 -----
 * Fixed bug in readline_strdup
-
 
 1.0.0
 -----
