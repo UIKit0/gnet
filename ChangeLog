@@ -1,3 +1,13 @@
+2005-02-07  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* configure.ac:
+	  When building on win32 using configure/autotools, always
+	  define HAVE_IPV6, so that GNET_ADDRLEN is the right
+	  size for ipv6 structs and calls to getnameinfo() don't
+	  crash on IPV6-enabled systems (gnetconfig.h.win32 where 
+	  HAVE_IPV6 is already defined is not used when building 
+	  on win32 using the autotools). Fixes #142644
+
 2005-02-04  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* AUTHORS:
