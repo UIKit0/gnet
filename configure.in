@@ -86,16 +86,14 @@ if test "x$enable_debug" = "xyes"; then
   GNET_DEBUG_FLAGS="-DG_ENABLE_DEBUG"
   AC_MSG_RESULT(yes)
 else
+  AC_MSG_RESULT(no)
   if test "x$enable_debug" = "xno"; then
     GNET_DEBUG_FLAGS="-DG_DISABLE_ASSERT -DG_DISABLE_CHECKS"
-    AC_MSG_RESULT(no)
   fi
 fi
 
 AC_SUBST(GNET_DEBUG_FLAGS)
 
-# Compile experimental stuff
-CFLAGS="$CFLAGS -DGNET_EXPERIMENTAL"
 
 
 # ****************************************
@@ -135,6 +133,9 @@ AC_HEADER_STDC
 
 # Initialize libtool
 AM_PROG_LIBTOOL
+
+# Compile experimental stuff
+CFLAGS="$CFLAGS -DGNET_EXPERIMENTAL"
 
 
 

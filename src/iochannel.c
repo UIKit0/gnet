@@ -32,7 +32,7 @@
  * number of bytes writen.
  * 
  * Write all @len bytes in the buffer to the channel.  This is
- * basically a wrapper around g_io_channel_read().  The problem with
+ * basically a wrapper around g_io_channel_write().  The problem with
  * g_io_channel_write() is that it may not write all the bytes in the
  * buffer and return a short count even when there was not an error
  * (this is rare, but it can happen and is often difficult to detect

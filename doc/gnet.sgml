@@ -111,7 +111,7 @@
 	If you are a developer and you want to use GNet in your
 	program, you can use the gnet-config script to figure out
 	which flags need to set when compiling.  For example, type
-	<userinput>gcc main.c `gnet-config --cflags -libs`</userinput>
+	<userinput>gcc main.c `gnet-config --cflags --libs`</userinput>
 	to compile the program main.c with GNet and link it to GNet.
       </para>
 
