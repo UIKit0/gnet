@@ -10,7 +10,8 @@ That glib snapshot has two confirmed problems:
 1) glib's socket iochannels are not freed properly,
 which causes Winsock to run out of buffer space over time.
 2) glib's window handle callback code always calls back,
-GNet in this release ignores those extra callbacks.
+GNet in this release ignores those extra callbacks. [It is
+fixed in GLIB's CVS]
 
 Later versions of Glib 1.3.X may work too.
 
