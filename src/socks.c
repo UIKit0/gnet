@@ -102,7 +102,10 @@ gnet_socks_get_server(void)
 	      char* ep;
 	      port = (gint) strtoul(&var[i+1], &ep, 10);
 	      if (*ep != '\0')
-		return NULL;
+		{
+		  g_free (hostname);
+		  return NULL;
+		}
 	    }
 
 	  addr = gnet_inetaddr_new (hostname, port);

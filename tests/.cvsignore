@@ -7,6 +7,6 @@ unpack
 hash
 dnstest
 hostinfo
-sockclient
+echoclient-socks
 url_test
 urlparse

@@ -1,3 +1,19 @@
+Wed Oct 17 22:26:42 2001  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c: Integrated SOCKS into gnet_tcp_socket_new_async.
+	* src/gnet-private.h (_GTcpSocketAsyncState ): Added field
+	    for socks server (so it can be changed while the connect
+	    is in effect).
+	* BUGS: Added note about blocking in tcp_socket_new_async
+	    during socks negotiation.
+	
+	* examples/echoclient.c: Finished async example.
+	* test/echoclient-socks.c: Renamed from socksclient.  Now does
+	    async too (but set manually)
+	
+	* src/socks.c (gnet_socks_get_server): Free hostname if port parse
+	    fails.
+
 Wed Oct 17 16:48:03 2001  David Helder  <dhelder@umich.edu>
 
 	* src/socks-private.c: Use g_getenv.  Fix missing io channel

@@ -195,10 +195,10 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
 GTcpSocket* 
 gnet_tcp_socket_new (const GInetAddr* addr)
 {
-  GTcpSocket* s = g_new0(GTcpSocket, 1);
-  struct sockaddr_in* sa_in;
-  GInetAddr* ss_addr = NULL;
-  const GInetAddr* addr2   = NULL;
+  GInetAddr* 		ss_addr = NULL;
+  const GInetAddr* 	addr2   = NULL;
+  GTcpSocket* 		s = g_new0(GTcpSocket, 1);
+  struct sockaddr_in* 	sa_in;
 
   g_return_val_if_fail (addr != NULL, NULL);
 
@@ -266,10 +266,13 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 			   GTcpSocketNewAsyncFunc func,
 			   gpointer data)
 {
-  gint sockfd;
-  gint flags;
-  GTcpSocket* s;
-  struct sockaddr_in* sa_in;
+  gint 			sockfd;
+  gint 			flags;
+  GTcpSocket* 		s;
+  GInetAddr* 		socks_addr = NULL;
+  const GInetAddr* 	socks_addr_save   = NULL;
+  struct sockaddr	sa;
+  struct sockaddr_in* 	sa_in;
   GTcpSocketAsyncState* state;
 
   g_return_val_if_fail(addr != NULL, NULL);
@@ -302,21 +305,40 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
   s->ref_count = 1;
   s->sockfd = sockfd;
 
+  /* If there's a SOCKS server, switch addresses so we connect to
+     that. */
+  socks_addr = gnet_socks_get_server ();
+  if (socks_addr)
+    {
+      socks_addr_save = addr;
+      addr = socks_addr;
+    }
+
   /* Set up address and port for connection */
-  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
-  sa_in = (struct sockaddr_in*) &s->sa;
+  memcpy(&sa, &addr->sa, sizeof(sa));
+  sa_in = (struct sockaddr_in*) &sa;
   sa_in->sin_family = AF_INET;
 
   /* Connect (but non-blocking!) */
-  if (connect(s->sockfd, &s->sa, sizeof(s->sa)) < 0)
+  if (connect(s->sockfd, &sa, sizeof(s->sa)) < 0)
     {
       if (errno != EINPROGRESS)
 	{
-	  g_free(s);
 	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+	  g_free(s);
+	  if (socks_addr) gnet_inetaddr_delete (socks_addr);
 	  return NULL;
 	}
     }
+
+  /* Swap the SOCK server back */
+  if (socks_addr_save)
+    addr = socks_addr_save;
+
+  /* Save address */ 
+  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
+  sa_in = (struct sockaddr_in*) &sa;
+  sa_in->sin_family = AF_INET;
 
   /* Note that if connect returns 0, then we're already connected and
      we could call the call back immediately.  But, it would probably
@@ -329,6 +351,7 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
   state->func = func;
   state->data = data;
   state->flags = flags;
+  state->socks_addr = socks_addr;
   state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
 					GNET_ANY_IO_CONDITION,
 					gnet_tcp_socket_new_async_cb, 
@@ -344,36 +367,53 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 			      gpointer data)
 {
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
+  gint error, len;
 
   /* Remove the watch now in case we don't return immediately */
   g_source_remove (state->connect_watch);
 
   errno = 0;
-  if ((condition & G_IO_IN) || (condition & G_IO_OUT))
-    {
-      gint error, len;
-      len = sizeof(error);
+  if (!((condition & G_IO_IN) || (condition & G_IO_OUT)))
+    goto error;
 
-      /* Get the error option */
-      if (getsockopt(state->socket->sockfd, SOL_SOCKET, SO_ERROR, (void*) &error, &len) >= 0)
-	{
-	  /* Check if there is an error */
-	  if (!error)
-	    {
-	      /* Reset the flags */
-	      if (fcntl(state->socket->sockfd, F_SETFL, state->flags) == 0)
-		{
-		  (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
-		  g_free(state);
-		  return FALSE;
-		}
-	    }
-	}
+  len = sizeof(error);
+
+  /* Get the error option */
+  if (getsockopt(state->socket->sockfd, SOL_SOCKET, SO_ERROR, (void*) &error, &len) < 0)
+    goto error;
+
+  /* Check if there is an error */
+  if (error)
+    goto error;
+
+  /* Reset the flags */
+  if (fcntl(state->socket->sockfd, F_SETFL, state->flags) != 0)
+    goto error;
+
+  /* Negotiate with SOCKS? */
+  if (state->socks_addr)
+    {
+      GInetAddr* addr;
+      int rv;
+
+      addr = gnet_private_inetaddr_sockaddr_new(state->socket->sa);
+      rv = gnet_private_negotiate_socks_server (state->socket, addr);
+      gnet_inetaddr_delete (addr);
+      if (rv < 0)
+	goto error;
     }
 
-  /* Otherwise, there was an error */
+  /* Success */
+  (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
+  gnet_inetaddr_delete (state->socks_addr);
+  g_free(state);
+  return FALSE;
+
+  /* Error */
+ error:
   (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
-  gnet_tcp_socket_delete(state->socket);
+  gnet_tcp_socket_delete (state->socket);
+  gnet_inetaddr_delete (state->socks_addr);
   g_free(state);
 
   return FALSE;
@@ -395,6 +435,7 @@ gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
 
   g_source_remove(state->connect_watch);
   gnet_tcp_socket_delete(state->socket);
+  gnet_inetaddr_delete (state->socks_addr);
   g_free (state);
 }
 
@@ -409,9 +450,12 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   gint sockfd;
   gint status;
   GTcpSocket* s;
+  GInetAddr* socks_addr = NULL;
+  const GInetAddr* socks_addr_save = NULL;
+  struct sockaddr sa;
   struct sockaddr_in* sa_in;
   GTcpSocketAsyncState* state;
-	u_long arg;
+  u_long arg;
 
   g_return_val_if_fail(addr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
@@ -429,32 +473,53 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   s->ref_count = 1;
   s->sockfd = sockfd;
 
+  /* If there's a SOCKS server, switch addresses so we connect to
+     that. */
+  socks_addr = gnet_socks_get_server ();
+  if (socks_addr)
+    {
+      socks_addr_save = addr;
+      addr = socks_addr;
+    }
+
   /* Set up address and port for connection */
-  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
-  sa_in = (struct sockaddr_in*) &s->sa;
+  memcpy(&sa, &addr->sa, sizeof(sa));
+  sa_in = (struct sockaddr_in*) &sa;
   sa_in->sin_family = AF_INET;
 
   /* Force the socket into non-blocking mode */
   arg = 1;
   ioctlsocket(sockfd, FIONBIO, &arg);
 
-  status = connect(s->sockfd, &s->sa, sizeof(s->sa));
+  status = connect(s->sockfd, &sa, sizeof(s->sa));
   if (status == SOCKET_ERROR) /* Returning an error is ok, unless.. */
     {
       status = WSAGetLastError();
       if (status != WSAEWOULDBLOCK)
 	{
 	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+	  if (socks_addr) gnet_inetaddr_delete (socks_addr);
 	  g_free(s);
 	  return NULL;
 	}
     }
+
+  /* Swap the SOCK server back */
+  if (socks_addr_save)
+    addr = socks_addr_save;
+
+  /* Save address */ 
+  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
+  sa_in = (struct sockaddr_in*) &sa;
+  sa_in->sin_family = AF_INET;
+
   /* Wait for the connection */
   state = g_new0(GTcpSocketAsyncState, 1);
   state->socket = s;
   state->func = func;
   state->data = data;
   state->socket->sockfd = sockfd;
+  state->socks_addr = socks_addr;
 
   state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
 					G_IO_IN | G_IO_ERR,
@@ -481,27 +546,42 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
 
   if (condition & G_IO_ERR)
+    goto error;
+
+  if (state->socks_addr)
     {
-      (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, 
-		     state->data);
-      g_free(state);
-      return FALSE;
+      GInetAddr* addr;
+      int rv;
+
+      addr = gnet_private_inetaddr_sockaddr_new (state->socket->sa);
+      rv = gnet_private_negotiate_socks_server (state->socket, addr);
+      gnet_inetaddr_delete (addr);
+      if (rv < 0)
+	goto error;
     }
 
   (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
-	g_free(state);
+  gnet_inetaddr_delete (state->socks_addr);
+  g_free (state);
+  return FALSE;
 
+ error:
+  (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
+  gnet_tcp_socket_delete (state->socket);
+  gnet_inetaddr_delete (state->socks_addr);
+  g_free (state);
   return FALSE;
 }
 
 
 void
-gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
+gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
 {
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
 	
   g_source_remove(state->connect_watch);
   gnet_tcp_socket_delete(state->socket);
+  gnet_inetaddr_delete (state->socks_addr);
   g_free (state);
 }
 

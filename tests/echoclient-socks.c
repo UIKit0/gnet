@@ -1,5 +1,5 @@
 /* Echo client
- * Copyright (C) 2000-2001  David Helder
+ * Copyright (C) 2000  David Helder
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,58 +16,59 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet/gnet.h>
 
-typedef enum { NORMAL, ASYNC, OBJECT} ClientType;
+#define GNET_EXPERIMENTAL 1
+#include <gnet.h>
 
 
 static void usage (int status);
-
 static void normal_echoclient (gchar* hostname, gint port);
 static void async_echoclient (gchar* hostname, gint port);
-static void object_echoclient (gchar* hostname, gint port);
 
 
 int
 main(int argc, char** argv)
 {
-  ClientType client_type = NORMAL;
+  char*      socks_hostname = NULL;
+  int        socks_port = GNET_SOCKS_PORT;
+  GInetAddr* socks_ia;
 
-  if (argc != 3 && argc != 4)
+  if (argc < 3 || argc > 5)
     usage(EXIT_FAILURE);
+  if (argc >= 4)
+    socks_hostname = argv[3];
+  if (argc >= 5)
+    socks_port = atoi(argv[4]);
 
-  if (argc == 4)
+  if (socks_hostname)
     {
-      if (strcmp(argv[1], "--async") == 0)
-	client_type = ASYNC;
-      else if (strcmp(argv[1], "--object") == 0)
-	client_type = OBJECT;
-      else
-	usage(EXIT_FAILURE);
+      socks_ia = gnet_inetaddr_new (socks_hostname, socks_port);
+      if (!socks_ia)
+	{
+	  fprintf (stderr, "Bad SOCKS server address: %s:%d\n", 
+		   socks_hostname, socks_port);
+	  exit (EXIT_FAILURE);
+	}
+      gnet_socks_set_server (socks_ia);
+      gnet_inetaddr_delete (socks_ia);
     }
 
-  switch (client_type)
-    {
-    case NORMAL:
-      g_print ("Normal echo client running\n");
-      normal_echoclient(argv[argc-2], atoi(argv[argc-1]));
-      break;
-    case ASYNC:
-      g_print ("Asynchronous echo client running\n");
-      async_echoclient(argv[argc-2], atoi(argv[argc-1]));
-      break;
-    case OBJECT:
-      g_print ("Object echo client running\n");
-      object_echoclient(argv[argc-2], atoi(argv[argc-1]));
-      break;
-    default:
-      g_assert_not_reached();
-    }
+  gnet_socks_set_enabled (TRUE);
+
+  socks_ia = gnet_socks_get_server();
+  if (socks_ia)
+    g_print ("SOCKS server is %s:%d\n",
+	     gnet_inetaddr_get_canonical_name(socks_ia),
+	     gnet_inetaddr_get_port(socks_ia));
+  else
+    g_print ("No SOCKS server\n");
+
+/*    normal_echoclient(argv[1], atoi(argv[2])); */
+  async_echoclient (argv[1], atoi(argv[2]));
 
   return 0;
 }
@@ -76,7 +77,7 @@ main(int argc, char** argv)
 static void
 usage (int status)
 {
-  g_print ("usage: echoclient [(nothing)|--async|--object] <server> <port>\n");
+  g_print ("usage: socksclient <server> <port> [SOCKS server] [SOCKS port]\n");
   exit(status);
 }
 
@@ -86,7 +87,7 @@ usage (int status)
 
 
 static void
-normal_echoclient(gchar* hostname, gint port)
+normal_echoclient (gchar* hostname, gint port)
 {
   GInetAddr* addr = NULL;
   GTcpSocket* socket = NULL;
@@ -125,8 +126,6 @@ normal_echoclient(gchar* hostname, gint port)
 
 }
 
-
-
 /* ************************************************************ */
 
 static void async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
@@ -164,8 +163,8 @@ static void
 async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
 		       GTcpSocketConnectAsyncStatus status, gpointer data)
 {
-  GIOChannel* in;
   GIOChannel* sin;
+  GIOChannel* in;
 
   if (status != GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK)
     {
@@ -182,7 +181,6 @@ async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
   in = g_io_channel_unix_new (fileno(stdin));
   g_io_add_watch(in, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 		 async_client_in_iofunc, sin);
-
 }
 
 
@@ -240,14 +238,15 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
 
 static gboolean
 async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition, 
-			gpointer data)
+		     gpointer data)
 {
   /* Check for socket error */
-  if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
+  if (condition & G_IO_ERR)
     {
       fprintf (stderr, "Socket error\n");
       goto error;
     }
+
 
   /* Check for data to be read (or if the stdin was closed (?)) */
   if (condition & G_IO_IN)
@@ -297,159 +296,3 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
   return FALSE;
 }
 
-
-
-
-
-#if 0
-
-  GIOChannel* server;
-
-
-  /* Read stuff from the server */
-  server = gnet_tcp_socket_get_iochannel(socket);
-  g_io_add_watch(iochannel, 
-		 G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
-		 async_server_iofunc, server);
-
-#endif
-
-
-
-/* ************************************************************ */
-
-static gboolean ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition, 
-			      gpointer data);
-
-static gboolean ob_conn_func (GConn* conn, GConnStatus status, 
-			      gchar* buffer, gint length, gpointer user_data);
-
-
-
-static void
-object_echoclient (gchar* hostname, gint port)
-{
-  GMainLoop* main_loop = NULL;
-  GConn* conn;
-  GIOChannel* in;
-
-  g_print ("connect to %s %d\n", hostname, port);
-
-  /* Create the main loop */
-  main_loop = g_main_new(FALSE);
-  
-  /* Create connection object */
-  conn = gnet_conn_new (hostname, port, ob_conn_func, NULL);
-  g_assert (conn);
-
-  /* Connect */
-  gnet_conn_connect (conn, 0);
-
-  /* Read from stdin */
-  in = g_io_channel_unix_new (fileno(stdin));
-  g_io_add_watch(in, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
-		 ob_in_iofunc, conn);
-
-  /* Start the main loop */
-  g_main_run (main_loop);
-}
-
-
-static gboolean
-ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition, 
-	      gpointer data)
-{
-  GConn* conn = (GConn*) data;
-
-  /* Check for socket error */
-  if (condition & G_IO_ERR)
-    {
-      fprintf (stderr, "Socket error\n");
-      goto error;
-    }
-
-
-  /* Check for data to be read (or if the stdin was closed (?)) */
-  if (condition & G_IO_IN)
-    {
-      GIOError error;
-      gchar buffer[1024];
-      guint bytes_read;
-
-      /* Read the data into our buffer */
-      error = g_io_channel_read(iochannel, buffer, 
-				sizeof(buffer), &bytes_read);
-
-      /* Check for stdin error */
-      if (error != G_IO_ERROR_NONE)
-	{
-	  fprintf (stderr, "Read error (%d)\n", error);
-	  goto error;
-	}
-
-      /* Check for EOF */
-      else if (bytes_read == 0)
-	{
-	  /* Really we should free all our resources here, but
-             whatever */
-	  goto error;
-	}
-
-      /* Otherwise, we read something */
-      else
-	{
-	  gnet_conn_write (conn, g_memdup(buffer, bytes_read), 
-			   bytes_read, 0);
-	}
-    }
-
-  return TRUE;
-
- error:
-  exit (EXIT_FAILURE);
-  return FALSE;
-}
-
-
-
-static gboolean
-ob_conn_func (GConn* conn, GConnStatus status, 
-	      gchar* buffer, gint length, gpointer user_data)
-{
-  switch (status)
-    {
-
-    case GNET_CONN_STATUS_CONNECT:
-      {
-	fprintf (stderr, "connect\n");
-	gnet_conn_readline (conn, NULL, 1024, 60000);
-	break;
-      }
-
-    case GNET_CONN_STATUS_READ:
-      {
-	fwrite (buffer, length, 1, stdout);
-	break;
-      }
-
-    case GNET_CONN_STATUS_WRITE:
-      {
-	g_free (buffer);
-	break;
-      }
-
-    case GNET_CONN_STATUS_CLOSE:
-    case GNET_CONN_STATUS_TIMEOUT:
-    case GNET_CONN_STATUS_ERROR:
-      {
-	gnet_conn_delete (conn, TRUE /* delete write buffers */);
-	break;
-      }
-
-    default:
-      g_assert_not_reached ();
-    }
-
-  return TRUE;	/* TRUE means read more if status was read, otherwise
-                   its ignored */
-}

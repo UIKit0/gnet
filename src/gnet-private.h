@@ -213,6 +213,7 @@ typedef struct _GTcpSocketAsyncState
   gpointer data;
   gint flags;
   guint connect_watch;
+  GInetAddr* socks_addr;
 #ifdef GNET_WIN32
   gint errorcode;
 #endif

@@ -15,7 +15,7 @@ noinst_PROGRAMS = 	\
 	hash		\
 	hostinfo	\
 	pack		\
-	socksclient	\
+	echoclient-socks\
 	unpack		\
 	urlparse	\
 	$(TESTS)
@@ -29,7 +29,7 @@ dnstest_LDADD	  = $(top_builddir)/src/libgnet.la
 hash_LDADD	  = $(top_builddir)/src/libgnet.la
 hostinfo_LDADD	  = $(top_builddir)/src/libgnet.la
 pack_LDADD	  = $(top_builddir)/src/libgnet.la
-socksclient_LDADD = $(top_builddir)/src/libgnet.la
+echoclient_socks_LDADD = $(top_builddir)/src/libgnet.la
 unpack_LDADD	  = $(top_builddir)/src/libgnet.la
 urlparse_LDADD	  = $(top_builddir)/src/libgnet.la
 
