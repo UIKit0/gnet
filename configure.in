@@ -152,6 +152,7 @@ glib_libs=`$GLIB_CONFIG --libs glib`
 
 
 # Need network libraries
+AC_CHECK_LIB(socket, main)
 AC_CHECK_LIB(nsl, main)
 AC_CHECK_LIB(resolv, main)
 
