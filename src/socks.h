@@ -20,7 +20,11 @@
 #ifndef _GNET_SOCKS_H
 #define _GNET_SOCKS_H
 
-/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+/* 
+   This module is experimental, buggy, and unstable.  Use at your own
+   risk.  To use this module, define GNET_EXPERIMENTAL before
+   including gnet.h.
+*/
 #ifdef GNET_EXPERIMENTAL 
 
 #include <glib.h>

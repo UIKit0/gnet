@@ -1,3 +1,9 @@
+Sat May 11 14:36:50 2002  David Helder  <dhelder@umich.edu>
+
+	* src/*.h: Added instructions on using experimental modules.
+	
+	* Makefile.am (copyweb): Updated copyweb.
+
 Fri May  3 11:18:51 2002  David Helder  <dhelder@umich.edu>
 
 	* src/{inetaddr,tcp}.h: s/id/async_id/.  id is a reserved
