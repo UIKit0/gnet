@@ -42,7 +42,9 @@ EXTRA_HFILES=
 HTML_IMAGES =
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE)
-content_files =
+# Need adding in one way or another to EXTRA_DIST as well (tpm)
+content_files = \
+	version.xml
 
 # Other files to distribute
 extra_files =
@@ -76,13 +78,15 @@ GPATH = $(srcdir)
 
 TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
 
+# took content_files out of EXTRA_DIST and added 
+#  version.xml.in directly (tpm)
 EXTRA_DIST = 				\
-	$(content_files)		\
 	$(HTML_IMAGES)			\
 	$(DOC_MAIN_SGML_FILE)		\
 	$(DOC_MODULE).types		\
 	$(DOC_MODULE)-sections.txt	\
-	$(DOC_MODULE)-overrides.txt
+	$(DOC_MODULE)-overrides.txt     \
+	version.xml.in
 
 DOC_STAMPS=scan-build.stamp tmpl-build.stamp sgml-build.stamp html-build.stamp \
 	   $(srcdir)/tmpl.stamp $(srcdir)/sgml.stamp $(srcdir)/html.stamp

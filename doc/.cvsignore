@@ -20,3 +20,4 @@ scan-build.stamp
 scratch
 sgml-build.stamp
 tmpl-build.stamp
+version.xml

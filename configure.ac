@@ -527,6 +527,7 @@ AC_CONFIG_FILES([
 	examples/Makefile
 	tests/Makefile
 	doc/Makefile
+	doc/version.xml
 	gnetconfig.h
 	gnet.spec
 	gnet-2.0.pc])

@@ -1,5 +1,17 @@
 2005-02-19  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* configure.ac:
+	* doc/.cvsignore:
+	* doc/Makefile.am:
+	* doc/README:
+	* doc/gnet-docs.sgml:
+	* doc/version.xml.in:
+	  Put the version number into the API reference manual
+	  banner; update doc README and remove outdated docs 
+	  build instructions.
+
+2005-02-19  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* RELEASE:
 	  Added some notes on which win32 files need to be changed
 	  when new source files and/or new symbols are added.

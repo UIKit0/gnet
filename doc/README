@@ -1,22 +1,20 @@
-
-GNet Documentation notes
-
+==========================
+ GNet Documentation notes
+==========================
 
 gtk-doc is required to build the documentation.  Only developers would
 need to build the docs.  All distributions should include the docs
-pre-built.
+pre-built. This will be the case if you create the distribution tarball
+with 'make distcheck'.
 
 
-To build the documentation:
+If gtk-doc is available and the version requirements are met, the 
+documentation will be built automatically when make descends into
+the doc directory.
 
-> make scan
-> make templates
-> make sgml
-> make html
-
-
-
-Style notes
+=====================================
+ Style notes for inline documentation
+======================================
 
 * Arguments 
 

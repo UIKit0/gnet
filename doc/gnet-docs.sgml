@@ -18,6 +18,7 @@
 <!ENTITY gnet-unix SYSTEM "xml/unix.xml">
 <!ENTITY gnet-ipv6 SYSTEM "xml/ipv6.xml">
 <!ENTITY gnet-base64 SYSTEM "xml/base64.xml">
+<!ENTITY version SYSTEM "version.xml">
 <!ENTITY hash     "#">
 <!ENTITY at       "@">
 <!ENTITY percent  "&percnt;">
@@ -32,6 +33,7 @@
   <bookinfo>
 
     <title>GNet Network Library Reference Manual</title>
+    <releaseinfo>for GNet &version;</releaseinfo>
 
     <authorgroup>
       <author>
