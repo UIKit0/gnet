@@ -145,6 +145,7 @@ server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpointer data)
       conn->inetaddr = gnet_tcp_socket_get_inetaddr (client);
       conn->hostname = gnet_inetaddr_get_canonical_name (conn->inetaddr);
       conn->port = gnet_inetaddr_get_port (conn->inetaddr);
+      conn->ref_count = 1;
 
       (server->func)(server, GNET_SERVER_STATUS_CONNECT, 
 		     conn, server->user_data);
