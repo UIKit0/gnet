@@ -182,7 +182,10 @@ if test "x$GCC" = "xyes"; then
 			;;
 		*)
 			CFLAGS="$CFLAGS -Wall -Wstrict-prototypes \
-			-Wmissing-prototypes -Wmissing-declarations -Werror"
+			-Wmissing-prototypes -Wmissing-declarations"
+			if test "x$enable_debug" = "xyes"; then
+			  CFLAGS="$CFLAGS -Werror"
+			fi
 			;;
 	esac
 	if test "x$enable_ansi" = "xyes"; then

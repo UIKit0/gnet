@@ -1,3 +1,10 @@
+Wed Oct 16 17:24:00 2002  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Enable -Werror only when in "yes"
+	   debug mode.  gcc-3.2 issues warnings on the 
+	   G_something_BE_LE ASM macro.  This allows gcc-3.2
+	   users to compile GNet.
+
 Fri Oct 11 15:37:41 2002  David Helder  <dhelder@umich.edu>
 
 	* tests/{unpack,pack}.c: Include stdlib.h.  Include
