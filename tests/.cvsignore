@@ -13,3 +13,5 @@ urlparse
 uri_test
 ipv6_test
 inetaddr_test
+.client*
+.server*
