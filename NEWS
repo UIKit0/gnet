@@ -5,6 +5,12 @@ GNet NEWS
 Changes in Gnet
 
 
+1.1.4 ("Inchmeal" release)
+-----
+* Several bugs fixed in the asynchronous DNS module
+* Objective C compile fixes
+
+
 1.1.3 ("Fishmeal" release)
 -----
 * Several small bugs and memory leaks fixed
