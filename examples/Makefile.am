@@ -3,7 +3,7 @@
 @SET_MAKE@
 
 EXTRA_PROGRAMS = sdr jmsend jmreceive hfetch echoserver echoclient \
-		 hostinfo dnstest ljoust pack hash
+		 hostinfo dnstest ljoust pack unpack hash
 
 CLEANFILES = sdr jmsend jmreceive hfetch echoserver echoclient \
 	     hostinfo dnstest ljoust pack hash
@@ -35,6 +35,9 @@ hash_SOURCES =		\
 
 pack_SOURCES =		\
 	pack.c
+
+unpack_SOURCES =	\
+	unpack.c
 
 
 ##########

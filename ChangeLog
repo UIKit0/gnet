@@ -1,3 +1,19 @@
+Sat Oct 21 01:09:52 2000  David Helder  <dhelder@umich.edu>
+
+	* examples/unpack.c: Added
+	* examples/pack.c: Added more tests 
+
+	* src/pack.c (gnet_vunpack): unpack s is now like pack s.  Use r
+	    or S for old semantics
+	* src/pack.c (strlenn): Fixed.  Fixes unpack s
+	* src/pack.c: Fixed pack/unpack of big endian pointers (like
+	    you'd ever do this...)
+	* src/pack.c (gnet_vpack): Fix pack R
+	* src/pack.c (gnet_vpack): p can now be repeated
+	
+	* src/pack.c: Made sure va_arg uses only int or double.  This
+	    should fix gcc 2.76 warning Joe found.
+
 Fri Oct 20 11:27:08 2000  David Helder  <dhelder@umich.edu>
 
 	* src/*.[ch]: Added Copyright line for Andy to files

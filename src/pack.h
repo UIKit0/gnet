@@ -26,7 +26,7 @@ gint gnet_pack (const gchar* format, gchar* str, const guint len, ...);
 gint gnet_vpack (const gchar* format, gchar* str, const guint len, va_list args);
 gint gnet_pack_strdup (const gchar* format, gchar** str, ...); /* NOT DONE */
      
-gint gnet_calcsize (const gchar* format);
+gint gnet_calcsize (const gchar* format); /* UNTESTED */
      
 gint gnet_unpack (const gchar* format, gchar* str, gint len, ...);
 gint gnet_vunpack (const gchar* format, gchar* str, gint len, va_list args);

@@ -41,4 +41,14 @@ gnetinclude_HEADERS = 		\
 	conn.h			\
 	server.h
 
+#EXTRA_PROGRAMS = pack unpack
+
+#pack_SOURCES =		\
+#	pack.c		\
+#	packtest.c
+
+#unpack_SOURCES =	\
+#	pack.c		\
+#	unpack.c
+
 EXTRA_DIST = gnet-private.h
