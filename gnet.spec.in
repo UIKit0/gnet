@@ -48,7 +48,7 @@ library.
 
 
 %prep
-%setup
+%setup -q -n gnet-%{version}
 
 %build
 %ifarch alpha
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/lib/libgnet-%{libver}.so
 
 %changelog
+* Sun Apr 27 2003 Bas Mevissen <packager@basmevissen.nl>
+- Updated to coexist with gnet-1.x.x RPM's
+
 * Mon Mar 03 2003 Jeff Bonggren <jbon@cfl.rr.com>
 - Removed Docdir directive.
 - Updated the files section.

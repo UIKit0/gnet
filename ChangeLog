@@ -1,3 +1,9 @@
+Mon Apr 28 12:32:55 2003  David Helder  <dhelder@umich.edu>
+
+	* configure.ac (GNET_BINARY_AGE): version++
+	* gnet.pc.in, src/?: Sun compiler patch from Ives Aerts
+	* gnet.spec.in: Fixes from Bas Mevissen
+
 Mon Apr 21 18:22:07 2003  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Update version for 2.0.1

@@ -132,12 +132,20 @@ struct sockaddr_storage {
 #define GNET_SOCKADDR_ADDR32(s,n)(((s).ss_family == AF_INET)?\
                                   ((struct sockaddr_in*)&s)->sin_addr.s_addr:\
                                   *(guint32*)&((struct sockaddr_in6*)&s)->sin6_addr.s6_addr[(n)*4])
+#define GNET_SOCKADDR_ADDR32_SET(s,n,a) if ((s).ss_family == AF_INET) \
+                                          ((struct sockaddr_in*)&s)->sin_addr.s_addr = a; \
+                                        else \
+                                          *(guint32*)&((struct sockaddr_in6*)&s)->sin6_addr.s6_addr[(n)*4] = a;
 #define GNET_SOCKADDR_ADDRLEN(s) (((s).ss_family == AF_INET)?\
 				 sizeof(struct in_addr):\
 				 sizeof(struct in6_addr))
 #define GNET_SOCKADDR_PORT(s)	(((s).ss_family == AF_INET)?\
                                   ((struct sockaddr_in*)&s)->sin_port:\
                                   ((struct sockaddr_in6*)&s)->sin6_port)
+#define GNET_SOCKADDR_PORT_SET(s, p)	if ((s).ss_family == AF_INET)\
+                                          ((struct sockaddr_in*)&(s))->sin_port = p;\
+                                        else \
+                                          ((struct sockaddr_in6*)&(s))->sin6_port = p;
 #define GNET_SOCKADDR_LEN(s)	(((s).ss_family == AF_INET)?\
                                   sizeof(struct sockaddr_in):\
                                   sizeof(struct sockaddr_in6))
@@ -167,6 +175,7 @@ struct sockaddr_storage {
 #define GNET_INETADDR_ADDR32(i,n)   GNET_SOCKADDR_ADDR32((i)->sa,(n))
 #define GNET_INETADDR_ADDRLEN(i)    GNET_SOCKADDR_ADDRLEN((i)->sa)
 #define GNET_INETADDR_PORT(i)       GNET_SOCKADDR_PORT((i)->sa)
+#define GNET_INETADDR_PORT_SET(i, p)	GNET_SOCKADDR_PORT_SET((i)->sa, p)
 #define GNET_INETADDR_LEN(i)        GNET_SOCKADDR_LEN((i)->sa)
 #define GNET_INETADDR_SET_SS_LEN(i) GNET_SOCKADDR_SET_SS_LEN((i)->sa)
 

@@ -22,6 +22,7 @@ Mark Ferlatte      <ferlatte@cryptio.net>	 Unix sockets
 Eric Williams	   <ericjw@umich.edu>		 URL escape code
 Alfred Reibenschuh <alfredreibenschuh@gmx.net>	 Base64 module
 
+
 Credits
 -------
 Owen Taylor	   Config files based on his GLib/Gtk versions

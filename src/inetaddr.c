@@ -582,7 +582,7 @@ gnet_inetaddr_new (const gchar* hostname, gint port)
   ia = (GInetAddr*) ialist->data;
   ialist = g_list_remove (ialist, ia);
 
-  GNET_INETADDR_PORT(ia) = g_htons(port);
+  GNET_INETADDR_PORT_SET(ia, g_htons(port));
 
   ialist_free (ialist);
 
@@ -618,7 +618,7 @@ gnet_inetaddr_new_list (const gchar* hostname, gint port)
   for (i = ialist; i != NULL; i = i->next)
     {
       GInetAddr* ia = (GInetAddr*) i->data;
-      GNET_INETADDR_PORT(ia) = g_htons(port);
+      GNET_INETADDR_PORT_SET(ia, g_htons(port));
     }
 
   return ialist;
@@ -1044,7 +1044,7 @@ inetaddr_new_list_async_pthread (void* arg)
       for (i = ialist; i != NULL; i = i->next)
 	{
 	  GInetAddr* ia = (GInetAddr*) i->data;
-	  GNET_INETADDR_PORT(ia) = g_htons(state->port);
+          GNET_INETADDR_PORT_SET(ia, g_htons(state->port));
 	}
 
       /* Save the list */
@@ -2205,7 +2205,7 @@ gnet_inetaddr_set_bytes (GInetAddr* inetaddr,
 #endif
   GNET_INETADDR_SET_SS_LEN(inetaddr);
   memcpy (GNET_INETADDR_ADDRP(inetaddr), bytes, length);
-  GNET_INETADDR_PORT(inetaddr) = port;
+  GNET_INETADDR_PORT_SET(inetaddr, port);
 }
 
 
@@ -2268,7 +2268,7 @@ gnet_inetaddr_set_port(const GInetAddr* inetaddr, gint port)
 {
   g_return_if_fail(inetaddr != NULL);
 
-  GNET_INETADDR_PORT(inetaddr) = g_htons(port);
+  GNET_INETADDR_PORT_SET(inetaddr, g_htons(port));
 }
 
 

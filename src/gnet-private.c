@@ -41,7 +41,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
     {
       family = GNET_INETADDR_FAMILY(iface);
       *sa = iface->sa;
-      GNET_SOCKADDR_PORT(*sa) = g_htons(port);
+      GNET_SOCKADDR_PORT_SET(*sa, g_htons(port));
     }
   else
     {

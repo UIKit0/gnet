@@ -4,6 +4,12 @@ GNet NEWS
 
 Changes in Gnet
 
+2.0.2 (UNRELEASED)
+-----
+* RPM fixes (Bas Mevissen)
+* Compile fixes for Sun compiler (thanks Ives Aerts!)
+
+
 2.0.1
 -----
 * Compile fixes for Solaris and systems with no IPv6 support

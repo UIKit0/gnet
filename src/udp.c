@@ -263,11 +263,11 @@ gnet_udp_socket_send (GUdpSocket* socket,
 	{
           sa.ss_family = AF_INET6;
 	  GNET_SOCKADDR_SET_SS_LEN(sa);
-          GNET_SOCKADDR_PORT(sa) = GNET_INETADDR_PORT(dst);
-          GNET_SOCKADDR_ADDR32(sa, 0) = 0;
-          GNET_SOCKADDR_ADDR32(sa, 1) = 0;
-          GNET_SOCKADDR_ADDR32(sa, 2) = g_htonl(0xffff);
-          GNET_SOCKADDR_ADDR32(sa, 3) = GNET_INETADDR_ADDR32(dst, 0);
+          GNET_SOCKADDR_PORT_SET(sa, GNET_INETADDR_PORT(dst));
+          GNET_SOCKADDR_ADDR32_SET(sa, 0, 0);
+          GNET_SOCKADDR_ADDR32_SET(sa, 1, 0);
+          GNET_SOCKADDR_ADDR32_SET(sa, 2, g_htonl(0xffff));
+          GNET_SOCKADDR_ADDR32_SET(sa, 3, GNET_INETADDR_ADDR32(dst, 0));
 	}
 
       /* If dst is IPv6, map to IPv4 if possible */
@@ -277,8 +277,8 @@ gnet_udp_socket_send (GUdpSocket* socket,
 	{
           sa.ss_family = AF_INET;
 	  GNET_SOCKADDR_SET_SS_LEN(sa);
-          GNET_SOCKADDR_PORT(sa) = GNET_INETADDR_PORT(dst);
-          GNET_SOCKADDR_ADDR32(sa, 0) = GNET_INETADDR_ADDR32(dst, 3);
+          GNET_SOCKADDR_PORT_SET(sa, GNET_INETADDR_PORT(dst));
+          GNET_SOCKADDR_ADDR32_SET(sa, 0, GNET_INETADDR_ADDR32(dst, 3));
 	}
       else
         return -1;
