@@ -719,8 +719,8 @@ gnet_inetaddr_get_name_nonblock(GInetAddr* ia,
 	      gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
 	      guchar* p = (guchar*) &(SOCKADDR_IN(ia->sa).sin_addr);
 
-	      snprintf(buffer, sizeof(buffer), 
-		       "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
+	      g_snprintf(buffer, sizeof(buffer), 
+			 "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
 	      len = strlen(buffer);
 
 	      if ((write(pipes[1], &len, sizeof(len)) == -1) ||
@@ -844,8 +844,8 @@ gnet_inetaddr_get_canonical_name(GInetAddr* ia)
   
   g_return_val_if_fail (ia != NULL, NULL);
 
-  snprintf(buffer, sizeof(buffer), 
-	   "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
+  g_snprintf(buffer, sizeof(buffer), 
+	     "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
   
   return g_strdup(buffer);
 }
