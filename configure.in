@@ -200,15 +200,14 @@ AC_TRY_COMPILE([
 # Checks for library functions.
 
 # Check for pthread.
-AC_CHECK_LIB(pthread, pthread_create, [
+pthread_libs=""
+AC_CHECK_LIB(pthread, pthread_create, pthread_libs="-lpthread")
+AC_CHECK_LIB(c_r, pthread_create, pthread_libs="-lc_r")
+if test "$pthread_libs" ; then
     AC_DEFINE(HAVE_LIBPTHREAD)
-    LIBS="-lpthread $LIBS"
-    pthread_libs="-lpthread"
-  ],[
-    pthread_libs=""
-  ])
+    LIBS="$pthread_libs $LIBS"
+fi
 AC_SUBST(pthread_libs)
-
 
 # Check if we have gethostbyname_r (we assume that if the user has gethostbyname_r,
 # that they have a similar gethostbyaddr_r).
