@@ -215,6 +215,12 @@ gnet_sha_copy_string
 </SECTION>
 
 <SECTION>
+<FILE>base64</FILE>
+gnet_base64_encode
+gnet_base64_decode
+</SECTION>
+
+<SECTION>
 <FILE>uri</FILE>
 GURI
 gnet_uri_new

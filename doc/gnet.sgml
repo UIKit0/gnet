@@ -13,6 +13,7 @@
 <!entity pack SYSTEM "sgml/pack.sgml">
 <!entity md5 SYSTEM "sgml/md5.sgml">
 <!entity sha SYSTEM "sgml/sha.sgml">
+<!entity base64 SYSTEM "sgml/base64.sgml">
 ]>
 
 <book>
@@ -92,6 +93,7 @@
         <listitem><para>Asynchronous socket IO</para></listitem>
 	<listitem><para>Asynchronous DNS lookup</para></listitem>
 	<listitem><para>SHA and MD5 hashes</para></listitem>
+	<listitem><para>Base64 encoding and decoding</para></listitem>
 	<listitem><para>Byte packing and unpacking</para></listitem>
 	<listitem><para>IPv4 and IPv6 support</para></listitem>
       </itemizedlist>
@@ -310,6 +312,7 @@ AM_PATH_GNET(&lt;version number&gt;,
     &pack;
     &md5;
     &sha;
+    &base64;
     &uri;
     &conn;
     &server;

@@ -1,3 +1,7 @@
+Mon Jan 27 15:07:38 2003  David Helder  <dhelder@umich.edu>
+
+	* src/base64.[hc]: Updates from Fredo.
+
 Fri Jan 24 15:33:13 2003  David Helder  <dhelder@umich.edu>
 
 	* src/base64.[hc]: Added.  Contributed by Alfred Reibenschuh
