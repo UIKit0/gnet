@@ -1,3 +1,16 @@
+Mon Feb  3 12:55:49 2003  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Bump version to 1.3.1 (unreleased)
+
+	* examples/*: Remove "Or include <gnet/gnet.h>" comment.
+	   This is no longer true.
+
+	* src/iochannel.c: bytes_{read,written} is no longer
+	   optional (reverses change from a few days ago).  Added
+	   some g_return_val_if_fail's
+	
+	* *: More doc work.  
+	
 Wed Jan 29 21:23:57 2003  David Helder  <dhelder@umich.edu>
 
 	* src/md5.[hc]: s/guchar and gint8/gchar/

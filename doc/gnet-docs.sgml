@@ -339,13 +339,14 @@ PKG_CHECK_MODULES(GNET, gnet &gt; 1.4.0,
     &gnet-conn;
     &gnet-server;
     &gnet-iochannel;
-    &gnet-unix;
-    &gnet-socks;
+    &gnet-uri;
+    &gnet-base64;
     &gnet-pack;
     &gnet-md5;
     &gnet-sha;
-    &gnet-base64;
-    &gnet-uri;
+    &gnet-unix;
+    &gnet-ipv6;
+    &gnet-socks;
     
   </chapter>
 </book>

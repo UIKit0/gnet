@@ -319,7 +319,7 @@ struct _GMD5
  *  @buffer: buffer to hash
  *  @length: length of @buffer
  * 
- *  Create an MD5 hash of @buffer.
+ *  Creates a #GMD5 from @buffer.
  *
  *  Returns: a new #GMD5.
  *
@@ -343,7 +343,8 @@ gnet_md5_new (const gchar* buffer, guint length)
  *  gnet_md5_new_string:
  *  @str: hexidecimal string
  * 
- *  Create an MD5 hash from a hexidecimal string.
+ *  Creates a #GMD5 from @str.  @str is a hexidecimal string
+ *  representing the digest.
  *
  *  Returns: a new #GMD5.
  *
@@ -406,9 +407,9 @@ gnet_md5_new_string (const gchar* str)
  *  gnet_md5_clone
  *  @gmd5: a #GMD5
  * 
- *  Create an MD5 by copying a #GMD5.
+ *  Copies a #GMD5.
  *
- *  Returns: a new #GMD5.
+ *  Returns: a copy of @gmd5.
  *
  **/
 GMD5*           
@@ -431,7 +432,7 @@ gnet_md5_clone (const GMD5* gmd5)
  *  gnet_md5_delete
  *  @gmd5: a #GMD5
  *
- *  Delete a #GMD5.
+ *  Deletes a #GMD5.
  *
  **/
 void
@@ -446,11 +447,11 @@ gnet_md5_delete (GMD5* gmd5)
 /**
  *  gnet_md5_new_incremental
  *
- *  Create an MD5 hash incrementally.  After creating the #GMD5, call
- *  gnet_md5_update() one or more times to hash more data.  Finally,
- *  call gnet_md5_final() to compute the final hash value.
+ *  Creates a #GMD5 incrementally.  After creating a #GMD5, call
+ *  gnet_md5_update() one or more times to hash data.  Finally, call
+ *  gnet_md5_final() to compute the final hash value.
  *
- *  Returns: a new #GMD5
+ *  Returns: a new #GMD5.
  *
  **/
 GMD5*		
@@ -470,8 +471,8 @@ gnet_md5_new_incremental (void)
  *  @buffer: buffer to add
  *  @length: length of @buffer
  *
- *  Update the hash with @buffer.  This may be called several times on
- *  a hash created by gnet_md5_new_incremental() before being
+ *  Updates the hash with @buffer.  This may be called several times
+ *  on a hash created by gnet_md5_new_incremental() before being
  *  finalized by calling gnet_md5_final().
  * 
  **/
@@ -488,9 +489,8 @@ gnet_md5_update (GMD5* gmd5, const gchar* buffer, guint length)
  *  gnet_md5_final
  *  @gmd5: a #GMD5
  *
- *  Calcuate the final hash value of @gmd5.  This is called on an
- *  #GMD5 created by gnet_md5_new_incremental() and updated by one or
- *  more calls to gnet_md5_update().
+ *  Calcuates the final hash value of a #GMD5.  This should only be
+ *  called on an #GMD5 created by gnet_md5_new_incremental().
  *
  **/
 void
@@ -509,9 +509,9 @@ gnet_md5_final (GMD5* gmd5)
  *  @p1: first #GMD5.
  *  @p2: second #GMD5.
  *
- *  Compare two #GMD5's.  
+ *  Compares two #GMD5's for equality.
  *
- *  Returns: 1 if they are the same; 0 otherwise.
+ *  Returns: 1 if they are equal; 0 otherwise.
  *
  **/
 gint
@@ -533,11 +533,10 @@ gnet_md5_equal (gconstpointer p1, gconstpointer p2)
  *  gnet_md5_hash
  *  @p: a #GMD5
  *
- *  Hash the GMD5 hash value.  This is not the actual MD5 hash, but a
- *  hash of this hash.  This hash can be used with the GLib
- *  GHashTable.
+ *  Creates a hash code for a #GMD5 for use with GHashTable.  This
+ *  hash value is not the same as the MD5 digest.
  *
- *  Returns: the hash value.
+ *  Returns: the hash code for @p.
  *
  **/
 guint
@@ -558,10 +557,10 @@ gnet_md5_hash (gconstpointer p)
  *  gnet_md5_get_digest
  *  @gmd5: a #GMD5
  *
- *  Get the raw MD5 hash digest.
+ *  Gets the raw MD5 digest.
  *
- *  Returns: callee-owned buffer containing the MD5 hash digest.  The
- *  buffer is %GNET_MD5_HASH_LENGTH bytes long.
+ *  Returns: a callee-owned buffer containing the MD5 hash digest.
+ *  The buffer is %GNET_MD5_HASH_LENGTH bytes long.
  *
  **/
 gchar*        	
@@ -582,9 +581,9 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
  *  gnet_md5_get_string
  *  @gmd5: a #GMD5
  *
- *  Get the digest represented a string.
+ *  Gets the digest represented a human-readable string.
  *
- *  Returns: a hexadecimal string representing the hash.  The string
+ *  Returns: a hexadecimal string representing the digest.  The string
  *  is 2 * %GNET_MD5_HASH_LENGTH bytes long and NULL terminated.  The
  *  string is caller owned.
  *
@@ -616,8 +615,8 @@ gnet_md5_get_string (const GMD5* gmd5)
  * @gmd5: a #GMD5
  * @buffer: buffer at least 2 * %GNET_MD5_HASH_LENGTH bytes long
  *
- * Copy the digest represented as a string into @buffer.  The string
- * is not NULL terminated.
+ * Copies the digest, represented as a string, into @buffer.  The
+ * string is not NULL terminated.
  * 
  **/
 void

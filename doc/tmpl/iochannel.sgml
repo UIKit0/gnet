@@ -6,8 +6,8 @@ GIOChannel utility functions
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-The IOChannel module provides utility functions for working with
-GIOChannels.
+The IOChannel module provides utility functions for reading from and
+writing to GIOChannels.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
@@ -23,9 +23,10 @@ GIOChannels.
 @channel: 
 @buffer: 
 @length: 
-@bytes_written: 
+@bytes_writtenp: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@bytes_written: 
 @buf: 
 @len: 
 
@@ -38,9 +39,10 @@ GIOChannels.
 @channel: 
 @buffer: 
 @length: 
-@bytes_read: 
+@bytes_readp: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@bytes_read: 
 @buf: 
 @len: 
 
@@ -53,9 +55,10 @@ GIOChannels.
 @channel: 
 @buffer: 
 @length: 
-@bytes_read: 
+@bytes_readp: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@bytes_read: 
 @buf: 
 @len: 
 
@@ -67,9 +70,10 @@ GIOChannels.
 
 @channel: 
 @bufferp: 
-@bytes_read: 
+@bytes_readp: 
 @Returns: 
 <!-- # Unused Parameters # -->
+@bytes_read: 
 @buf_ptr: 
 
 

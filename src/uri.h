@@ -66,9 +66,14 @@ GURI*	  gnet_uri_new_fields_all (const gchar* scheme, const gchar* userinfo,
 				   const gchar* query, const gchar* fragment);
 GURI*     gnet_uri_clone (const GURI* uri);
 void      gnet_uri_delete (GURI* uri);
-
-guint     gnet_uri_hash (gconstpointer p);
+	       
 gint 	  gnet_uri_equal (gconstpointer p1, gconstpointer p2);
+guint     gnet_uri_hash (gconstpointer p);
+
+void	  gnet_uri_escape (GURI* uri);
+void	  gnet_uri_unescape (GURI* uri);
+
+gchar* 	  gnet_uri_get_string (const GURI* uri);
 
 void 	  gnet_uri_set_scheme   (GURI* uri, const gchar* scheme);
 void 	  gnet_uri_set_userinfo	(GURI* uri, const gchar* userinfo);
@@ -77,11 +82,6 @@ void 	  gnet_uri_set_port     (GURI* uri, gint port);
 void 	  gnet_uri_set_path	(GURI* uri, const gchar* path);
 void 	  gnet_uri_set_query 	(GURI* uri, const gchar* query);
 void 	  gnet_uri_set_fragment (GURI* uri, const gchar* fragment);
-	       
-void	  gnet_uri_escape (GURI* uri);
-void	  gnet_uri_unescape (GURI* uri);
-
-gchar* 	  gnet_uri_get_string (const GURI* uri);
 
 #ifdef __cplusplus
 }

@@ -230,8 +230,9 @@ gnet_uri_new_fields
 gnet_uri_new_fields_all
 gnet_uri_clone
 gnet_uri_delete
-gnet_uri_hash
-gnet_uri_equal
+gnet_uri_escape
+gnet_uri_unescape
+gnet_uri_get_string
 gnet_uri_set_scheme
 gnet_uri_set_userinfo
 gnet_uri_set_hostname
@@ -239,9 +240,8 @@ gnet_uri_set_port
 gnet_uri_set_path
 gnet_uri_set_query
 gnet_uri_set_fragment
-gnet_uri_escape
-gnet_uri_unescape
-gnet_uri_get_string
+gnet_uri_hash
+gnet_uri_equal
 </SECTION>
 
 <SECTION>

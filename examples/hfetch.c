@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
+#include <gnet.h>
 
 
 #define DELIM ":/"

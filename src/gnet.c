@@ -33,7 +33,7 @@ static gboolean ipv6_detect_iface (void);
 
 
 /**
- *  gnet_init:
+ *  gnet_init
  *
  *  Initializes the GNet library.  This should be called at the
  *  beginning of any GNet program and before any call to gtk_init().
@@ -58,8 +58,6 @@ gnet_init (void)
 /*    g_print ("ipv6 policy is %d\n", gnet_ipv6_get_policy()); */
 
 }
-
-
 
 
 /* 
@@ -105,8 +103,6 @@ ipv6_detect_envvar (void)
 
   return TRUE;
 }
-
-
 
 
 

@@ -35,20 +35,9 @@ extern "C" {
  *  @GIPV6_POLICY_IPV6_ONLY: Use IPv6 only
  * 
  *  Policy for IPv6 use in GNet.  This affects domain name resolution
- *  and server binding.  A name can be resolved to several addresses.
- *  Most programs will use the first address in the list.  The problem
- *  then is what order should the list be in if there are both IPv4
- *  and IPv6 addresses in the list.  For example, if the system cannot
- *  connect to IPv6 hosts then an IPv6 address should not be first in
- *  the list.  In addition, GNet needs to know whether to bind to the
- *  IPv4 or IPv6 "any" address when creating a server socket.
- *  
- *  gnet_init() attempts to set a reasonable default based on the
- *  interfaces available on the host.  If there are only IPv4
- *  interfaces, the policy is set to %GIPV6_POLICY_IPV4_ONLY.  If
- *  there are only IPv6 interfaces, the policy is set to
- *  %GIPV6_POLICY_IPV6_ONLY.  If there are both, the policy is
- *  set to %GIPV6_POLICY_SYSTEM_DEFAULT.
+ *  and server binding.  gnet_init() attempts to set a reasonable
+ *  default based on environment variables or the interfaces available
+ *  on the host.
  *
  **/
 typedef enum {

@@ -1,59 +1,48 @@
 <!-- ##### SECTION Title ##### -->
-Inetaddr
+InetAddr
 
 <!-- ##### SECTION Short_Description ##### -->
 Internet Address
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-GInetAddr represents an internet address.  This module provides
+A #GInetAddr represents an internet address.  This module provides
 functions for making DNS and reverse DNS lookups (blocking and
-asynchronously) and for working with GInetAddr's.
+asynchronously) and for working with #GInetAddr's.
 </para>
 
 <para>
-A GInetAddr can be created by calling gnet_inetaddr_new().  This
-function will perform a DNS lookup and creates a GInetAddr
-representing the address.  This function will block.  This is not
-tolerable in an interactive program.  To prevent the program from
-blocking, either create a thread that will do the lookup or call
-gnet_inetaddr_new_async().  This function performs the lookup
-asynchronously and calls a callback with the GInetAddr when the lookup
-completes.  Note that GNet requires that the GLib event loop be
-running to make asynchronous calls.  This is usually the case in most
-GTK and Gnome programs.  An asynchronous lookup can be canceled by
-calling gnet_inetaddr_new_async_cancel().
+Create a #GInetAddr by calling gnet_inetaddr_new().  This function
+will perform a DNS lookup and creates a #GInetAddr representing the
+address.  This function blocks.  The function
+gnet_inetaddr_new_async() performs the lookup asynchronously and calls
+a callback with the #GInetAddr when the lookup completes.  An
+asynchronous lookup can be canceled by calling
+gnet_inetaddr_new_async_cancel().
 </para>
 
 <para>
-Technically, a DNS lookup can map a name to several addresses.  Use
+Technically a DNS lookup can map a name to several addresses.  Use
 gnet_inetaddr_new_list() or gnet_inetaddr_new_list_async() to get this
-list.  Use gnet_inetaddr_delete_list() to delete this list.
+list.  Use gnet_inetaddr_delete_list() to delete the list.
 </para>
 
 <para>
-This module can also be used to make reverse DNS lookups.  That is, it
-can map an address to a hostname.  Call gnet_inetaddr_get_name() to
-get the hostname from an address.  This function blocks.  The
-asynchronous version of this function is
+This module can also make reverse DNS lookups (i.e., map an address to
+a hostname).  Call gnet_inetaddr_get_name() to get the hostname from
+an address.  This function blocks.  Its asynchronous counterpart is
 gnet_inetadr_get_name_async().  To get the canonical name, or dotted
-decimal address, call gnet_inetaddr_get_canonical_name().  This
-function does not block.
+decimal address, call gnet_inetaddr_get_canonical_name().
 </para>
 
 <para>
 To get the host's address, call gnet_inetaddr_gethostaddr().  This
-creates a GInetAddr by performing a DNS lookup on the host's name.
-</para>
-
-<para>
-To get the list of the host's interfaces, call
+creates a #GInetAddr by performing a DNS lookup on the host's name.
+To get the list of all the host's interfaces, call
 gnet_inetaddr_list_interfaces().  The function
 gnet_inetaddr_autodetect_internet_interface() uses this function and
-heuristics to find an interface connected to the internet.  This is
-useful for automatically configuring peer-to-peer applications.  Note
-that by default, the gnet_tcp_socket_server_new() binds to all
-interfaces.
+heuristics to find an interface connected to the internet.  This can
+be used to automatically configure peer-to-peer applications.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
@@ -72,9 +61,11 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @port: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### TYPEDEF GInetAddrNewAsyncID ##### -->
@@ -97,11 +88,13 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @port: 
 @func: 
 @data: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_new_async_cancel ##### -->
@@ -119,9 +112,11 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @port: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_delete_list ##### -->
@@ -156,11 +151,13 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @port: 
 @func: 
 @data: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_new_list_async_cancel ##### -->
@@ -178,9 +175,11 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @port: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_new_bytes ##### -->
@@ -255,8 +254,10 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @data: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_name_async ##### -->
@@ -312,8 +313,10 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_is_internet ##### -->
@@ -471,8 +474,10 @@ interfaces.
 
 </para>
 
-@name: 
+@hostname: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@name: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_list_interfaces ##### -->

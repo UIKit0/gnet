@@ -42,7 +42,7 @@ void    gnet_sha_delete (GSHA* gsha);
 GSHA*	gnet_sha_new_incremental (void);
 void	gnet_sha_update (GSHA* gsha, const gchar* buffer, guint length);
 void	gnet_sha_final (GSHA* gsha);
-	
+
 gint 	gnet_sha_equal (gconstpointer p1, gconstpointer p2);
 guint	gnet_sha_hash (gconstpointer p);
 	
@@ -50,7 +50,7 @@ gchar*  gnet_sha_get_digest (const GSHA* gsha);
 gchar*  gnet_sha_get_string (const GSHA* gsha);
 	
 void	gnet_sha_copy_string (const GSHA* gsha, gchar* buffer);
-
+	
 
 #ifdef __cplusplus
 }

@@ -33,7 +33,7 @@ static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpo
  *  @func: callback to call when a connection is accepted
  *  @user_data: data to pass to callback
  *
- *  Create a new #GServer object representing a server.  Normally,
+ *  Creates a new #GServer object representing a server.  Normally,
  *  @iface is set to NULL to bind to all interfaces and @port is a
  *  specific number.  The callback is called whenever a new connection
  *  arrives or if there is a server error.  The callback is not called
@@ -75,7 +75,7 @@ gnet_server_new (const GInetAddr* iface, gint port,
  *  gnet_server_delete:
  *  @server: #GServer to delete.
  *
- *  Close and delete a #GServer.
+ *  Closes and deletes a #GServer.
  *
  **/
 void

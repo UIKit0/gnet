@@ -544,26 +544,26 @@ inet_aton (const char *cp, struct in_addr *inp)
 
 
 /**
- *  gnet_inetaddr_new:
- *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal
- *  name (eg, 141.213.8.59).
+ *  gnet_inetaddr_new
+ *  @hostname: host name
  *  @port: port number (0 if the port doesn't matter)
  * 
- *  Create an internet address from a name and port.  This function
- *  may block.  A hostname may resolve to multiple addresses.  If this
- *  occurs, the first address in the list is returned.  Use
- *  gnet_inetaddr_new_list() to get the complete list.
+ *  Creates a #GInetAddr from a host name and port.  This function
+ *  makes a DNS lookup on the host name so it may block.  The host
+ *  name may resolve to multiple addresses.  If this occurs, the first
+ *  address in the list is returned.  Use gnet_inetaddr_new_list() to
+ *  get the complete list.
  *
  *  Returns: a new #GInetAddr, or NULL if there was a failure.
  *
  **/
 GInetAddr* 
-gnet_inetaddr_new (const gchar* name, gint port)
+gnet_inetaddr_new (const gchar* hostname, gint port)
 {
   GList* ialist;
   GInetAddr* ia = NULL;
 
-  ialist = gnet_gethostbyname (name);
+  ialist = gnet_gethostbyname (hostname);
   if (!ialist)
     return NULL;
 
@@ -580,26 +580,25 @@ gnet_inetaddr_new (const gchar* name, gint port)
 
 /**
  *  gnet_inetaddr_new_list:
- *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal
- *  name (eg, 141.213.8.59).
+ *  @hostname: host name
  *  @port: port number (0 if the port doesn't matter)
  * 
- *  Create a list of #GInetAddrs from a name and port.  This function
- *  may block.
+ *  Creates a GList of #GInetAddr's from a host name and port.  This
+ *  function makes a DNS lookup on the host name so it may block.
  *
- *  Returns: a list of #GInetAddrs, or NULL if there was a failure.
+ *  Returns: a GList of #GInetAddr's, or NULL if there was a failure.
  *
  **/
 GList*
-gnet_inetaddr_new_list (const gchar* name, gint port)
+gnet_inetaddr_new_list (const gchar* hostname, gint port)
 {
   GList* ialist;
   GList* i;
 
-  g_return_val_if_fail (name != NULL, NULL);
+  g_return_val_if_fail (hostname != NULL, NULL);
 
   /* Try to get the host by name (ie, DNS) */
-  ialist = gnet_gethostbyname(name);
+  ialist = gnet_gethostbyname(hostname);
   if (!ialist)
     return NULL;
 
@@ -616,9 +615,9 @@ gnet_inetaddr_new_list (const gchar* name, gint port)
 
 /**
  *  gnet_inetaddr_delete_list
- *  @list: List of GInetAddrs
+ *  @list: GList of #GInetAddr's
  *
- *  Delete a list of GInetAddrs
+ *  Deletes a GList of #GInetAddr's.
  *
  **/
 void
@@ -640,26 +639,25 @@ static void
 inetaddr_new_async_cb (GList* ialist, gpointer data);
 
 /**
- *  gnet_inetaddr_new_async:
- *  @name: a domain name (eg, mofo.eecs.umich.edu or 141.213.8.59).
+ *  gnet_inetaddr_new_async
+ *  @hostname: host name
  *  @port: port number (0 if the port doesn't matter)
- *  @func: Callback function.
- *  @data: User data passed when callback function is called.
+ *  @func: callback function
+ *  @data: data to pass to @func on the callback
  * 
- *  Create a GInetAddr from a name and port asynchronously.  The
- *  callback is called once it is created or an error occurs during
- *  lookup.  The callback will not be called during the call to
- *  gnet_inetaddr_new_async().  The GInetAddr passed in the callback
- *  is callee owned.
+ *  Asynchronously creates a #GInetAddr from a host name and port.
+ *  The callback is called once the #GInetAddr is created or an error
+ *  occurs during lookup.  The callback will not be called during the
+ *  call to this function.
  *
  *  See gnet_inetaddr_new_list_async() for implementation notes.
  *
- *  Returns: ID of the lookup which can be used with
- *  gnet_inetaddr_new_async_cancel() to cancel it; NULL on failure.
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be
+ *  used with gnet_inetaddr_new_async_cancel() to cancel the lookup.
  *
  **/
 GInetAddrNewAsyncID 
-gnet_inetaddr_new_async (const gchar* name, gint port, 
+gnet_inetaddr_new_async (const gchar* hostname, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data)
 {
   GInetAddrNewState*		state;
@@ -667,7 +665,7 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 
   state = g_new0(GInetAddrNewState, 1);
 
-  list_id = gnet_inetaddr_new_list_async (name, port, inetaddr_new_async_cb, NULL);
+  list_id = gnet_inetaddr_new_list_async (hostname, port, inetaddr_new_async_cb, NULL);
   if (list_id == NULL)
     {
       g_free (state);
@@ -686,7 +684,7 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
  *  gnet_inetaddr_new_async_cancel
  *  @id: ID of the lookup
  *
- *  Cancel an asynchronous GInetAddr creation that was started with
+ *  Cancels an asynchronous #GInetAddr creation that was started with
  *  gnet_inetaddr_new_async().
  *
  **/
@@ -779,22 +777,22 @@ writen (int fd, const void* buf, size_t len)
 
 
 /**
- *  gnet_inetaddr_new_list_async:
- *  @name: a domain name (eg, mofo.eecs.umich.edu or 141.213.8.59).
+ *  gnet_inetaddr_new_list_async
+ *  @hostname: host name
  *  @port: port number (0 if the port doesn't matter)
- *  @func: Callback function.
- *  @data: User data passed when callback function is called.
+ *  @func: callback function
+ *  @data: data to pass to @func on the callback
  * 
- *  Create a list of GInetAddr's from a name and port asynchronously.
- *  The callback is called once the list is created or an error occurs
- *  during lookup.  The callback will not be called during the call to
- *  gnet_inetaddr_new_async().  The GInetAddr passed in the callback
- *  is callee owned.
+ *  Asynchronously creates a GList of #GInetAddr's from a host name
+ *  and port.  The callback is called once the list is created or an
+ *  error occurs during lookup.  The callback will not be called
+ *  during the call to gnet_inetaddr_new_list_async().  The list
+ *  passed in the callback is callee owned.
  *
  *  The Unix version creates a pthread thread which does the lookup.
  *  If pthreads aren't available, it forks and does the lookup.
- *  Forking will be slow or even fail when using operating systems
- *  that copy the entire process when forking.  
+ *  Forking can be slow or even fail when using operating systems that
+ *  copy the entire process when forking.
  *
  *  If you need to lookup hundreds of addresses, we recommend calling
  *  g_main_iteration(FALSE) between calls.  This will help prevent an
@@ -808,19 +806,19 @@ writen (int fd, const void* buf, size_t len)
  *  The Windows version should work fine.  Windows has an asynchronous
  *  DNS lookup function.
  *
- *  Returns: ID of the lookup which can be used with
- *  gnet_inetaddr_new_list_async_cancel() to cancel it; NULL on
- *  failure.
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be
+ *  used with gnet_inetaddr_new_list_async_cancel() to cancel the
+ *  lookup.
  *
  **/
 GInetAddrNewListAsyncID
-gnet_inetaddr_new_list_async (const gchar* name, gint port, 
+gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
 			      GInetAddrNewListAsyncFunc func, 
 			      gpointer data)
 {
   GInetAddrNewListState* state = NULL;
 
-  g_return_val_if_fail(name != NULL, NULL);
+  g_return_val_if_fail(hostname != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
 # ifdef HAVE_LIBPTHREAD			/* Pthread */
@@ -833,7 +831,7 @@ gnet_inetaddr_new_list_async (const gchar* name, gint port,
     state = g_new0(GInetAddrNewListState, 1);
 
     args = g_new (void*, 2);
-    args[0] = (void*) g_strdup(name);
+    args[0] = (void*) g_strdup(hostname);
     args[1] = state;
 
     pthread_mutex_init (&state->mutex, NULL);
@@ -885,7 +883,7 @@ gnet_inetaddr_new_list_async (const gchar* name, gint port,
 	close (pipes[0]);
 
 	/* Try to get the host by name (ie, DNS) */
-	if ((ialist = gnet_gethostbyname(name)) != NULL)
+	if ((ialist = gnet_gethostbyname(hostname)) != NULL)
 	  {
 	    GList* i;
 	    char* buf;
@@ -1086,7 +1084,7 @@ inetaddr_new_list_async_pthread_dispatch (gpointer data)
  *  gnet_inetaddr_new_list_async_cancel
  *  @id: ID of the lookup
  *
- *  Cancel an asynchronous GInetAddr list creation that was started
+ *  Cancels an asynchronous #GInetAddr list creation that was started
  *  with gnet_inetaddr_new_list_async().
  * 
  **/
@@ -1276,7 +1274,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 
 
 GInetAddrNewListAsyncID
-gnet_inetaddr_new_list_async (const gchar* name, gint port,
+gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
 			      GInetAddrNewListAsyncFunc func, 
 			      gpointer data)
 {
@@ -1284,12 +1282,12 @@ gnet_inetaddr_new_list_async (const gchar* name, gint port,
   struct sockaddr_in* sa_in;
   GInetAddrNewListState* state;
 
-  g_return_val_if_fail(name != NULL, NULL);
+  g_return_val_if_fail(hostname != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
   /* Create a new InetAddr */
   ia = g_new0(GInetAddr, 1);
-  ia->name = g_strdup(name);
+  ia->name = g_strdup(hostname);
   ia->ref_count = 1;
 
   sa_in = (struct sockaddr_in*) &ia->sa;	  /* FIX (Andy) */
@@ -1381,29 +1379,27 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 
 /**
  *  gnet_inetaddr_new_nonblock:
- *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal name
- *    (eg, 141.213.8.59).  You can delete the after the function is called.
+ *  @hostname: host name
  *  @port: port number (0 if the port doesn't matter)
  * 
- *  Create an internet address from a name and port, but don't block
- *  and fail if it would require blocking.  Otherwise, it returns
- *  NULL.  That is, the call will only succeed if the address is in
- *  network address format (i.e., is not a domain name).
+ *  Creates a #GInetAddr from a host name and port without blocking.
+ *  This function does not make a DNS lookup and will fail if creating
+ *  the address would require a DNS lookup.
  *
- *  Returns: a new #GInetAddr, or NULL if there was a failure or it
- *  would require blocking.
+ *  Returns: a new #GInetAddr, or NULL if there was a failure or the
+ *  function would block.
  *
  **/
 GInetAddr* 
-gnet_inetaddr_new_nonblock (const gchar* name, gint port)
+gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
 {
   struct in_addr inaddr;
   struct in6_addr in6addr;
   GInetAddr* ia = NULL;
 
-  g_return_val_if_fail (name, NULL);
+  g_return_val_if_fail (hostname, NULL);
 
-  if (inet_pton(AF_INET, name, &inaddr) != 0)
+  if (inet_pton(AF_INET, hostname, &inaddr) != 0)
     {
       struct sockaddr_in* sa_inp;
 
@@ -1415,7 +1411,7 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
       memcpy(&sa_inp->sin_addr, (char*) &inaddr, sizeof(inaddr));
       sa_inp->sin_port = g_htons(port);
     }
-  else if (inet_pton(AF_INET6, name, &in6addr) != 0)
+  else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
     {
       struct sockaddr_in6* sa_inp;
 
@@ -1437,10 +1433,10 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
 
 /**
  *  gnet_inetaddr_new_bytes
- *  @addr: Address in raw bytes
- *  @length: Length of address (4 if IPv4, 16 if IPv6)
+ *  @addr: address in raw bytes
+ *  @length: length of @addr (4 if IPv4, 16 if IPv6)
  * 
- *  Create an internet address from raw bytes.  The bytes should be in
+ *  Creates a #GInetAddr from raw bytes.  The bytes should be in
  *  network byte order (big endian).  There should be 4 bytes if it's
  *  an IPv4 address and 16 bytees if it's an IPv6 address.  The port
  *  is set to 0.
@@ -1472,11 +1468,11 @@ gnet_inetaddr_new_bytes (const guint8* addr, const guint length)
 
 /**
  *   gnet_inetaddr_clone:
- *   @ia: Address to clone
+ *   @ia: a #GInetAddr
  *
- *   Create an internet address from another one.  
+ *   Copies a #GInetAddr.
  *
- *   Returns: a new InetAddr, or NULL if there was a failure.
+ *   Returns: a copy of @ia.
  *
  **/
 GInetAddr* 
@@ -1497,10 +1493,10 @@ gnet_inetaddr_clone(const GInetAddr* ia)
 
 
 /** 
- *  gnet_inetaddr_delete:
- *  @ia: GInetAddr to delete
+ *  gnet_inetaddr_delete
+ *  @ia: a #GInetAddr
  *
- *  Delete a GInetAddr.
+ *  Deletes a #GInetAddr.
  *
  **/
 void
@@ -1513,9 +1509,9 @@ gnet_inetaddr_delete (GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_ref
- *  @ia: GInetAddr to reference
+ *  @ia: a #GInetAddr
  *
- *  Increment the reference counter of the GInetAddr.
+ *  Adds a reference to a #GInetAddr.
  *
  **/
 void
@@ -1529,10 +1525,10 @@ gnet_inetaddr_ref (GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_unref
- *  @ia: GInetAddr to unreference
+ *  @ia: a #GInetAddr
  *
- *  Remove a reference from the GInetAddr.  When reference count
- *  reaches 0, the address is deleted.
+ *  Removes a reference from a #GInetAddr.  A #GInetAddr is deleted
+ *  when the reference count reaches 0.
  *
  **/
 void
@@ -1554,15 +1550,13 @@ gnet_inetaddr_unref (GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_get_name:
- *  @ia: Address to get the name of.
+ *  @ia: a #GInetAddr
  *
- *  Get the nice name of the address (eg, "mofo.eecs.umich.edu").  The
- *  "nice name" is the domain name if it has one or the canonical name
- *  if it does not.  Be warned that this call may block since it may
- *  need to do a reverse DNS lookup.
+ *  Gets the host name for a #GInetAddr.  This functions makes a
+ *  reverse DNS lookup on the address so it may block.  The canonical
+ *  name is returned if the address has no host name.
  *
- *  Returns: the nice name of the host, or NULL if there was an error.
- *  The caller is responsible for deleting the returned string.
+ *  Returns: the host name for the @ia, or NULL if there was an error.
  *
  **/
 gchar* 
@@ -1588,14 +1582,14 @@ gnet_inetaddr_get_name (/* const */ GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_get_name_nonblock:
- *  @ia: Address to get the name of.
+ *  @ia: a #GInetAddr
  *
- *  Get the nice name of the address, but don't block and fail if it
- *  would require blocking.
+ *  Gets the host name for a #GInetAddr.  This function does not make
+ *  a reverse DNS lookup and will fail if getting the name would
+ *  require a reverse DNS lookup.
  *
- *  Returns: the nice name of the host, or NULL if there was an error
- *  or it would require blocking.  The caller is responsible for
- *  deleting the returned string.
+ *  Returns: the host name for the @ia, or NULL if there was an error
+ *  or it would require blocking.
  *
  **/
 gchar* 
@@ -1618,21 +1612,19 @@ static void* inetaddr_get_name_async_pthread (void* arg);
 
 /**
  *  gnet_inetaddr_get_name_async:
- *  @ia: Address to get the name of.
- *  @func: Callback function.
- *  @data: User data passed when callback function is called.
+ *  @ia: a #GInetAddr
+ *  @func: callback function
+ *  @data: data to pass to @func on the callback
  *
- *  Get the nice name of the address (eg, "mofo.eecs.umich.edu").
- *  This function will use the callback once it knows the nice name.
- *  The callback will not be called during the call to
- *  gnet_inetaddr_new_async().
+ *  Asynchronously gets the host name for a #GInetAddr.  The callback
+ *  is called once the reverse DNS lookup is complete.  The call back
+ *  will not be called during the call to this function.
  *
- *  The Unix uses either pthreads or fork().  See the notes for
- *  gnet_inetaddr_new_async().
+ *  See gnet_inetaddr_new_list_async() for implementation notes.
  *
- *  Returns: ID of the lookup which can be used with
- *  gnet_inetaddrr_get_name_async_cancel() to cancel it; NULL on
- *  failure.
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be
+ *  used with gnet_inetaddr_get_name_async_cancel() to cancel the
+ *  lookup.
  *
  **/
 GInetAddrGetNameAsyncID
@@ -1803,7 +1795,7 @@ static gboolean inetaddr_get_name_async_pthread_dispatch (gpointer data);
  *  gnet_inetaddr_get_name_async_cancel:
  *  @id: ID of the lookup
  *
- *  Cancel an asynchronous nice name lookup that was started with
+ *  Cancels an asynchronous name lookup that was started with
  *  gnet_inetaddr_get_name_async().
  * 
  */
@@ -2110,13 +2102,13 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 
 /**
  *  gnet_inetaddr_get_canonical_name:
- *  @ia: Address to get the canonical name of.
+ *  @ia: a #GInetAddr
  *
- *  Get the "canonical" name of an address (eg, for IP4 the dotted
- *  decimal name 141.213.8.59).
+ *  Gets the canonical name of a #GInetAddr.  An IPv4 canonical name
+ *  is a dotted decimal name (e.g., 141.213.8.59).  An IPv6 canonical
+ *  name is a semicoloned hexidecimal name (e.g., 23:de:ad:be:ef).
  *
- *  Returns: NULL if there was an error.  The caller is responsible
- *  for deleting the returned string.
+ *  Returns: the canonical name; NULL if there was an error.
  *
  **/
 gchar* 
@@ -2137,9 +2129,10 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_get_port:
- *  @ia: Address to get the port number of.
+ *  @ia: a #GInetAddr
  *
- *  Get the port number.
+ *  Gets the port number of a #GInetAddr.  
+ *
  *  Returns: the port number.
  */
 gint
@@ -2153,10 +2146,10 @@ gnet_inetaddr_get_port(const GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_set_port:
- *  @ia: Address to set the port number of.
- *  @port: New port number
+ *  @ia: a #GInetAddr
+ *  @port: new port number
  *
- *  Set the port number.
+ *  Set the port number of a #GInetAddr.
  *
  **/
 void
@@ -2173,11 +2166,10 @@ gnet_inetaddr_set_port(const GInetAddr* ia, guint port)
 
 
 /**
- *  gnet_inetaddr_is_canonical:
- *  @name: Name to check
+ *  gnet_inetaddr_is_canonical
+ *  @hostname: host name
  *
- *  Check if the domain name is canonical.  For IPv4, a canonical name
- *  is a dotted decimal name (eg, 141.213.8.59).
+ *  Checks if the host name is in canonical form.
  *
  *  Returns: TRUE if @name is canonical; FALSE otherwise.
  *
@@ -2196,18 +2188,18 @@ gnet_inetaddr_is_canonical (const gchar* name)
 
 
 /**
- *  gnet_inetaddr_is_internet:
- *  @inetaddr: Address to check
+ *  gnet_inetaddr_is_internet
+ *  @inetaddr: a #GInetAddr
  * 
- *  Check if the address is a sensible internet address.  This mean it
- *  is not private, reserved, loopback, multicast, or broadcast.
+ *  Checks if a #GInetAddr is a sensible internet address.  This mean
+ *  it is not private, reserved, loopback, multicast, or broadcast.
  *
  *  Note that private and loopback address are often valid addresses,
- *  so this should only be used to check for general Internet
+ *  so this should only be used to check for general internet
  *  connectivity.  That is, if the address passes, it is reachable on
- *  the Internet.
+ *  the internet.
  *
- *  Returns: TRUE if the address is an 'Internet' address; FALSE
+ *  Returns: TRUE if the address is an internet address; FALSE
  *  otherwise.
  *
  **/
@@ -2231,11 +2223,11 @@ gnet_inetaddr_is_internet (const GInetAddr* inetaddr)
 
 
 /**
- *  gnet_inetaddr_is_private:
- *  @inetaddr: Address to check
+ *  gnet_inetaddr_is_private
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is an address reserved for private networks
- *  or something else.  For IPv4, this includes:
+ *  Checks if a #GInetAddr is an address reserved for private
+ *  networks.  For IPv4, this includes:
  *
  *   10.0.0.0        -   10.255.255.255  (10/8 prefix)
  *   172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
@@ -2246,8 +2238,7 @@ gnet_inetaddr_is_internet (const GInetAddr* inetaddr)
  *  For IPv6, this includes link local addresses (fe80::/64) and site
  *  local addresses (fec0::/64).
  * 
- *  Returns: TRUE if the address is reserved for private networks;
- *  FALSE otherwise.
+ *  Returns: TRUE if @inetaddr is private; FALSE otherwise.
  *
  **/
 gboolean
@@ -2284,10 +2275,10 @@ gnet_inetaddr_is_private (const GInetAddr* inetaddr)
 
 /**
  *  gnet_inetaddr_is_reserved:
- *  @inetaddr: Address to check
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is reserved for 'something'.  This excludes
- *  address reserved for private networks.
+ *  Checks if a #GInetAddr is reserved for some purpose.  This
+ *  excludes addresses reserved for private networks.
  *
  *  For IPv4, we check for:
  *    0.0.0.0/16  (top 16 bits are 0's)
@@ -2295,9 +2286,7 @@ gnet_inetaddr_is_private (const GInetAddr* inetaddr)
  *
  *  For IPv6, we check for the 00000000 prefix.
  *    
- *
- *  Returns: TRUE if the address is reserved for something; FALSE
- *  otherwise.
+ *  Returns: TRUE if @inetaddr is reserved; FALSE otherwise.
  *
  **/
 gboolean
@@ -2336,14 +2325,13 @@ gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
 
 /**
  *  gnet_inetaddr_is_loopback:
- *  @inetaddr: Address to check
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is a loopback address.  The IPv4 loopback
- *  address have prefix 127.0.0.1/24.  The IPv6 loopback address is
- *  ::1.
+ *  Checks if a #GInetAddr is a loopback address.  The IPv4 loopback
+ *  addresses have the prefix 127.0.0.1/24.  The IPv6 loopback address
+ *  is ::1.
  * 
- *  Returns: TRUE if the address is a loopback address; FALSE
- *  otherwise.
+ *  Returns: TRUE if @inetaddr is a loopback address; FALSE otherwise.
  *
  **/
 gboolean
@@ -2372,15 +2360,15 @@ gnet_inetaddr_is_loopback (const GInetAddr* inetaddr)
 
 
 /**
- *  gnet_inetaddr_is_multicast:
- *  @inetaddr: Address to check
+ *  gnet_inetaddr_is_multicast
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is a multicast address.  IPv4 multicast
- *  addresses are in the range 224.0.0.0 - 239.255.255.255 (ie, the
- *  top four bits are 1110).  IPv6 multicast addresses are in the
- *  format FF::*
+ *  Checks if a #GInetAddr is a multicast address.  IPv4 multicast
+ *  addresses are in the range 224.0.0.0 to 239.255.255.255 (ie, the
+ *  top four bits are 1110).  IPv6 multicast addresses have the prefix
+ *  FF.
  * 
- *  Returns: TRUE if the address is a multicast address; FALSE
+ *  Returns: TRUE if @inetaddr is a multicast address; FALSE
  *  otherwise.
  *
  **/
@@ -2405,14 +2393,14 @@ gnet_inetaddr_is_multicast (const GInetAddr* inetaddr)
 
 
 /**
- *  gnet_inetaddr_is_broadcast:
- *  @inetaddr: Address to check
+ *  gnet_inetaddr_is_broadcast
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is a broadcast address.  The broadcast
- *  address is 255.255.255.255.  (Network broadcast address are
+ *  Checks if a #GInetAddr is a broadcast address.  The broadcast
+ *  address is 255.255.255.255.  (Network broadcast addresses are
  *  network dependent.)
  * 
- *  Returns: TRUE if the address is a broadcast address; FALSE
+ *  Returns: TRUE if @inetaddr is a broadcast address; FALSE
  *  otherwise.
  *
  **/
@@ -2434,12 +2422,11 @@ gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr)
 
 /**
  *  gnet_inetaddr_is_ipv4:
- *  @inetaddr: Address to check
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is an IPv4 address
+ *  Checks if a #GInetAddr is an IPv4 address.
  * 
- *  Returns: TRUE if the address is an IPv4 address; FALSE
- *  otherwise.
+ *  Returns: TRUE if @inetaddr is an IPv4 address; FALSE otherwise.
  *
  **/
 gboolean
@@ -2453,12 +2440,11 @@ gnet_inetaddr_is_ipv4 (const GInetAddr* inetaddr)
 
 /**
  *  gnet_inetaddr_is_ipv6:
- *  @inetaddr: Address to check
+ *  @inetaddr: a #GInetAddr
  *
- *  Check if the address is an IPv6 address
+ *  Check if a #GInetAddr is an IPv6 address.
  * 
- *  Returns: TRUE if the address is an IPv6 address; FALSE
- *  otherwise.
+ *  Returns: TRUE if @inetaddr is an IPv6 address; FALSE otherwise.
  *
  **/
 gboolean
@@ -2479,9 +2465,9 @@ gnet_inetaddr_is_ipv6 (const GInetAddr* inetaddr)
  *  gnet_inetaddr_hash:
  *  @p: Pointer to an #GInetAddr.
  *
- *  Hash the address.  This is useful for GLib containers.
+ *  Creates a hash code for a #GInetAddr for use with GHashTable.
  *
- *  Returns: hash value.
+ *  Returns: the hash code for @p.
  *
  **/
 guint 
@@ -2525,17 +2511,17 @@ gnet_inetaddr_hash (gconstpointer p)
 
 /**
  *  gnet_inetaddr_equal:
- *  @p1: Pointer to first #GInetAddr.
- *  @p2: Pointer to second #GInetAddr.
+ *  @p1: a #GInetAddr.
+ *  @p2: another #GInetAddr.
  *
- *  Compare two #GInetAddr's.  IPv4 and IPv6 addresses are always
- *  unequal.
+ *  Compares two #GInetAddr's for equality.  IPv4 and IPv6 addresses
+ *  are always unequal.
  *
- *  Returns: 1 if they are the same; 0 otherwise.
+ *  Returns: 1 if they are equal; 0 otherwise.
  *
  **/
 gint 
-gnet_inetaddr_equal(gconstpointer p1, gconstpointer p2)
+gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
 {
   const GInetAddr* ia1 = (const GInetAddr*) p1;
   const GInetAddr* ia2 = (const GInetAddr*) p2;
@@ -2574,13 +2560,14 @@ gnet_inetaddr_equal(gconstpointer p1, gconstpointer p2)
 
 
 /**
- *  gnet_inetaddr_noport_equal:
- *  @p1: Pointer to first GInetAddr.
- *  @p2: Pointer to second GInetAddr.
+ *  gnet_inetaddr_noport_equal
+ *  @p1: a #GInetAddr
+ *  @p2: another #GInetAddr
  *
- *  Compare two #GInetAddr's, but does not compare the port numbers.
+ *  Compares two #GInetAddr's for equality, but does not compare the
+ *  port numbers.
  *
- *  Returns: 1 if they are the same; 0 otherwise.
+ *  Returns: 1 if they are equal; 0 otherwise.
  *
  **/
 gint 
@@ -2630,14 +2617,13 @@ gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
 /**
  *  gnet_inetaddr_gethostname:
  * 
- *  Get the primary host's name.
+ *  Gets the host's name.
  *
- *  Returns: the name of the host; NULL if there was an error.  The
- *  caller is responsible for deleting the returned string.
+ *  Returns: the name of the host; NULL if there was an error.
  *
  **/
 gchar*
-gnet_inetaddr_gethostname(void)
+gnet_inetaddr_gethostname (void)
 {
   gchar* name = NULL;
   struct utsname myname;
@@ -2667,7 +2653,7 @@ gnet_inetaddr_gethostname(void)
 /* (Windows doesn't have uname */
 
 gchar*
-gnet_inetaddr_gethostname(void)
+gnet_inetaddr_gethostname (void)
 {
   gchar* name = NULL;
   int error = 0;
@@ -2689,10 +2675,9 @@ gnet_inetaddr_gethostname(void)
 /**
  *  gnet_inetaddr_gethostaddr:
  * 
- *  Get the primary host's #GInetAddr.
+ *  Get the host's address.
  *
- *  Returns: the #GInetAddr of the host; NULL if there was an error.
- *  The caller is responsible for deleting the returned #GInetAddr.
+ *  Returns: the address of the host; NULL if there was an error.
  *
  **/
 GInetAddr* 
@@ -2718,9 +2703,9 @@ gnet_inetaddr_gethostaddr (void)
 
 
 /**
- *  gnet_inetaddr_new_any:
+ *  gnet_inetaddr_new_any
  *
- *  Create a #GInetAddr with the address INADDR_ANY and port 0.  This
+ *  Creates a #GInetAddr with the address INADDR_ANY and port 0.  This
  *  is useful for creating default addresses for binding.  The
  *  address's name will be "&lt;INADDR_ANY&gt;".
  *
@@ -2746,14 +2731,14 @@ gnet_inetaddr_new_any (void)
 
 
 /**
- *  gnet_inetaddr_autodetect_internet_interface:
+ *  gnet_inetaddr_autodetect_internet_interface
  *
- *  Find an Internet interface.  Usually, this interface routes
- *  packets to and from the Internet.  It can be used to automatically
- *  configure simple servers that must advertise their address.  This
- *  sometimes doesn't work correctly when the user is behind a NAT.
+ *  Finds an interface likely to be connected to the internet.  This
+ *  function can be used to automatically configure peer-to-peer
+ *  applications.  The function relies on heuristics and does not
+ *  always work correctly, especially if the host is behind a NAT.
  *
- *  Returns: Address of an Internet interface; NULL if it couldn't
+ *  Returns: an address of an internet interface; NULL if it couldn't
  *  find one or there was an error.
  *
  **/
@@ -2791,16 +2776,16 @@ gnet_inetaddr_autodetect_internet_interface (void)
 
 /**
  *  gnet_inetaddr_get_interface_to:
- *  @addr: address
+ *  @addr: a #GInetAddr
  *
- *  Figure out which local interface would be used to send a packet to
- *  @addr.  This works on some systems, but not others.  We recommend
- *  using gnet_inetaddr_autodetect_internet_interface() to find an
- *  Internet interface since it's more likely to work.
+ *  Figures out which local interface would be used to send a packet
+ *  to @addr.  This works on some systems, but not others.  We
+ *  recommend using gnet_inetaddr_autodetect_internet_interface() to
+ *  find an Internet interface since it's more likely to work.
  *
- *  Returns: Address of an interface used to route packets to @addr;
- *  NULL if there is no such interface or the system does not support
- *  this check.
+ *  Returns: the address of an interface used to route packets to
+ *  @addr; NULL if there is no such interface or the system does not
+ *  support this check.
  *
  **/
 GInetAddr* 
@@ -2840,7 +2825,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* addr)
 
 
 /**
- *  gnet_inetaddr_get_internet_interface:
+ *  gnet_inetaddr_get_internet_interface
  *
  *  Find an Internet interface.  This just calls
  *  gnet_inetaddr_list_interfaces() and returns the first one that
@@ -2895,42 +2880,43 @@ gnet_inetaddr_get_internet_interface (void)
 
 
 
+/* FIX : hostname */
 /**
  *  gnet_inetaddr_is_internet_domainname:
- *  @name: Domain name to check
+ *  @hostname: name
  *
- *  Check if the domain name is a sensible Internet domain name.  This
+ *  Checks if a domain name is a sensible internet domain name.  This
  *  function uses heuristics and does not use DNS (or even block).
  *  For example, "localhost" and "10.10.23.42" are not sensible
  *  Internet domain names.  (10.10.23.42 is a network address, but not
- *  accessible to the Internet at large.)
+ *  accessible to the internet at large.)
  *
  *  Returns: TRUE if @name is a sensible Internet domain name; FALSE
  *  otherwise.
  *
  **/
 gboolean
-gnet_inetaddr_is_internet_domainname (const gchar* name)
+gnet_inetaddr_is_internet_domainname (const gchar* hostname)
 {
   GInetAddr* addr;
 
-  g_return_val_if_fail (name, FALSE);
+  g_return_val_if_fail (hostname, FALSE);
 
   /* The name can't be localhost or localhost.localdomain */
-  if (!strcmp(name, "localhost") || 
-      !strcmp(name, "localhost.localdomain"))
+  if (!strcmp(hostname, "localhost") || 
+      !strcmp(hostname, "localhost.localdomain"))
     {
       return FALSE;
     }
 
   /* The name must have a dot in it */
-  if (!strchr(name, '.'))
+  if (!strchr(hostname, '.'))
     {
       return FALSE;
     }
 	
   /* If it's dotted decimal, make sure it's valid */
-  addr = gnet_inetaddr_new_nonblock (name, 0);
+  addr = gnet_inetaddr_new_nonblock (hostname, 0);
   if (addr)
     {
       gboolean rv;

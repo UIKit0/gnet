@@ -26,7 +26,7 @@ static GIPv6Policy   ipv6_policy = GIPV6_POLICY_IPV4_ONLY;
 /**
  *  gnet_ipv6_get_policy
  *
- *  Get the IPv6 policy.
+ *  Gets the IPv6 policy.
  *
  *  Returns: IPv6 policy.
  **/
@@ -49,7 +49,7 @@ gnet_ipv6_get_policy (void)
  *  gnet_ipv6_set_policy
  *  @policy: IPv6 policy
  *
- *  Set the IPv6 policy.
+ *  Sets the IPv6 policy.
  *
  **/
 void

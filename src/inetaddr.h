@@ -101,27 +101,27 @@ typedef void (*GInetAddrNewListAsyncFunc)(GList* list, gpointer data);
 
 /* ********** */
 
-GInetAddr* gnet_inetaddr_new (const gchar* name, gint port);
+GInetAddr* gnet_inetaddr_new (const gchar* hostname, gint port);
 
 
 GInetAddrNewAsyncID 
-           gnet_inetaddr_new_async (const gchar* name, gint port, 
+           gnet_inetaddr_new_async (const gchar* hostname, gint port, 
 				    GInetAddrNewAsyncFunc func, 
 				    gpointer data);
 void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
 
 
-GList*     gnet_inetaddr_new_list (const gchar* name, gint port);
+GList*     gnet_inetaddr_new_list (const gchar* hostname, gint port);
 void	   gnet_inetaddr_delete_list (GList* list);
 
 GInetAddrNewListAsyncID 
-           gnet_inetaddr_new_list_async (const gchar* name, gint port, 
+           gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
 					 GInetAddrNewListAsyncFunc func, 
 					 gpointer data);
 void       gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
 
 
-GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
+GInetAddr* gnet_inetaddr_new_nonblock (const gchar* hostname, gint port);
 
 GInetAddr* gnet_inetaddr_new_bytes (const guint8* addr, const guint length);
 
@@ -149,14 +149,14 @@ typedef gpointer GInetAddrGetNameAsyncID;
 
 /**
  *   GInetAddrGetNameAsyncFunc:
- *   @name: Canonical name of the address (callee owned)
+ *   @hostname: Canonical name of the address (callee owned)
  *   @data: User data
  *   
  *   Callback for gnet_inetaddr_get_name_async().  Callee owns the
  *   name.  The name will be NULL if the lookup failed.
  *
  **/
-typedef void (*GInetAddrGetNameAsyncFunc)(gchar* name,
+typedef void (*GInetAddrGetNameAsyncFunc)(gchar* hostname,
 					  gpointer data);
 
 
@@ -186,7 +186,7 @@ void 	gnet_inetaddr_set_port (const GInetAddr* ia, guint port);
 
 /* ********** */
 
-gboolean gnet_inetaddr_is_canonical (const gchar* name);
+gboolean gnet_inetaddr_is_canonical (const gchar* hostname);
 
 gboolean gnet_inetaddr_is_internet  (const GInetAddr* inetaddr);
 gboolean gnet_inetaddr_is_private   (const GInetAddr* inetaddr);
@@ -219,7 +219,7 @@ GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
 GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* addr);
 GInetAddr* gnet_inetaddr_get_internet_interface (void);
 
-gboolean   gnet_inetaddr_is_internet_domainname (const gchar* name);
+gboolean   gnet_inetaddr_is_internet_domainname (const gchar* hostname);
 
 
 /* ********** */

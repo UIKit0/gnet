@@ -7,7 +7,7 @@ GNet utility functions and macros
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 The main GNet module provides the function gnet_init().  This function
-should be called at the start of any GNet program.
+should be called at the beginning of any GNet program.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->

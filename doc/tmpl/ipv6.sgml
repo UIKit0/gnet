@@ -17,14 +17,15 @@ gnet_ipv6_set_policy().
 
 <para>
 IPv6 policy affects domain name resolution.  A domain name can be
-resolved to several addresses.  Most programs will use the first
-address in the list.  The problem then is what order should the
-addresses be in if there are both IPv4 and IPv6 addresses in the list.
-For example, if the system cannot connect to IPv6 hosts then an IPv6
+resolved to several addresses.  Most programs will only use the first
+address in the list.  The problem then is what order the addresses
+should be in.  For example, if there are both IPv4 and IPv6 addresses
+in the list and the system cannot connect to IPv6 hosts then an IPv6
 address should not be first in the list.  Otherwise, the host will
-attempt to connect to it and fail.  If the policy is "IPv4 only", only
-IPv4 addresses will be returned.  If the policy is "IPv6 then IPv4",
-IPv6 addresses will come before IPv4 addresses in the list.
+attempt to connect to it and fail.  IPv6 policy determines the order
+of the list.  If the policy is "IPv4 only", only IPv4 addresses will
+be returned.  If the policy is "IPv6 then IPv4", IPv6 addresses will
+come before IPv4 addresses in the list.
 </para>
 
 <para>
@@ -50,7 +51,7 @@ If neither environment variable is set, GNet sets the policy based on
 the host's interfaces.  If there are only IPv4 interfaces, the policy
 is set to %GIPV6_POLICY_IPV4_ONLY.  If there are only IPv6 interfaces,
 the policy is set to %GIPV6_POLICY_IPV6_ONLY.  If there are both, the
-policy is set to %GIPV6_POLICY_SYSTEM_DEFAULT.
+policy is set to %GIPV6_POLICY_IPV4_THEN_IPV6.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->

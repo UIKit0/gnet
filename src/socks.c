@@ -28,7 +28,7 @@ static gboolean   socks_enabled = FALSE;
 /**
  *  gnet_socks_get_enabled
  *
- *  Determine whether SOCKS support is enabled.
+ *  Determines whether SOCKS support is enabled.
  *
  *  Returns: TRUE if SOCKS is enabled, FALSE otherwise.
  *
@@ -44,7 +44,7 @@ gnet_socks_get_enabled (void)
  *  gnet_socks_set_enabled
  *  @enabled: is SOCKS support enabled?
  *
- *  Set whether SOCKS support is enabled.
+ *  Sets whether SOCKS support is enabled.
  *
  **/
 void
@@ -62,7 +62,7 @@ gnet_socks_set_enabled (gboolean enabled)
 /**
  *  gnet_socks_get_server
  *
- *  Get the address of the SOCKS server.  This function checks the
+ *  Gets the address of the SOCKS server.  This function checks the
  *  gnet_socks_set_server() value and, if not set, the SOCKS_SERVER
  *  environment variable.  The SOCKS_SERVER enviroment variable should
  *  be in the form HOSTNAME or HOSTNAME:PORT.
@@ -128,7 +128,7 @@ gnet_socks_get_server (void)
  *  gnet_socks_set_server:
  *  @ia: SOCKS server address
  *
- *  Set the address of the SOCKS server.
+ *  Sets the address of the SOCKS server.
  *
  **/
 void

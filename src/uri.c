@@ -106,15 +106,17 @@ for ($i = 0; $i < 32; $i++)
 
 
 /**
- *  gnet_uri_new:
+ *  gnet_uri_new
  *  @uri: URI string
  *
- *  Create a #GURI from a string.  Empty fields are set to NULL.  The
+ *  Creates a #GURI from a string.  Empty fields are set to NULL.  The
  *  parser does not validate the URI -- it will accept some malformed
  *  URI.  URIs are usually in the form
  *  scheme://userinfo@hostname:port/path?query#fragment
  *
- *  Hint: The path does not necessarily start with a /.
+ *  URIs created from user input are typically unescaped.  URIs
+ *  created from machine input (e.g. received over the internet) are
+ *  typically escaped.
  *  
  *  Returns: a new #GURI, or NULL if there was a failure.
  *
@@ -230,16 +232,17 @@ gnet_uri_new (const gchar* uri)
 
 
 /**
- *  gnet_uri_new_fields:
+ *  gnet_uri_new_fields
  *  @scheme: scheme
- *  @hostname: hostname
+ *  @hostname: host name
  *  @port: port
  *  @path: path
  *
- *  Create a #GURI from the fields.  This is the short version.  Use
- *  gnet_uri_new_fields_all() to specify all fields.
+ *  Creates a #GURI from the fields.  This function uses the most
+ *  common fields.  Use gnet_uri_new_fields_all() to specify all
+ *  fields.
  *
- *  Returns: A new #GURI.
+ *  Returns: a new #GURI.
  *
  **/
 GURI*     
@@ -259,19 +262,18 @@ gnet_uri_new_fields (const gchar* scheme, const gchar* hostname,
 
 
 /**
- *  gnet_uri_new_fields_all:
+ *  gnet_uri_new_fields_all
  *  @scheme: scheme
- *  @userinfo: userinfo
- *  @hostname: hostname
+ *  @userinfo: user info
+ *  @hostname: host name
  *  @port: port
  *  @path: path
  *  @query: query
  *  @fragment: fragment
  *
- *  Create a #GURI from the fields.  This is the short version.  Use
- *  gnet_uri_new_fields_all() to specify all fields.
+ *  Creates a #GURI from all fields.
  *
- *  Returns: A new #GURI.
+ *  Returns: a new #GURI.
  *
  **/
 GURI*
@@ -297,11 +299,11 @@ gnet_uri_new_fields_all (const gchar* scheme, const gchar* userinfo,
 
 /**
  *  gnet_uri_clone:
- *  @uri: URI to clone.
+ *  @uri: a #GURI
  * 
- *  Create a URI from another one.
+ *  Copies a #GURI.
  *
- *  Returns: a new #GURI.
+ *  Returns: a copy of @uri.
  *
  **/
 GURI*     
@@ -326,9 +328,9 @@ gnet_uri_clone (const GURI* uri)
 
 /** 
  *  gnet_uri_delete:
- *  @uri: #GURI to delete
+ *  @uri: a #GURI
  *
- *  Delete a #GURI.
+ *  Deletes a #GURI.
  *
  **/
 void
@@ -347,45 +349,18 @@ gnet_uri_delete (GURI* uri)
 }
 
 
-/**
- *  gnet_uri_hash
- *  @p: GURI to get hash value of
- *
- *  Hash the GURI hash value.
- *
- *  Returns: hash value.
- *
- **/
-guint
-gnet_uri_hash (gconstpointer p)
-{
-  const GURI* uri = (const GURI*) p;
-  guint h = 0;
-
-  g_return_val_if_fail (uri, 0);
-
-  if (uri->scheme)	h =  g_str_hash (uri->scheme);
-  if (uri->userinfo)	h ^= g_str_hash (uri->userinfo);
-  if (uri->hostname)	h ^= g_str_hash (uri->hostname);
-  h ^= uri->port;
-  if (uri->path)	h ^= g_str_hash (uri->path);
-  if (uri->query)	h ^= g_str_hash (uri->query);
-  if (uri->fragment)	h ^= g_str_hash (uri->fragment);
-  
-  return h;
-}
 
 
 #define SAFESTRCMP(A,B) (((A)&&(B))?(strcmp((A),(B))):((A)||(B)))
 
 /**
- *  gnet_uri_equal:
- *  @p1: Pointer to first #GURI.
- *  @p2: Pointer to second #GURI.
+ *  gnet_uri_equal
+ *  @p1: a #GURI
+ *  @p2: another #GURI
  *
- *  Compare two #GURI's.  
+ *  Compares two #GURI's for equality.
  *
- *  Returns: 1 if they are the same; 0 otherwise.
+ *  Returns: 1 if they are equal; 0 otherwise.
  *
  **/
 gint
@@ -411,170 +386,40 @@ gnet_uri_equal (gconstpointer p1, gconstpointer p2)
 
 
 /**
- *  gnet_uri_set_scheme:
- *  @uri: uri
- *  @scheme: scheme
+ *  gnet_uri_hash
+ *  @p: a #GURI
  *
- *  Set the scheme in the URI.
+ *  Creates a hash code for @p for use with GHashTable. 
  *
- **/
-void
-gnet_uri_set_scheme (GURI* uri, const gchar* scheme)
-{
-  g_return_if_fail (uri);
-
-  if (uri->scheme)
-    {
-      g_free (uri->scheme);
-      uri->scheme = NULL;
-    }
-
-  if (scheme)
-    uri->scheme = g_strdup (scheme);
-}
-
-
-/**
- *  gnet_uri_set_userinfo:
- *  @uri: uri
- *  @userinfo: userinfo
- *
- *  Set the userinfo in the URI.
+ *  Returns: hash code for @p.
  *
  **/
-void
-gnet_uri_set_userinfo (GURI* uri, const gchar* userinfo)
+guint
+gnet_uri_hash (gconstpointer p)
 {
-  g_return_if_fail (uri);
+  const GURI* uri = (const GURI*) p;
+  guint h = 0;
 
-  if (uri->userinfo)
-    {
-      g_free (uri->userinfo);
-      uri->userinfo = NULL;
-    }
+  g_return_val_if_fail (uri, 0);
 
-  if (userinfo)
-    uri->userinfo = g_strdup (userinfo);
-}
-
-
-/**
- *  gnet_uri_set_hostname:
- *  @uri: uri
- *  @hostname: hostname
- *
- *  Set the hostname in the URI.
- *
- **/
-void
-gnet_uri_set_hostname (GURI* uri, const gchar* hostname)
-{
-  g_return_if_fail (uri);
-
-  if (uri->hostname)
-    {
-      g_free (uri->hostname);
-      uri->hostname = NULL;
-    }
-
-  if (hostname)
-    uri->hostname = g_strdup (hostname);
-}
-
-
-/**
- *  gnet_uri_set_port:
- *  @uri: uri
- *  @port: port
- *
- *  Set the port in the URI.
- *
- **/
-void	
-gnet_uri_set_port (GURI* uri, gint port)
-{
-  uri->port = port;
-}
-
-
-/**
- *  gnet_uri_set_path:
- *  @uri: uri
- *  @path: path
- *
- *  Set the path in the URI.
- *
- **/
-void
-gnet_uri_set_path (GURI* uri, const gchar* path)
-{
-  g_return_if_fail (uri);
-
-  if (uri->path)
-    {
-      g_free (uri->path);
-      uri->path = NULL;
-    }
-
-  if (path)
-    uri->path = g_strdup (path);
-}
-
-
-
-/**
- *  gnet_uri_set_query:
- *  @uri: uri
- *  @query: query
- *
- *  Set the query in the URI.
- *
- **/
-void
-gnet_uri_set_query (GURI* uri, const gchar* query)
-{
-  g_return_if_fail (uri);
-
-  if (uri->query)
-    {
-      g_free (uri->query);
-      uri->query = NULL;
-    }
-
-  if (query)
-    uri->query = g_strdup (query);
-}
-
-
-/**
- *  gnet_uri_set_fragment:
- *  @uri: uri
- *  @fragment: fragment
- *
- *  Set the fragment in the URI.
- *
- **/
-void
-gnet_uri_set_fragment (GURI* uri, const gchar* fragment)
-{
-  g_return_if_fail (uri);
-
-  if (uri->fragment)
-    {
-      g_free (uri->fragment);
-      uri->fragment = NULL;
-    }
-
-  if (fragment)
-    uri->fragment = g_strdup (fragment);
+  if (uri->scheme)	h =  g_str_hash (uri->scheme);
+  if (uri->userinfo)	h ^= g_str_hash (uri->userinfo);
+  if (uri->hostname)	h ^= g_str_hash (uri->hostname);
+  h ^= uri->port;
+  if (uri->path)	h ^= g_str_hash (uri->path);
+  if (uri->query)	h ^= g_str_hash (uri->query);
+  if (uri->fragment)	h ^= g_str_hash (uri->fragment);
+  
+  return h;
 }
 
 
 /**
  *  gnet_uri_escape
- *  @uri: #GURI to escape
+ *  @uri: a #GURI
  *
- *  Escape the fields in the URI.  gnet_uri_get_nice
+ *  Escapes the fields in a #GURI.  Network protocols use escaped
+ *  URIs.  People use unescaped URIs.
  *
  **/
 void
@@ -591,9 +436,10 @@ gnet_uri_escape (GURI* uri)
 
 /**
  *  gnet_uri_unescape
- *  @uri: #GURI to unescape
+ *  @uri: a #GURI
  *
- *  Unescape the fields in the URI.
+ *  Unescapes the fields in the URI.  Network protocols use escaped
+ *  URIs.  People use unescaped URIs.
  *
  **/
 void
@@ -725,13 +571,14 @@ field_unescape (gchar* s)
 
 
 /**
- *  gnet_uri_get_string:
- *  @uri: URI
+ *  gnet_uri_get_string
+ *  @uri: a #GURI
  *
- *  Convert the URI to a string.  The string is not escaped.  Call
- *  gnet_uri_escape() first if the string should be escaped.
+ *  Gets a string representation of a #GURI.  This function does not
+ *  escape or unescape the fields first.  Call gnet_uri_escape() or
+ *  gnet_uri_unescape first if necessary.
  *
- *  Returns: string.
+ *  Returns: a string.
  *
  **/
 gchar*
@@ -787,4 +634,164 @@ gnet_uri_get_string (const GURI* uri)
   rv = buffer->str;
   g_string_free (buffer, FALSE); 
   return rv;
+}
+
+
+/**
+ *  gnet_uri_set_scheme
+ *  @uri: a #GURI
+ *  @scheme: scheme
+ *
+ *  Sets a #GURI's scheme.
+ *
+ **/
+void
+gnet_uri_set_scheme (GURI* uri, const gchar* scheme)
+{
+  g_return_if_fail (uri);
+
+  if (uri->scheme)
+    {
+      g_free (uri->scheme);
+      uri->scheme = NULL;
+    }
+
+  if (scheme)
+    uri->scheme = g_strdup (scheme);
+}
+
+
+/**
+ *  gnet_uri_set_userinfo
+ *  @uri: a #GURI
+ *  @userinfo: user info
+ *
+ *  Sets a #GURI's user info.
+ *
+ **/
+void
+gnet_uri_set_userinfo (GURI* uri, const gchar* userinfo)
+{
+  g_return_if_fail (uri);
+
+  if (uri->userinfo)
+    {
+      g_free (uri->userinfo);
+      uri->userinfo = NULL;
+    }
+
+  if (userinfo)
+    uri->userinfo = g_strdup (userinfo);
+}
+
+
+/**
+ *  gnet_uri_set_hostname
+ *  @uri: a #GURI
+ *  @hostname: host name
+ *
+ *  Sets a #GURI's host name.
+ *
+ **/
+void
+gnet_uri_set_hostname (GURI* uri, const gchar* hostname)
+{
+  g_return_if_fail (uri);
+
+  if (uri->hostname)
+    {
+      g_free (uri->hostname);
+      uri->hostname = NULL;
+    }
+
+  if (hostname)
+    uri->hostname = g_strdup (hostname);
+}
+
+
+/**
+ *  gnet_uri_set_port
+ *  @uri: a #GURI
+ *  @port: port
+ *
+ *  Set a #GURI's port.
+ *
+ **/
+void	
+gnet_uri_set_port (GURI* uri, gint port)
+{
+  uri->port = port;
+}
+
+
+/**
+ *  gnet_uri_set_path
+ *  @uri: a #GURI
+ *  @path: path
+ *
+ *  Set a #GURI's path.
+ *
+ **/
+void
+gnet_uri_set_path (GURI* uri, const gchar* path)
+{
+  g_return_if_fail (uri);
+
+  if (uri->path)
+    {
+      g_free (uri->path);
+      uri->path = NULL;
+    }
+
+  if (path)
+    uri->path = g_strdup (path);
+}
+
+
+
+/**
+ *  gnet_uri_set_query
+ *  @uri: a #GURI
+ *  @query: query
+ *
+ *  Set a #GURI's query.
+ *
+ **/
+void
+gnet_uri_set_query (GURI* uri, const gchar* query)
+{
+  g_return_if_fail (uri);
+
+  if (uri->query)
+    {
+      g_free (uri->query);
+      uri->query = NULL;
+    }
+
+  if (query)
+    uri->query = g_strdup (query);
+}
+
+
+/**
+ *  gnet_uri_set_fragment
+ *  @uri: a #GURI
+ *  @fragment: fragment
+ *
+ *  Set a #GURI's fragment.
+ *
+ **/
+void
+gnet_uri_set_fragment (GURI* uri, const gchar* fragment)
+{
+  g_return_if_fail (uri);
+
+  if (uri->fragment)
+    {
+      g_free (uri->fragment);
+      uri->fragment = NULL;
+    }
+
+  if (fragment)
+    uri->fragment = g_strdup (fragment);
 }

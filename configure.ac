@@ -5,17 +5,11 @@
 # autoconf requirement
 AC_PREREQ([2.52])
 
-###############################
 # Init autoconf and automake
-AC_INIT([gnet], [1.3.0], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [1.3.1], [gnet@gnetlibrary.org])
 AC_CANONICAL_BUILD
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
-# Activate maintainer mode
 AM_MAINTAINER_MODE
-
-
-###############################
-# Package info
 AC_REVISION([$Revision$])
 AC_CONFIG_SRCDIR([src/gnet.c])
 
@@ -28,7 +22,7 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=1
 GNET_MINOR_VERSION=3
-GNET_MICRO_VERSION=0
+GNET_MICRO_VERSION=1
 GNET_INTERFACE_AGE=0
 GNET_BINARY_AGE=0
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
@@ -393,7 +387,6 @@ if test "x$with_html_dir" = "x" ; then
 else
   HTML_DIR=$with_html_dir
 fi
-echo $HTML_DIR
 AC_SUBST(HTML_DIR)
 
 AC_CHECK_PROG(GTKDOC, [gtkdoc-mkdb], [yes], [no])

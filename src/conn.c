@@ -99,7 +99,7 @@ static gboolean conn_timeout_cb (gpointer data);
  *  @func: function to call on #GConn events
  *  @user_data: data to pass to @func on callbacks
  *
- *  Create a #GConn.  A connection is not made until
+ *  Creates a #GConn.  A connection is not made until
  *  gnet_conn_connect() is called.  The callback @func is called when
  *  events occur.
  *
@@ -133,7 +133,7 @@ gnet_conn_new (const gchar* hostname, gint port,
  *  @func: function to call on #GConn events
  *  @user_data: data to pass to @func on callbacks
  *
- *  Create a #GConn.  A connection is not made until
+ *  Creates a #GConn.  A connection is not made until
  *  gnet_conn_connect() is called.  The callback @func is called when
  *  events occur.
  *
@@ -167,7 +167,7 @@ gnet_conn_new_inetaddr (const GInetAddr* inetaddr,
  *  @func: function to call on #GConn events
  *  @user_data: data to pass to @func on callbacks
  *
- *  Create a #GConn.  The #GConn is created from the @socket.  The
+ *  Creates a #GConn.  The #GConn is created from the @socket.  The
  *  socket is callee owned - do not delete it.  The callback is called
  *  when events occur.
  *
@@ -201,9 +201,9 @@ gnet_conn_new_socket (GTcpSocket* socket,
 
 /**
  *  gnet_conn_delete
- *  @conn: #GConn to delete
+ *  @conn: a #GConn
  *
- *  Delete the connection.
+ *  Deletes a #GConn.
  *
  **/
 void
@@ -216,9 +216,9 @@ gnet_conn_delete (GConn* conn)
 
 /**
  *  gnet_conn_ref
- *  @conn: #GConn to reference
+ *  @conn: a #GConn
  *
- *  Add a reference to @conn.
+ *  Adds a reference to a #GConn.
  *
  **/
 void
@@ -232,10 +232,10 @@ gnet_conn_ref (GConn* conn)
 
 /**
  *  gnet_conn_unref
- *  @conn: #GConn to unreference
+ *  @conn: a #GConn
  *
- *  Remove a reference from @conn.  The connection is deleted
- *  when reference count reaches 0.
+ *  Removes a reference from a #GConn.  A #GConn is deleted when the
+ *  reference count reaches 0.
  *
  **/
 void
@@ -295,7 +295,7 @@ unref_internal (GConn* conn)
  *  @func: function to call on #GConn events
  *  @user_data: data to pass to @func on callbacks
  *
- *  Set the #GConnEvent callback for @conn.  The callback @func is
+ *  Sets the #GConnEvent callback for a #GConn.  The callback @func is
  *  called when events occur.
  *
  **/
@@ -313,7 +313,7 @@ gnet_conn_set_callback (GConn* conn, GConnFunc func, gpointer user_data)
  *  gnet_conn_connect
  *  @conn: a #GConn
  *
- *  Establish a connection.  If the connection is pending or already
+ *  Establishes a connection.  If the connection is pending or already
  *  established, this function does nothing.  The callback is called
  *  when the connection is established or an error occurs.
  *
@@ -417,7 +417,7 @@ conn_connect_cb (GTcpSocket* socket,
  *  gnet_conn_disconnect
  *  @conn: a #GConn
  *
- *  Close the connection.  The connection can later be reestablished
+ *  Closes the connection.  The connection can later be reestablished
  *  by calling gnet_conn_connect() again.  If the connection was not
  *  established, this function does nothing.
  *
@@ -498,7 +498,7 @@ gnet_conn_disconnect (GConn* conn)
  *  gnet_conn_is_connected
  *  @conn: a #GConn
  *
- *  Check if the connection is established.
+ *  Checks if the connection is established.
  *
  *  Returns: TRUE if the connection is established, FALSE otherwise.
  *
@@ -609,7 +609,7 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
  *  gnet_conn_read:
  *  @conn: a #GConn
  *
- *  Begin an asynchronous read.  The connection callback is called
+ *  Begins an asynchronous read.  The connection callback is called
  *  when any data has been read.  This function may be called again
  *  before the asynchronous read completes.
  *
@@ -626,7 +626,7 @@ gnet_conn_read (GConn* conn)
  *  @conn: a #GConn
  *  @length: Number of bytes to read
  *
- *  Begin an asynchronous read of exactly @length bytes.  The
+ *  Begins an asynchronous read of exactly @length bytes.  The
  *  connection callback is called when the data has been read.  This
  *  function may be called again before the asynchronous read
  *  completes.
@@ -647,7 +647,7 @@ gnet_conn_readn (GConn* conn, gint n)
  *  gnet_conn_readline:
  *  @conn: a #GConn
  *
- *  Begin an asynchronous line read.  The connection callback is
+ *  Begins an asynchronous line read.  The connection callback is
  *  called when a line has been read.  Lines are terminated with \n,
  *  \r, \r\n, or \0.  The terminator is \0'ed out in the buffer.  The
  *  terminating \0 is accounted for in the buffer length.  This
@@ -1094,7 +1094,7 @@ process_read_buffer (GConn* conn)
  *  @buffer: buffer to write from
  *  @length: length of @buffer
  *
- *  Set up an asynchronous write to @conn from @buffer.  The buffer is
+ *  Sets up an asynchronous write to @conn from @buffer.  The buffer is
  *  copied, so it may be deleted by the caller.  This function can be
  *  called again before the asynchronous write completes.
  *
@@ -1199,11 +1199,11 @@ conn_write_async_cb (GConn* conn)
  * @conn: a #GConn
  * @enable: enable the %GNET_CONN_READABLE event?
  *
- * Enable (or disable) the %GNET_CONN_READABLE event.  If enabled, the
- * %GNET_CONN_READABLE event occurs when data can be read from the
- * socket.  Read from the iochannel member of the @conn.  Do not
- * enable this while using gnet_conn_read(), gnet_conn_readn(), or
- * gnet_conn_readline().
+ * Enables (or disables) the %GNET_CONN_READABLE event for a #GConn.
+ * If enabled, the %GNET_CONN_READABLE event occurs when data can be
+ * read from the socket.  Read from the iochannel member of the @conn.
+ * Do not enable this while using gnet_conn_read(), gnet_conn_readn(),
+ * or gnet_conn_readline().
  *
  **/
 void
@@ -1224,10 +1224,10 @@ gnet_conn_set_watch_readable (GConn* conn, gboolean enable)
  * @conn: a #GConn
  * @enable: enable the #GNET_CONN_WRITABLE event?
  *
- * Enable (or disable) the %GNET_CONN_WRITABLE event.  If enabled, the
- * #GNET_CONN_WRITABLE event occurs when data can be written to the
- * socket.  Write to the iochannel member of the @conn.  Do not enable
- * this while using gnet_conn_write().
+ * Enables (or disables) the %GNET_CONN_WRITABLE event for a #GConn.
+ * If enabled, the #GNET_CONN_WRITABLE event occurs when data can be
+ * written to the socket.  Write to the iochannel member of the @conn.
+ * Do not enable this while using gnet_conn_write().
  *
  **/
 void
@@ -1252,7 +1252,7 @@ gnet_conn_set_watch_writable (GConn* conn, gboolean enable)
  *  @conn: a #GConn
  *  @timeout: Timeout (in milliseconds)
  * 
- *  Set a timeout on @conn.  When the timer expires, the
+ *  Sets a timeout on a #GConn.  When the timer expires, the
  *  %GNET_CONN_STATUS_TIMEOUT event occurs.  If there already is a
  *  timeout set on @conn, the old timeout is canceled.  Set @timeout
  *  to 0 to cancel the current timeout.

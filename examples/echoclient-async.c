@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
+#include <gnet.h>
 
 
 static void async_client_connfunc (GTcpSocket* socket,

@@ -186,9 +186,10 @@ flipmemcpy(char* dst, char* src, guint n)
  *  @length: length of @buffer
  *  @Varargs: variables to pack from
  *  
- *  Write @Varargs to @buffer.  @format is a string that describes the
- *  @Varargs and how they are to be packed.  This string is a list of
- *  characters, each describing the type of an argument in @Varargs.
+ *  Writes @Varargs to @buffer.  @format is a string that describes
+ *  the @Varargs and how they are to be packed.  This string is a list
+ *  of characters, each describing the type of an argument in
+ *  @Varargs.
  *
  *  An example:
  *
@@ -281,7 +282,7 @@ gnet_pack (const gchar* format, gchar* buffer, const guint length, ...)
  *  @bufferp: pointer to a buffer (buffer is caller owned)
  *  @Varargs: variables to pack from
  *
- *  Write @Varargs into a buffer pointed to by @bufferp.  The buffer
+ *  Writes @Varargs into a buffer pointed to by @bufferp.  The buffer
  *  is allocated by the function and is caller owned.  See gnet_pack()
  *  for more information.
  *
@@ -327,7 +328,7 @@ gnet_pack_strdup (const gchar* format, gchar** bufferp, ...)
  *  @format: pack data format
  *  @Varargs: variables
  *
- *  Calculate the size of the buffer needed to pack @Varargs by the
+ *  Calculates the size of the buffer needed to pack @Varargs by the
  *  given format.  See gnet_pack() for more information.
  *
  *  Returns: number of bytes required to pack; -1 on error.
@@ -768,11 +769,11 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
  *  @length: length of @buffer
  *  @Varargs: addresses of variables to unpack to
  *
- *  Read the data in @buffer into @Varargs.  @format is a string that
+ *  Reads the data in @buffer into @Varargs.  @format is a string that
  *  describes the @Varargs and how they are to be packed.  This string
  *  is a list of characters, each describing the type of an argument
- *  in @Varargs.  
-
+ *  in @Varargs.
+ *
  *  An example:
  *
  *  <informalexample>

@@ -24,6 +24,9 @@ Style notes
 
   - The first word is not capitalized.
   - There is no period.
+  - If the first argument is a "this" pointer, the description can be
+	"a #Type" most of the time.
+  - hostname should be described as "host name"
 
   Also note:
   - Parameter names should be as descriptive as possible.  Use
@@ -41,3 +44,21 @@ Style notes
   - The first word is not capitalized
   - There is a period so that the first sentence reads as a sentence
   - There can be more than one sentence.
+
+
+* Descriptions
+
+ The first sentence should be in the form: "Does something to a #X."
+
+ Examples:
+
+ x_new: Creates a #X [from ...].  Returns: a new #X.
+ x_clone: Copies a #X.  Returns: a copy of @x.
+ x_delete: Deletes a #X.
+ x_hash: Creates a hash code for a #X for use with GHashTable.
+	Returns: the hash code for @x.
+ x_equal: Compares two #Xs for equality.  Returns: 1 if they are equal;
+	0 otherwise.  (args are "a #X" and "another #X"
+ x_ref:  Adds a reference to a #X.
+ x_unref: Removes a reference from a #X.  A #X is deleted when
+ 	the reference count reaches 0.

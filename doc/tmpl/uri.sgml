@@ -7,7 +7,17 @@ Uniform Resource Identifier (URI)
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 A URI is a Uniform Resource Identifier, similar to a URL.  This module
-provides functions for creating and manipulating URIs.
+provides functions for creating and manipulating URIs.  A URI is
+represented by #GURI.  All fields in the #GURI structure are publicly
+readable.
+</para>
+
+<para>
+Create a URI from a string by calling gnet_uri_new().  To get the
+string representation back, call gnet_uri_get_string().  To escape a
+URI call gnet_uri_escape(), and to unescape it call
+gnet_uri_unescape().  Network protocols use escaped URIs.  People use
+unescaped URIs.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
@@ -83,22 +93,28 @@ provides functions for creating and manipulating URIs.
 @uri: 
 
 
-<!-- ##### FUNCTION gnet_uri_hash ##### -->
+<!-- ##### FUNCTION gnet_uri_escape ##### -->
 <para>
 
 </para>
 
-@p: 
-@Returns: 
+@uri: 
 
 
-<!-- ##### FUNCTION gnet_uri_equal ##### -->
+<!-- ##### FUNCTION gnet_uri_unescape ##### -->
 <para>
 
 </para>
 
-@p1: 
-@p2: 
+@uri: 
+
+
+<!-- ##### FUNCTION gnet_uri_get_string ##### -->
+<para>
+
+</para>
+
+@uri: 
 @Returns: 
 
 
@@ -165,28 +181,22 @@ provides functions for creating and manipulating URIs.
 @fragment: 
 
 
-<!-- ##### FUNCTION gnet_uri_escape ##### -->
+<!-- ##### FUNCTION gnet_uri_hash ##### -->
 <para>
 
 </para>
 
-@uri: 
+@p: 
+@Returns: 
 
 
-<!-- ##### FUNCTION gnet_uri_unescape ##### -->
+<!-- ##### FUNCTION gnet_uri_equal ##### -->
 <para>
 
 </para>
 
-@uri: 
-
-
-<!-- ##### FUNCTION gnet_uri_get_string ##### -->
-<para>
-
-</para>
-
-@uri: 
+@p1: 
+@p2: 
 @Returns: 
 
 

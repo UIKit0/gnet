@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <gnet.h>	/* Or <gnet/gnet.h> when installed. */
+#include <gnet.h>
 
 
 
