@@ -120,11 +120,12 @@ typedef struct {
 #endif
 
 #define GNET_SOCKADDR_IN(s)    	(*((struct sockaddr_in*) &s))
-
 #define GNET_SOCKADDR_SA(s)	(*((struct sockaddr*) &s))
 #define GNET_SOCKADDR_SA4(s)	(*((struct sockaddr_in*) &s))
-#define GNET_SOCKADDR_SA6(s)	(*((struct sockaddr_in6*) &s))
 #define GNET_SOCKADDR_FAMILY(s) ((s).ss_family)
+
+#ifdef HAVE_IPV6
+#define GNET_SOCKADDR_SA6(s)	(*((struct sockaddr_in6*) &s))
 #define GNET_SOCKADDR_ADDRP(s)	(((s).ss_family == AF_INET)?\
                                   (void*)&((struct sockaddr_in*)&s)->sin_addr:\
                                   (void*)&((struct sockaddr_in6*)&s)->sin6_addr)
@@ -140,6 +141,17 @@ typedef struct {
 #define GNET_SOCKADDR_LEN(s)	(((s).ss_family == AF_INET)?\
                                   sizeof(struct sockaddr_in):\
                                   sizeof(struct sockaddr_in6))
+#else /* NO IPV6 */
+
+#define GNET_SOCKADDR_ADDRP(s)	(void*)&((struct sockaddr_in*)&s)->sin_addr
+#define GNET_SOCKADDR_ADDR32(s,n)((struct sockaddr_in*)&s)->sin_addr.s_addr
+#define GNET_SOCKADDR_ADDRLEN(s) sizeof(struct in_addr)
+#define GNET_SOCKADDR_PORT(s)	((struct sockaddr_in*)&s)->sin_port
+#define GNET_SOCKADDR_LEN(s)	sizeof(struct sockaddr_in)
+
+#endif
+
+
 #ifdef HAVE_SOCKADDR_SA_LEN
 #define GNET_SOCKADDR_SET_SS_LEN(s) do{(s).ss_len = GNET_SOCKADDR_LEN(s);}while(0)
 #else

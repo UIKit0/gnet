@@ -23,6 +23,8 @@
 #include <string.h>
 #include <gnet.h>
 
+#include "config.h"
+
 
 static int failed = 0;
 
@@ -141,6 +143,7 @@ main (int argc, char* argv[])
   g_free (cname);
   gnet_inetaddr_delete (inetaddr);
 
+#ifdef HAVE_IPV6
 
   /* **************************************** */
   /* IPv6 tests */
@@ -196,6 +199,9 @@ main (int argc, char* argv[])
   gnet_inetaddr_delete (inetaddr);
   g_free (cname);
 
+#endif
+
+
 
 
   /* **************************************** */
@@ -205,20 +211,10 @@ main (int argc, char* argv[])
   IS_TEST ("IPv4", "141.213.11.124", 	     	  gnet_inetaddr_is_ipv4);
   IS_TEST ("!IPv4", "3ffe:b00:c18:1fff::6f", 	  !gnet_inetaddr_is_ipv4);
 
-  /* IPv6 */
-  IS_TEST ("IPv6", "3ffe:b00:c18:1fff::6f",  	  gnet_inetaddr_is_ipv6);
-  IS_TEST ("!IPv6", "141.213.11.124", 	     	  !gnet_inetaddr_is_ipv6);
-
-
   /* IPv4 Loopback */
   IS_TEST ("IPv4 Loopback",  "127.0.0.1",     	  gnet_inetaddr_is_loopback);
   IS_TEST ("IPv4 Loopback2", "127.23.42.129", 	  gnet_inetaddr_is_loopback);
   IS_TEST ("IPv4 !Loopback", "128.23.42.129", 	  !gnet_inetaddr_is_loopback);
-
-  /* IPv6 Loopback */
-  IS_TEST ("IPv6 Loopback",   "::1", 	      	  gnet_inetaddr_is_loopback);
-  IS_TEST ("IPv6 !Loopback",  "::",           	  !gnet_inetaddr_is_loopback);
-  IS_TEST ("IPv6 !Loopback2", "::201",        	  !gnet_inetaddr_is_loopback);
 
   /* IPv4 Multicast */
   IS_TEST ("IPv4 Multicast",   "224.0.0.0",       gnet_inetaddr_is_multicast);
@@ -226,14 +222,6 @@ main (int argc, char* argv[])
   IS_TEST ("IPv4 Multicast3",  "239.255.255.255", gnet_inetaddr_is_multicast);
   IS_TEST ("IPv4 !Multicast",  "223.255.255.255", !gnet_inetaddr_is_multicast);
   IS_TEST ("IPv4 !Multicast2", "240.0.0.0", 	  !gnet_inetaddr_is_multicast);
-
-  /* IPv6 Multicast */
-  IS_TEST ("IPv6 Multicast",   "ffff::1",         gnet_inetaddr_is_multicast);
-  IS_TEST ("IPv6 !Multicast",  "feff::1",         !gnet_inetaddr_is_multicast);
-
-  /* IPv4 Broadcast */
-  IS_TEST ("IPv6 Broadcast",   "255.255.255.255", gnet_inetaddr_is_broadcast);
-  IS_TEST ("IPv6 !Broadcast",  "255.255.255.254", !gnet_inetaddr_is_broadcast);
 
   /* IPv4 Private */
   IS_TEST ("IPv4 Private",   	"10.0.0.0", 	   gnet_inetaddr_is_private);
@@ -249,12 +237,6 @@ main (int argc, char* argv[])
   IS_TEST ("IPv4 !Private5",   	"192.167.255.255", !gnet_inetaddr_is_private);
   IS_TEST ("IPv4 !Private6",   	"192.169.0.0",     !gnet_inetaddr_is_private);
 
-  /* IPv6 Private */
-  IS_TEST ("IPv6 Private",   	"fe80::",     	   gnet_inetaddr_is_private);
-  IS_TEST ("IPv6 Private2",   	"fecf:ffff::",     gnet_inetaddr_is_private);
-  IS_TEST ("IPv6 !Private",   	"fe7f:ffff::",     !gnet_inetaddr_is_private);
-  IS_TEST ("IPv6 !Private2",   	"ff00::",          !gnet_inetaddr_is_private);
-
 
   /* IPv4 Reserved */
   IS_TEST ("IPv4 Reserved",   	"0.0.0.0", 	   gnet_inetaddr_is_reserved);
@@ -265,16 +247,42 @@ main (int argc, char* argv[])
   IS_TEST ("IPv4 !Reserved3",   "239.255.255.255", !gnet_inetaddr_is_reserved);
   IS_TEST ("IPv4 !Reserved4",   "248.0.0.0", 	   !gnet_inetaddr_is_reserved);
 
+  /* Internet */
+  IS_TEST ("Internet1", "141.213.11.124", 	   gnet_inetaddr_is_internet);
+
+#ifdef HAVE_IPV6
+  /* IPv6 */
+  IS_TEST ("IPv6", "3ffe:b00:c18:1fff::6f",  	  gnet_inetaddr_is_ipv6);
+  IS_TEST ("!IPv6", "141.213.11.124", 	     	  !gnet_inetaddr_is_ipv6);
+
+  /* IPv6 Loopback */
+  IS_TEST ("IPv6 Loopback",   "::1", 	      	  gnet_inetaddr_is_loopback);
+  IS_TEST ("IPv6 !Loopback",  "::",           	  !gnet_inetaddr_is_loopback);
+  IS_TEST ("IPv6 !Loopback2", "::201",        	  !gnet_inetaddr_is_loopback);
+
+  /* IPv6 Multicast */
+  IS_TEST ("IPv6 Multicast",   "ffff::1",         gnet_inetaddr_is_multicast);
+  IS_TEST ("IPv6 !Multicast",  "feff::1",         !gnet_inetaddr_is_multicast);
+
+  /* IPv6 Broadcast */
+  IS_TEST ("IPv6 Broadcast",   "255.255.255.255", gnet_inetaddr_is_broadcast);
+  IS_TEST ("IPv6 !Broadcast",  "255.255.255.254", !gnet_inetaddr_is_broadcast);
+
+  /* IPv6 Private */
+  IS_TEST ("IPv6 Private",   	"fe80::",     	   gnet_inetaddr_is_private);
+  IS_TEST ("IPv6 Private2",   	"fecf:ffff::",     gnet_inetaddr_is_private);
+  IS_TEST ("IPv6 !Private",   	"fe7f:ffff::",     !gnet_inetaddr_is_private);
+  IS_TEST ("IPv6 !Private2",   	"ff00::",          !gnet_inetaddr_is_private);
+
   /* IPv6 Reserved */
   IS_TEST ("IPv6 Reserved",   	"::",     	   gnet_inetaddr_is_reserved);
   IS_TEST ("IPv6 !Reserved",   	"1::",     	   !gnet_inetaddr_is_reserved);
 
   /* Internet */
-  IS_TEST ("Internet1", "141.213.11.124", 	   gnet_inetaddr_is_internet);
   IS_TEST ("Internet2", "3ffe:b00:c18:1fff::6f",   gnet_inetaddr_is_internet);
   IS_TEST ("!Internet1",  "255.255.255.255",       !gnet_inetaddr_is_internet);
   IS_TEST ("!Internet2",  "ffff::1",     	   !gnet_inetaddr_is_internet);
-
+#endif
 
   /* **************************************** */
   /* Other tests				*/

@@ -208,6 +208,21 @@ AC_SUBST(GLIB_LIBS)
 AC_SUBST(GTHREAD_CFLAGS)
 AC_SUBST(GTHREAD_LIBS)
 
+# Check for IPv6 support
+AC_MSG_CHECKING([for IPv6 availability])
+AC_TRY_LINK([ #include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>], [struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;],
+  [
+    AC_DEFINE(HAVE_IPV6, 1, [Define if IPv6 is potentially available])
+    AC_MSG_RESULT(yes)
+  ],
+  [
+    AC_MSG_RESULT(no)
+  ]
+)
+
+
 
 ###############################
 # Check for headers

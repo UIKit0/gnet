@@ -243,6 +243,7 @@ gnet_mcast_socket_join_group (GMcastSocket* socket,
       rv = setsockopt(socket->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		      (void*) &mreq, sizeof(mreq));
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       struct ipv6_mreq mreq;
@@ -256,6 +257,7 @@ gnet_mcast_socket_join_group (GMcastSocket* socket,
       rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		      (void*) &mreq, sizeof(mreq));
     }
+#endif
   else
     g_assert_not_reached ();
 
@@ -292,6 +294,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
       rv = setsockopt(socket->sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 		      (void*) &mreq, sizeof(mreq));
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       struct ipv6_mreq mreq;
@@ -305,6 +308,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
       rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 		      (void*) &mreq, sizeof(mreq));
     }
+#endif
   else
     g_assert_not_reached ();
 
@@ -385,11 +389,13 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* socket)
     }
 
   /* Get the IPv6 TTL if the socket is bound to an IPv6 address */
+#ifdef HAVE_IPV6
   else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
 		      (void*) &ttl, &ttl_size);
     }
+#endif
   else
     g_assert_not_reached ();
 
@@ -417,7 +423,9 @@ gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
 {
   guchar ttlb;
   int rv1, rv2;
+#ifdef HAVE_IPV6
   GIPv6Policy policy;
+#endif
 
   rv1 = -1;
   rv2 = -1;
@@ -426,11 +434,14 @@ gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
      0::0 IPv6 and IPv6 policy allows IPv4, set IP_TTL.  In the latter case,
      if we bind to 0::0 and the host is dual-stacked, then all IPv4
      interfaces will be bound to also. */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET ||
-      (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET 
+#ifdef HAVE_IPV6
+      || (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
        IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
-	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
+	policy == GIPV6_POLICY_IPV6_THEN_IPV4))
+#endif
+      )
     {
       ttlb = ttl;
       rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
@@ -439,12 +450,14 @@ gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
 
 
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
+#ifdef HAVE_IPV6
   if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       ttlb = ttl;
       rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
 		       (void*) &ttlb, sizeof(ttlb));
     }
+#endif
 
   if (rv1 == -1 && rv2 == -1)
     return -1;
@@ -485,6 +498,7 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
     }
 
   /* Otherwise, get IPv6 loopback */
+#ifdef HAVE_IPV6
   else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       guint flag;
@@ -495,6 +509,7 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
       if (flag)
 	is_loopback = 1;
     }
+#endif
   else
     g_assert_not_reached();
 
@@ -521,17 +536,22 @@ gint
 gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
 {
   int rv1, rv2;
+#ifdef HAVE_IPV6
   GIPv6Policy policy;
+#endif
 
   rv1 = -1;
   rv2 = -1;
 
   /* Set IPv4 loopback.  (As in set_ttl().) */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET ||
-      (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET 
+#ifdef HAVE_IPV6
+      || (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
        IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
-	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
+	policy == GIPV6_POLICY_IPV6_THEN_IPV4))
+#endif
+      )
     {
       guchar flag;
 
@@ -542,6 +562,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
     }
 
   /* Set IPv6 loopback */
+#ifdef HAVE_IPV6
   if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       guint flag;
@@ -551,6 +572,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
       rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       &flag, sizeof(flag));
     }
+#endif
 
   if (rv1 == -1 && rv2 == -1)
     return -1;

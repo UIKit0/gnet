@@ -28,8 +28,10 @@ const guint gnet_interface_age = GNET_INTERFACE_AGE;
 const guint gnet_binary_age = GNET_BINARY_AGE;
 
 
+#ifdef HAVE_IPV6
 static gboolean ipv6_detect_envvar (void);
 static gboolean ipv6_detect_iface (void);
+#endif
 
 
 /**
@@ -51,8 +53,10 @@ gnet_init (void)
 
 
   /* Auto-detect IPv6 policy.  Set it to IPv4 if auto-detection fails. */
+#ifdef HAVE_IPV6
   if (!ipv6_detect_envvar())
     if (!ipv6_detect_iface())
+#endif
       gnet_ipv6_set_policy (GIPV6_POLICY_IPV4_ONLY);
 
 /*    g_print ("ipv6 policy is %d\n", gnet_ipv6_get_policy()); */
@@ -60,6 +64,7 @@ gnet_init (void)
 }
 
 
+#ifdef HAVE_IPV6
 /* 
 
    Try to get policy based on environment variables.  We look in the
@@ -152,3 +157,4 @@ ipv6_detect_iface (void)
 
   return TRUE;
 }
+#endif

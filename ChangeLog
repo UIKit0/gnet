@@ -1,3 +1,9 @@
+Wed Apr 16 11:52:22 2003  David Helder  <dhelder@umich.edu>
+
+	* src/{inetaddr,mcast,udp, gnet-private, gnet}.c: Use HAVE_IPV6
+	* examples/inetaddr_test.c: "
+	* configure.ac (HAVE_IPV6): Added check for.
+
 Tue Apr 15 13:37:38 2003  David Helder  <dhelder@umich.edu>
 
 	* src/gnet-private.h: define sockaddr_storage if not defined.

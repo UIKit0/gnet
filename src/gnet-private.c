@@ -60,6 +60,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
 	  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
 	  sa_in->sin_port = g_htons(port);
 	}
+#ifdef HAVE_IPV6
       else						/* IPv6 */
 	{
 	  struct sockaddr_in6* sa_in6;
@@ -72,6 +73,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
 	  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
 	  sa_in6->sin6_port = g_htons(port);
 	}
+#endif
     }
 
   sockfd = socket(family, type, 0);

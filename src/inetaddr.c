@@ -93,7 +93,9 @@ gnet_gethostbyname(const char* hostname)
   /* First attempt non-blocking lookup */
   
   struct in_addr inaddr;
+#ifdef HAVE_IPV6
   struct in6_addr in6addr;
+#endif
 
   if (inet_pton(AF_INET, hostname, &inaddr) != 0)
     {
@@ -111,6 +113,7 @@ gnet_gethostbyname(const char* hostname)
       list = g_list_prepend (list, ia);
       return list;
     }
+#ifdef HAVE_IPV6
   else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
     {
       GInetAddr* ia;
@@ -128,6 +131,7 @@ gnet_gethostbyname(const char* hostname)
       list = g_list_prepend (list, ia);
       return list;
     }
+#endif
 
   /* **************************************** */
   /* DNS lookup: getaddrinfo() */
@@ -1411,9 +1415,11 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 GInetAddr* 
 gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
 {
-  struct in_addr inaddr;
-  struct in6_addr in6addr;
   GInetAddr* ia = NULL;
+  struct in_addr inaddr;
+#ifdef HAVE_IPV6
+  struct in6_addr in6addr;
+#endif
 
   g_return_val_if_fail (hostname, NULL);
 
@@ -1430,6 +1436,7 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
       sa_inp->sin_addr = inaddr;
       sa_inp->sin_port = g_htons(port);
     }
+#ifdef HAVE_IPV6
   else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
     {
       struct sockaddr_in6* sa_inp;
@@ -1443,6 +1450,7 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
       sa_inp->sin6_addr = in6addr;
       sa_inp->sin6_port = g_htons(port);
     }
+#endif
   else
     return NULL;
 
@@ -1478,8 +1486,10 @@ gnet_inetaddr_new_bytes (const gchar* bytes, const guint length)
   ia->ref_count = 1;
   if (length == 4)
     GNET_INETADDR_FAMILY(ia) = AF_INET;
+#ifdef HAVE_IPV6
   else
     GNET_INETADDR_FAMILY(ia) = AF_INET6;
+#endif
   GNET_INETADDR_SET_SS_LEN(ia);
   memcpy(GNET_INETADDR_ADDRP(ia), bytes, length);
 
@@ -2191,8 +2201,10 @@ gnet_inetaddr_set_bytes (GInetAddr* inetaddr,
 
   if (length == 4)
     GNET_INETADDR_FAMILY(inetaddr) = AF_INET;
+#ifdef HAVE_IPV6
   else if (length == 16)
     GNET_INETADDR_FAMILY(inetaddr) = AF_INET6;
+#endif
   GNET_INETADDR_SET_SS_LEN(inetaddr);
   memcpy (GNET_INETADDR_ADDRP(inetaddr), bytes, length);
   GNET_INETADDR_PORT(inetaddr) = port;
@@ -2278,12 +2290,21 @@ gnet_inetaddr_set_port(const GInetAddr* inetaddr, gint port)
 gboolean
 gnet_inetaddr_is_canonical (const gchar* name)
 {
-  struct in6_addr inaddr;
+  char buf[16];
 
   g_return_val_if_fail (name, FALSE);
 
-  return (inet_pton(AF_INET,  name, &inaddr) != 0) ||
-         (inet_pton(AF_INET6, name, &inaddr) != 0);
+  if (inet_pton(AF_INET,  name, buf) == 1)
+    return TRUE;
+
+#ifdef HAVE_IPV6
+ {
+   if (inet_pton(AF_INET6, name, buf) == 1)
+     return TRUE;
+ }
+#endif
+
+ return FALSE;
 }
 
 
@@ -2363,12 +2384,14 @@ gnet_inetaddr_is_private (const GInetAddr* inetaddr)
       if ((addr & 0xFFFF0000) == 0xC0A80000)
 	return TRUE;
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       if (IN6_IS_ADDR_LINKLOCAL(&GNET_INETADDR_SA6(inetaddr).sin6_addr) ||
 	  IN6_IS_ADDR_SITELOCAL(&GNET_INETADDR_SA6(inetaddr).sin6_addr))
 	return TRUE;
     }
+#endif
 
   return FALSE;
 }
@@ -2408,6 +2431,7 @@ gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
       if ((addr & 0xF8000000) == 0xF0000000)
 	return TRUE;
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       guint32 high_addr;
@@ -2418,6 +2442,7 @@ gnet_inetaddr_is_reserved (const GInetAddr* inetaddr)
       if ((high_addr & 0xFFFF0000) == 0)	/* 0000 0000 prefix */
 	return TRUE;
     }
+#endif
 
   return FALSE;
 }
@@ -2450,11 +2475,13 @@ gnet_inetaddr_is_loopback (const GInetAddr* inetaddr)
       if ((addr & 0xFF000000) == (IN_LOOPBACKNET << 24))
 	return TRUE;
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       if (IN6_IS_ADDR_LOOPBACK(&GNET_INETADDR_SA6(inetaddr).sin6_addr))
 	return TRUE;
     }
+#endif
 
   return FALSE;
 }
@@ -2483,11 +2510,13 @@ gnet_inetaddr_is_multicast (const GInetAddr* inetaddr)
       if (IN_MULTICAST(g_htonl(GNET_INETADDR_SA4(inetaddr).sin_addr.s_addr)))
 	return TRUE;
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       if (IN6_IS_ADDR_MULTICAST(&GNET_INETADDR_SA6(inetaddr).sin6_addr))
 	return TRUE;
     }
+#endif
 
   return FALSE;
 }
@@ -2553,7 +2582,11 @@ gnet_inetaddr_is_ipv6 (const GInetAddr* inetaddr)
 {
   g_return_val_if_fail (inetaddr != NULL, FALSE);
 
+#ifdef HAVE_IPV6
   return GNET_INETADDR_FAMILY(inetaddr) == AF_INET6;
+#else
+  return FALSE;
+#endif
 }
 
 
@@ -2593,6 +2626,7 @@ gnet_inetaddr_hash (gconstpointer p)
 
       addr = g_ntohl(sa_in->sin_addr.s_addr);
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(ia) == AF_INET6)
     {
       addr = g_ntohl(GNET_INETADDR_ADDR32(ia, 0)) ^
@@ -2600,6 +2634,7 @@ gnet_inetaddr_hash (gconstpointer p)
 	g_ntohl(GNET_INETADDR_ADDR32(ia, 2)) ^
 	g_ntohl(GNET_INETADDR_ADDR32(ia, 3));
     }
+#endif
   else
     g_assert_not_reached();
 
@@ -2642,6 +2677,7 @@ gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
 	  (sa_in1->sin_port == sa_in2->sin_port))
 	return TRUE;
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(ia1) == AF_INET6)
     {
       struct sockaddr_in6* sa_in1 = (struct sockaddr_in6*) &ia1->sa;
@@ -2651,6 +2687,7 @@ gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
 	  (sa_in1->sin6_port == sa_in2->sin6_port))
 	return TRUE;
     }
+#endif
   else
     g_assert_not_reached();
 
@@ -2688,6 +2725,7 @@ gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2)
       if (sa_in1->sin_addr.s_addr == sa_in2->sin_addr.s_addr)
 	return TRUE;
     }
+#ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(ia1) == AF_INET6)
     {
       if ((GNET_INETADDR_ADDR32(ia1, 0) ==
@@ -2700,6 +2738,7 @@ gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2)
 	   GNET_INETADDR_ADDR32(ia2, 3)))
 	return TRUE;
     }
+#endif
   else
     g_assert_not_reached();
 
@@ -3162,11 +3201,13 @@ gnet_inetaddr_list_interfaces (void)
 	  src = (void*) &((struct sockaddr_in*) sa)->sin_addr;
 	  len = sizeof(struct in_addr);
 	}
+#ifdef HAVE_IPV6
       else if (sa->sa_family == AF_INET6)
 	{
 	  src = (char*) &((struct sockaddr_in6*) sa)->sin6_addr;
 	  len = sizeof(struct in6_addr);
 	}
+#endif
       else
 	continue;
 
@@ -3245,9 +3286,13 @@ gnet_inetaddr_list_interfaces (void)
       ifr = (struct ifreq*) ptr;
 
       /* Ignore non-AF_INET */
-      if (ifr->ifr_addr.sa_family != AF_INET &&
-	  ifr->ifr_addr.sa_family != AF_INET6 )
-	continue;
+      if (ifr->ifr_addr.sa_family != AF_INET)
+	{
+#ifdef HAVE_IPV6
+	  if (ifr->ifr_addr.sa_family != AF_INET6)
+#endif
+	    continue;
+	}
 
       /* Save the address - the next call will clobber it */
       memcpy(&addr, &ifr->ifr_addr, sizeof(addr));

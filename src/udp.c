@@ -254,11 +254,12 @@ gnet_udp_socket_send (GUdpSocket* socket,
   g_return_val_if_fail (dst,    -1);
 
   /* Address of dst must be address of socket */
+#ifdef HAVE_IPV6
   if (GNET_INETADDR_FAMILY(dst) != GNET_SOCKADDR_FAMILY(socket->sa))
     {
       /* If dst is IPv4, map to IPv6 */
-      if (GNET_INETADDR_FAMILY(dst) == AF_INET &&
-          GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
+      if (GNET_INETADDR_FAMILY(dst) == AF_INET && 
+	  GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
 	{
           sa.ss_family = AF_INET6;
 	  GNET_SOCKADDR_SET_SS_LEN(sa);
@@ -285,6 +286,7 @@ gnet_udp_socket_send (GUdpSocket* socket,
     }
     /* Addresses match - just copy the address */
     else
+#endif
       {
 	sa = dst->sa;
       }
@@ -450,11 +452,13 @@ gnet_udp_socket_get_ttl (const GUdpSocket* socket)
     }
 
   /* Or, get the IPv6 TTL if it's bound to an IPv6 address */
+#ifdef HAVE_IPV6
   else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
 		      (void*) &ttl, &ttl_size);
     }
+#endif
   else
     g_assert_not_reached();
 
@@ -482,7 +486,9 @@ gint
 gnet_udp_socket_set_ttl (GUdpSocket* socket, gint ttl)
 {
   int rv1, rv2;
+#ifdef HAVE_IPV6
   GIPv6Policy policy;
+#endif
 
   rv1 = -1;
   rv2 = -1;
@@ -491,11 +497,14 @@ gnet_udp_socket_set_ttl (GUdpSocket* socket, gint ttl)
      0::0 IPv6 and IPv6 policy allows IPv4, set IP_TTL.  In the latter case,
      if we bind to 0::0 and the host is dual-stacked, then all IPv4
      interfaces will be bound to also. */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET ||
-      (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET 
+#ifdef HAVE_IPV6
+      || (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
        IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
-	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
+	policy == GIPV6_POLICY_IPV6_THEN_IPV4))
+#endif
+      )
     {
       rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_TTL, 
 		       (void*) &ttl, sizeof(ttl));
@@ -503,11 +512,13 @@ gnet_udp_socket_set_ttl (GUdpSocket* socket, gint ttl)
 
 
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
+#ifdef HAVE_IPV6
   if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
 		       (void*) &ttl, sizeof(ttl));
     }
+#endif
 
   if (rv1 == -1 && rv2 == -1)
     return -1;
