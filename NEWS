@@ -4,6 +4,12 @@ GNet NEWS
 
 Changes in Gnet
 
+1.0.2 (unreleased)
+-----
+* Fixed bugs in inetaddr async functions
+* Fixed memory leaks in inetaddr and tcp async functions
+* Portability fixes for OpenBSD and FreeBSD 4.0
+
 1.0.1
 -----
 * Fixed bug in readline_strdup

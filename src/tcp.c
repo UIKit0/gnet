@@ -208,6 +208,8 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
       gnet_inetaddr_delete(state->ia);
       gnet_tcp_socket_new_async_cancel(state->tcp_id);
     }
+
+  g_free (state);
 }
 
 
@@ -354,11 +356,9 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 			      gpointer data)
 {
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
-  GTcpSocketNewAsyncStatus status = GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR;
-
 
   errno = 0;
-  if ((condition | G_IO_IN) || (condition | G_IO_OUT))
+  if ((condition & G_IO_IN) || (condition & G_IO_OUT))
     {
       gint error, len;
       len = sizeof(error);
@@ -366,28 +366,23 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
       /* Get the error option */
       if (getsockopt(state->socket->sockfd, SOL_SOCKET, SO_ERROR, (void*) &error, &len) >= 0)
 	{
-	  /* TODO: Solaris pending error in Stevens? */
-/*  	  errno = error; */
-
 	  /* Check if there is an error */
 	  if (!error)
 	    {
 	      /* Reset the flags */
 	      if (fcntl(state->socket->sockfd, F_SETFL, state->flags) == 0)
 		{
-		  status = GTCP_SOCKET_NEW_ASYNC_STATUS_OK;
+		  (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
+		  g_free(state);
+		  return FALSE;
 		}
 	    }
 	}
     }
 
-/*    if (errno) */
-/*        g_warning("tcp_socket_new_async_cb: %s\n", g_strerror(errno)); */
-
-
-  /* Call back */
-  (*state->func)(state->socket, status, state->data);
-
+  /* Otherwise, there was an error */
+  (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
+  gnet_tcp_socket_delete(state->socket);
   g_free(state);
 
   return FALSE;
@@ -409,6 +404,7 @@ gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
 
   g_source_remove(state->connect_watch);
   gnet_tcp_socket_delete(state->socket);
+  g_free (state);
 }
 
 

@@ -539,7 +539,7 @@ gnet_inetaddr_new_async(const gchar* name, const gint port,
 
       /* Add a watch */
       state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
-				    GNET_ANY_IO_CONDITION,
+				    (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				    gnet_inetaddr_new_async_cb, 
 				    state);
 
@@ -571,10 +571,9 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 			    gpointer data)
 {
   GInetAddrAsyncState* state = (GInetAddrAsyncState*) data;
-  GInetAddrAsyncStatus status = GINETADDR_ASYNC_STATUS_ERROR;
 
   /* Read from the pipe */
-  if (condition | G_IO_IN)
+  if (condition & G_IO_IN)
     {
       int rv;
       char* buf;
@@ -583,33 +582,40 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
       buf = &state->buffer[state->len];
       length = sizeof(state->buffer) - state->len;
 
-      if ((rv = read(state->fd, buf, length)) > 0)
+      if ((rv = read(state->fd, buf, length)) >= 0)
 	{
-	  struct sockaddr_in* sa_in;
-
 	  state->len += rv;
 
 	  /* Return true if there's more to read */
 	  if ((state->len - 1) != state->buffer[0])
 	    return TRUE;
 
-	  sa_in = (struct sockaddr_in*) &state->ia->sa;
+	  /* We're done reading.  Copy into the addr if we were
+             successful. */
+	  if (state->len > 1)
+	    {
+	      struct sockaddr_in* sa_in;
 
-	  /* We are done! */
-	  memcpy(&sa_in->sin_addr, &state->buffer[1], state->len);
+	      sa_in = (struct sockaddr_in*) &state->ia->sa;
+	      memcpy(&sa_in->sin_addr, &state->buffer[1], (state->len - 1));
 
-	  status = GINETADDR_ASYNC_STATUS_OK;
 
-	  close(state->fd);
-	  waitpid(state->pid, NULL, 0);
+	    }
+	  /* Otherwise, we got a 0 because there was an error */
+
+	  /* Call back */
+	  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
+	  close (state->fd);
+	  waitpid (state->pid, NULL, 0);
+	  g_free(state);
+	  return FALSE;
 	}
+      /* otherwise, there was an error */
     }
+  /* otherwise, there was an error */
 
-
-  /* Call back */
-  (*state->func)(state->ia, status, state->data);
-  g_free(state);
-
+  (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+  gnet_inetaddr_new_async_cancel(state);
   return FALSE;
 }
 
@@ -872,7 +878,7 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
 
 	  /* Add a watch */
 	  state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
-					GNET_ANY_IO_CONDITION,
+					(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 					gnet_inetaddr_get_name_async_cb, 
 					state);
 	  return state;
@@ -895,6 +901,60 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
 
   return NULL;
 }
+
+
+
+static gboolean 
+gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
+				 GIOCondition condition, 
+				 gpointer data)
+{
+  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) data;
+  gchar* name = NULL;
+
+  g_return_val_if_fail (state != NULL, FALSE);
+
+  /* Read from the pipe */
+  if (condition & G_IO_IN)
+    {
+      int rv;
+      char* buf;
+      int length;
+
+      buf = &state->buffer[state->len];
+      length = sizeof(state->buffer) - state->len;
+
+      if ((rv = read(state->fd, buf, length)) >= 0)
+	{
+	  state->len += rv;
+
+	  /* Return true if there's more to read */
+	  if ((state->len - 1) != state->buffer[0])
+	    return TRUE;
+
+	  /* Copy the name */
+	  name = g_new(gchar, state->buffer[0] + 1);
+	  strncpy(name, &state->buffer[1], state->buffer[0]);
+	  name[state->buffer[0]] = '\0';
+	  state->ia->name = g_strdup(name);
+
+	  /* Call back */
+	  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, name, state->data);
+	  close (state->fd);
+	  waitpid (state->pid, NULL, 0);
+	  g_free (state);
+	  return FALSE;
+	}
+      /* otherwise, there was a read error */
+    }
+  /* otherwise, there was some error */
+
+  /* Call back */
+  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, state->data);
+  gnet_inetaddr_get_name_async_cancel(state);
+  return FALSE;
+}
+
 
 
 
@@ -921,55 +981,6 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
   waitpid (state->pid, NULL, 0);
 
   g_free(state);
-}
-
-
-
-static gboolean 
-gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
-				 GIOCondition condition, 
-				 gpointer data)
-{
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) data;
-  GInetAddrAsyncStatus status = GINETADDR_ASYNC_STATUS_ERROR;
-  gchar* name = NULL;
-
-  /* Read from the pipe */
-  if (condition | G_IO_IN)
-    {
-      int rv;
-      char* buf;
-      int length;
-
-      buf = &state->buffer[state->len];
-      length = sizeof(state->buffer) - state->len;
-
-      if ((rv = read(state->fd, buf, length)) > 0)
-	{
-	  state->len += rv;
-
-	  /* Return true if there's more to read */
-	  if ((state->len - 1) != state->buffer[0])
-	    return TRUE;
-
-	  /* Copy the name */
-	  name = g_new(gchar, state->buffer[0] + 1);
-	  strncpy(name, &state->buffer[1], state->buffer[0]);
-	  state->ia->name = name;
-
-	  status = GINETADDR_ASYNC_STATUS_OK;
-
-	  close(state->fd);
-	  waitpid(state->pid, NULL, 0);
-	}
-    }
-
-
-  /* Call back */
-  (*state->func)(state->ia, status, name, state->data);
-  g_free(state);
-
-  return FALSE;
 }
 
 

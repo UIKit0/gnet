@@ -24,7 +24,7 @@
 
 
 #define DO_REVERSE 0
-#define VERBOSE 0
+#define VERBOSE 1
 
 void lookup_block(void);
 void lookup_async(void);

@@ -1,3 +1,31 @@
+Thu Apr  6 16:14:16 2000  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_async): Don't watch PRI or
+	   OUT.
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): Likewise.
+
+	* src/tcp.c (gnet_tcp_socket_new_async_cancel): Delete
+	   the state.
+	* src/tcp.c (gnet_tcp_socket_connect_async_cancel): Delete the
+	   state.
+
+	* src/tcp.c (gnet_tcp_socket_new_async_cb): Bug fix:
+	   Mask the condition properly.  Delete the socket if
+	   there was an error.  General clean-ups.
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async_cb): Bug fix: 
+	   Make sure name ends with '\0'.
+
+	* src/inetaddr.c (gnet_inetaddr_new_async_cb): Bug fix:
+	   Mask the condition properly.
+	* src/inetaddr.c (gnet_inetaddr_new_async_cb): Bug fix: Copy len-1
+	   bytes, not len.
+	* src/inetaddr.c (gnet_inetaddr_new_async_cb): If we call back
+	   with ERROR, set ia to NULL.  Also delete the ia, which fixes
+	   a memory leak.
+
+	* configure.in: Print stuff when checking for --enable-debug
+
 Wed Apr  5 14:04:52 2000  David Helder  <dhelder@umich.edu>
 
 	* src/gnet-private.c (gnet_private_inetaddr_list_interfaces): Use
