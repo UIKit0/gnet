@@ -132,6 +132,9 @@ gnet_udp_socket_get_MTU(GUdpSocket* us)
    destroy the data from the hash.  A WinSock 2 async call is
    destroyed by WSACancelAsyncRequest(HANDLE);.
 
+	 UPDATE: As of March 2001, many of the problems in glib's iochannel
+	 code were fixed so only a few gnet functions still use this method.
+
    I believe I have taken care of the multi-threaded issues by using
    mutexes.  
 
@@ -160,9 +163,13 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
   GTcpSocketAsyncState *TCPNEWstate;
   SocketWatchAsyncState *WatchState;
 
+	int i;
+
   /*Take the msg off the message queue */
-  GetMessage (&msg, gnet_hWnd, 0, 0);
- 
+  i = PeekMessage (&msg, gnet_hWnd, 0, 0, PM_REMOVE); 
+	if (!i)
+		return 1; /* you have a buggy version of glib that is calling this func when it shouldn't*/
+
   switch (msg.message) 
     {
     case IA_NEW_MSG:
@@ -235,41 +242,6 @@ GnetWndProc(HWND hwnd,        /* handle to window */
     return 0; 
 } 
 
-/* Not used but required*/
-LRESULT CALLBACK
-GnetWndProcWatch(HWND hwnd,        /* handle to window */
-	    UINT uMsg,        /* message identifier */
-	    WPARAM wParam,    /* first message parameter */
-	    LPARAM lParam)    /* second message parameter */
-{ 
-
-    switch (uMsg) 
-    { 
-        case WM_CREATE: 
-            /* Initialize the window. */
-            return 0; 
- 
-        case WM_PAINT: 
-            /* Paint the window's client area. */ 
-            return 0; 
- 
-        case WM_SIZE: 
-            /* Set the size and position of the window. */ 
-            return 0; 
- 
-        case WM_DESTROY: 
-            /* Clean up window-specific data objects. */
-            return 0; 
- 
-        /* 
-          Process other messages. 
-        */ 
- 
-        default: 
-            return DefWindowProc(hwnd, uMsg, wParam, lParam); 
-    } 
-    return 0; 
-} 
 
 BOOL WINAPI 
 DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */

@@ -1,3 +1,10 @@
+Sun May 20 10:22:29 2001  Andrew Lanoix <alanoix@umich.edu>
+
+	*src/gnet-private.c:[win32 only] workaround for a glib
+	   bug that caused problems when one used GNet with GTK
+
+	*README.win32: Updated
+
 Mon May 14 11:13:22 2001  David Helder  <dhelder@umich.edu>
 
 	* src/url.c, inetaddr.c, md5.c (*_hash, *_equal): 
