@@ -274,7 +274,8 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 
 	if (!RegisterClassEx(&gnetWndClass))
 	  {
-	    return FALSE;	
+	    if (GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+			return FALSE;
 	  }
 
 	gnet_hWnd  = CreateWindowEx

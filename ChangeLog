@@ -1,3 +1,9 @@
+Sun Mar 21 18:04:50.48    Andrew Lanoix <alanoix@umich.edu>
+
+	*src/gnet-private.c(DllMain): If RegisterClassEx() fails, check to see if
+		class was already registered.
+		Found by: Tommy Chang <tchang@cme.nist.gov>
+
 Mon Mar  1 19:07:26 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* *: Prepare 2.0.5
