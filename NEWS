@@ -6,7 +6,11 @@ Changes in Gnet
 
 1.0.4 (unreleased)
 -----
+* New experimental features: connection and server classes, MD5, SHA,
+    URL class, formatted pack/unpack (perl/python style), asyncronous
+    IO helper functions
 * Windows port
+* Bug fixes
 
 1.0.3
 -----
