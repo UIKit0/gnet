@@ -1,3 +1,7 @@
+Wed Feb  2 13:58:10 2000  David A Helder  <dhelder@umich.edu>
+
+	* Makefile.am (copyweb): Fixed copy to debian server
+
 Wed Feb  2 10:31:13 2000  David A Helder  <dhelder@umich.edu>
 
 	* doc/gnet.sgml: Fixed version number stuff, old function names.
