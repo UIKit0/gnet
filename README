@@ -3,15 +3,13 @@ GNet README
 -----------
 
 GNet is a simple network library.  It is writen in C, object-oriented,
-and built upon glib.  It is intended to be small, fast, easy-to-use,
+and built upon GLib.  It is intended to be small, fast, easy-to-use,
 and easy to port.  GNet comes with documentation and examples.  It is
 licensed under the GNU Library General Public Licence.
 
 Features:
-  * TCP 'client' sockets
-  * TCP 'server' sockets
-  * UDP
-  * IP Multicast
+  * TCP "client" and "server" sockets
+  * UDP and IP Multicast
   * Internet address abstraction
   * Asynchronous socket IO
   * Asynchronous DNS lookup
@@ -19,16 +17,16 @@ Features:
   * URLs (Experimental)
   * Server and Conn objects (Experimental)
 
-GNet has been ported to Linux, *BSD, Solaris, HP, and Windows.  It may
-work on other operating systems also.
+GNet has been ported to Linux, *BSD, Solaris, HP, MacOS X, and
+Windows.  It may work on other operating systems also.
 
-GNet requires Glib 1.2.  You can get this at www.gtk.org.  Or, if you
-have a system with packages (eg, Red Hat or Debian), look for the
-latest glib package.
+GNet requires GLib 1.2, available at www.gtk.org.  Or, if you have a
+system with packages (e.g., Red Hat or Debian), look for the latest
+glib package.
 
-Comments and questions should be sent to gnet-dev@eecs.umich.edu.
+Comments and questions should be sent to gnet@gnetlibrary.org.
 
-The GNet homepage is at http://www.gnetlibrary.org
+The GNet homepage is at <http://www.gnetlibrary.org>.
 
 
 Install
@@ -45,15 +43,14 @@ In a nutshell:
 Bugs
 ====
 
-Bug reports should be submited through http://bugzilla.gnome.org.  
+Bug reports should be submited through <http://bugzilla.gnome.org>.
 
 
 Mailing lists
 =============
 
-To join these mailing lists, send an email to
-<name>-request@eecs.umich.edu, where <name> is the name of the mailing
-list, with "subscribe" as the subject.
+Go to <http://www.gnetlibrary.org/mailman/listinfo/> to join the
+mailing lists and view the archives.
 
 Name			Purpose
 gnet-announce		Announcements about GNet
@@ -65,19 +62,20 @@ Developer info
 ==============
 
 API documentation lives on the GNet homepage (specifically, at
-http://www.gnetlibrary.org/docs)
+<http://www.gnetlibrary.org/docs>)
 
-The URL, Server, and Conn modules are experimental and part of the
-IOChannel module is also experimental.  The GNet development team
-believes these modules are useful and usable, but are not yet
-completely confident in them.  The API to these modules may change and
-there may still be bugs in them.  For example, the URL module is
-incomplete and the new IOChannel functions should be audited again.
-If you are feeling adventurous and want to use these functions, define
-GNET_EXPERIMENTAL.  Otherwise, your compiler should warn or fail if
-they are used.  We welcome bug fixes, improvements, and comments on
-the experimental modules.  Our hope is that adventurous programmers
-will use these modules and help in their further development.
+NOTE ON EXPERIMENTAL FEATURES.  The URL, Server, and Conn modules are
+experimental and part of the IOChannel module is also experimental.
+The GNet development team believes these modules are useful and
+usable, but are not yet completely confident in them.  The API to
+these modules may change and there may still be bugs in them.  For
+example, the URL module is incomplete and the new IOChannel functions
+should be audited again.  If you are feeling adventurous and want to
+use these functions, define GNET_EXPERIMENTAL.  Otherwise, your
+compiler should warn or fail if they are used.  We welcome bug fixes,
+improvements, and comments on the experimental modules.  Our hope is
+that adventurous programmers will use these modules and help in their
+further development.
 
 
 Hacking
@@ -122,3 +120,7 @@ gPoker
 PreViking
   telephony middleware
   http://www.bellworldwide.net/previking/
+
+B-Chat
+  3rd party Yahoo! Chat client
+  http://btech1.sourceforge.net

@@ -12,7 +12,7 @@ Description: Developer files for GNet network library
  Development files for GNet
  .
  GNet is a simple network library.  It is writen in C, object-oriented,
- and built upon glib.  It is intended to be small, fast, easy-to-use,
+ and built upon GLib.  It is intended to be small, fast, easy-to-use,
  and easy to port.
  .
  Features:
@@ -27,7 +27,7 @@ Description: Developer files for GNet network library
    * URLs (Experimental)
    * Server and Conn objects (Experimental)
  .
- The GNet homepage is at http://www.gnetlibrary.org
+ The GNet homepage is at <http://www.gnetlibrary.org>.
 
 Package: libgnet@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@
 Architecture: any
@@ -50,4 +50,4 @@ Description: GNet network library
    * URLs (Experimental)
    * Server and Conn objects (Experimental)
  .
- The GNet homepage is at http://www.gnetlibrary.org
+ The GNet homepage is at <http://www.gnetlibrary.org>.

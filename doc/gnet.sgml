@@ -32,7 +32,7 @@
     </authorgroup>
 
     <copyright>
-      <year>2000</year>
+      <year>2000-2001</year>
       <holder>David Helder</holder>
     </copyright>	
 
@@ -76,20 +76,16 @@
     <para>
       GNet is a simple networking library.  It is writen in C,
       object-oriented, and built upon glib.  It is intended to be
-      small, fast, easy-to-use, and easy to port.  The interface is
-      similar to the interface for Java's network library.  It is
-      somewhere between being wrappers over the standard network
-      sockets library and providing high-level client and server
-      abstractions.
+      small, fast, easy-to-use, and easy to port.  It is somewhere
+      between being wrappers over the standard network sockets library
+      and providing high-level client and server abstractions.
     </para>
 
     <para>
       Features:
       <itemizedlist>
-	<listitem><para>TCP 'client' sockets</para></listitem>
-        <listitem><para>TCP 'server' sockets</para></listitem>
-        <listitem><para>UDP</para></listitem>
-        <listitem><para>IP Multicast</para></listitem>
+	<listitem><para>TCP "client" and "server" sockets</para></listitem>
+        <listitem><para>UDP and IP Multicast</para></listitem>
         <listitem><para>Internet address abstraction</para></listitem>
         <listitem><para>Asynchronous socket IO</para></listitem>
 	<listitem><para>Asynchronous DNS lookup</para></listitem>
@@ -161,12 +157,13 @@ AM_PATH_GNET(&lt;version number&gt;,
       </para>
 
       <para>
-	Non-blocking functions return immediately.  Asynchronous
-	functions are non-blocking, but also call a callback when.
-
+	"Non-blocking" functions return immediately.  Asynchronous
+	functions are non-blocking and call a callback when completed.
 	IO operations on socket IOChannels (e.g., read, write) are not
-	non-blocking
-
+	non-blocking.  Use GLib's asynchronous g_io_add_watch on a
+	GIOChannel to set a callback to be called when the GIOChannel
+	can be read (or written to, or there's an error).  See the
+	echoclient and echoserver for examples.
       </para>
 
     </sect1>
@@ -182,9 +179,9 @@ AM_PATH_GNET(&lt;version number&gt;,
       GNet comes with several example programs.  They are intented to
       be used by developers as examples of how to use GNet.  The
       example programs are in the examples directory that comes with
-      the source code.  To build the examples, go to this directory
-      and type <userinput>make examples</userinput>.  This section
-      describes what each of the example programs does.
+      the source code.  To build the examples, install GNet then go to
+      this directory and type <userinput>make examples</userinput>.  This
+      section describes what each of the example programs does.
     </para>
 
     <sect1 id="echo">

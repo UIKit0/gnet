@@ -4,7 +4,7 @@
 %define prefix   /usr
 
 Summary: Gnet, a network library
-Name:      gnet1.1
+Name:      gnet
 Version:   %ver
 Release:   %rel
 Copyright: LGPL
@@ -18,15 +18,12 @@ Requires: glib >= 1.2
 
 %description
 Gnet is a simple network library.  It is writen in C, object-oriented,
-and built upon glib.  It is intended to be small, fast, easy-to-use,
-and easy to port.  The interface is similar to the interface for
-Java's network library.
+and built upon GLib.  It is intended to be small, fast, easy-to-use,
+and easy to port.
 
 Features:
-  * TCP 'client' sockets
-  * TCP 'server' sockets
-  * UDP
-  * IP Multicast
+  * TCP "client" and "server" sockets
+  * UDP and IP Multicast
   * Internet address abstraction
   * Asynchronous socket IO
   * Asynchronous DNS lookup
@@ -34,14 +31,9 @@ Features:
   * URLs (Experimental)
   * Server and Conn objects (Experimental)
 
-Gnet requires Glib 1.2.  You can get this at www.gtk.org.  Or, if you
-have a system with packages (eg, Red Hat or Debian), look for the
-latest glib package.
+Comments and questions should be sent to gnet@gnetlibrary.org.
 
-Comments, questions, and bug reports should be sent to
-gnet-dev@eecs.umich.edu.
-
-The Gnet homepage is at http://www.gnetlibrary.org
+The Gnet homepage is at <http://www.gnetlibrary.org>.
 
 %package devel
 Summary: Header files for the Gnet library
@@ -49,7 +41,7 @@ Group: Development/Libraries
 
 %description devel
 Gnet is a simple network library.  It is writen in C, object-oriented,
-and built upon glib.
+and built upon GLib.
 This package allows you to develop applications that use the Gnet
 library.
 
@@ -92,7 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/bin/gnet-config
 %{prefix}/share/aclocal/gnet.m4
 %doc doc/html
-%{prefix}/lib/libgnet-1.0.so.*
+%{prefix}/lib/libgnet-1.1.so.*
 
 %files devel
 %defattr(-, root, root)

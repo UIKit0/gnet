@@ -7,13 +7,22 @@ you can help.
 
 
 Features
+--------
 
 - Move udp_mcast_ttl to mcast?
 
 - URL cleanup.  Need to sync with RFC.
 
+- SOCK5 interface support.  (Marius <marius@umich.edu> is
+    interested)
+
 - Put include files in gnet-MAJOR.MINOR so multiple development
     packages can be installed.
+
+- Support IPv6.  
+
+    Someone with an IPv6 system needs to do this and test it.  I don't
+    want to just use IPv6 structures and claim it's IPv6 compliant.
 
 - Include more protocols
 
@@ -25,9 +34,9 @@ Features
     IRC) because they are more application-focused and have limited
     use outside their specific application.  For example, someone who
     wants NNTP is probably implementing a new reader and would be
-    better off implementing it from scratch to get a finer control
-    over the protocol.  On the other hand, if someone had a good
-    implementation of NNTP with a good interface and there was demand
+    better off implementing it from scratch for finer control
+    of the protocol.  On the other hand, if someone had a good
+    implementation of NNTP with a good interface and there were demand
     for it, I would probably accept it.  (An alternative would be
     start a gnet-protocol library which would include more complex
     protocols).
@@ -38,11 +47,6 @@ Features
     implementations have been tested both in functionality and in
     interface design.  Moreover, we would be guaranteed at least one
     user.
-
-- Support IPv6.  
-
-    Someone with an IPv6 system needs to do this and test it.  I don't
-    want to just use IPv6 structures and claim it's IPv6.
 
 - Bindings for other languages
 
@@ -60,6 +64,7 @@ Features
 
 
 Internal Improvements
+---------------------
 
 - Better asynchronous DNS
     * Use pthread's instead of fork where available (or better,
@@ -76,10 +81,11 @@ Internal Improvements
 
 
 Other
+-----
 
 - More documentation and examples
 
-    Add a beginners guide.  Show more code examples.
+    Add a beginners guide/tutorial.  Show more code examples.
 
 - Clean up Debian packages.  Add a Debian docs package?
 
@@ -89,6 +95,7 @@ Other
 
 
 Undecided (things discussed, but not decided on)
+---------
 
 - Add more error types
 
@@ -122,10 +129,9 @@ Undecided (things discussed, but not decided on)
     You shouldn't have to bind a connecting socket, so this may not be
     needed.  (Well, sometimes you do for UDP.)
 
-    GConn does this, so it may not be necessary.
+    GConn does this to an extent, so it may not be necessary.
 
-- Support out-of-band data.  How useful is this?  How portable is
-    this?
+- Support out-of-band data.  How useful is this?  How portable?
 
 - Add lightweight intraprocess communication stuff via IOChannel.  I'd
     like a shared buffer and a message queue.  These should be simple
@@ -133,5 +139,6 @@ Undecided (things discussed, but not decided on)
 
 
 Never (things that will probably never become part of GNet)
+-----
 
 - Raw or low-level IP (use libpcap, libnet)

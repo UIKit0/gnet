@@ -16,7 +16,7 @@ m4data_DATA = gnet.m4
 configincludedir = $(pkglibdir)/include
 configinclude_DATA = gnetconfig.h
 
-WEBPATH=/home/www/gnetlibrary.org/html
+WEBPATH=/n/misc/home/www/gnetlibrary.org/html
 DEBPATH=$(HOME)/public_html/misc/debian
 
 DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING
@@ -37,6 +37,8 @@ snapshot:
 
 copyweb:
 	-cp -f $(DOCS) $(WEBPATH)
+	cp -f doc/html/* $(WEBPATH)/docs
+	cp -f doc/html/book1.html doc/html/index.html
 	-(cd $(WEBPATH); chmod a+r $(DOCS))
 	-cp -f $(TARBALL) $(WEBPATH)/src
 	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)/deb

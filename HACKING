@@ -10,8 +10,8 @@ What to do (in general)
 
 We will always accept bug and portability fixes.  If you are
 interested in doing something more major, please write
-gnet-dev@umich.edu first.  This is so we know what people are doing
-and can offer advice.  Also see the TODO file for ideas on the
+gnet-dev@gnetlibrary.net first.  This is so we know what people are
+doing and can offer advice.  Also see the TODO file for ideas on the
 direction we want to take GNet.  We _strongly_ recommend, if you are
 contributing a feature, that you fully implement and test the feature
 in your own program before submitting a patch.  This ensures that the
@@ -21,7 +21,7 @@ feature is tested the interface is reasonably mature.
 Mailing list
 ------------
 
-gnet-dev@eecs.umich.edu is the development mailing list.  See the
+gnet-dev@gnetlibrary.org is the development mailing list.  See the
 README for information on how to subscribe.
 
 
