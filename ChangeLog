@@ -1,5 +1,7 @@
 Wed Oct 24 10:02:43 2001  Ross Golder  <ross@golder.org>
 
+	* src/pack.h: Commented out argument to #endif.
+	* src/sha.h: Removed extraneous character (typo?).
 	* Makefile.am: Updated handling of rpms and spec files.
 	* Makefile.am: Added debian directory to make dist.
 

@@ -16,7 +16,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */c
+#endif /* __cplusplus */
 
 typedef struct _GSHA GSHA;
 #define GNET_SHA_HASH_LENGTH	20	/* in bytes */
