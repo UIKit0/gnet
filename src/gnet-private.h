@@ -95,6 +95,7 @@ struct sockaddr_storage {
 /* Use gnet_private_io_channel_new() to create iochannels */
 #define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
 
+
 #else	/*********** Windows specific ***********/
 
 #include <windows.h>
