@@ -16,7 +16,7 @@ TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
 man_MANS = gnet-config.1
 
 scan:
-	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR)/src --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="acconfig.h config.h gnetconfig.h src/gnet-private.h src/gnet-private.c src/socks-private.h src/socks-private.c src/scheduler.h src/scheduler.c"
+	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR)/src --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="acconfig.h config.h gnetconfig.h gnet-private.h socks-private.h scheduler.h"
 
 templates: scan
 	gtkdoc-mktmpl --module=$(DOC_MODULE)

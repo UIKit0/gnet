@@ -24,8 +24,8 @@
 
 /**
  *  gnet_tcp_socket_connect:
- *  @hostname: Name of host to connect to
- *  @port: Port to connect to
+ *  @hostname: Name of host to connect to.
+ *  @port: Port to connect to.
  *
  *  A quick and easy #GTcpSocket constructor.  This connects to the
  *  specified address and port.  This function does block
@@ -36,7 +36,6 @@
  *  gnet_tcp_socket_get_inetaddr().
  *
  *  Returns: A new #GTcpSocket, or NULL if there was a failure.
- *
  **/
 GTcpSocket*
 gnet_tcp_socket_connect (const gchar* hostname, gint port)

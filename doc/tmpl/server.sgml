@@ -1,19 +1,20 @@
 <!-- ##### SECTION Title ##### -->
-Server
+server
 
 <!-- ##### SECTION Short_Description ##### -->
-TCP Server
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-Server represents a TCP server.  A callback is called when there's
-a new connection.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### STRUCT GServer ##### -->
 <para>
@@ -55,9 +56,6 @@ a new connection.
 @func: 
 @user_data: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@interface: 
-@port: 
 
 
 <!-- ##### FUNCTION gnet_server_delete ##### -->

@@ -5,6 +5,14 @@ GNet NEWS
 Changes in Gnet
 
 
+1.1.5 ("Bonemeal" release)
+-----
+* New gnet_init() function.  This should be called in main(). [1]
+* GNet now properly links to libgthread (if necessary)
+* More automated test cases
+* Several compile fixes and small bug fixes
+
+
 1.1.4 ("Inchmeal" release)
 -----
 * Several bugs fixed in the asynchronous DNS module

@@ -59,6 +59,19 @@ Features
     fake it if we don't have it.
 
 
+API Fixes
+---------
+
+- Simplify callbacks.  They shouldn't include extraneous arguments.
+    See GInetAddrGetNameAsyncFunc.  Also make the status the first
+    argument.
+
+- GInetAddrNewAsyncFunc's inetaddr should be callee owned.  It's a
+    new() function so this makes more sense.
+
+- Remove "localhost" check from gnet_inetaddr_new_nonblock().
+
+
 
 Internal Improvements
 ---------------------
@@ -88,7 +101,9 @@ Undecided (things discussed, but not decided on)
 
 - Add more error types
 
-- Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
+- Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it).
+    Add an argument for interface name, which maybe could come from
+    the list_interfaces function.
 
 - Clean up GIOChannel usage.  
 

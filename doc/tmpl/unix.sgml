@@ -1,18 +1,26 @@
 <!-- ##### SECTION Title ##### -->
-Unix
+unix
 
 <!-- ##### SECTION Short_Description ##### -->
-Unix Sockets
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-Unix Sockets are only available on Unix systems.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
+
+<!-- ##### STRUCT GUnixSocket ##### -->
+<para>
+
+</para>
+
 
 <!-- ##### FUNCTION gnet_unix_socket_connect ##### -->
 <para>

@@ -1,19 +1,76 @@
 <!-- ##### SECTION Title ##### -->
-TCP
+tcp
 
 <!-- ##### SECTION Short_Description ##### -->
-Tcp socket (stream).
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-TcpSocket represents an open TCP (stream) socket. Create a TcpSocket
-by calling tcp_socket_new or tcp_socket_port_new.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
+
+<!-- ##### STRUCT GTcpSocket ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GTcpSocketConnectAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GTcpSocketConnectAsyncStatus ##### -->
+<para>
+
+</para>
+
+@GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK: 
+@GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR: 
+@GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR: 
+
+<!-- ##### USER_FUNCTION GTcpSocketConnectAsyncFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@ia: 
+@status: 
+@data: 
+
+
+<!-- ##### TYPEDEF GTcpSocketNewAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GTcpSocketNewAsyncStatus ##### -->
+<para>
+
+</para>
+
+@GTCP_SOCKET_NEW_ASYNC_STATUS_OK: 
+@GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR: 
+
+<!-- ##### USER_FUNCTION GTcpSocketNewAsyncFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
+
 
 <!-- ##### FUNCTION gnet_tcp_socket_connect ##### -->
 <para>
@@ -42,34 +99,8 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
-@id: 
+@async_id: 
 
-
-<!-- ##### TYPEDEF GTcpSocketConnectAsyncID ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### USER_FUNCTION GTcpSocketConnectAsyncFunc ##### -->
-<para>
-
-</para>
-
-@socket: 
-@ia: 
-@status: 
-@data: 
-
-
-<!-- ##### ENUM GTcpSocketConnectAsyncStatus ##### -->
-<para>
-
-</para>
-
-@GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK: 
-@GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR: 
-@GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_new ##### -->
 <para>
@@ -96,32 +127,8 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
-@id: 
+@async_id: 
 
-
-<!-- ##### TYPEDEF GTcpSocketNewAsyncID ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### USER_FUNCTION GTcpSocketNewAsyncFunc ##### -->
-<para>
-
-</para>
-
-@socket: 
-@status: 
-@data: 
-
-
-<!-- ##### ENUM GTcpSocketNewAsyncStatus ##### -->
-<para>
-
-</para>
-
-@GTCP_SOCKET_NEW_ASYNC_STATUS_OK: 
-@GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_delete ##### -->
 <para>
@@ -230,6 +237,16 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @Returns: 
 
 
+<!-- ##### USER_FUNCTION GTcpSocketAcceptFunc ##### -->
+<para>
+
+</para>
+
+@server: 
+@client: 
+@data: 
+
+
 <!-- ##### FUNCTION gnet_tcp_socket_server_accept_async ##### -->
 <para>
 
@@ -246,5 +263,25 @@ by calling tcp_socket_new or tcp_socket_port_new.
 </para>
 
 @socket: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new_direct ##### -->
+<para>
+
+</para>
+
+@addr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new_async_direct ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
+@Returns: 
 
 

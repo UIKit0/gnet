@@ -2,18 +2,19 @@
 pack
 
 <!-- ##### SECTION Short_Description ##### -->
-Data packing and unpacking.
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-Perl/python style functions for converting a list of data to an array
-of bytes (packing) and back again (unpacking).
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### FUNCTION gnet_pack ##### -->
 <para>
@@ -25,8 +26,6 @@ of bytes (packing) and back again (unpacking).
 @len: 
 @Varargs: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@str: 
 
 
 <!-- ##### FUNCTION gnet_pack_strdup ##### -->
@@ -38,8 +37,18 @@ of bytes (packing) and back again (unpacking).
 @buffer: 
 @Varargs: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@str: 
+
+
+<!-- ##### FUNCTION gnet_vpack ##### -->
+<para>
+
+</para>
+
+@format: 
+@buffer: 
+@len: 
+@args: 
+@Returns: 
 
 
 <!-- ##### FUNCTION gnet_calcsize ##### -->
@@ -62,20 +71,6 @@ of bytes (packing) and back again (unpacking).
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_vpack ##### -->
-<para>
-
-</para>
-
-@format: 
-@buffer: 
-@len: 
-@args: 
-@Returns: 
-<!-- # Unused Parameters # -->
-@str: 
-
-
 <!-- ##### FUNCTION gnet_unpack ##### -->
 <para>
 
@@ -86,8 +81,6 @@ of bytes (packing) and back again (unpacking).
 @len: 
 @Varargs: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@str: 
 
 
 <!-- ##### FUNCTION gnet_vunpack ##### -->
@@ -100,7 +93,5 @@ of bytes (packing) and back again (unpacking).
 @len: 
 @args: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@str: 
 
 

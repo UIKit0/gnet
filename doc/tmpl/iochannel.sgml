@@ -1,18 +1,20 @@
 <!-- ##### SECTION Title ##### -->
-IOChannel
+iochannel
 
 <!-- ##### SECTION Short_Description ##### -->
-IOChannel utility functions
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-Helpful functions for use with IOChannels.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### FUNCTION gnet_io_channel_writen ##### -->
 <para>

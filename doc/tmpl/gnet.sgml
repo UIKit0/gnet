@@ -1,17 +1,35 @@
 <!-- ##### SECTION Title ##### -->
-GNet main module
+gnet
 
 <!-- ##### SECTION Short_Description ##### -->
-Main header and utility functions.
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-gnet.h is the main header file for Gnet applications.  It also
-includes some utility functions for working with glib IOChannels.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
+
+<!-- ##### MACRO GNET_EXPORT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GNET_CHECK_VERSION ##### -->
+<para>
+
+</para>
+
+@major: 
+@minor: 
+@micro: 
+
 

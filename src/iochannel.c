@@ -346,6 +346,25 @@ static gboolean write_async_timeout_cb (gpointer data);
 
 
 
+/**
+ *  gnet_io_channel_write_async:
+ *  @iochannel: the channel to write to
+ *  @buffer: the buffer to read from
+ *  @length: length of the buffer
+ *  @timeout: maximum write time
+ *  @func: callback function
+ *  @user_data: callback function data
+ *
+ *  Write @buffer to @iochannel asynchronously.  When the operation is
+ *  complete, @func is called.  The callback may also be called if
+ *  there is an error or timeout.  The timeout is in milliseconds.
+ *  Use a @timeout of 0 if no timeout is needed.
+ *
+ *  Returns: ID of the operation which can be used with
+ *  gnet_io_channel_write_async_cancel() to cancel it; NULL on
+ *  failure.
+ *
+ **/
 GNetIOChannelWriteAsyncID
 gnet_io_channel_write_async (GIOChannel* iochannel, 
 			     gchar* buffer, guint length, guint timeout,
@@ -355,15 +374,9 @@ gnet_io_channel_write_async (GIOChannel* iochannel,
   GNetIOChannelWriteAsyncState* state;
 
   g_return_val_if_fail (iochannel != NULL, NULL);
-  g_return_val_if_fail ((buffer != NULL && length != 0) || (buffer == NULL && length == 0), NULL);
+  g_return_val_if_fail ((buffer != NULL && length != 0) || 
+			(length == 0), NULL);
   g_return_val_if_fail (func != NULL, NULL);
-
-  if (buffer == NULL)
-    {
-      (func)(iochannel, buffer, length, 0, 
-	     GNET_IOCHANNEL_WRITE_ASYNC_STATUS_OK, user_data);
-      return NULL;
-    }
 
   state = g_new0(GNetIOChannelWriteAsyncState, 1);
 
@@ -386,6 +399,18 @@ gnet_io_channel_write_async (GIOChannel* iochannel,
 
 
 /* called in user code and in user upcalls */
+/**
+ *  gnet_io_channel_write_async_cancel:
+ *  @id: ID of the connection.
+ *  @delete_buffer: Should this function delete the buffer
+ *
+ *  Cancel an asynchronous write that was started with
+ *  gnet_io_channel_write_async().  Set @delete_buffer to TRUE if the
+ *  buffer should be deleted.  TODO: The delete_buffer functionality
+ *  will probably be removed in the next version (it will remain in
+ *  GConn).
+ *
+ **/
 void
 gnet_io_channel_write_async_cancel (GNetIOChannelWriteAsyncID id, 
 				    gboolean delete_buffer)

@@ -52,39 +52,60 @@ GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel,
    This part of the module is experimental, buggy, and unstable.  Use
    at your own risk.  To use this part, define GNET_EXPERIMENTAL
    before including gnet.h.  
+
+   Note that types are prefixed by "GNet" and not just "G".  This is
+   to avoid potential future namespace collision with GLib.
+
 */
 #ifdef GNET_EXPERIMENTAL 
 
 
-/*
-  Notes
-
-  _Do_not_ call cancel in the callback.  For example, if you receive a
-  callback with the status of TIMEOUT, _do_not_ cancel the read or
-  write.
-
-  A timeout of 0 means there is no timeout.  If you are writing a
-  server, you should use a timeout.  2 minutes is reasonable for most
-  small things.
-
-*/
+/**
+ *   GNetIOChannelWriteAsyncID:
+ * 
+ *   ID of an asynchronous write started with
+ *   gnet_io_channel_write_async().  The connection can be canceled by
+ *   calling gnet_io_channel_write_async_cancel() with the ID.
+ *
+ **/
+typedef gpointer GNetIOChannelWriteAsyncID;
 
 
+/**
+ *   GNetIOChannelWriteAsyncStatus:
+ * 
+ *   Status for an asynchronous write via
+ *   gnet_io_channel_write_async(), passed by
+ *   GNetIOChannelWriteAsyncFunc.
+ *
+ **/
 typedef enum {
   GNET_IOCHANNEL_WRITE_ASYNC_STATUS_OK,
   GNET_IOCHANNEL_WRITE_ASYNC_STATUS_TIMEOUT,
   GNET_IOCHANNEL_WRITE_ASYNC_STATUS_ERROR
 } GNetIOChannelWriteAsyncStatus;
 
-typedef gpointer GNetIOChannelWriteAsyncID;
 
-  /* callee owns buffer */
+/**
+ *  GNetIOChannelWriteAsyncFunction:
+ *  @iochannel: channel written to TOREMOVE
+ *  @buffer: Buffer (callee owned) TOREMOVE
+ *  @length: Length of buffer TOREMOVE
+ *  @bytes_writen: Total bytes writen to channel
+ *  @status: Write status
+ *  @user_data: User data
+ *
+ *  Callback for gnet_io_channel_write_async().  Called when something
+ *  is read or if a timeout or error occurs.  FIX: Remove iochannel,
+ *  buffer, and length arguments.
+ *
+ **/
 typedef void (*GNetIOChannelWriteAsyncFunc)(GIOChannel* iochannel,
-				    gchar* buffer,
-				    guint length,
-				    guint bytes_writen,
-				    GNetIOChannelWriteAsyncStatus status, 
-				    gpointer user_data);
+					    gchar* buffer,
+					    guint length,
+					    guint bytes_writen,
+					    GNetIOChannelWriteAsyncStatus status, 
+					    gpointer user_data);
 
 GNetIOChannelWriteAsyncID
 gnet_io_channel_write_async (GIOChannel* iochannel, 

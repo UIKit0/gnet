@@ -1,3 +1,11 @@
+Wed Aug 14 12:37:23 2002  David Helder  <dhelder@umich.edu>
+	
+	* *: Release 1.1.5
+
+	* src/iochannel.c (gnet_io_channel_write_async): Don't succeed
+	   immediately if the buffer is length 0.  Also allow a write
+	   from a non-NULL buffer of length 0.
+
 Sat Aug 10 19:18:33 2002  David Helder  <dhelder@umich.edu>
 
 	* examples/hash.c: Move hash example to examples.

@@ -1,21 +1,26 @@
 <!-- ##### SECTION Title ##### -->
-Multicast
+mcast
 
 <!-- ##### SECTION Short_Description ##### -->
-Multicast.
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-McastSocket represents a multicast socket.  Currently, this supports
-only IP multicast.  An McastSocket is a "child" of a UdpSocket.  You
-can cast a pointer to a McastSocket to a pointer to a UdpSocket and
-then use the UDP functions.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
+
+<!-- ##### STRUCT GMcastSocket ##### -->
+<para>
+
+</para>
+
 
 <!-- ##### FUNCTION gnet_mcast_socket_new ##### -->
 <para>

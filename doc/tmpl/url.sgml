@@ -1,18 +1,20 @@
 <!-- ##### SECTION Title ##### -->
-URL
+url
 
 <!-- ##### SECTION Short_Description ##### -->
-Universal Resource Locator (e.g. http://www.gnetlibrary.org/index.html)
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### FUNCTION gnet_url_new ##### -->
 <para>
@@ -87,15 +89,6 @@ Universal Resource Locator (e.g. http://www.gnetlibrary.org/index.html)
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_url_get_nice_string ##### -->
-<para>
-
-</para>
-
-@url: 
-@Returns: 
-
-
 <!-- ##### FUNCTION gnet_url_set_protocol ##### -->
 <para>
 
@@ -166,5 +159,14 @@ Universal Resource Locator (e.g. http://www.gnetlibrary.org/index.html)
 
 @url: 
 @fragment: 
+
+
+<!-- ##### FUNCTION gnet_url_get_nice_string ##### -->
+<para>
+
+</para>
+
+@url: 
+@Returns: 
 
 

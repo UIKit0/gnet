@@ -1,19 +1,67 @@
 <!-- ##### SECTION Title ##### -->
-Internet address
+inetaddr
 
 <!-- ##### SECTION Short_Description ##### -->
-Internet address.
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-InetAddr represents an internet address.  Currently, only IP version 4
-addresses are used (eg, addresses in the form 141.213.8.59).
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
+
+<!-- ##### STRUCT GInetAddr ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GInetAddrAsyncStatus ##### -->
+<para>
+
+</para>
+
+@GINETADDR_ASYNC_STATUS_OK: 
+@GINETADDR_ASYNC_STATUS_ERROR: 
+
+<!-- ##### TYPEDEF GInetAddrNewAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GInetAddrNewAsyncFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@data: 
+
+
+<!-- ##### TYPEDEF GInetAddrGetNameAsyncID ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GInetAddrGetNameAsyncFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@name: 
+@data: 
+
 
 <!-- ##### FUNCTION gnet_inetaddr_new ##### -->
 <para>
@@ -23,27 +71,6 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @name: 
 @port: 
 @Returns: 
-
-
-<!-- ##### FUNCTION gnet_inetaddr_new_any ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
-<para>
-
-</para>
-
-@name: 
-@port: 
-@Returns: 
-<!-- # Unused Parameters # -->
-@func: 
-@data: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_new_async ##### -->
@@ -63,32 +90,18 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 </para>
 
-@id: 
+@async_id: 
 
 
-<!-- ##### TYPEDEF GInetAddrNewAsyncID ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
 <para>
 
 </para>
 
+@name: 
+@port: 
+@Returns: 
 
-<!-- ##### USER_FUNCTION GInetAddrNewAsyncFunc ##### -->
-<para>
-
-</para>
-
-@inetaddr: 
-@status: 
-@data: 
-
-
-<!-- ##### ENUM GInetAddrAsyncStatus ##### -->
-<para>
-
-</para>
-
-@GINETADDR_ASYNC_STATUS_OK: 
-@GINETADDR_ASYNC_STATUS_ERROR: 
 
 <!-- ##### FUNCTION gnet_inetaddr_clone ##### -->
 <para>
@@ -139,9 +152,6 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 @ia: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@func: 
-@data: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_name_async ##### -->
@@ -160,24 +170,7 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 </para>
 
-@id: 
-
-
-<!-- ##### TYPEDEF GInetAddrGetNameAsyncID ##### -->
-<para>
-
-</para>
-
-
-<!-- ##### USER_FUNCTION GInetAddrGetNameAsyncFunc ##### -->
-<para>
-
-</para>
-
-@inetaddr: 
-@status: 
-@name: 
-@data: 
+@async_id: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_get_canonical_name ##### -->
@@ -270,6 +263,35 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_inetaddr_hash ##### -->
+<para>
+
+</para>
+
+@p: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_noport_equal ##### -->
+<para>
+
+</para>
+
+@p1: 
+@p2: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_gethostname ##### -->
 <para>
 
@@ -279,6 +301,14 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 
 <!-- ##### FUNCTION gnet_inetaddr_gethostaddr ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_any ##### -->
 <para>
 
 </para>
@@ -318,8 +348,6 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 @name: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@domainname: 
 
 
 <!-- ##### FUNCTION gnet_inetaddr_list_interfaces ##### -->
@@ -327,35 +355,6 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 </para>
 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_inetaddr_hash ##### -->
-<para>
-
-</para>
-
-@p: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_inetaddr_equal ##### -->
-<para>
-
-</para>
-
-@p1: 
-@p2: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gnet_inetaddr_noport_equal ##### -->
-<para>
-
-</para>
-
-@p1: 
-@p2: 
 @Returns: 
 
 

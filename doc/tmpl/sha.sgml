@@ -1,18 +1,20 @@
 <!-- ##### SECTION Title ##### -->
-SHA
+sha
 
 <!-- ##### SECTION Short_Description ##### -->
-SHA Hash
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### STRUCT GSHA ##### -->
 <para>
@@ -106,8 +108,6 @@ SHA Hash
 
 @p: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gsha: 
 
 
 <!-- ##### FUNCTION gnet_sha_get_digest ##### -->

@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000, 2002  David Helder
  * Copyright (C) 2000  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
@@ -82,10 +82,10 @@ typedef gpointer GInetAddrNewAsyncID;
  *   @status: Status of the lookup
  *   @data: User data
  *   
- *   Caller owns the address; the callee should copy it if necessary.
- *   FIX: In next major version, make inetaddr callee owned.
- *   GInetAddrGetNameAsyncFunc and GTcpSocketConnectAsyncFunc both
- *   pass callee owned data.
+ *   Callback for gnet_inetaddr_new_async().  Caller owns the address;
+ *   the callee should copy it if necessary.  FIX: In next major
+ *   version, make inetaddr callee owned.  GInetAddrGetNameAsyncFunc
+ *   and GTcpSocketConnectAsyncFunc both pass callee owned data.
  *
  *   Callback for gnet_inetaddr_new_async().
  *
@@ -95,6 +95,28 @@ typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr,
 				      gpointer data);
 
 
+
+/* ********** */
+
+GInetAddr* gnet_inetaddr_new (const gchar* name, gint port);
+
+GInetAddrNewAsyncID 
+gnet_inetaddr_new_async (const gchar* name, gint port, 
+			 GInetAddrNewAsyncFunc func, gpointer data);
+
+void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id);
+
+GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
+
+GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
+
+void       gnet_inetaddr_delete (GInetAddr* ia);
+
+void gnet_inetaddr_ref (GInetAddr* ia);
+void gnet_inetaddr_unref (GInetAddr* ia);
+
+
+/* ********** */
 
 /**
  *   GInetAddrGetNameAsyncID:
@@ -128,28 +150,6 @@ typedef void (*GInetAddrGetNameAsyncFunc)(GInetAddr* inetaddr,
 
 
 
-
-/* ********** */
-
-GInetAddr* gnet_inetaddr_new (const gchar* name, gint port);
-
-GInetAddrNewAsyncID 
-gnet_inetaddr_new_async (const gchar* name, gint port, 
-			 GInetAddrNewAsyncFunc func, gpointer data);
-
-void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id);
-
-GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
-
-GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
-
-void       gnet_inetaddr_delete (GInetAddr* ia);
-
-void gnet_inetaddr_ref (GInetAddr* ia);
-void gnet_inetaddr_unref (GInetAddr* ia);
-
-
-/* ********** */
 
 gchar* gnet_inetaddr_get_name (/* const */ GInetAddr* ia);
 

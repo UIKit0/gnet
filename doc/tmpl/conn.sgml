@@ -1,19 +1,20 @@
 <!-- ##### SECTION Title ##### -->
-Connection
+conn
 
 <!-- ##### SECTION Short_Description ##### -->
-TCP Connection
+
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-Conn represents a TCP connection.  New connections can be created and
-connected to.  New connections can also by created by a Server.
+
 </para>
+
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### STRUCT GConn ##### -->
 <para>

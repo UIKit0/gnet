@@ -46,8 +46,8 @@ copyweb:
 	-cp -f $(DOCS) $(WEBPATH)
 	-(cd $(WEBPATH); chmod a+r $(DOCS))
 	-rm -f $(WEBPATH)/docs/*
+	-cp -f doc/html/book1.html $(WEBPATH)/docs/index.html
 	-cp -f doc/html/* $(WEBPATH)/docs
-	-cp -f doc/html/book1.html doc/html/index.html
 	-chmod a+r $(WEBPATH)/docs/*
 	-cp -f $(TARBALL) $(WEBPATH)/src
 	-cp -f $(RPMFILE) $(RPMFILEDEV) $(RPMFILESRC) $(WEBPATH)/rpm
