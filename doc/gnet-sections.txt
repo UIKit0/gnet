@@ -153,6 +153,7 @@ gnet_conn_read
 gnet_conn_readn
 gnet_conn_readline
 gnet_conn_write
+gnet_conn_set_watch_error
 gnet_conn_set_watch_readable
 gnet_conn_set_watch_writable
 gnet_conn_timeout

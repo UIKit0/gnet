@@ -63,6 +63,7 @@ main(int argc, char** argv)
 
   /* Connect */
   gnet_conn_connect (conn);
+  gnet_conn_set_watch_error (conn, TRUE);
   gnet_conn_timeout (conn, 30000);  /* 30 second timeout */
 
   /* Read from stdin */
@@ -144,7 +145,7 @@ ob_conn_func (GConn* conn, GConnEvent* event, gpointer user_data)
     {
     case GNET_CONN_CONNECT:
       {
-	gnet_conn_timeout (conn, 0);
+	gnet_conn_timeout (conn, 0);	/* reset timeout */
 	gnet_conn_readline (conn);
 	break;
       }

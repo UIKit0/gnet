@@ -24,6 +24,7 @@ or write completes.
 </para>
 
 <para>
+Use gnet_conn_set_watch_error() to get an event if an error occurs.
 Use gnet_conn_set_watch_readable() and gnet_conn_set_watch_writable()
 to get events when the connection is readable or writable.  These can
 be used to implement custom I/O handling.  For example, consider
@@ -236,6 +237,15 @@ See also GServer and the echoclient-gconn example.
 @conn: 
 @buffer: 
 @length: 
+
+
+<!-- ##### FUNCTION gnet_conn_set_watch_error ##### -->
+<para>
+
+</para>
+
+@conn: 
+@enable: 
 
 
 <!-- ##### FUNCTION gnet_conn_set_watch_readable ##### -->

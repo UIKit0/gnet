@@ -78,6 +78,7 @@ ob_server_func (GServer* server, GConn* conn, gpointer user_data)
   if (conn)
     {
       gnet_conn_set_callback (conn, ob_client_func, NULL);
+      gnet_conn_set_watch_error (conn, TRUE);
       gnet_conn_readline (conn);
     }
   else	/* Error */

@@ -1,3 +1,20 @@
+Wed Feb  5 18:29:40 2003  David Helder  <dhelder@umich.edu>
+
+	* examples/echoserver-gserver.c (ob_server_func): Watch
+	    for error.
+	* examples/echoclient-gconn.c (main): "
+
+	* src/conn.c (conn_connect_cb): Add watch if flags set
+	* src/conn.c (conn_new_cb): "
+
+	* src/conn.c (gnet_conn_set_watch_writable): Don't do
+	    source add if not connected yet.
+
+	* src/conn.c (gnet_conn_set_watch_error): Added.
+
+	* src/conn.c (gnet_conn_timeout): return_if_fail(conn->func)
+	   only if a timer is being set.
+
 Wed Feb  5 12:26:29 2003  David Helder  <dhelder@umich.edu>
 
 	* src/base64.c: Patch from fredo

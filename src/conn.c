@@ -32,16 +32,18 @@
 #define ADD_WATCH(C, FLAG)	do {			\
   if (!IS_WATCHING(C,FLAG)) 	{			\
     (C)->watch_flags |= (FLAG);				\
-    if ((C)->watch) g_source_remove ((C)->watch);	\
-    (C)->watch = g_io_add_watch ((C)->iochannel, (C)->watch_flags, async_cb, (C)); \
-  }} while (0)
+    if ((C)->iochannel) {				\
+      if ((C)->watch) g_source_remove ((C)->watch);	\
+      (C)->watch = g_io_add_watch ((C)->iochannel, (C)->watch_flags, async_cb, (C)); \
+ }}} while (0)
 
 #define REMOVE_WATCH(C, FLAG)	do {			\
   if (IS_WATCHING(C,FLAG)) 	{			\
     (C)->watch_flags &= ~(FLAG);			\
-    if ((C)->watch) g_source_remove ((C)->watch);	\
-    (C)->watch = g_io_add_watch ((C)->iochannel, (C)->watch_flags, async_cb, (C)); \
-  }} while (0)
+    if ((C)->iochannel) {				\
+      if ((C)->watch) g_source_remove ((C)->watch);	\
+      (C)->watch = g_io_add_watch ((C)->iochannel, (C)->watch_flags, async_cb, (C)); \
+ }}} while (0)
 
 #define UNSET_WATCH (C, FLAG)
 
@@ -360,10 +362,10 @@ conn_new_cb (GTcpSocket* socket, gpointer user_data)
     {
       conn->socket = socket;
       conn->iochannel = gnet_tcp_socket_get_io_channel (socket);
-      ADD_WATCH(conn, G_IO_ERR | G_IO_HUP | G_IO_NVAL);
 
       conn_check_write_queue (conn);
       conn_check_read_queue (conn);
+      if (conn->watch_flags) ADD_WATCH(conn, 0);
 
       event.type = GNET_CONN_CONNECT;
     }
@@ -395,10 +397,10 @@ conn_connect_cb (GTcpSocket* socket,
       conn->socket = socket;
       conn->inetaddr = gnet_tcp_socket_get_remote_inetaddr (socket);
       conn->iochannel = gnet_tcp_socket_get_io_channel (socket);
-      ADD_WATCH(conn, G_IO_ERR | G_IO_HUP | G_IO_NVAL);
 
       conn_check_write_queue (conn);
       conn_check_read_queue (conn);
+      if (conn->watch_flags) ADD_WATCH(conn, 0);
 
       event.type = GNET_CONN_CONNECT;
     }
@@ -1191,6 +1193,28 @@ conn_write_async_cb (GConn* conn)
  * @conn: a #GConn
  * @enable: enable the %GNET_CONN_READABLE event?
  *
+ * Enables (or disables) the %GNET_CONN_ERROR event for a #GConn.  If
+ * enabled, the %GNET_CONN_ERROR event occurs when an error occurs.
+ * The @conn is disconnected before the callback is made.
+ *
+ **/
+void
+gnet_conn_set_watch_error (GConn* conn, gboolean enable)
+{
+  g_return_if_fail (conn);
+
+  if (enable)
+    ADD_WATCH(conn, G_IO_ERR | G_IO_HUP | G_IO_NVAL);
+  else
+    REMOVE_WATCH(conn, G_IO_ERR | G_IO_HUP | G_IO_NVAL);
+}
+
+
+/**
+ * gnet_conn_set_watch_readable
+ * @conn: a #GConn
+ * @enable: enable the %GNET_CONN_READABLE event?
+ *
  * Enables (or disables) the %GNET_CONN_READABLE event for a #GConn.
  * If enabled, the %GNET_CONN_READABLE event occurs when data can be
  * read from the socket.  Read from the iochannel member of the @conn.
@@ -1227,7 +1251,6 @@ void
 gnet_conn_set_watch_writable (GConn* conn, gboolean enable)
 {
   g_return_if_fail (conn);
-  g_return_if_fail (conn->func);
 
   conn->watch_writable = enable;
   if (enable)
@@ -1255,7 +1278,6 @@ void
 gnet_conn_timeout (GConn* conn, guint timeout)
 {
   g_return_if_fail (conn);
-  g_return_if_fail (conn->func);
 
   if (conn->timer)
     {
@@ -1265,6 +1287,7 @@ gnet_conn_timeout (GConn* conn, guint timeout)
 
   if (timeout)
     {
+      g_return_if_fail (conn->func);
       conn->timer = g_timeout_add (timeout, conn_timeout_cb, conn);
     }
 }

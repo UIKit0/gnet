@@ -234,6 +234,7 @@ void	   gnet_conn_write (GConn* conn, gchar* buffer, gint length);
 
 void	   gnet_conn_set_watch_readable (GConn* conn, gboolean enable);
 void	   gnet_conn_set_watch_writable (GConn* conn, gboolean enable);
+void	   gnet_conn_set_watch_error    (GConn* conn, gboolean enable);
 
 void	   gnet_conn_timeout (GConn* conn, guint timeout);
 
