@@ -1,0 +1,10 @@
+Makefile.in
+Makefile.am
+Makefile
+.deps
+.libs
+pack
+unpack
+hash
+dnstest
+hostinfo
