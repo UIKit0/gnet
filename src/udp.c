@@ -188,7 +188,7 @@ gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet)
 }
 
 
-#ifndef G_OS_WIN32  /*********** Unix code ***********/
+#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 
 /**

@@ -33,8 +33,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef G_OS_WIN32
-#  define GNET_EXPORT GLIB_VAR
+#ifdef GNET_WIN32
+#  define GNET_EXPORT extern __declspec(dllimport)
 #else
 #  define GNET_EXPORT GUTILS_C_VAR
 #endif

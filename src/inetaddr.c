@@ -164,7 +164,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
       }
   }
 #else
-#ifdef G_OS_WIN32
+#ifdef GNET_WIN32
   {
     struct hostent *result;
 
@@ -308,7 +308,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
       rv = g_strdup(he->h_name);
   }
 #else
-#ifdef G_OS_WIN32
+#ifdef GNET_WIN32
   {
     struct hostent* he;
 
@@ -410,7 +410,7 @@ gnet_inetaddr_new(const gchar* name, const gint port)
 }
 
 
-#ifndef G_OS_WIN32  /*********** Unix code ***********/
+#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 
 /**
@@ -896,7 +896,7 @@ gnet_inetaddr_get_name(GInetAddr* ia)
 }
 
 
-#ifndef G_OS_WIN32  /*********** Unix code ***********/
+#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 
 /**
@@ -1373,7 +1373,7 @@ gnet_inetaddr_noport_equal(const gpointer p1, const gpointer p2)
 
 /* **************************************** */
 
-#ifndef G_OS_WIN32  /*********** Unix code ***********/
+#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 /**
  *  gnet_inetaddr_gethostname:

@@ -222,7 +222,7 @@ gnet_tcp_socket_new(const GInetAddr* addr)
 }
 
 
-#ifndef G_OS_WIN32  /*********** Unix code ***********/
+#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 
 /**
@@ -667,7 +667,7 @@ gnet_tcp_socket_server_new(const gint port)
 
   /* The socket is set to non-blocking mode later in the Windows
      version.*/
-#ifndef G_OS_WIN32
+#ifndef GNET_WIN32
   {
     gint flags;
 
@@ -709,7 +709,7 @@ gnet_tcp_socket_server_new(const gint port)
 }
 
 
-#ifndef G_OS_WIN32  /*********** Unix code ***********/
+#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 
 /**

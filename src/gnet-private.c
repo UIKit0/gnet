@@ -63,7 +63,7 @@ gnet_private_inetaddr_get_sockaddr(const GInetAddr* ia)
 
 
 
-#ifndef G_OS_WIN32		/* Unix specific version */
+#ifndef GNET_WIN32		/* Unix specific version */
 
 /**
  *  gnet_private_inetaddr_list_interfaces:
@@ -166,7 +166,7 @@ gnet_private_inetaddr_list_interfaces(void)
   return list;
 }
 
-#else G_OS_WIN32		/* Windows specific version */
+#else GNET_WIN32		/* Windows specific version */
 
 GList* 
 gnet_private_inetaddr_list_interfaces(void)
@@ -300,7 +300,7 @@ gnet_udp_socket_get_MTU(GUdpSocket* us)
 
 */
 
-#ifdef G_OS_WIN32
+#ifdef GNET_WIN32
 
 WNDCLASSEX gnetWndClass;
 HWND  gnet_hWnd; 

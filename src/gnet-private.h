@@ -39,7 +39,7 @@
 #include "gnet.h"
 #include "gnetconfig.h"
 
-#ifndef G_OS_WIN32  /*********** Unix specific ***********/
+#ifndef GNET_WIN32  /*********** Unix specific ***********/
 
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -152,7 +152,7 @@ typedef struct _GInetAddrAsyncState
   GInetAddr* ia;
   GInetAddrNewAsyncFunc func;
   gpointer data;
-#ifndef G_OS_WIN32
+#ifndef GNET_WIN32
   pid_t pid;
   int fd;
   guint watch;
@@ -177,7 +177,7 @@ typedef struct _GInetAddrReverseAsyncState
   GInetAddr* ia;
   GInetAddrGetNameAsyncFunc func;
   gpointer data;
-#ifndef G_OS_WIN32
+#ifndef GNET_WIN32
   pid_t pid;
   int fd;
   guint watch;
@@ -203,7 +203,7 @@ typedef struct _GTcpSocketAsyncState
   gpointer data;
   gint flags;
   guint connect_watch;
-#ifdef G_OS_WIN32
+#ifdef GNET_WIN32
   gint errorcode;
 #endif
 
@@ -233,7 +233,7 @@ typedef struct _GTcpSocketConnectState
 /* **************************************** 	*/
 /* More Windows specific stuff 			*/
 
-#ifdef G_OS_WIN32
+#ifdef GNET_WIN32
 
 extern WNDCLASSEX gnetWndClass;
 extern HWND  gnet_hWnd; 
