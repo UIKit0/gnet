@@ -2,10 +2,14 @@
 GNet BUGS
 =========
 
+See our Bugzilla page for the last bugs:
+  <http://bugzilla.gnome.org/buglist.cgi?product=gnet>
+
 * gnet_tcp_socket_new_async can block when SOCKS is used
 
-It will block during the SOCKS negotiation after the connection to the
-SOCKS server has been made.  This shouldn't be too serious, so it hasn't been fixed yet.
+The function will block during the SOCKS negotiation after the
+connection to the SOCKS server has been made.  This shouldn't be too
+serious, so it hasn't been fixed.
 
 
 * Process uses 100% CPU  [GLib bug 11059]
@@ -28,5 +32,4 @@ Monkey 0.1.10 for an example of how to do this.
 
 See GLib bug 11059 on http://bugs.gnome.org.  (The original bug report
 is incorrect - the problem is with GLib, not Linux.)
-
 

@@ -41,9 +41,9 @@ In a nutshell:
   > make
   > make install
 
-To force GNet to build against GLib 1.3/2.0, pass the --enable-glib2
-to configure.  GNet will attempt to build against GLib 1.2 by default
-and GLib 1.3/2.0 if 1.2 is not available.
+To force GNet to build against GLib 1.2, pass the --enable-glib1.2 to
+configure.  GNet will attempt to build against GLib 2 by default and
+GLib 1.2 if GLib 2 is not available.
 
 If gethostbyname() and gethostbyaddr() are thread-safe, pass the
 --enable-threadsafe-gethostbyname() to configure.  (If it is and you
@@ -52,6 +52,12 @@ don't do this, it will still function correctly.)
 Similarly, if getaddrinfo() and getnameinfo() are thread-safe, pass
 the --enable-threadsafe-getaddrinfo() to configure
 
+The flag --with-html-dir=DIR controls the directory the HTML
+documentation goes into.  By default it will go into
+DATADIR/doc/libgnet-X.Y, which DATADIR is /usr/local/share on most
+Unix machines.  Use this flag if you want it to go somewhere else.
+
+
 INSTALL is the standard autoconf INSTALL file.
 
 
@@ -59,6 +65,10 @@ Bugs
 ====
 
 Bug reports should be submitted through <http://bugzilla.gnome.org>.
+Our bug page is: 
+   <http://bugzilla.gnome.org/buglist.cgi?product=gnet>
+
+See BUGS for known bugs.
 
 
 Mailing lists
