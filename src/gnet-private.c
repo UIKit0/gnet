@@ -22,7 +22,6 @@
 #include "gnet.h"
 
 
-
 /**
  *  gnet_private_inetaddr_sockaddr_new:
  *  @sa: sockaddr struct to create InetAddr from.
@@ -140,13 +139,13 @@ gnet_udp_socket_get_MTU(GUdpSocket* us)
 
 #ifdef GNET_WIN32
 
-WNDCLASSEX gnetWndClass;
-HWND  gnet_hWnd; 
-guint gnet_io_watch_ID;
-GIOChannel *gnet_iochannel;
+WNDCLASSEX gnetWndClass, gnetWndClass_sock;
+HWND  gnet_hWnd, gnet_sock_hWnd; 
+guint gnet_io_watch_ID, gnet_io_sock_watch_ID;
+GIOChannel *gnet_iochannel, *gnet_sock_iochannel;
 	
 GHashTable *gnet_hash;
-GHashTable *gnet_select_hash; /* gnet_tcp_socket_new_async needs its own hash */
+GHashTable *gnet_select_hash;
 HANDLE gnet_Mutex; 
 HANDLE gnet_select_Mutex;
 HANDLE gnet_hostent_Mutex;
@@ -197,30 +196,6 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 	gnet_inetaddr_get_name_async_cb(NULL, G_IO_IN, (gpointer)IARstate);
 	break;
       }
-    case TCP_NEW_MSG:
-      {
-	WaitForSingleObject(gnet_select_Mutex, INFINITE);
-	data = g_hash_table_lookup(gnet_select_hash, (gpointer)msg.wParam);
-	g_hash_table_remove(gnet_select_hash, (gpointer)msg.wParam);
-	ReleaseMutex(gnet_select_Mutex);
-			
-	TCPNEWstate = (GTcpSocketAsyncState*) data;
-	TCPNEWstate->errorcode = WSAGETSELECTERROR(msg.lParam);
-	gnet_tcp_socket_new_async_cb(NULL, G_IO_IN, (gpointer) TCPNEWstate);
-	break;
-      }
-		case SOCKET_WATCH_MSG:
-			{
-	WaitForSingleObject(gnet_select_Mutex, INFINITE);
-	data = g_hash_table_lookup(gnet_select_hash, (gpointer)msg.wParam);
-	ReleaseMutex(gnet_select_Mutex);
-
-	WatchState = (SocketWatchAsyncState*) data;
-	WatchState->errorcode = WSAGETSELECTERROR(msg.lParam);
-	/*specifies the network event that has occurred */
-	WatchState->eventcode = WSAGETSELECTEVENT(msg.lParam); 
-	gnet_socket_watch_cb((gpointer) WatchState);
-	break;
     }
 
   return 1;
@@ -229,6 +204,42 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 /* Not used but required*/
 LRESULT CALLBACK
 GnetWndProc(HWND hwnd,        /* handle to window */
+	    UINT uMsg,        /* message identifier */
+	    WPARAM wParam,    /* first message parameter */
+	    LPARAM lParam)    /* second message parameter */
+{ 
+
+    switch (uMsg) 
+    { 
+        case WM_CREATE: 
+            /* Initialize the window. */
+            return 0; 
+ 
+        case WM_PAINT: 
+            /* Paint the window's client area. */ 
+            return 0; 
+ 
+        case WM_SIZE: 
+            /* Set the size and position of the window. */ 
+            return 0; 
+ 
+        case WM_DESTROY: 
+            /* Clean up window-specific data objects. */
+            return 0; 
+ 
+        /* 
+          Process other messages. 
+        */ 
+ 
+        default: 
+            return DefWindowProc(hwnd, uMsg, wParam, lParam); 
+    } 
+    return 0; 
+} 
+
+/* Not used but required*/
+LRESULT CALLBACK
+GnetWndProcWatch(HWND hwnd,        /* handle to window */
 	    UINT uMsg,        /* message identifier */
 	    WPARAM wParam,    /* first message parameter */
 	    LPARAM lParam)    /* second message parameter */
@@ -304,7 +315,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
  
 	/* The WinSock DLL is acceptable. Proceed. */
 
-	/* Setup and register a windows class that we use for out GIOchannel */
+	/* Setup and register a windows class that we use for our GIOchannel */
 	gnetWndClass.cbSize = sizeof(WNDCLASSEX); 
 	gnetWndClass.style = CS_SAVEBITS; /* doesn't matter, need something? */ 
 	gnetWndClass.lpfnWndProc = (WNDPROC) GnetWndProc; 
@@ -349,6 +360,54 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 	gnet_io_watch_ID = g_io_add_watch(gnet_iochannel,
 					  (GIOCondition)(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 					  gnet_MainCallBack, 
+					  NULL);
+
+
+	/* Setup and register a windows class that we use for socket watches */
+	gnetWndClass_sock.cbSize = sizeof(WNDCLASSEX); 
+	gnetWndClass_sock.style = CS_SAVEBITS; /* doesn't matter, need something? */ 
+	gnetWndClass_sock.lpfnWndProc = (WNDPROC) GnetWndProcWatch; 
+	gnetWndClass_sock.cbClsExtra = 0; 
+	gnetWndClass_sock.cbWndExtra = 0; 
+	gnetWndClass_sock.hInstance = hinstDLL; 
+	gnetWndClass_sock.hIcon = NULL; 
+	gnetWndClass_sock.hCursor = NULL; 
+	gnetWndClass_sock.hbrBackground = NULL; 
+	gnetWndClass_sock.lpszMenuName = NULL; 
+	gnetWndClass_sock.lpszClassName = "GnetWatch"; 
+	gnetWndClass_sock.hIconSm = NULL; 
+
+	if (!RegisterClassEx(&gnetWndClass_sock))
+	  {
+	    return FALSE;	
+	  }
+
+	gnet_sock_hWnd  = CreateWindowEx
+	  (
+	   0,
+	   "Gnet", 
+	   "none",
+	   WS_OVERLAPPEDWINDOW, 
+	   CW_USEDEFAULT, 
+	   CW_USEDEFAULT, 
+	   CW_USEDEFAULT, 
+	   CW_USEDEFAULT, 
+	   (HWND) NULL, 
+	   (HMENU) NULL, 
+	   hinstDLL, 
+	   (LPVOID) NULL);  
+
+	if (!gnet_sock_hWnd) 
+	  {
+	    return FALSE;
+	  }
+
+	gnet_sock_iochannel = g_io_channel_win32_new_messages((unsigned int)gnet_sock_hWnd);
+
+	/* Add a watch */
+	gnet_io_sock_watch_ID = g_io_add_watch(gnet_sock_iochannel,
+					  (GIOCondition)(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
+					  gnet_socket_watch_cb, 
 					  NULL);
 
 	gnet_hash = g_hash_table_new(NULL, NULL);
@@ -404,6 +463,10 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 	g_source_remove(gnet_io_watch_ID);
 	g_free(gnet_iochannel);
 	DestroyWindow(gnet_hWnd);
+
+	g_source_remove(gnet_io_watch_ID);
+	g_free(gnet_sock_iochannel);
+	DestroyWindow(gnet_sock_hWnd);
 
 	/*CleanUp WinSock 2 */
 	WSACleanup();

@@ -20,12 +20,18 @@ for Glib for Windows. It supports multiple watches per socket.
 One GIOChannel per socket. OOB data is not supported. 
 
 No modifications to the Glib source were made. All changes were 
-through function pointers and the redefinition of 
-g_io_channel_win32_new_stream_socket().
+through function pointers.
+
+Use gnet_io_channel_win32_new_stream_socket() instead of
+g_io_channel_win32_new_stream_socket(). In callbacks the socket is
+set to blocking mode.
 
 gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
+
 gnet_private_inetaddr_list_interfaces() does not support more than 10
 interfaces.
+
+Compiling GNet on windows with mingw is not supported.  
 
 
 How to link your project to the Gnet DLL
@@ -56,6 +62,3 @@ FIX: gnet_inetaddr_gethostname() so it can handle hostnames over 256 chars.
 
 FIX: gnet_private_inetaddr_list_interfaces() so it support more than
 10 Interfaces.
-
-TODO: Create a makefile so you can compile GNet with gcc under
-windows. See the gtk for Win32 site for more info and links.

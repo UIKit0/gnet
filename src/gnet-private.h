@@ -85,7 +85,7 @@
 #define socklen_t gint32
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
-#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_win32_new_stream_socket(SOCKFD)
+#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) gnet_io_channel_win32_new_stream_socket(SOCKFD)
 
 #endif	/*********** End Windows specific ***********/
 
@@ -225,7 +225,7 @@ typedef struct _SocketWatchAsyncState
 	GSList* callbacklist;
 } SocketWatchAsyncState;
 
-void gnet_socket_watch_cb(gpointer data);
+int gnet_socket_watch_cb(GIOChannel *iochannel, GIOCondition condition, void *nodata);
 #endif
 
 void gnet_tcp_socket_connect_inetaddr_cb(GInetAddr* inetaddr, 
@@ -253,10 +253,10 @@ typedef struct _GTcpSocketConnectState
 
 #ifdef GNET_WIN32
 
-extern WNDCLASSEX gnetWndClass;
-extern HWND  gnet_hWnd; 
-extern guint gnet_io_watch_ID;
-extern GIOChannel *gnet_iochannel;
+extern WNDCLASSEX gnetWndClass, gnetWndClass_sock;
+extern HWND  gnet_hWnd, gnet_sock_hWnd; 
+extern guint gnet_io_watch_ID, gnet_io_sock_watch_ID;
+extern GIOChannel *gnet_iochannel, *gnet_sock_iochannel;
 	
 extern GHashTable *gnet_hash;
 extern GHashTable *gnet_select_hash; /* gnet_tcp_socket_new_async needs its own hash */
@@ -266,8 +266,6 @@ extern HANDLE gnet_hostent_Mutex;
 	
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
 #define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
-#define TCP_NEW_MSG 102	/* gnet_tcp_socket_new_async  */
-#define SOCKET_WATCH_MSG 103 /* gnet_tcp_socket_server_watch */
 
 /* Windows does not have inet_aton, but it does have inet_addr.  TODO:
    We should write a better inet_aton because inet_addr doesn't catch

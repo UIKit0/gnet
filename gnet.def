@@ -79,4 +79,4 @@ EXPORTS
 	gnet_mcast_socket_is_loopback
 	gnet_mcast_socket_set_loopback
 	;
-	g_io_channel_win32_new_stream_socket
+	gnet_io_channel_win32_new_stream_socket

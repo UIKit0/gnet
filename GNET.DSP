@@ -8,12 +8,12 @@ CFG=gnet - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "gnet.mak".
+!MESSAGE NMAKE /f "Gnet.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "gnet.mak" CFG="gnet - Win32 Debug"
+!MESSAGE NMAKE /f "Gnet.mak" CFG="gnet - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -68,8 +68,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -105,6 +105,10 @@ SOURCE=.\gnet.def
 # Begin Source File
 
 SOURCE=.\inetaddr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\iochannel.c
 # End Source File
 # Begin Source File
 
@@ -149,6 +153,10 @@ SOURCE=.\gnetconfig.h
 # Begin Source File
 
 SOURCE=.\inetaddr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\iochannel.h
 # End Source File
 # Begin Source File
 

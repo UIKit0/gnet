@@ -25,13 +25,13 @@
 
 #include "gnetconfig.h"
 #include "inetaddr.h"
+#include "iochannel.h"
 #include "udp.h"
 #include "mcast.h"
 #include "tcp.h"
 
 #ifndef GNET_WIN32	/* New stuff, not ported to Win32 yet */
 #include "url.h"
-#include "iochannel.h"
 #include "conn.h"
 #include "server.h"
 #include "md5.h"

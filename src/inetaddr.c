@@ -1743,7 +1743,7 @@ GInetAddr*
 gnet_inetaddr_autodetect_internet_interface (void)
 {
   GInetAddr* jm_addr;
-  GInetAddr* interface;
+  GInetAddr* Interface;
 
   /* First try to get the interface with a route to
      junglemonkey.net (141.213.11.1).  This uses the connected UDP
@@ -1752,19 +1752,19 @@ gnet_inetaddr_autodetect_internet_interface (void)
   jm_addr = gnet_inetaddr_new_nonblock ("141.213.11.1", 0);
   g_assert (jm_addr);
 
-  interface = gnet_inetaddr_get_interface_to (jm_addr);
+  Interface = gnet_inetaddr_get_interface_to (jm_addr);
   gnet_inetaddr_delete (jm_addr);
 
   /* We want an internet interface */
-  if (interface && gnet_inetaddr_is_internet(interface))
-    return interface;
-  gnet_inetaddr_delete (interface);
+  if (Interface && gnet_inetaddr_is_internet(Interface))
+    return Interface;
+  gnet_inetaddr_delete (Interface);
 
   /* Try getting an internet interface from the list via
      SIOCGIFCONF. (see Stevens UNPv1 pp 428-) */
-  interface = gnet_inetaddr_get_internet_interface ();
+  Interface = gnet_inetaddr_get_internet_interface ();
 
-  return interface;
+  return Interface;
 }
 
 
@@ -1789,7 +1789,7 @@ gnet_inetaddr_get_interface_to (GInetAddr* addr)
   int sockfd;
   struct sockaddr_in myaddr;
   socklen_t len;
-  GInetAddr* interface;
+  GInetAddr* Interface;
 
   g_return_val_if_fail (addr, NULL);
 
@@ -1799,22 +1799,22 @@ gnet_inetaddr_get_interface_to (GInetAddr* addr)
 
   if (connect (sockfd, &addr->sa, sizeof(addr->sa)) == -1)
     {
-      close (sockfd);
+      GNET_CLOSE_SOCKET(sockfd);
       return NULL;
     }
 
   len = sizeof (myaddr);
   if (getsockname (sockfd, (struct sockaddr*) &myaddr, &len) != 0)
     {
-      close (sockfd);
+      GNET_CLOSE_SOCKET(sockfd);
       return NULL;
     }
 
-  interface = g_new0 (GInetAddr, 1);
-  interface->ref_count = 1;
-  memcpy (&interface->sa, (char*) &myaddr, sizeof (struct sockaddr_in));
+  Interface = g_new0 (GInetAddr, 1);
+  Interface->ref_count = 1;
+  memcpy (&Interface->sa, (char*) &myaddr, sizeof (struct sockaddr_in));
 
-  return interface;
+  return Interface;
 }
 
 
@@ -1837,7 +1837,7 @@ gnet_inetaddr_get_interface_to (GInetAddr* addr)
 GInetAddr* 
 gnet_inetaddr_get_internet_interface (void)
 {
-  GInetAddr* interface = NULL;
+  GInetAddr* Interface = NULL;
   GList* interfaces;
   GList* i;
 
@@ -1855,21 +1855,21 @@ gnet_inetaddr_get_internet_interface (void)
 
       if (gnet_inetaddr_is_internet (ia))
 	{
-	  interface = gnet_inetaddr_clone (ia);
+	  Interface = gnet_inetaddr_clone (ia);
 	  break;
 	}
     }
 
   /* If we didn't find one, return the first interface. */
-  if (interface == NULL)
-    interface = gnet_inetaddr_clone ((GInetAddr*) interfaces->data);
+  if (Interface == NULL)
+    Interface = gnet_inetaddr_clone ((GInetAddr*) interfaces->data);
 
   /* Delete the interface list */
   for (i = interfaces; i != NULL; i = i->next)
     gnet_inetaddr_delete ((GInetAddr*) i->data);
   g_list_free (interfaces);
 
-  return interface;
+  return Interface;
 }
 
 
