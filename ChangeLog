@@ -1,3 +1,9 @@
+Sun Feb 15 2004 Tomasz K³oczko <kloczek@pld.org.pl>
+
+	* gnet-2.0.m4: added missing [] quotation first parameter of
+		AC_DEFUN(). This fix is for aclocal from automake 1.8.x and
+		is backward compatible with older auto tools.
+
 Sat Jan 17 2004 Andrew Lanoix <alanoix@umich.edu>
 
 	*src/tcp.c(gnet_tcp_socket_new_async_direct(): 
