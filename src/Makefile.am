@@ -22,6 +22,8 @@ libgnet_la_SOURCES = 		\
 	tcp.c			\
 	udp.c			\
 	iochannel.c		\
+	socks.c			\
+	socks-private.c		\
 	md5.c			\
 	sha.c			\
 	pack.c			\
@@ -36,6 +38,7 @@ gnetinclude_HEADERS = 		\
 	tcp.h			\
         udp.h			\
 	iochannel.h		\
+	socks.h			\
 	md5.h			\
 	sha.h			\
 	pack.h			\
@@ -43,4 +46,4 @@ gnetinclude_HEADERS = 		\
 	conn.h			\
 	server.h
 
-EXTRA_DIST = gnet-private.h
+EXTRA_DIST = gnet-private.h socks-private.h

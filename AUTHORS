@@ -13,6 +13,7 @@ Jacques Fortier    <jfortier@seul.org>		 gnet_iochannel_readline_strdup()
 Andrew Lanoix      <alanoix@umich.edu>		 Win32 port
 Eric Cronin	   <ecronin@umich.edu>		 MacOSX port
 David Bolcsfoldi   <david.bolcsfoldi@telia.com>	 URL improvements
+Marius Eriksen	   <marius@umich.edu>		 SOCKS support
 
 Credits
 -------

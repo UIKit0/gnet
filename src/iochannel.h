@@ -28,14 +28,14 @@ extern "C" {
 
 
 GIOError gnet_io_channel_writen (GIOChannel    *channel, 
-				 gchar         *buf, 
+				 gpointer       buf, 
 				 guint          len,
 				 guint         *bytes_written);
 
 GIOError gnet_io_channel_readn (GIOChannel    *channel, 
-				 gchar         *buf, 
-				 guint          len,
-				 guint         *bytes_read);
+				 gpointer      buf, 
+				 guint         len,
+				 guint        *bytes_read);
 
 GIOError gnet_io_channel_readline (GIOChannel    *channel, 
 				   gchar         *buf, 

@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000, 2001  David Helder
+ * Copyright (C) 2001  Marius Eriksen, David Helder
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -17,19 +17,33 @@
  * Boston, MA  02111-1307, USA.
  */
 
-#ifndef _GNET_PACK_H
-#define _GNET_PACK_H
+#ifndef _GNET_SOCKS_PRIVATE_H
+#define _GNET_SOCKS_PRIVATE_H
 
-#include <glib.h>
+#include "gnet-private.h"
 
-gint gnet_pack (const gchar* format, gchar* buffer, const guint len, ...);
-gint gnet_pack_strdup (const gchar* format, gchar** buffer, ...);
-gint gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args);
+struct socks4_h {
+	u_char vn;
+	u_char cd;
+	guint16 dport;
+	guint32 dip;
+	u_char userid;
+};
 
-gint gnet_calcsize (const gchar* format, ...);
-gint gnet_vcalcsize (const gchar* format, va_list args);
-     
-gint gnet_unpack (const gchar* format, gchar* buffer, guint len, ...);
-gint gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args);
+struct socks5_h {
+	u_char vn;
+	u_char cd;
+	u_char rsv;
+	u_char atyp;	
+	guint32 dip;
+	guint32 dport;
+};
 
-#endif _GNET_PACK_H
+#define GNET_DEFAULT_SOCKS_VERSION 5
+
+GInetAddr* gnet_private_get_socks_server(void);
+int gnet_private_negotiate_socks_server(GTcpSocket*, const GInetAddr*);
+int gnet_private_negotiate_socks4(GIOChannel*, const GInetAddr*);
+int gnet_private_negotiate_socks5(GIOChannel*, const GInetAddr*);
+
+#endif /* _GNET_SOCKS_PRIVATE_H */

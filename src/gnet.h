@@ -29,13 +29,13 @@
 #include "udp.h"
 #include "mcast.h"
 #include "tcp.h"
+#include "socks.h"
 #include "pack.h"
 #include "url.h"
 #include "conn.h"
 #include "server.h"
 #include "md5.h"
 #include "sha.h"
-
 
 #ifdef __cplusplus
 extern "C" {

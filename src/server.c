@@ -18,8 +18,8 @@
  */
 
 #include <memory.h>
-#include "server.h"
 #include "gnet-private.h"
+#include "server.h"
 
 
 

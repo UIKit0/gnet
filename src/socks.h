@@ -17,19 +17,28 @@
  * Boston, MA  02111-1307, USA.
  */
 
-#ifndef _GNET_PACK_H
-#define _GNET_PACK_H
+#ifndef _GNET_SOCKS_H
+#define _GNET_SOCKS_H
+
+/* This module is experimental, buggy, and unstable.  Use at your own risk. */
+#ifdef GNET_EXPERIMENTAL 
 
 #include <glib.h>
 
-gint gnet_pack (const gchar* format, gchar* buffer, const guint len, ...);
-gint gnet_pack_strdup (const gchar* format, gchar** buffer, ...);
-gint gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args);
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-gint gnet_calcsize (const gchar* format, ...);
-gint gnet_vcalcsize (const gchar* format, va_list args);
-     
-gint gnet_unpack (const gchar* format, gchar* buffer, guint len, ...);
-gint gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args);
 
-#endif _GNET_PACK_H
+
+/* SOCKS public interface */
+
+
+
+#ifdef __cplusplus
+}
+#endif				/* __cplusplus */
+
+#endif /* GNET_EXPERIMENTAL */
+
+#endif /* _GNET_SOCKS_H */

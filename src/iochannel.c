@@ -45,7 +45,7 @@
  **/
 GIOError
 gnet_io_channel_writen (GIOChannel    *channel, 
-			gchar         *buf, 
+			gpointer       buf, 
 			guint          len,
 			guint         *bytes_written)
 {
@@ -102,7 +102,7 @@ gnet_io_channel_writen (GIOChannel    *channel,
  **/
 GIOError
 gnet_io_channel_readn (GIOChannel    *channel, 
-		       gchar         *buf, 
+		       gpointer       buf, 
 		       guint          len,
 		       guint         *bytes_read)
 {

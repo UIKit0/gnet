@@ -1,3 +1,15 @@
+Sun Oct  7 18:42:05 2001  David Helder  <dhelder@umich.edu>
+
+	* src/socks.[hc]: Added.  Not integrated with TCP yet.
+	* src/socks-private.c: Added
+	* AUTHORS: Added Marius
+
+	* src/server.c: Include gnet-private before server.  Fixes
+	   MAX/MIN warning with param.h
+
+	* src/iochannel.c (gnet_io_channel_writen): buf is now a gpointer.
+	* src/iochannel.c (gnet_io_channel_readn): 
+
 Sun Oct  7 17:53:03 2001  David Helder  <dhelder@umich.edu>
 
 	* src/url.[hc]: Integrated David's URL improvements (fragments,
