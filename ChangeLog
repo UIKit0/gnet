@@ -1,3 +1,11 @@
+Wed Feb  2 10:31:13 2000  David A Helder  <dhelder@umich.edu>
+
+	* doc/gnet.sgml: Fixed version number stuff, old function names.
+	* src/udp.c: Fixed type in docs for get_iochannel.
+	
+	* debian/changelog: Did a 0.1.8-2 release with fixed
+	    documentation. (I did not generate them properly 
+	    when I did the first released).
 
 Tue Feb  1 20:00:23 2000  David A Helder  <dhelder@umich.edu>
 

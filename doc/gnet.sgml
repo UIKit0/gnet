@@ -122,10 +122,15 @@
       
 	<programlisting>
 dnl Need GNet
-AM_PATH_GNET(0.1.2,
+AM_PATH_GNET(&lt;version number&gt;,
   [LIBS="$LIBS $GNET_LIBS" CFLAGS="$CFLAGS $GNET_CFLAGS"],
   AC_MSG_ERROR(Cannot find GNet: Is gnet-config in path?))
 	</programlisting>
+
+	Where &lt;version number&gt; is the version of GNet you're
+	using (e.g. 0.1.8).  You can get the version number by doing
+	<userinput>gnet-config --version</userinput>.
+
       </para>
     </sect1>
 
@@ -273,8 +278,8 @@ AM_PATH_GNET(0.1.2,
 
       <para>
 	dnstest demonstrates how to use
-	<function>inetaddr_new_nonblock</function> and
-	<function>inetaddr_get_name_nonblock</function>.
+	<function>gnet_inetaddr_new_nonblock</function> and
+	<function>gnet_inetaddr_get_name_nonblock</function>.
       </para>
     </sect1>
 

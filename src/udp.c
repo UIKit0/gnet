@@ -189,8 +189,8 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
  *  Use the channel with g_io_add_watch() to do non-blocking IO (so if
  *  you do not want to do non-blocking IO, you do not need the
  *  channel).  If you can read from the channel, use
- *  g_udp_socket_receive() to read a packet.  If you can write to the
- *  channel, use g_udp_socket_send() to write a packet.
+ *  gnet_udp_socket_receive() to read a packet.  If you can write to
+ *  the channel, use gnet_udp_socket_send() to write a packet.
  *
  *  There is one channel for every socket.  This function refs the
  *  channel before returning it.  You should unref the channel when
