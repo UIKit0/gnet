@@ -7,7 +7,7 @@ AC_PREREQ([2.52])
 
 ###############################
 # Init autoconf and automake
-AC_INIT([gnet], [1.1.8], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [1.1.9], [gnet@gnetlibrary.org])
 AC_CANONICAL_BUILD
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 # Activate maintainer mode
@@ -29,9 +29,9 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=1
 GNET_MINOR_VERSION=1
-GNET_MICRO_VERSION=8
-GNET_INTERFACE_AGE=1
-GNET_BINARY_AGE=8
+GNET_MICRO_VERSION=9
+GNET_INTERFACE_AGE=2
+GNET_BINARY_AGE=9
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
@@ -56,6 +56,18 @@ AC_DEFINE_UNQUOTED(GNET_MINOR_VERSION, $GNET_MINOR_VERSION, [GNet minor version]
 AC_DEFINE_UNQUOTED(GNET_MICRO_VERSION, $GNET_MICRO_VERSION, [GNet micro version])
 AC_DEFINE_UNQUOTED(GNET_INTERFACE_AGE, $GNET_INTERFACE_AGE, [GNet interface age])
 AC_DEFINE_UNQUOTED(GNET_BINARY_AGE, $GNET_BINARY_AGE, [GNet binary age])
+
+
+####################
+
+AC_ARG_WITH(html-dir, [  --with-html-dir=PATH    path to installed docs])
+if test "x$with_html_dir" = "x" ; then
+  HTML_DIR=$datadir/doc/libgnet$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION-dev/html
+else
+  HTML_DIR=$with_html_dir
+fi
+AC_SUBST(HTML_DIR)
+
 
 
 ####################

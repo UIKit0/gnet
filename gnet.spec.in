@@ -1,5 +1,6 @@
 # Note that this is NOT a relocatable package
 %define ver      @VERSION@
+%define libver   @GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@
 %define rel      1
 %define prefix   /usr
 
@@ -47,24 +48,26 @@ library.
 
 
 %prep
-%setup
+%setup -q -n gnet-%{version}
 
 %build
 %ifarch alpha
    CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" ./configure --host=alpha-redhat-linux\
 	--prefix=%{prefix} \
+	--with-html-dir=/usr/share/gtk-doc/html	\
 	--with-gnu-ld
 %else
    CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" ./configure \
 	--prefix=%{prefix} \
-	--with-gnu-ld 
+	--with-gnu-ld 	   \
+	--with-html-dir=/usr/share/gtk-doc/html
 %endif
-make
+make %{_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make prefix=$RPM_BUILD_ROOT%{prefix} install
+make DESTDIR=$RPM_BUILD_ROOT install
 
 %post
 /sbin/ldconfig
@@ -77,21 +80,30 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-
 %doc README COPYING ChangeLog NEWS TODO AUTHORS INSTALL HACKING
-%{prefix}/bin/gnet-config
-%{prefix}/share/aclocal/gnet.m4
-%doc doc/html
-%{prefix}/lib/libgnet-1.1.so.*
+%{prefix}/lib/libgnet-%{libver}.so.*
 
 %files devel
 %defattr(-, root, root)
-%{prefix}/include/gnet
-%{prefix}/lib/*a
-%{prefix}/lib/gnet
-%{prefix}/lib/lib*.so
+%{prefix}/share/gtk-doc/*
+%{prefix}/share/aclocal/*
+%{prefix}/lib/pkgconfig/*
+%{prefix}/include/gnet-%{libver}
+%{prefix}/lib/gnet-%{libver}
+%{prefix}/lib/libgnet-%{libver}.*a
+%{prefix}/lib/libgnet-%{libver}.so
 
 %changelog
+* Sun Apr 27 2003 Bas Mevissen <packager@basmevissen.nl>
+- Updated to coexist with gnet-1.x.x RPM's
+
+* Mon Mar 03 2003 Jeff Bonggren <jbon@cfl.rr.com>
+- Removed Docdir directive.
+- Updated the files section.
+- Changed 'prefix' to 'DESTDIR' in install to fix gtk-doc install.
+- Added %{_smp_mflags} for faster make on SMP machines.
+- Added --with-html-dir=/usr/share/gtk-doc/html to configure line.
+
 * Thu Oct 26 2000 Benjamin Kahn <xkahn@helixcode.com>
 - Added missing file in lib/gnet
 

@@ -5,6 +5,12 @@ GNet NEWS
 Changes in Gnet
 
 
+1.1.9
+-----
+* RPM fixes (thanks Bas Mevissen!)
+* Leak fixed in server module
+
+
 1.1.8 ("Square meal 3" release)
 -----
 * Compilation fixes

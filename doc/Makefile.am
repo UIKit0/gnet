@@ -9,8 +9,6 @@ DOC_MAIN_SGML_FILE=gnet.sgml
 # The directory containing the source code (if it contains documentation).
 DOC_SOURCE_DIR=..
 
-HTML_DIR=$(prefix)/share/doc/libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)-dev/html
-
 TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
 
 man_MANS = gnet-config.1
