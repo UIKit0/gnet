@@ -255,7 +255,13 @@ main(int argc, char* argv[])
   TEST2S (40000, "hello", "there", "ss", hello, 12, s1, s2);
   TEST2S (40010, "hello", "there", "2s", hello, 12, s1, s2);
   
-  TEST1S (40100, "hello", "8S", hello, 6, s1);  TEST(40021, s1[6], 0);
+  TEST1S (40100, "hello", "8S", hello, 6, s1);
+  s1 = NULL;
+  gnet_unpack ("8S", hello, 6, &s1);
+  TESTS(40100, s1, "hello");  
+  TEST(40021, s1[6], 0);
+  g_free (s1);
+
   TEST1S (40110, "hello", "6S", hello, 6, s1);
   TEST1S (40120, "hell",  "4S", hello, 6, s1);
 

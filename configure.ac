@@ -7,13 +7,12 @@ AC_PREREQ([2.52])
 
 ###############################
 # Init autoconf and automake
-AC_INIT([gnet], [1.1.7], [gnet@gnetlibrary.org])
-# CANONICAL_TARGET has to occur before INIT_AUTOMAKE, for reasons I don't
-# fully understand
-AC_CANONICAL_TARGET
+AC_INIT([gnet], [1.1.8], [gnet@gnetlibrary.org])
+AC_CANONICAL_BUILD
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 # Activate maintainer mode
 AM_MAINTAINER_MODE
+
 
 
 ###############################
@@ -30,9 +29,9 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=1
 GNET_MINOR_VERSION=1
-GNET_MICRO_VERSION=7
-GNET_INTERFACE_AGE=0
-GNET_BINARY_AGE=7
+GNET_MICRO_VERSION=8
+GNET_INTERFACE_AGE=1
+GNET_BINARY_AGE=8
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
@@ -98,6 +97,18 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_CHECK_PROG(PKGCONFIG, [pkg-config], [yes])
 AM_PROG_LIBTOOL
+
+####################
+# Mac OS X
+
+# MacOSX doesn't define socklen_t, so we must define it to be an
+# 'int'.  On all other systems, it's size_t.
+case $build in
+  *-apple-darwin*)
+    AC_DEFINE(GNET_APPLE_DARWIN, 1,
+              [Define if building on Apple Darwin])
+esac
+
 
 ###############################
 # Check for libraries

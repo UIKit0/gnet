@@ -1,3 +1,11 @@
+Wed Jan  1 17:05:11 2003  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Check for Apple Darwin
+	* src/gnet-private.h (socklen_t): Define to be 'int'
+	    on Apple Darwin.
+
+	* tests/unpack.c: Fix test 40021.  (From HEAD)
+
 Wed Oct 23 13:52:18 2002  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Add --disable-pthreads flag.  Patch from Ian
