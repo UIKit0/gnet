@@ -2,10 +2,11 @@
 GNet README
 -----------
 
-GNet is a simple network library.  It is writen in C, object-oriented,
-and built upon GLib.  It is intended to be small, fast, easy-to-use,
-and easy to port.  GNet comes with documentation and examples.  It is
-licensed under the GNU Library General Public Licence.
+GNet is a simple network library.  It is written in C,
+object-oriented, and built upon GLib.  It is intended to be small,
+fast, easy-to-use, and easy to port.  GNet comes with documentation
+and examples.  It is licensed under the GNU Library General Public
+Licence.
 
 Features:
   * TCP "client" and "server" sockets
