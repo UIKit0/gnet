@@ -25,47 +25,44 @@
 #include <pthread.h>
 #endif
 
+#ifdef HAVE_LINUX_NETLINK_H
+#include <usagi_ifaddrs.h>
+#endif
+
 
 /* **************************************** */
 
-static gboolean gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** nicename);
-static gchar* gnet_gethostbyaddr(const char* addr, size_t length, int type);
+static gboolean gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa);
+static gchar* gnet_gethostbyaddr(const struct sockaddr_storage* sa);
 
-/* Testing stuff */
-/*  #undef   HAVE_GETHOSTBYNAME_R_GLIBC */
-/*  #define  HAVE_GETHOSTBYNAME_R_GLIB_MUTEX */
-
-/* TODO: Move this to an init function */
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
 #  ifndef G_THREADS_ENABLED
 #    error Using GLib Mutex but thread are not enabled.
 #  endif
-G_LOCK_DEFINE (gethostbyname);
+G_LOCK_DEFINE (dnslock);
 #endif
 
 /* Thread safe gethostbyname.  The only valid fields are sin_len,
    sin_family, and sin_addr.  Nice name */
 
 gboolean
-gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** nicename)
+gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa)
 {
   gboolean rv = FALSE;
-
-#ifndef GNET_WIN32
-  
   struct in_addr inaddr;
   struct in6_addr in6addr;
 
-  /* Attempt non-blocking lookup */
 
+  /* **************************************** */
+  /* First attempt non-blocking lookup */
+  
   if (inet_pton(AF_INET, hostname, &inaddr) != 0)
     {
       struct sockaddr_in* sa_inp = (struct sockaddr_in*) sa;
 
       sa_inp->sin_family = AF_INET;
       memcpy(&sa_inp->sin_addr, (char*) &inaddr, sizeof(inaddr));
-      if (nicename)
-	*nicename = g_strdup (hostname);
+      /* don't set the nice name, it's not necessarily canonical */
       return TRUE;
     }
   else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
@@ -74,37 +71,44 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 
       sa_inp->sin6_family = AF_INET6;
       memcpy(&sa_inp->sin6_addr, (char*) &in6addr, sizeof(in6addr));
-      if (nicename)
-	*nicename = g_strdup (hostname);
+      /* don't set the nice name, it's not necessarily canonical */
       return TRUE;
     }
 
-#endif
+  /* **************************************** */
+  /* DNS lookup: getaddrinfo() */
 
+#ifdef HAVE_GETADDRINFO
+  {
+    struct addrinfo hints;
+    struct addrinfo* res;
+    int gairv;
 
-  /* HAVE_GETADDRINFO */
- {
-   struct addrinfo hints;
-   struct addrinfo* res;
-   int rv;
+    memset (&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+    /*hints.ai_family = AF_INET;*/ 	/* FIX */
 
-   memset (&hints, 0, sizeof(hints));
-   hints.ai_socktype = SOCK_STREAM;
-   /*    hints.ai_family = AF_INET; */	/* FIX */
+    /* If GLIB_MUTEX is not defined, either getaddrinfo() is
+       thread-safe, or we don't have mutexes. */
+#   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
+      G_LOCK (dnslock);
+#   endif
 
-   rv = getaddrinfo(hostname, NULL, &hints, &res);
-   if (rv != 0)
-     {
-      fprintf (stderr, "getaddrinfo error: %s\n", gai_strerror(rv));
+    gairv = getaddrinfo(hostname, NULL, &hints, &res);
+    if (gairv == 0)
+      {
+	memcpy (sa, res->ai_addr, res->ai_addrlen);
+	rv = TRUE;
+      }
 
+#   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
+      G_UNLOCK (dnslock);
+#   endif
+  }
+#else
 
-     return FALSE;
-     }
-     
-   memcpy (sa, res->ai_addr, res->ai_addrlen);
-   return TRUE;
- }
-
+  /* **************************************** */
+  /* DNS lookup: gethostbyname() */
 
 #ifdef HAVE_GETHOSTBYNAME_THREADSAFE
   {
@@ -119,9 +123,6 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 	    sa_inp->sin_family = he->h_addrtype;
 	    memcpy(&sa_inp->sin_addr, he->h_addr_list[0], he->h_length);
 	  }
-
-	if (nicename && he->h_name)
-	  *nicename = g_strdup(he->h_name);
 
 	rv = TRUE;
       }
@@ -155,9 +156,6 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 	memcpy(&sa_inp->sin_addr, result->h_addr_list[0], result->h_length);
       }
 
-    if (nicename && result->h_name)
-      *nicename = g_strdup(result->h_name);
-
     rv = TRUE;
 
   done:
@@ -165,7 +163,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
   }
 
 #else
-#ifdef HAVE_GET_HOSTBYNAME_R_SOLARIS
+#ifdef HAVE_GETHOSTBYNAME_R_SOLARIS
   {
     struct hostent result;
     size_t len;
@@ -192,9 +190,6 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 	memcpy(&sa_inp->sin_addr, result->h_addr_list[0], result->h_length);
       }
 
-    if (nicename && result->h_name)
-      *nicename = g_strdup(result->h_name);
-
     rv = TRUE;
 
   done:
@@ -219,41 +214,11 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 	    memcpy(&sa_inp->sin_addr, result.h_addr_list[0], result.h_length);
 	  }
 	
-	if (nicename && result.h_name)
-	  *nicename = g_strdup(result.h_name);
-
 	rv = TRUE;
       }
   }
 
 #else 
-#ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
-  {
-    struct hostent* he;
-    struct sockaddr_in* sa_inp = (struct sockaddr_in*) sa;
-
-    if (!g_threads_got_initialized)
-      g_thread_init (NULL);
-
-    G_LOCK (gethostbyname);
-    he = gethostbyname(hostname);
-
-    if (he != NULL && he->h_addr_list[0] != NULL)
-      {
-	if (sa_inp)
-	  {
-	    sa_inp->sin_family = he->h_addrtype;
-	    memcpy(&sa_inp->sin_addr, he->h_addr_list[0], he->h_length);
-	  }
-
-	if (nicename && he->h_name)
-	  *nicename = g_strdup(he->h_name);
-
-	rv = TRUE;
-      }
-    G_UNLOCK (gethostbyname);
-  }
-#else
 #ifdef GNET_WIN32
   {
     struct hostent *result;
@@ -270,9 +235,6 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 	    memcpy(&sa_inp->sin_addr, result->h_addr_list[0], result->h_length);
 	  }
 	
-	if (nicename && result->h_name)
-	  *nicename = g_strdup(result->h_name);
-
 	ReleaseMutex(gnet_hostent_Mutex);
 	rv = TRUE;
    
@@ -283,7 +245,12 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
     struct hostent* he;
     struct sockaddr_in* sa_inp = (struct sockaddr_in*) sa;
 
+#   ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
+      G_LOCK (dnslock);
+#   endif
+
     he = gethostbyname(hostname);
+
     if (he != NULL && he->h_addr_list[0] != NULL)
       {
 	if (sa_inp)
@@ -292,11 +259,12 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 	    memcpy(&sa_inp->sin_addr, he->h_addr_list[0], he->h_length);
 	  }
 
-	if (nicename && he->h_name)
-	  *nicename = g_strdup(he->h_name);
-
 	rv = TRUE;
       }
+
+#   ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
+      G_UNLOCK (dnslock);
+#   endif
   }
 #endif
 #endif
@@ -318,22 +286,58 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 */
 
 gchar*
-gnet_gethostbyaddr(const char* addr, size_t length, int type)
+gnet_gethostbyaddr(const struct sockaddr_storage* sa)
 {
   gchar* rv = NULL;
 
+  /* We assume if there's getaddrinfo(), then there's getnameinfo(). */
+#ifdef HAVE_GETADDRINFO
+  {
+    int gnirv;
+    char host[NI_MAXHOST];
 
+
+#   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
+      G_LOCK (dnslock);
+#   endif
+
+  again:
+    gnirv = getnameinfo((const struct sockaddr*) sa, 
+			GNET_SOCKADDR_LEN(*sa),
+			host, sizeof(host),
+			NULL, 0, NI_NAMEREQD);
+    if (gnirv == 0)
+      rv = g_strdup (host);
+    else if (gnirv == EAGAIN)
+      goto again;
+    else
+      rv = NULL;
+
+#   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
+      G_UNLOCK (dnslock);
+#   endif
+
+  }
+#else
 #ifdef HAVE_GETHOSTBYNAME_THREADSAFE
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent* he;
 
-    he = gethostbyaddr(addr, length, type);
+    he = gethostbyaddr(sa_addr, sa_len, sa_type);
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }
 #else
 #ifdef HAVE_GETHOSTBYNAME_R_GLIBC
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent result_buf, *result;
     size_t len;
     char* buf;
@@ -343,7 +347,9 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
     len = 1024;
     buf = g_new(gchar, len);
 
-    while ((res = gethostbyaddr_r (addr, length, type, &result_buf, buf, len, &result, &herr)) 
+    while ((res = gethostbyaddr_r (sa_addr, sa_len, sa_type, 
+				   &result_buf, buf, len, 	
+				   &result, &herr)) 
 	   == ERANGE)
       {
 	len *= 2;
@@ -362,6 +368,10 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 #else
 #ifdef HAVE_GET_HOSTBYNAME_R_SOLARIS
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent result;
     size_t len;
     char* buf;
@@ -371,7 +381,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
     len = 1024;
     buf = g_new(gchar, len);
 
-    while ((res = gethostbyaddr_r (addr, lenght, type, &result, buf, len, &herr)) == ERANGE)
+    while ((res = gethostbyaddr_r (sa_addr, sa_len, sa_type, &result, buf, len, &herr)) == ERANGE)
       {
 	len *= 2;
 	buf = g_renew (gchar, buf, len);
@@ -389,11 +399,15 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 #else
 #ifdef HAVE_GETHOSTBYNAME_R_HPUX
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent result;
     struct hostent_data buf;
     int res;
 
-    res = gethostbyaddr_r (addr, length, type, &result, &buf);
+    res = gethostbyaddr_r (sa_addr, sa_len, sa_type, &result, &buf);
 
     if (res == 0)
       rv = g_strdup (result.h_name);
@@ -402,36 +416,46 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 #else 
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent* he;
 
-    if (!g_threads_got_initialized)
-      g_thread_init (NULL);
-
-    G_LOCK (gethostbyname);
-    he = gethostbyaddr(addr, length, type);
+    G_LOCK (dnslock);
+    he = gethostbyaddr(sa_addr, sa_len, sa_type);
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
-    G_UNLOCK (gethostbyname);
+    G_UNLOCK (dnslock);
   }
 #else
 #ifdef GNET_WIN32
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent* he;
 
     WaitForSingleObject(gnet_hostent_Mutex, INFINITE);
-    he = gethostbyaddr(addr, length, type);
+    he = gethostbyaddr(sa_addr, sa_len, sa_type);
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
     ReleaseMutex(gnet_hostent_Mutex);
   }
 #else
   {
+    const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
+    size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
+    int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
+
     struct hostent* he;
 
-    he = gethostbyaddr(addr, length, type);
+    he = gethostbyaddr(sa_addr, sa_len, sa_type);
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }
+#endif
 #endif
 #endif
 #endif
@@ -499,15 +523,10 @@ gnet_inetaddr_new (const gchar* name, gint port)
   g_return_val_if_fail (name != NULL, NULL);
 
   /* Try to get the host by name (ie, DNS) */
-  if (!gnet_gethostbyname(name, &sa, NULL))
-    {
-      fprintf (stderr, "gnet_inetaddr_new failure!!!\n");
-
+  if (!gnet_gethostbyname(name, &sa))
     return NULL;
-    }
 
   ia = g_new0(GInetAddr, 1);
-  ia->name = g_strdup(name);
   ia->ref_count = 1;
 	  
   memcpy(&ia->sa, &sa, sizeof(ia->sa));
@@ -564,7 +583,6 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 			 GInetAddrNewAsyncFunc func, gpointer data)
 {
   GInetAddr* ia;
-  struct sockaddr_in* sa_in;
   GInetAddrAsyncState* state = NULL;
 
   g_return_val_if_fail(name != NULL, NULL);
@@ -631,12 +649,12 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 	close (pipes[0]);
 
 	/* Try to get the host by name (ie, DNS) */
-	if (gnet_gethostbyname(name, &sa, NULL))
+	if (gnet_gethostbyname(name, &sa))
 	  {
-	    guchar size = GNET_SOCKADDR_LEN(sa);
+	    guchar size = GNET_SOCKADDR_ADDRLEN(sa);
       
 	    if ( (write(outfd, &size, sizeof(guchar)) != sizeof(guchar)) ||
-		 (write(outfd, &sa.sin_addr, size) != size) )
+		 (write(outfd, GNET_SOCKADDR_ADDRP(sa), size) != size) )
 	      g_warning ("Error writing to pipe: %s\n", g_strerror(errno));
 	  }
 	else
@@ -688,13 +706,10 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
   ia->name = g_strdup(name);
   ia->ref_count = 1;
 
-  sa_in = (struct sockaddr_in*) &ia->sa;
-  sa_in->sin_family = AF_INET;
-  sa_in->sin_port = g_htons(port);
-
   /* Finish setting up state for callback */
   g_assert (state);
   state->ia = ia;
+  state->port = port;
   state->func = func;
   state->data = data;
 
@@ -707,10 +722,91 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
   return state;
 }
 
-
 #ifdef HAVE_LIBPTHREAD	/* ********** UNIX Pthread ********** */
 
 static gboolean inetaddr_new_async_pthread_dispatch (gpointer data);
+
+
+static void*
+inetaddr_new_async_pthread (void* arg)
+{
+  void** args = (void**) arg;
+  gchar* name = (gchar*) args[0];
+  GInetAddrAsyncState* state = (GInetAddrAsyncState*) args[1];
+  struct sockaddr_storage sa;
+  int rv;
+
+  g_free (args);
+
+  /* Do lookup */
+  rv = gnet_gethostbyname (name, &sa);
+  g_free (name);
+
+  /* Lock */
+  pthread_mutex_lock (&state->mutex);
+
+  /* If cancelled, destroy state and exit.  The main thread is no
+     longer using state. */
+  if (state->is_cancelled)
+    {
+      gnet_inetaddr_delete (state->ia);
+
+      pthread_mutex_unlock (&state->mutex);
+      pthread_mutex_destroy (&state->mutex);
+
+      g_free (state);
+
+      return NULL;
+    }
+
+  if (rv)
+    {
+      /* Copy result */
+      GNET_SOCKADDR_PORT(sa) = g_htons(state->port);
+      memcpy(&state->ia->sa, &sa, sizeof(state->ia->sa));
+    }
+  else
+    {
+      /* Flag failure */
+      state->lookup_failed = TRUE;
+    }
+
+  /* Add a source for reply */
+  state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
+				   inetaddr_new_async_pthread_dispatch,
+				   state, NULL);
+
+  /* Unlock */
+  pthread_mutex_unlock (&state->mutex);
+
+  /* Thread exits... */
+  return NULL;
+}
+
+
+static gboolean
+inetaddr_new_async_pthread_dispatch (gpointer data)
+{
+  GInetAddrAsyncState* state = (GInetAddrAsyncState*) data;
+
+  pthread_mutex_lock (&state->mutex);
+
+  /* Upcall */
+  if (!state->lookup_failed)
+    (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
+  else
+    (*state->func)(NULL,      GINETADDR_ASYNC_STATUS_ERROR, state->data);
+
+  /* Delete state */
+  g_source_remove (state->source);
+  gnet_inetaddr_delete (state->ia);
+  pthread_mutex_unlock (&state->mutex);
+  pthread_mutex_destroy (&state->mutex);
+  memset (state, 0, sizeof(*state));
+  g_free (state);
+
+  return FALSE;
+}
 
 
 /**
@@ -762,87 +858,6 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id)
     }
 }
 
-
-static gboolean
-inetaddr_new_async_pthread_dispatch (gpointer data)
-{
-  GInetAddrAsyncState* state = (GInetAddrAsyncState*) data;
-
-  pthread_mutex_lock (&state->mutex);
-
-  /* Upcall */
-  if (!state->lookup_failed)
-    (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
-  else
-    (*state->func)(NULL,      GINETADDR_ASYNC_STATUS_ERROR, state->data);
-
-  /* Delete state */
-  g_source_remove (state->source);
-  pthread_mutex_unlock (&state->mutex);
-  pthread_mutex_destroy (&state->mutex);
-  memset (state, 0, sizeof(*state));
-  g_free (state);
-
-  return FALSE;
-}
-
-
-static void*
-inetaddr_new_async_pthread (void* arg)
-{
-  void** args = (void**) arg;
-  gchar* name = (gchar*) args[0];
-  GInetAddrAsyncState* state = (GInetAddrAsyncState*) args[1];
-  struct sockaddr_storage sa;
-  int rv;
-
-  g_free (args);
-
-  /* Do lookup */
-  rv = gnet_gethostbyname (name, &sa, NULL);
-  g_free (name);
-
-  /* Lock */
-  pthread_mutex_lock (&state->mutex);
-
-  /* If cancelled, destroy state and exit.  The main thread is no
-     longer using state. */
-  if (state->is_cancelled)
-    {
-      gnet_inetaddr_delete (state->ia);
-
-      pthread_mutex_unlock (&state->mutex);
-      pthread_mutex_destroy (&state->mutex);
-
-      g_free (state);
-
-      return NULL;
-    }
-
-  if (rv)
-    {
-      /* Copy result */
-      memcpy(&state->ia->sa, &sa, sizeof(state->ia->sa));
-    }
-  else
-    {
-      /* Flag failure */
-      state->lookup_failed = TRUE;
-    }
-
-  /* Add a source for reply */
-  state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
-				   inetaddr_new_async_pthread_dispatch,
-				   state, NULL);
-
-  /* Unlock */
-  pthread_mutex_unlock (&state->mutex);
-
-  /* Thread exits... */
-  return NULL;
-}
-
-
 #else		/* ********** UNIX process ********** */
 
 
@@ -865,27 +880,32 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
       buf = &state->buffer[state->len];
       length = sizeof(state->buffer) - state->len;
 
-      if ((rv = read(state->fd, buf, length)) >= 0)
+      if ((rv = read(state->fd, buf, length)) > 0)
 	{
+	  struct sockaddr_storage* sa;
+
 	  state->len += rv;
 
 	  /* Return true if there's more to read */
-	  if ((state->len - 1) != state->buffer[0])
+	  if ((state->len - 1) < state->buffer[0])
 	    return TRUE;
+
+	  g_assert ((state->len - 1) == state->buffer[0]);
 
 	  /* We're done reading.  Copy into the addr if we were
              successful. */
-	  if (state->len > 1)
-	    {
-	      struct sockaddr_in* sa_in;
+	  sa = &state->ia->sa;
 
-	      sa_in = (struct sockaddr_in*) &state->ia->sa;
-	      memcpy(&sa_in->sin_addr, &state->buffer[1], (state->len - 1));
-	    }
+	  if (state->len == (4 + 1))
+	    sa->ss_family = AF_INET;
+	  else if (state->len == (16 + 1))
+	    sa->ss_family = AF_INET6;
+	  else 
+	    g_assert_not_reached();
 
-	  /* Otherwise, we got a 0 because there was an error */
-	  else
-	    goto error;
+	  memcpy(GNET_SOCKADDR_ADDRP(*sa), &state->buffer[1], 
+		 (state->len - 1));
+	  GNET_SOCKADDR_PORT(*sa) = g_htons(state->port);
 
 	  /* Call back */
 	  state->in_callback = TRUE;
@@ -898,7 +918,6 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
     }
   /* otherwise, there was an error */
 
- error:
   state->in_callback = TRUE;
   (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
   state->in_callback = FALSE;
@@ -933,6 +952,8 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id)
 
 
 #endif	/* UNIX */
+
+
 
 
 #else	/*********** Windows code ***********/
@@ -1198,8 +1219,7 @@ gnet_inetaddr_get_name (/* const */ GInetAddr* ia)
     {
       gchar* name;
 
-      if ((name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&ia->sa)->sin_addr, 
-				    sizeof(struct in_addr), AF_INET)) != NULL)
+      if ((name = gnet_gethostbyaddr(&ia->sa)) != NULL)
 	ia->name = name;
       else
 	ia->name = gnet_inetaddr_get_canonical_name(ia);
@@ -1328,8 +1348,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 	if (ia->name)
 	  name = g_strdup(ia->name);
 	else
-	  name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&ia->sa)->sin_addr, 
-				    sizeof(struct in_addr), AF_INET);
+	  name = gnet_gethostbyaddr(&ia->sa);
 
 	/* Write the name to the pipe.  If we didn't get a name, we
 	   just write the canonical name. */
@@ -1504,8 +1523,7 @@ inetaddr_get_name_async_pthread (void* arg)
   if (state->ia->name)
     name = g_strdup (state->ia->name);
   else
-    name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&state->ia->sa)->sin_addr, 
-			      sizeof(struct in_addr), AF_INET);
+    name = gnet_gethostbyaddr(&state->ia->sa);
 
   /* If cancelled, destroy state and exit.  The main thread is no
      longer using state. */
@@ -1753,8 +1771,6 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* ia)
   gchar buffer[INET6_ADDRSTRLEN];	/* defined in netinet/in.h */
   
   g_return_val_if_fail (ia != NULL, NULL);
-
-  fprintf (stderr, "fam = %d\n", GNET_INETADDR_FAMILY(ia));
 
   if (inet_ntop(GNET_INETADDR_FAMILY(ia), 
 		GNET_INETADDR_ADDRP(ia),
@@ -2068,7 +2084,7 @@ gnet_inetaddr_is_ipv6 (const GInetAddr* inetaddr)
  *  gnet_inetaddr_hash:
  *  @p: Pointer to an #GInetAddr.
  *
- *  Hash the address.  This is useful for glib containers.
+ *  Hash the address.  This is useful for GLib containers.
  *
  *  Returns: hash value.
  *
@@ -2118,7 +2134,8 @@ gnet_inetaddr_hash (gconstpointer p)
  *  @p1: Pointer to first #GInetAddr.
  *  @p2: Pointer to second #GInetAddr.
  *
- *  Compare two #GInetAddr's.  
+ *  Compare two #GInetAddr's.  IPv4 and IPv6 addresses are always
+ *  unequal.
  *
  *  Returns: 1 if they are the same; 0 otherwise.
  *
@@ -2235,12 +2252,23 @@ gnet_inetaddr_gethostname(void)
 {
   gchar* name = NULL;
   struct utsname myname;
+  GInetAddr* addr;
 
+  /* Get system name */
   if (uname(&myname) < 0)
     return NULL;
 
-  if (!gnet_gethostbyname(myname.nodename, NULL, &name))
+  /* Do forward lookup */
+  addr = gnet_inetaddr_new (myname.nodename, 0);
+  if (!addr)
     return NULL;
+  
+  /* Do backwards lookup */
+  name = gnet_inetaddr_get_name (addr);
+  if (!name)
+    name = g_strdup (myname.nodename);
+
+  gnet_inetaddr_delete (addr);
 
   return name;
 }
@@ -2552,6 +2580,66 @@ GList*
 gnet_inetaddr_list_interfaces (void)
 {
   GList* list = NULL;
+
+  /* Use USAGI project's getifaddr() if available. */ 
+#ifdef HAVE_LINUX_NETLINK_H
+#  define HAVE_GETIFADDRS 1
+#  define getifaddrs usagi_getifaddrs
+#  define freeifaddrs usagi_freeifaddrs
+#endif
+
+#ifdef HAVE_GETIFADDRS
+
+  int rv;
+  struct ifaddrs* ifs;
+  struct ifaddrs* i;
+  
+  rv = getifaddrs (&ifs);
+  if (rv != 0)
+    return NULL;
+
+  for (i = ifs; i != NULL; i = i->ifa_next)
+    {
+      struct sockaddr* sa;
+      void*  src;
+      size_t len;
+      GInetAddr* ia;
+
+      /* Skip if not up or is loopback */
+      if (!(i->ifa_flags & IFF_UP) ||
+	  (i->ifa_flags & IFF_LOOPBACK))
+	continue;
+
+      /* Skip if no address */
+      if (!i->ifa_addr)
+	continue;
+      
+      /* Get address, or skip if not IPv4 or IPv6 */
+      sa = (struct sockaddr*) i->ifa_addr;
+      if (sa->sa_family == AF_INET)
+	{
+	  src = (void*) &((struct sockaddr_in*) sa)->sin_addr;
+	  len = sizeof(struct in_addr);
+	}
+      else if (sa->sa_family == AF_INET6)
+	{
+	  src = (char*) &((struct sockaddr_in6*) sa)->sin6_addr;
+	  len = sizeof(struct in6_addr);
+	}
+      else
+	continue;
+
+      ia = g_new0 (GInetAddr, 1);
+      ia->ref_count = 1;
+      GNET_INETADDR_FAMILY(ia) = sa->sa_family;
+      memcpy(GNET_INETADDR_ADDRP(ia), src, len);
+      list = g_list_prepend (list, ia);
+    }
+
+  freeifaddrs (ifs);
+
+#else	/* Old-fashioned IPv4-only method */
+
   gint len, lastlen;
   gchar* buf;
   gchar* ptr;
@@ -2559,10 +2647,6 @@ gnet_inetaddr_list_interfaces (void)
   struct ifconf ifc;
   struct ifreq* ifr;
 
-  /* FIX: Use getifaddrs().  The technique below does not work with
-     IPv6 addresses (sockaddr is too small).  Glibc 2.3 will have
-     getifaddrs.  *BSD already has it.  We could write (or borrow) our
-     own getifaddrs(). */
 
   /* Create a dummy socket */
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -2647,6 +2731,7 @@ gnet_inetaddr_list_interfaces (void)
     }
 
   g_free (buf);
+#endif
 
   list = g_list_reverse (list);
 

@@ -9,7 +9,7 @@ EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
 	gnet.spec gnet.spec.in gnet.pc.in \
 	examples/makefile.mingw src/makefile.mingw \
 	src/gnet-private.h src/socks-private.h \
-	tests/makefile.mingw
+	src/usagi_ifaddrs.h tests/makefile.mingw
 
 
 m4datadir = $(datadir)/aclocal

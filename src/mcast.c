@@ -59,17 +59,19 @@ gnet_mcast_socket_new(void)
 GMcastSocket* 
 gnet_mcast_socket_port_new(gint port)
 {
-  struct sockaddr_in* saip;			/* FIX */
-  GInetAddr ia;
+  GInetAddr inetaddr;
+  struct sockaddr_in* sa_in;
   GMcastSocket* ms;
 
-  saip = (struct sockaddr_in*) &ia.sa;
+  /* Set up address and port (any address, any port) */
+  /* Default is to use IPv4.  FIX */
+  memset (&inetaddr, 0, sizeof(inetaddr));
+  sa_in= (struct sockaddr_in*) &inetaddr.sa;
+  sa_in->sin_family = AF_INET;
+  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+  sa_in->sin_port = g_htons(port);
 
-  saip->sin_family = AF_INET;
-  saip->sin_addr.s_addr = g_htonl(INADDR_ANY);
-  saip->sin_port = g_htons(port);
-
-  ms = gnet_mcast_socket_inetaddr_new(&ia);
+  ms = gnet_mcast_socket_inetaddr_new(&inetaddr);
   
   return ms;
 }

@@ -18,18 +18,28 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <glib.h>
 
 #include <gnet.h>
 
+#define PORT	0x1234
 
-int do_reverse = 0;
-int verbose = 1;
+gchar* host;
+gboolean do_reverse = FALSE;
+gboolean do_async = FALSE;
 
-void lookup_block(void);
-void lookup_async(void);
+int    verbose = 1;
+gint   num_runs = 1;
+gint   runs_done = 0;
+
+void lookup_block(int run);
+
+void lookup_async_forward(int run);
 void inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, gpointer data);
+
+void lookup_async_reverse(int run);
 void reverse_inetaddr_cb(gchar* name, GInetAddrAsyncStatus status, 
 			 gpointer data);
 
@@ -37,9 +47,6 @@ void reverse_inetaddr_cb(gchar* name, GInetAddrAsyncStatus status,
 void usage(void);
 
 
-gint num_runs = 1;
-gchar* host = NULL;
-gint runs_done = 0;
 
 
 struct ReverseState
@@ -53,33 +60,64 @@ struct ReverseState
 int
 main(int argc, char** argv)
 {
-  gboolean block = TRUE;
+  extern char* optarg;
+  extern int   optind;
+  char c;
 
   gnet_init ();
 
-  if (argc < 2 || argc > 4)
-    usage();
-
-  host = argv[1];
-
-  if (argc >= 3 && !strcmp(argv[2], "async"))
-    block = FALSE;
-
-  if (argc >= 4)
+  /* Parse arguments */
+  while ((c = getopt(argc, argv, "arn:")) != -1) 
     {
-      num_runs = atoi(argv[3]);
+      switch (c) 
+	{
+	case 'a':	
+	  do_async = TRUE;
+	  break;
+	case 'r':
+	  do_reverse = TRUE;
+	  break;
+	case 'n':
+	  num_runs = atoi(optarg);
+	  break;
+	case 'h':
+	case '?':
+	  usage();
+	  break;
+	}
     }
 
+  if (argc == optind)
+    usage();
 
-  if (block)
+  host = argv[optind];
+
+  if (!do_async)
     {
+      int i;
+
       g_print ("Using blocking DNS\n");
-      lookup_block();
+      for (i = 0; i < num_runs; ++i)
+	lookup_block(i);
     }
   else
     {
+      int i;
+      GMainLoop* main_loop = NULL;
+
       g_print ("Using asynchronous DNS\n");
-      lookup_async();
+
+      main_loop = g_main_new(FALSE);
+
+      for (i = 0; i < num_runs; ++i)
+	{
+	  if (!do_reverse)
+	    lookup_async_forward(i);
+	  else
+	    lookup_async_reverse(i);
+	}
+
+      g_main_run(main_loop);
     }
 
   exit(EXIT_SUCCESS);
@@ -87,81 +125,42 @@ main(int argc, char** argv)
 
 
 void
-lookup_block(void)
+lookup_block (int run)
 {
-  int i;
+  GInetAddr* ia;
+  gchar* name;
 
-  for (i = 0; i < num_runs; ++i)
+  ia = gnet_inetaddr_new(host, PORT);
+  if (ia == NULL)
     {
-      GInetAddr* ia;
-      gchar* name;
-
-      ia = gnet_inetaddr_new(host, 0);
-      if (ia == NULL)
-	{
-	  g_print ("DNS lookup for %s failed\n", host);
-	  exit (EXIT_FAILURE);
-	}
-
-      if (do_reverse)
-	name = gnet_inetaddr_get_name(ia);
-      else
-	name = gnet_inetaddr_get_canonical_name(ia);
-
-      g_assert (name != NULL);
-
-      if (verbose)
-	g_print ("%d: %s -> %s\n", i, host, name);
-
-      g_free (name);
-
-      gnet_inetaddr_delete (ia);
-
+      g_print ("DNS lookup for %s failed\n", host);
+      exit (EXIT_FAILURE);
     }
+  g_assert (gnet_inetaddr_get_port(ia) == PORT);
+
+  if (do_reverse)
+    name = gnet_inetaddr_get_name(ia);
+  else
+    name = gnet_inetaddr_get_canonical_name(ia);
+
+  g_assert (name != NULL);
+
+  if (verbose)
+    g_print ("%d: %s -> %s\n", run, host, name);
+
+  g_free (name);
+
+  gnet_inetaddr_delete (ia);
 }
 
 
+/* **************************************** */
 
 
 void
-lookup_async(void)
+lookup_async_forward (int run)
 {
-  int i;
-  GMainLoop* main_loop = NULL;
-
-  main_loop = g_main_new(FALSE);
-
-  for (i = 0; i < num_runs; ++i)
-    {
-      if (do_reverse)
-	{
-	  GInetAddr* ia;
-	  struct ReverseState* rs;
-
-	  ia = gnet_inetaddr_new(host, 0);
-	  if (ia == NULL)
-	    {
-	      if (verbose)
-		g_print ("DNS lookup for %s failed\n", host);
-	      exit (EXIT_FAILURE);
-	    }
-
-	  rs = g_new0(struct ReverseState, 1);
-	  rs->ia = ia;
-	  rs->num = i;
-
-	  gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, rs);
-				       
-	}
-      else
-	{
-	  gnet_inetaddr_new_async(host, 0, inetaddr_cb, GINT_TO_POINTER(i));
-	}
-
-/*        g_main_iteration (FALSE); */
-    }
-
-  g_main_run(main_loop);
+  gnet_inetaddr_new_async(host, PORT, inetaddr_cb, GINT_TO_POINTER(run));
 }
 
 
@@ -174,6 +173,8 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
     {
       gchar* cname;
 
+      g_assert (gnet_inetaddr_get_port(ia) == PORT);
+
       cname = gnet_inetaddr_get_canonical_name(ia);
       if (cname == NULL)
 	{
@@ -183,9 +184,6 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 
       if (verbose)
 	g_print ("%d: %s -> %s\n", i, host, cname);
-
-      if (do_reverse) /* Caller owns forward ia, we own reverse ia. */
-	gnet_inetaddr_delete (ia);
 
       g_free (cname);
     }
@@ -197,6 +195,28 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 
   if (runs_done == num_runs)
     exit(EXIT_SUCCESS);
+}
+
+
+void
+lookup_async_reverse (int run)
+{
+  GInetAddr* ia;
+  struct ReverseState* rs;
+
+  ia = gnet_inetaddr_new(host, 0);
+  if (ia == NULL)
+    {
+      if (verbose)
+	g_print ("DNS lookup for %s failed\n", host);
+      exit (EXIT_FAILURE);
+    }
+
+  rs = g_new0(struct ReverseState, 1);
+  rs->ia = ia;
+  rs->num = run;
+
+  gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, rs);
 }
 
 
@@ -236,10 +256,16 @@ reverse_inetaddr_cb (gchar* name, GInetAddrAsyncStatus status,
 }
 
 
+/* **************************************** */
+
 
 void
 usage(void)
 {
-  g_print ("dnstest <host> [block|async] [num-runs]\n");
+  g_print ("dnstest -a -r -n <num runs> <host>\n");
+  g_print ("  -a                asynchronous\n");
+  g_print ("  -r                reverse lookup\n");
+  g_print ("  -n <num runs>     number of lookups\n");
+
   exit (EXIT_FAILURE);
 }

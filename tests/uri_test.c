@@ -27,7 +27,7 @@ static int failed = 0;
 
 #define TEST(N, S, C) do {                             \
 if (C) { /*g_print ("%d %s: PASS\n", (N), (S)); */        } \
-else   { g_print ("%d %s: FAIL\n", (N), (S)); failed = 1; } \
+else   { g_print ("%d %s: FAIL (%s)\n", (N), (S), tests[N].str); failed = 1; } \
 } while (0)
 
 struct URITest
@@ -71,6 +71,13 @@ struct URITest tests[] =
   { "scheme://hostname:123/path", NULL, 
     {"scheme", NULL, NULL, "hostname", 123, "/path", NULL, NULL}},
 
+  /* ipv6 hostname/port */
+  { "scheme://[01:23:45:67:89:ab:cd:ef]/path", NULL, 
+    {"scheme", NULL, NULL, "01:23:45:67:89:ab:cd:ef", 0, "/path", NULL, NULL}},
+
+  { "scheme://[01:23:45:67:89:ab:cd:ef]:123/path", NULL, 
+    {"scheme", NULL, NULL, "01:23:45:67:89:ab:cd:ef", 123, "/path", NULL, NULL}},
+
   /* query/fragment */
   { "path?query", NULL, 
     {NULL, NULL, NULL, NULL, 0, "path", "query", NULL}},
@@ -100,10 +107,6 @@ struct URITest tests[] =
 
   /* FUNNY URIS.  PARSING AND PRINTING OF THESE MAY CHANGE */
 
-  /* empty */
-  { "", NULL, 
-    {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL} },
-
   { "scheme://hostname:123path?query#fragment", 
     "scheme://hostname:123/path?query#fragment",  /* PRETTY */
     {"scheme", NULL, NULL, "hostname", 123, "path", "query", "fragment"}},
@@ -114,7 +117,14 @@ struct URITest tests[] =
   { "scheme://:pass@hostname:123/path?query#fragment", NULL, 
     {"scheme", "", "pass", "hostname", 123, "/path", "query", "fragment"}},
 
+  /* IPv6 hostname without brackets */
+  { "scheme://01:23:45:67:89:ab:cd:ef:123/path", 
+    "scheme://01:23/:45:67:89:ab:cd:ef:123/path",  /* PRETTY */
+    {"scheme", NULL, NULL, "01", 23, ":45:67:89:ab:cd:ef:123/path", NULL, NULL}},
+
+
   { NULL, NULL, {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL} }
+
 };
 
 #define SAFESTRCMP(A,B) (((A)&&(B))?(strcmp((A),(B))):((A)||(B)))
@@ -125,6 +135,20 @@ main (int argc, char* argv[])
   int i;
 
   gnet_init ();
+
+  /* Empty string is an error */
+  if (gnet_uri_new("") != NULL)
+    {
+      g_print ("empty string is error: FAIL\n");
+      failed = 1;
+    }
+
+  /* String of whitespace is an error */
+  if (gnet_uri_new(" \n\t\r") != NULL)
+    {
+      g_print ("whitespace string is error: FAIL\n");
+      failed = 1;
+    }
 
   for (i = 0; tests[i].str; ++i)
     {
@@ -138,7 +162,6 @@ main (int argc, char* argv[])
       pretty = gnet_uri_get_nice_string (uri);
       TEST (i, "gnet_uri_get_nice_string", pretty);
       if (!pretty) continue;
-      TEST (i, pretty, TRUE);
 
       if (tests[i].pretty)
 	TEST (i, "pretty1", !strcmp (pretty, tests[i].pretty));

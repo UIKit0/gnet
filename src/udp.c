@@ -51,15 +51,19 @@ gnet_udp_socket_port_new (gint port)
 {
   GInetAddr inetaddr;
   struct sockaddr_in* sa_in;
+  GUdpSocket* us;
 
   /* Set up address and port (any address, any port) */
+  /* Default is to use IPv4.  FIX */
   memset (&inetaddr, 0, sizeof(inetaddr));
-  sa_in = (struct sockaddr_in*) &inetaddr.sa;	/* FIX */
+  sa_in = (struct sockaddr_in*) &inetaddr.sa;
   sa_in->sin_family = AF_INET;
   sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
   sa_in->sin_port = g_htons(port);
 
-  return gnet_udp_socket_new_interface (&inetaddr);
+  us = gnet_udp_socket_new_interface (&inetaddr);
+
+  return us;
 }
 
 

@@ -41,12 +41,14 @@ gnet_uri_new (const gchar* uri)
 
   g_return_val_if_fail (uri, NULL);
 
-  guri = g_new0 (GURI, 1);
-
   /* Skip initial whitespace */
-  while (*uri && isspace((int)*uri))
-    ++uri;
   p = uri;
+  while (*p && isspace((int)*p))
+    ++p;
+  if (!*p)	/* Error if it's just a string of space */
+    return NULL;
+
+  guri = g_new0 (GURI, 1);
 
   /* Scheme */
   temp = p;
@@ -54,10 +56,10 @@ gnet_uri_new (const gchar* uri)
     ++p;
   if (*p == ':')
     {
-      guri->scheme = g_strndup (uri, p - uri);
+      guri->scheme = g_strndup (temp, p - temp);
       ++p;
     }
-  else	/* This is a \0 or /, so it must be the hostname */
+  else	/* This char is NUL, /, ?, or # */
     p = temp;
 
   /* Authority */
@@ -90,14 +92,26 @@ gnet_uri_new (const gchar* uri)
 	p = temp;
 
       /* Hostname */
-      temp = p;
-      while (*p && *p != '/' && *p != '?' && *p != '#' && *p != ':') ++p;
-      if ((p - temp) == 0) 
+
+      /* Check for IPv6 canonical hostname in brackets */
+      if (*p == '[')
 	{
-	  gnet_uri_delete (guri);
-	  return NULL;
+	  p++;  /* Skip [ */
+	  temp = p;
+	  while (*p && *p != ']') ++p;
+	  if ((p - temp) == 0) 
+	    goto error;
+	  guri->hostname = g_strndup (temp, p - temp);
+	  p++;	/* Skip ] */
 	}
-      guri->hostname = g_strndup (temp, p - temp);
+      else
+	{
+	  temp = p;
+	  while (*p && *p != '/' && *p != '?' && *p != '#' && *p != ':') ++p;
+	  if ((p - temp) == 0) 
+	    goto error;
+	  guri->hostname = g_strndup (temp, p - temp);
+	}
 
       /* Port */
       if (*p == ':')
@@ -132,6 +146,10 @@ gnet_uri_new (const gchar* uri)
     }
 
   return guri;
+
+ error:
+  gnet_uri_delete (guri);
+  return NULL;
 }
 
 
@@ -542,8 +560,14 @@ gnet_uri_get_nice_string (const GURI* uri)
       buffer = g_string_append_c (buffer, '@');
     }
 
+  /* Add brackets around the hostname if it's IPv6 */
   if (uri->hostname)
-    buffer = g_string_append (buffer, uri->hostname); 
+    {
+      if (strchr(uri->hostname, ':') == NULL) 
+	buffer = g_string_append (buffer, uri->hostname); 
+      else
+	g_string_sprintfa (buffer, "[%s]", uri->hostname);
+    }
 
   if (uri->port)
     g_string_sprintfa (buffer, ":%d", uri->port);

@@ -239,7 +239,6 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
 {
   int 			sockfd;
   GTcpSocket* 		s;
-  struct sockaddr_in* 	sa_in;
   int			rv;
 
   g_return_val_if_fail (addr != NULL, NULL);
@@ -253,11 +252,7 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
   s = g_new0 (GTcpSocket, 1);
   s->sockfd = sockfd;
   s->ref_count = 1;
-
-  /* Set up address and port for connection */
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
-  sa_in = (struct sockaddr_in*) &s->sa;
-  sa_in->sin_family = AF_INET;
 
   /* Connect */
   rv = connect(sockfd, 
@@ -282,11 +277,13 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
  *  @func: Callback function.
  *  @data: User data passed when callback function is called.
  *
- *  Connect to a specifed address asynchronously.  When the connection
- *  is complete or there is an error, it will call the callback.  It
- *  may call the callback before the function returns.  It will call
- *  the callback if there is a failure.  SOCKS is used if SOCKS is
- *  enabled.  The SOCKS negotiation will block.
+ *  Connect to a specifed address asynchronously.  The callback is
+ *  called once the connection is made or an error occurs while
+ *  connecting.  The callback will not be called during the call to
+ *  gnet_tcp_socket_new_async().
+ *
+ *  SOCKS is used if SOCKS is enabled.  The SOCKS negotiation will
+ *  block.
  *
  *  Returns: ID of the connection which can be used with
  *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
@@ -307,8 +304,6 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 
   /* Otherwise, connect directly to the address */
   return gnet_tcp_socket_new_async_direct (addr, func, data);
-
-
 }
 
 
@@ -335,8 +330,6 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   gint 			sockfd;
   gint 			flags;
   GTcpSocket* 		s;
-  struct sockaddr	sa;
-  struct sockaddr_in* 	sa_in;
   GTcpSocketAsyncState* state;
 
   g_return_val_if_fail(addr != NULL, NULL);
@@ -345,41 +338,27 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   /* Create socket */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
-    {
-      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
-      return NULL;
-    }
+    return NULL;
 
   /* Get the flags (should all be 0?) */
   flags = fcntl(sockfd, F_GETFL, 0);
   if (flags == -1)
-    {
-      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
-      return NULL;
-    }
+    return NULL;
 
   if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-    {
-      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
-      return NULL;
-    }
+    return NULL;
 
   /* Create our structure */
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = sockfd;
 
-  /* Set up address and port for connection */
-  memcpy(&sa, &addr->sa, sizeof(sa));
-  sa_in = (struct sockaddr_in*) &sa;
-  sa_in->sin_family = AF_INET;
-
   /* Connect (but non-blocking!) */
-  if (connect(s->sockfd, &sa, sizeof(s->sa)) < 0)
+  if (connect(s->sockfd, &GNET_INETADDR_SA(addr), 
+	      GNET_INETADDR_LEN(addr)) < 0)
     {
       if (errno != EINPROGRESS)
 	{
-	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
 	  g_free(s);
 	  return NULL;
 	}
@@ -387,8 +366,6 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   /* Save address */ 
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
-  sa_in = (struct sockaddr_in*) &sa;
-  sa_in->sin_family = AF_INET;
 
   /* Note that if connect returns 0, then we're already connected and
      we could call the call back immediately.  But, it would probably
@@ -489,8 +466,6 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   gint sockfd;
   gint status;
   GTcpSocket* s;
-  struct sockaddr sa;
-  struct sockaddr_in* sa_in;
   GTcpSocketAsyncState* state;
   u_long arg;
 
@@ -510,22 +485,17 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   s->ref_count = 1;
   s->sockfd = sockfd;
 
-  /* Set up address and port for connection */
-  memcpy(&sa, &addr->sa, sizeof(sa));
-  sa_in = (struct sockaddr_in*) &sa;
-  sa_in->sin_family = AF_INET;
-
   /* Force the socket into non-blocking mode */
   arg = 1;
   ioctlsocket(sockfd, FIONBIO, &arg);
 
-  status = connect(s->sockfd, &sa, sizeof(s->sa));
+  status = connect(s->sockfd, &GNET_INETADDR_SA(addr), 
+		   GNET_INETADDR_LEN(addr));
   if (status == SOCKET_ERROR) /* Returning an error is ok, unless.. */
     {
       status = WSAGetLastError();
       if (status != WSAEWOULDBLOCK)
 	{
-	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
 	  g_free(s);
 	  return NULL;
 	}
@@ -533,8 +503,6 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   /* Save address */ 
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
-  sa_in = (struct sockaddr_in*) &sa;
-  sa_in->sin_family = AF_INET;
 
   /* Wait for the connection */
   state = g_new0(GTcpSocketAsyncState, 1);
@@ -736,7 +704,7 @@ gnet_tcp_socket_get_port(const GTcpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, 0);
 
-  return g_ntohs(GNET_SOCKADDR_IN(socket->sa).sin_port);
+  return g_ntohs(GNET_SOCKADDR_PORT(socket->sa));
 }
 
 
@@ -820,6 +788,7 @@ gnet_tcp_socket_server_new (gint port)
     return gnet_private_socks_tcp_socket_server_new (port);
 
   /* Set up address and port (any address, any port) */
+  /* Default is to use IPv4.  FIX */
   memset (&iface, 0, sizeof(iface));
   sa_in = (struct sockaddr_in*) &iface.sa;
   sa_in->sin_family = AF_INET;
@@ -852,7 +821,6 @@ GTcpSocket*
 gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
 {
   GTcpSocket* s;
-  struct sockaddr_in* sa_in;
   socklen_t socklen;
 
   /* Use SOCKS if enabled */
@@ -867,15 +835,16 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
     goto error;
 
   /* Set up address and port for connection */
-  sa_in = (struct sockaddr_in*) &s->sa;
-  sa_in->sin_family = AF_INET;
   if (iface)
     {
-      sa_in->sin_addr.s_addr = GNET_SOCKADDR_IN(iface->sa).sin_addr.s_addr;
-      sa_in->sin_port = GNET_SOCKADDR_IN(iface->sa).sin_port;
+      memcpy (&s->sa, &iface->sa, sizeof(s->sa));
     }
-  else
+  else /* Default is to use IPv4 - FIX */
     {
+      struct sockaddr_in* sa_in;
+
+      sa_in = (struct sockaddr_in*) &s->sa;
+      sa_in->sin_family = AF_INET;
       sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
       sa_in->sin_port = 0;
     }

@@ -1,3 +1,6 @@
+#include <config.h>
+#ifdef  HAVE_LINUX_NETLINK_H
+
 /* $USAGI: ifaddrs.c,v 1.20 2002/08/23 05:38:00 yoshfuji Exp $ */
 
 /* 
@@ -43,6 +46,7 @@
 #endif
 
 #define __set_errno(e)  do { errno = e; } while(0)
+#define __close(s) 	close(s)
 
 
 /* ====================================================================== */
@@ -859,100 +863,4 @@ usagi_freeifaddrs (struct ifaddrs *ifa)
 
 /* **************************************** */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-int
-main(int argc, char** argv)
-{
-  int rv;
-  struct ifaddrs* ifs;
-  struct ifaddrs* i;
-  
-  rv = usagi_getifaddrs(&ifs);
-  if (rv != 0)
-    {
-      fprintf (stderr, "%s: usage_getifaddrs error: %s\n", 
-	       argv[0], strerror(errno));
-      exit (EXIT_FAILURE);
-    }
-
-  for (i = ifs; i != NULL; i = i->ifa_next)
-    {
-      printf ("ifa_name = %s\n", i->ifa_name);
-      printf ("ifa_flags = ");
-      if (i->ifa_flags & IFF_UP)
-	printf ("UP ");
-      if (i->ifa_flags & IFF_BROADCAST)
-	printf ("BROADCAST ");
-      if (i->ifa_flags & IFF_LOOPBACK)
-	printf ("LOOPBACK ");
-      if (i->ifa_flags & IFF_POINTOPOINT)
-	printf ("POINTOPOINT ");
-      if (i->ifa_flags & IFF_NOTRAILERS)
-	printf ("NOTRAILERS ");
-      if (i->ifa_flags & IFF_RUNNING)
-	printf ("RUNNING ");
-      if (i->ifa_flags & IFF_NOARP)
-	printf ("NOARP ");
-      if (i->ifa_flags & IFF_PROMISC)
-	printf ("PROMISC ");
-      if (i->ifa_flags & IFF_ALLMULTI)
-	printf ("ALLMULTI ");
-      if (i->ifa_flags & IFF_MASTER)
-	printf ("MASTER ");
-      if (i->ifa_flags & IFF_SLAVE)
-	printf ("SLAVE ");
-      if (i->ifa_flags & IFF_MULTICAST)
-	printf ("MULTICAST ");
-      if (i->ifa_flags & IFF_PORTSEL)
-	printf ("PORTSEL ");
-      if (i->ifa_flags & IFF_AUTOMEDIA)
-	printf ("AUTOMEDIA ");
-      printf ("\n");
-      if (i->ifa_addr)
-	{
-	  struct sockaddr* sa = (struct sockaddr*) i->ifa_addr;
-
-	  printf ("ifa_addr.sa_family = ");
-	  if (sa->sa_family == AF_INET)
-	    printf ("AF_INET");
-	  else if (sa->sa_family == AF_INET6)
-	    printf ("AF_INET6");
-	  else if (sa->sa_family == AF_PACKET)
-	    printf ("AF_PACKET");
-	  printf ("\n");
-
-
-	  if (sa->sa_family == AF_INET ||
-	      sa->sa_family == AF_INET6)
-	    {
-	      char addr[64];
-	      char* src;
-
-	      if (sa->sa_family == AF_INET)
-		src = (char*) &((struct sockaddr_in*) sa)->sin_addr;
-	      else if (sa->sa_family == AF_INET6)
-		src = (char*) &((struct sockaddr_in6*) sa)->sin6_addr;
-
-	      if (inet_ntop (sa->sa_family, src, addr, sizeof(addr)))
-		{
-		  printf ("ifa_addr = %s\n", addr);
-		}
-	      else
-		{
-		  fprintf (stderr, "%s: inet_ntop error: %s\n", 
-			   argv[0], strerror(errno));
-		}
-	    }
-	}
-
-      printf ("ifa_netmask = %p\n", i->ifa_netmask);
-    }
-
-  usagi_freeifaddrs (ifs);
-
-  exit (EXIT_SUCCESS);
-  return 0;
-}
+#endif  /* HAVE_LINUX_NETLINK_H */

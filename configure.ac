@@ -130,7 +130,8 @@ AC_SUBST(pthread_libs)
 
 if test "x${enable_glib2}" != "xyes"; then
   AM_PATH_GLIB([1.2.10],
-		GTHREAD_CFLAGS=" ",
+		# GTHREAD_CFLAGS are included in GLIB_CFLAGS for 1.2
+		GTHREAD_CFLAGS=" ",  
 		[enable_glib2=yes],
 		[gthread])
 fi
@@ -167,6 +168,17 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([sys/sockio.h sys/param.h])
 
 
+AC_MSG_CHECKING([for linux/netlink.h])
+AC_TRY_CPP([#include <linux/netlink.h>],
+	   [
+	     AC_MSG_RESULT(yes)	     
+             AC_DEFINE(HAVE_LINUX_NETLINK_H, 1,
+	       [Define if linux/netlink.h header exists])
+	     AC_MSG_RESULT(yes)
+           ],[
+             AC_MSG_RESULT(no)
+           ])
+
 ###############################
 # Check for types
 
@@ -191,23 +203,85 @@ CFLAGS="$CFLAGS -D_REENTRANT -DGNET_EXPERIMENTAL"
 ###############################
 # Check for library functions
 
-# On some systems, gethostbyname is thread-safe
+# Most of this code checks for variants of gethostbyname().  For
+# simplicity and curiosity, we check for all variants, though only one
+# working variant is needed.
+
+# Look for getifaddrs()
+AC_CHECK_FUNC(getifaddrs, AC_DEFINE(HAVE_GETIFADDRS, 1, 
+    [Define if getifaddrs() is available]))
+
+
+# The user may be able to tell us if a function is thread-safe.  We
+# know of no good way to test this programaticly.
+
+# On some systems, getaddrinfo() is thread-safe
+AC_ARG_ENABLE(threadsafe_getaddrinfo,
+	      AC_HELP_STRING([--enable-threadsafe-getaddrinfo],
+			     [assume getaddrinfo() is threadsafe]))
+
+# On some systems, gethostbyname() is thread-safe
 AC_ARG_ENABLE(threadsafe_gethostbyname,
 	      AC_HELP_STRING([--enable-threadsafe-gethostbyname],
 			     [assume gethostbyname() is threadsafe]))
 
-# Look for a gethostbyname_r we can use (we assume that if the user has
-# gethostbyname_r, they also have gethostbyaddr_r)
 
+# Look for getaddrinfo().  If we have that, we don't need
+# gethostbyname().  We assume if the system has getaddrinfo(), they
+# have getnameinfo().
+
+AC_CHECK_FUNC(getaddrinfo, 
+ [ # have getaddrinfo()
+  HAVE_GETADDRINFO=yes
+  AC_DEFINE(HAVE_GETADDRINFO, 1, 
+    [Define if getaddrinfo() is available])
+  # Check for threadsafe getaddrinfo()
+  AC_MSG_CHECKING([for threadsafe getaddrinfo()])
+  if test "x$enable_threadsafe_getaddrinfo" = "xyes" ; then
+    HAVE_GETADDRINFO_THREADSAFE=yes
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_GETADDRINFO_THREADSAFE, 1, 
+	[Define if getaddrinfo is threadsafe])
+  else
+    # If there is no threadsafe getaddrinfo, use a Glib mutex.
+    if test "x$GTHREAD_CFLAGS" != "x"; then
+      AC_DEFINE(HAVE_GETADDRINFO_GLIB_MUTEX, 1,
+                [Define if getaddrinfo requires a mutex for thread-safety])
+	HAVE_GETADDRINFO_GLIB_MUTEX=yes
+    else
+	AC_MSG_WARN([
+
+You do not have a thread-safe getaddrinfo() or GLib threads.
+Calls to getaddrinfo() (called by the GNet address functions) may
+not be thread-safe.  This build of GNet could malfunction if used in
+programs that use threads.  If your system has a thread-safe version
+of getaddrinfo(), pass the option --enable-threadsafe-getaddrinfo
+to configure.  The function's manpage may be able to tell you whether
+it is thread-safe or not.
+
+])
+    fi
+  fi
+ ],
+ [  # no getaddrinfo()
+  AC_MSG_RESULT(no)
+ ])
+
+
+
+# Check if the user told use gethostbyname() is thread-safe.
 AC_MSG_CHECKING([for threadsafe gethostbyname()])
 if test "x$enable_threadsafe_gethostbyname" = "xyes" ; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_GETHOSTBYNAME_THREADSAFE, 1, 
 	[Define if gethostbyname is threadsafe])
-  HAVE_GETHOSTBYNAME_THREADSAFE=1
+  HAVE_GETHOSTBYNAME_THREADSAFE=yes
 else
   AC_MSG_RESULT(no)
 fi
+
+# Look for a gethostbyname_r() we can use.  We assume that if the
+# system has gethostbyname_r(), they also have gethostbyaddr_r().
 
 # First, look for the glibc varient
 AC_MSG_CHECKING([for glibc gethostbyname_r])
@@ -225,7 +299,7 @@ AC_TRY_LINK([#include <netdb.h>],
 			     &h_erropp);],
 	     [AC_MSG_RESULT([yes])
 	      AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIBC, 1, 
-	         [Define if glibc variant of gethostbyname is available])
+	         [Define if glibc variant of gethostbyname() is available])
 	      HAVE_GETHOSTBYNAME_R=yes],
 	     [AC_MSG_RESULT([no])])
 
@@ -243,7 +317,7 @@ AC_TRY_LINK([#include <netdb.h>],
 			     &h_errnop);],
 	    [AC_MSG_RESULT([yes])
 	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_SOLARIS, 1,
-                [Define if Solaris variant of gethostbyname is available])
+                [Define if Solaris variant of gethostbyname() is available])
 	     HAVE_GETHOSTBYNAME_R=yes],
 	    [AC_MSG_RESULT([no])])
 
@@ -258,26 +332,31 @@ AC_TRY_LINK([#include <netdb.h>],
 			     buf);],
 	    [AC_MSG_RESULT([yes])
 	     AC_DEFINE(HAVE_GETHOSTBYNAME_R_HPUX, 1,
-               [Define if HPUX variant of gethostbyname is available])
+               [Define if HPUX variant of gethostbyname() is available])
 	     HAVE_GETHOSTBYNAME_R=yes],
 	    [AC_MSG_RESULT([no])])
 
-# We're stuck without gethostbyname_r.  Use Glib threads.
+# If there is no gethostbyname_r, use Glib threads.
 if test -z "$HAVE_GETHOSTBYNAME_THREADSAFE" -a -z "$HAVE_GETHOSTBYNAME_R" -a "$GTHREAD_CFLAGS"; then
 	AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX, 1,
-                [Define if gethostbyname requires a mutex for thread safety])
+                [Define if gethostbyname requires a mutex for thread-safety])
 	HAVE_GETHOSTBYNAME_R=yes
 fi
 
-# Duh-oh.  We don't have _any_ thread safety, so warn the builder
-if test -z "$HAVE_GETHOSTBYNAME_THREADSAFE" -a -z "$HAVE_GETHOSTBYNAME_R"; then
+# Duh-oh.  We don't have _any_ thread-safety, so warn the builder
+if test -z "$HAVE_GETADDRINFO_THREADSAFE" -a -z "$HAVE_GETHOSTBYNAME_THREADSAFE" -a -z "$HAVE_GETHOSTBYNAME_R"; then
 	AC_MSG_WARN([
-You have neither gethostbyname_r() or GLib threads.  Calls
-to gethostbyname() (called by the GNet address functions) 
-may not be thread safe.  This build of GNet could malfunction
-if used in programs that use threads.  If your system has a
-thread-safe version of gethostbyname(), pass the option
---enable-threadsafe-gethostbyname to configure.])  
+
+You do not have a thread-safe gethostbyname_r() or GLib threads.
+Calls to gethostbyname() (called by the GNet address functions) may
+not be thread-safe.  This build of GNet could malfunction if used in
+programs that use threads.  If your system has a thread-safe version
+of gethostbyname(), pass the option --enable-threadsafe-gethostbyname
+to configure.  The function's manpage may be able to tell you whether
+it is thread-safe or not.
+
+])
+
 fi
 
 

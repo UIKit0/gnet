@@ -11,6 +11,9 @@ API cleanup
 
 - Move udp_mcast_ttl to mcast?
 
+   Check: what's the difference between IP_TTL and IP_MULTICAST_TTL
+   anyway?
+
 
 Experimental changes
 
@@ -61,6 +64,10 @@ New features
 		www.microsoft.akadns.net.  Intent was to get 
 		canonical name for short names, like
 		speak.eecs.umich.edu for speak.
+
+
+   - inetaddr_equal - can a ipv4 address equal an ipv6 address?
+
 
 - New Inetaddr functions:
 
@@ -139,6 +146,11 @@ Possible changes
 
 ========================================
 DONE
+
+- URI parsing:
+
+    gnet_uri_new("") results in NULL.  Before it created a GURI.
+
 
 - Remove "localhost" check from gnet_inetaddr_new_nonblock().
 

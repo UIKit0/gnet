@@ -1,3 +1,6 @@
+#include <config.h>
+#ifdef HAVE_LINUX_NETLINK_H
+
 /* $USAGI: ifaddrs.h,v 1.1 2001/01/26 07:11:49 yoshfuji Exp $ */
 
 /*
@@ -60,3 +63,5 @@ extern void usagi_freeifaddrs (struct ifaddrs *) __THROW;
 __END_DECLS
 
 #endif	/* _IFADDRS_H */
+
+#endif  /* HAVE_LINUX_NETLINK_H */

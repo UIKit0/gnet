@@ -1,3 +1,59 @@
+Fri Dec  6 15:57:39 2002  David Helder  <dhelder@umich.edu>
+
+	* *: More IPv6 hacking.  DNS and IPv6 should work.  
+	    Todo: connect()/bind(), auto-detection, inetaddr helper
+	    funcs
+	    Connections have not been tested yet.  IPv6 auto-detection
+	    is not done yet.  Inetaddr
+	
+	* src/inetaddr.c (gnet_gethostbyname): Add getifaddr()
+	    version.  Use USAGI's getifaddr() on systems with
+	    linux/netlink.h.  We do this because Glibc's getifaddr()
+	    does not handle IPv6.
+	* configure.ac: Check for linux/netlink.h
+
+	* src/inetaddr.c (gnet_inetaddr_new_async_cb): read()
+	   (ideally) will always return positive.  If it's zero,
+	   then there's something wrong.  We detect when the
+	   read is done and close the socket, so we should not
+	   get the other side closing the socket.
+
+	* src/uri.c (gnet_uri_new): Strip whitespace before
+	   scheme (before we included it).  Strings of whitespace
+	   produce errors.  Strip hostname brackets (this is
+	   used for IPv6 canonical names.
+	* src/uri.c (gnet_uri_get_nice_string): Add brackets if
+	   hostname has :'s in it (it's IPv6 then).
+
+	* src/inetaddr.c (gnet_gethostbyname): Remove "nicename"
+	   (FQDN) functionality.  It doesn't work consistently.
+	   E.g., www.microsoft.com's h_name is www.microsoft.akadns.com,
+	   h_alias[0] is www.microsoft.com.  Really we need to do a
+	   reverse DNS lookup for this to work reliably.
+	* src/inetaddr.c (gnet_inetaddr_gethostname): Do reverse
+	   DNS to get name.
+
+	* src/inetaddr.c (gnet_gethostbyaddr): Add getnameinfo
+	   implementation.  Changed prototype to take a sockaddr*.
+
+	* tests/dnstest.c: Clean-up.  Add args so you don't have to
+	   recompile.
+
+	* src/inetaddr.c (gnet_gethostbyname): Don't init gthreads
+	    - this is done in gnet_init().
+
+	* configure.ac: Add --enable-threadsafe-gethostbyname
+
+	* src/tcp.c (gnet_tcp_socket_get_port): IPv6ize.  Use
+	    GNET_SOCKADDR_PORT macro.
+
+	* src/tcp.c (gnet_tcp_socket_new_async): Update docs - callback is
+	*not* called if an error occurs immediately.
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): Don't call
+	    callback.
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): IPv6ize.
+	* src/tcp.c (gnet_tcp_socket_new_async_direct[win32]): "
+
 Thu Nov  7 14:25:08 2002  Jonathan Blandford  <jrb@redhat.com>
 
 	* src/inetaddr.c (gnet_inetaddr_hash): initialize addr to keep

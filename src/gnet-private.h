@@ -110,6 +110,9 @@
 #define GNET_SOCKADDR_ADDRP(s)	(((s).ss_family == AF_INET)?\
                                   (void*)&((struct sockaddr_in*)&s)->sin_addr:\
                                   (void*)&((struct sockaddr_in6*)&s)->sin6_addr)
+#define GNET_SOCKADDR_ADDRLEN(s) (((s).ss_family == AF_INET)?\
+				 sizeof(struct in_addr):\
+				 sizeof(struct in6_addr))
 #define GNET_SOCKADDR_PORT(s)	(((s).ss_family == AF_INET)?\
                                   ((struct sockaddr_in*)&s)->sin_port:\
                                   ((struct sockaddr_in6*)&s)->sin6_port)
@@ -198,6 +201,7 @@ gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 typedef struct _GInetAddrAsyncState 
 {
   GInetAddr* 	ia;
+  gint		port;
   GInetAddrNewAsyncFunc func;
   gpointer 	data;
 #ifndef GNET_WIN32		/* UNIX */
@@ -211,7 +215,7 @@ typedef struct _GInetAddrAsyncState
   pid_t 	pid;
   GIOChannel* 	iochannel;
   guint 	watch;
-  guchar 	buffer[16];
+  guchar 	buffer[17];
   int 		len;
   gboolean 	in_callback;
 #endif
