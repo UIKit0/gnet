@@ -45,6 +45,12 @@ Features
 
     Jacques Fortier might be working on this.
 
+- Add MD5 and SHA
+
+    See:
+	http://www.faqs.org/rfcs/rfc1321.html	(includes free code)
+	http://www.itl.nist.gov/fipspubs/fip180-1.htm
+
 - Add lightweight intraprocess communication stuff via IOChannel.  I'd
     like a shared buffer and a message queue.  These should be simple
     to do.
@@ -133,4 +139,4 @@ Other
 
 Never: (things that will probably never become part of GNet)
 
-- Raw IP (there are other libraries)
+- Raw IP (use libpcap)
