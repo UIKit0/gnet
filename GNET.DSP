@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "." /D "NDEBUG" /D "GNET_EXPERIMENTAL" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 glib-1.3.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"Release/gnet-1.0.dll"
+# ADD LINK32 glib-1.3.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"Release/gnet-1.1.dll"
 
 !ELSEIF  "$(CFG)" == "gnet - Win32 Debug"
 
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "." /D "_DEBUG" /D "GNET_EXPERIMENTAL" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNET_EXPORTS" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 glib-1.3.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"Debug/gnet-1.0.dll" /pdbtype:sept
+# ADD LINK32 glib-1.3.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"Debug/gnet-1.1.dll" /pdbtype:sept
 
 !ENDIF 
 
@@ -90,6 +90,10 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=.\conn.c
+# End Source File
 # Begin Source File
 
 SOURCE=".\gnet-private.c"
@@ -116,11 +120,31 @@ SOURCE=.\mcast.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\md5.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\pack.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\server.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sha.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tcp.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\udp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\url.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -129,6 +153,10 @@ SOURCE=.\udp.c
 # Begin Source File
 
 SOURCE=.\config.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\conn.h
 # End Source File
 # Begin Source File
 
@@ -164,11 +192,31 @@ SOURCE=.\mcast.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\md5.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\pack.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\server.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sha.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tcp.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\udp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\url.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

@@ -5,6 +5,8 @@ Wed May 23  9:33:45 2001  Andrew Lanoix <alanoix@umich.edu>
 	*examples/echoserver.c: In object_echoserver(),
 	  too may args to gnet_server_new()
 
+	*update Gnet.dsp
+
 Wed May 23 10:08:09 2001  David Helder  <dhelder@umich.edu>
 
 	* src/gnet.h: Include all files on Win32
