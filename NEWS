@@ -4,6 +4,15 @@ GNet NEWS
 
 Changes in Gnet
 
+0.1.8
+-----
+* HP-UX and other portability fixes.
+* Fixed bug in gnet_inetaddr_new_nonblock where dotted decimal
+    address caused a seg fault.
+* Fixed bug in Solaris version of gnet_inetaddr_get_name.
+* Deleting a NULL object is now allowed.
+* IOChannel semantics have changed - see documentation.
+
 0.1.7
 -----
 * Fixed bugs in gnet_iochannel_{readn, writen, readline}.

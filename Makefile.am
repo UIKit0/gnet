@@ -14,6 +14,7 @@ m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet.m4
 
 WEBPATH=$(HOME)/public_html/misc/gnet
+DEBPATH=$(HOME)/public_html/misc/debian
 
 DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING
 
@@ -36,6 +37,9 @@ copyweb:
 	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)/deb
 	-cp -f $(RPMFILE) $(RPMFILEDEV) $(RPMFILESRC) $(WEBPATH)/rpm
 	-chmod a+r $(WEBPATH)/src/* $(WEBPATH)/deb/* $(WEBPATH)/rpm/*
+	-rm -f $(DEBPATH)/dists/unstable/main/binary-i386/lib/gnet*
+	-cp -f debian-temp/$(DEBFILE) $(DEBPATH)/dists/unstable/main/binary-i386/lib
+	-(cd $(DEBPATH); ./setup.sh)
 
 deb:
 	rm -rf debian-temp

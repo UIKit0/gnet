@@ -1,3 +1,9 @@
+gnet (0.1.8-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- David Helder <dhelder@umich.edu>  Tue,  1 Feb 2000 19:59:53 -0500
+
 gnet (0.1.7-1) unstable; urgency=low
 
   * New upstream release
