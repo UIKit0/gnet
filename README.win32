@@ -6,16 +6,9 @@ This snapshot was compiled with extra development GNet code.
 That code has not been tested on windows. See README for
 a list of Experimental code.
 
-This requires GLib 1.3 snapshot 20010301.
-[http://www.gimp.org/win32/glib-dev-20010301.zip]
-That glib snapshot has two confirmed problems:
-1) glib's socket iochannels are not freed properly,
-which causes Winsock to run out of buffer space over time.
-2) glib's window handle callback code always calls back,
-GNet in this release ignores those extra callbacks. [It is
-fixed in GLIB's CVS]
-
-Later versions of Glib 1.3.X may work too.
+I am using Glib CVS HEAD checked out on 2001-7-22.
+A chekout at a later date may not compile. Tor is back 
+and working on a new release of glib.
 
 Join or checkout the mailing lists at
 http://www.gnetlibrary.org/ for the most

@@ -1,3 +1,7 @@
+Fri Aug 24 10:47:34 2001 Andrew Lanoix <alanoix@umich.edu>
+	
+	*README.win32: Update
+
 Sun Aug 12 11:59:22 2001  Andrew Lanoix <alanoix@umich.edu>
 
 	*gnet.def: Add missing gnet_inetaddr_new_nonblock &
