@@ -25,24 +25,14 @@
 
 
 
-typedef enum { NORMAL, NONBLOCKING, THREADED} ServerType;
-#define ANY_IO_CONDITION  (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
+typedef enum { NORMAL, NONBLOCKING, OBJECT} ServerType;
 
 static void normal_echoserver(GTcpSocket* server);
 static void nonblocking_echoserver(GTcpSocket* server);
-static void threaded_echoserver(GTcpSocket* server);
+/*  static void object_echoserver(GTcpSocket* server); */
 
 gboolean nb_server_iofunc (GIOChannel* server, GIOCondition condition, gpointer data);
 gboolean nb_client_iofunc (GIOChannel* client, GIOCondition condition, gpointer data);
-
-
-typedef struct
-{
-  GTcpSocket* socket;
-  gchar buffer[1024];
-  guint n;
-
-} ClientState;
 
 
 
@@ -57,8 +47,7 @@ main(int argc, char** argv)
 
   if (argc !=  2 && argc != 3)
     {
-      g_print ("usage: echoserver [(nothing)|--nonblocking|--threaded] <port> \n");
-      g_print ("  (threaded isn't implemented yet)\n");
+      g_print ("usage: echoserver [(nothing)|--nonblocking] <port> \n");
       exit(EXIT_FAILURE);
     }
 
@@ -71,11 +60,9 @@ main(int argc, char** argv)
       port = atoi(argv[2]);
       if (strcmp(argv[1], "--nonblocking") == 0)
 	server_type = NONBLOCKING;
-      else if (strcmp(argv[1], "--threaded") == 0)
-	server_type = THREADED;
       else
 	{
-	  g_print ("usage: echoserver [(nothing)|--nonblocking|--threaded] <port> \n");
+	  g_print ("usage: echoserver [(nothing)|--nonblocking] <port> \n");
 	  exit(EXIT_FAILURE);
 	}
     }
@@ -92,9 +79,6 @@ main(int argc, char** argv)
       break;
     case NONBLOCKING:
       nonblocking_echoserver(server);
-      break;
-    case THREADED:
-      threaded_echoserver(server);
       break;
     default:
       g_assert_not_reached();
@@ -130,7 +114,7 @@ normal_echoserver(GTcpSocket* server)
 	}
 
       if (error != G_IO_ERROR_NONE)
-	g_print ("\nReceived error %d (closing socket).\n", error);
+	fprintf (stderr, "\nReceived error %d (closing socket).\n", error);
 
       g_io_channel_unref(ioclient);
       gnet_tcp_socket_delete(client);
@@ -138,6 +122,30 @@ normal_echoserver(GTcpSocket* server)
 }
 
 
+/* ************************************************************ */
+
+typedef struct
+{
+  GTcpSocket* socket;
+  GIOChannel* iochannel;
+  guint out_watch;
+  gchar buffer[1024];
+  guint n;
+
+} ClientState;
+
+static void clientstate_delete (ClientState* state);
+
+
+static void
+clientstate_delete (ClientState* state)
+{
+  gnet_tcp_socket_delete (state->socket);
+  if (state->out_watch)
+    g_source_remove (state->out_watch);
+  g_io_channel_unref (state->iochannel);
+  g_free(state);
+}
 
 
 void 
@@ -151,7 +159,9 @@ nonblocking_echoserver(GTcpSocket* server)
 
   /* Add a watch for incoming clients */
   iochannel = gnet_tcp_socket_get_iochannel(server);
-  g_io_add_watch(iochannel, ANY_IO_CONDITION, nb_server_iofunc, server);
+  g_io_add_watch(iochannel, 
+		 G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
+		 nb_server_iofunc, server);
 
   /* Start the main loop */
   g_main_run(main_loop);
@@ -166,131 +176,151 @@ nb_server_iofunc (GIOChannel* iochannel, GIOCondition condition, gpointer data)
   GTcpSocket* server = (GTcpSocket*) data;
   g_assert (server != NULL);
 
-/*    g_print ("nb_server_iofunc %d\n", condition); */
+  /*    g_print ("nb_server_iofunc %d\n", condition); */
 
-
-  switch (condition)
+  if (condition & G_IO_IN)
     {
-    case G_IO_IN:
-      {
-	GTcpSocket* client = NULL;
-	GIOChannel* client_iochannel = NULL;
-	ClientState* client_state = NULL;
+      GTcpSocket* client = NULL;
+      GIOChannel* client_iochannel = NULL;
+      ClientState* client_state = NULL;
 
-	client = gnet_tcp_socket_server_accept(server);
-	g_assert(client != NULL);
+      client = gnet_tcp_socket_server_accept(server);
+      g_assert(client != NULL);
 
-	client_iochannel = gnet_tcp_socket_get_iochannel(client);
-	g_assert (client_iochannel != NULL);
+      client_iochannel = gnet_tcp_socket_get_iochannel(client);
+      g_assert (client_iochannel != NULL);
 
-	client_state = g_new0(ClientState, 1);
-	client_state->socket = client;
+      client_state = g_new0(ClientState, 1);
+      client_state->socket = client;
+      client_state->iochannel = client_iochannel;
 
-	g_io_add_watch(client_iochannel, ANY_IO_CONDITION & ~G_IO_OUT, 
-		       nb_client_iofunc, client_state);
+      g_io_add_watch(client_iochannel, 
+		     G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
+		     nb_client_iofunc, client_state);
 	
-	break;
-      }
-    default:
-      {
-	g_print ("nm_server_iofunc condition =  %d\n", condition);
-	break;
-      }
+    }
+  else
+    {
+      fprintf (stderr, "Server error %d\n", condition);
+      return FALSE;
     }
 
   return TRUE;
 }
 
 
-gboolean nb_client_iofunc (GIOChannel* iochannel, GIOCondition condition, gpointer data)
+/*
+
+  This callback is called for (IN|ERR) or OUT.  
+
+  We add the watch for (IN|ERR) when the client connects in
+  nb_server_iofunc().  We remove it if the connection is closed
+  (i.e. we read 0 bytes) or if there's an error.
+
+  We add the watch for OUT when we have something to write and remove
+  it when we're done writing or when the connection is closed.
+
+  On some systems GLib has problems if you use more than one watch on
+  a file descriptor.  The problem is GLib assumes descriptors can
+  appear twice in the array passed to poll(), which is true on some
+  systems but not others (Linux).
+
+  See GLib bug 11059 on http://bugs.gnome.org.
+  Look at Jungle Monkey for an example of how to work around the bug.
+
+ */
+gboolean
+nb_client_iofunc (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 {
   ClientState* client_state = (ClientState*) data;
   GIOError error;
 
   g_assert (client_state != NULL);
 
-/*    g_print ("nb_client_iofunc %d\n", condition); */
+/*    fprintf (stderr, "nb_client_iofunc %d (in = %d, out = %d, err = %d, hup = %d, pri = %d\n", condition, G_IO_IN, G_IO_OUT, G_IO_ERR, G_IO_HUP, G_IO_PRI); */
 
-
-  switch (condition)
+  /* Check for socket error */
+  if (condition & G_IO_ERR)
     {
-    case G_IO_IN:
-      {
-	guint bytes_read;
+      fprintf (stderr, "Client socket error\n");
+      clientstate_delete (client_state);
+      return FALSE;
+    }
 
-	/* Read the data into our buffer */
-	error = g_io_channel_read(iochannel, &client_state->buffer[client_state->n], 
-				  sizeof(client_state->buffer) - client_state->n, 
-				  &bytes_read);
+  /* Check for data to be read (or if the socket was closed) */
+  if (condition & G_IO_IN)
+    {
+      guint bytes_read;
 
-	if (error != G_IO_ERROR_NONE)
-	  g_print ("Client read error: %d\n", error);
-	else if (bytes_read > 0)
-	  {
-	    /* If there weren't any bytes to write before, then there wasn't a
-	       watch on write, so add one. */
-	    if (client_state->n == 0)
-	      {
-		g_io_add_watch(iochannel, G_IO_OUT, nb_client_iofunc, client_state);
-	      }
+      /* Read the data into our buffer */
+      error = g_io_channel_read(iochannel, 
+				&client_state->buffer[client_state->n], 
+				sizeof(client_state->buffer) - client_state->n, 
+				&bytes_read);
 
-	    client_state->n += bytes_read;
-	  }
+      /* Check for socket error */
+      if (error != G_IO_ERROR_NONE)
+	{
+	  fprintf (stderr, "Client read error: %d\n", error);
+	  clientstate_delete (client_state);
+	  return FALSE;
+	}
+      /* Check if we read something */
+      else if (bytes_read > 0)
+	{
+	  /* If there weren't any bytes to write before, then there wasn't a
+	     watch on write, so add one. */
+	  if (client_state->n == 0)
+	    {
+	      client_state->out_watch = 
+		g_io_add_watch(iochannel, G_IO_OUT, 
+			       nb_client_iofunc, client_state);
+	    }
 
-	break;
-      }
-    case G_IO_OUT:
-      {
-	guint bytes_written;
+	  client_state->n += bytes_read;
+	}
+      /* Otherwise, we read 0 bytes, which means the connection is
+         closed */
+      else
+	{
+	  clientstate_delete (client_state);
+	  return FALSE;
+	}
+    }
 
+  if (condition & G_IO_OUT)
+   {
+     guint bytes_written;
 
-	/* Write the data out */
-	error = g_io_channel_write(iochannel, client_state->buffer, 
-				   client_state->n, &bytes_written);
+     /* Write the data out */
+     error = g_io_channel_write(iochannel, client_state->buffer, 
+				client_state->n, &bytes_written);
 
-	if (error != G_IO_ERROR_NONE) 
-	  g_print ("Client write error: %d\n", error);
-	else if (bytes_written > 0)
-	  {
-	    /* Move the memory down some (you wouldn't want to do this
-               in a performance server because it's slow!) */
-	    memmove(client_state->buffer, 
-		    &client_state->buffer[bytes_written],
-		    bytes_written);
+     if (error != G_IO_ERROR_NONE) 
+       {
+	 fprintf (stderr, "Client write error: %d\n", error);
+	 clientstate_delete (client_state);
+	 return FALSE;
+       }
+     else if (bytes_written > 0)
+       {
+	 /* Move the memory down some (you wouldn't want to do this
+	    in a performance server because it's slow!) */
+	 memmove(client_state->buffer, 
+		 &client_state->buffer[bytes_written],
+		 bytes_written);
 
-	    client_state->n -= bytes_written;
-	  }
+	 client_state->n -= bytes_written;
+       }
 
-	return (client_state->n != 0);
-      }
+     /* Check if done */
+     if (client_state->n == 0)
+       {
+	 client_state->out_watch = 0;
+	 return FALSE;
+       }
 
-    case G_IO_HUP:
-      {
-	/* Close the connection */
-	gnet_tcp_socket_delete(client_state->socket);
-
-	/* Clean up */
-	g_free(client_state);
-
-	return FALSE;
-      }
-
-
-    default:
-      {
-	g_print ("nm_client_iofunc condition =  %d\n", condition);
-	break;
-      }
-
-    }      
+   }
 
   return TRUE;
-}
-
-
-
-void
-threaded_echoserver(GTcpSocket* server)
-{
-  g_assert_not_reached();
 }

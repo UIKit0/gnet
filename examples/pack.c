@@ -153,15 +153,15 @@ main()
 
   /* ********** */
 
-  gnet_pack ("P", buffer, sizeof(void*), (void*) 0x01020304);
+  gnet_pack ("v", buffer, sizeof(void*), (void*) 0x01020304);
   print_bytes (buffer, sizeof(void*));
   printf ("should be: 04 03 02 01\n");
 
-  gnet_pack ("P", buffer, sizeof(void*), (void*) 0xf1020304);
+  gnet_pack ("v", buffer, sizeof(void*), (void*) 0xf1020304);
   print_bytes (buffer, sizeof(void*));
   printf ("should be: 04 03 02 f1\n");
 
-  gnet_pack ("P", buffer, sizeof(void*), (void*) 0x010203f4);
+  gnet_pack ("v", buffer, sizeof(void*), (void*) 0x010203f4);
   print_bytes (buffer, sizeof(void*));
   printf ("should be: f4 03 02 01\n");
 

@@ -170,12 +170,12 @@ main()
   /* ********** */
 
   voidp = (void*) 0xaaaaaaaa;
-  gnet_unpack ("P", &buf[1], sizeof(void*), &voidp);
+  gnet_unpack ("v", &buf[1], sizeof(void*), &voidp);
   printf ("\noutput:    %x\n", voidp);
   printf ("should be: 4030201\n");
 
   voidp = (void*) 0xaaaaaaaa;
-  gnet_unpack ("P", &bufh[1], sizeof(void*), &voidp);
+  gnet_unpack ("v", &bufh[1], sizeof(void*), &voidp);
   printf ("\noutput:    %x\n", voidp);
   printf ("should be: f4f3f2f1\n");
 

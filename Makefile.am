@@ -4,7 +4,7 @@ SUBDIRS = src examples doc
 
 @SET_MAKE@
 
-EXTRA_DIST=TODO HACKING	gnet.m4 gnetconfig.h gnetconfig.h.in
+EXTRA_DIST=TODO HACKING BUGS gnet.m4 gnetconfig.h gnetconfig.h.in
 
 bin_SCRIPTS=gnet-config
 BUILT_SOURCES=gnet-config

@@ -157,63 +157,64 @@ flipmemcpy(char* dst, char* src, int n)
 
 
 /**
-
-   pack
-
-   The pack format string is a list of types.  Each type is
-   represented by a character.  Most types can be prefixed by an
-   integer, which represents how many times it is repeated (eg, "4i2b"
-   is equivalent to "iiiibb". 
-
-   x is a pad byte.  The pad byte is the NULL character.
-
-   b/B are signed/unsigned chars
-
-   h/H are signed/unsigned shorts
-
-   i/I are signed/unsigned ints
-
-   l/L are signed/unsigned longs
-
-   f/D are floats/doubles (always native order/size)
-   
-   P is a void pointer (always native order/size)
-
-   s is a zero-terminated string.  REPEAT is repeat.
-
-   S is a zero-padded string of maximum length REPEAT.  We write up-to
-   a NULL character or REPEAT characters, whichever comes first.  We
-   then write NULL characters up to a total of REPEAT characters.
-   Special case: If REPEAT is not specified, we write the string as a
-   non-NULL-terminated string (note that it can't be unpacked easily
-   then).
-
-   r is a byte array of NEXT bytes.  NEXT is the next argument and is
-   an integer.  REPEAT is repeat.  (r is from "raw")
-
-   R is a byte array of REPEAT bytes.  REPEAT must be specified.
-
-   p is a Pascal string.  The string passed is a NULL-termiated string
-   of less than 256 character.  The string writen is a
-   non-NULL-terminated string with a byte before the string storing
-   the string length.  REPEAT is repeat.
-
-   Native size/order is the default.  If the first character of FORMAT
-   is < then little endian order and standard size is used.  If the
-   first character is > or ! then big endian (or network) order and
-   standard size is used.  Standard sizes are 1 byte for chars, 2
-   bytes for shorts, and 4 bytes for ints and longs.
-
-   Mnemonics: Byte, sHort, Integer, Float, Double, Pointer, String,
-   Raw
-
-   pack was mostly inspired by Python's pack, with some awareness of
-   Perl's pack.  We don't do Python 0-repeat-is-alignment.  Submit a
-   patch if you really want it.
-
-   Returns: bytes packed; -1 if error.
-
- */
+ *  gnet_pack:
+ *  @format: Pack format (see below)
+ *  @buffer: Buffer to pack to
+ *  @len: Length of buffer
+ *
+ *  The pack format string is a list of types.  Each type is
+ *  represented by a character.  Most types can be prefixed by an
+ *  integer, which represents how many times it is repeated (eg,
+ *  "4i2b" is equivalent to "iiiibb".
+ *
+ *  Native size/order is the default.  If the first character of
+ *  FORMAT is < then little endian order and standard size are used.
+ *  If the first character is > or !, then big endian (or network)
+ *  order and standard size are used.  Standard sizes are 1 byte for
+ *  chars, 2 bytes for shorts, and 4 bytes for ints and longs.
+ *  x is a pad byte.  The pad byte is the NULL character.
+ *
+ *  b/B are signed/unsigned chars
+ *
+ *  h/H are signed/unsigned shorts
+ *
+ *  i/I are signed/unsigned ints
+ *
+ *  l/L are signed/unsigned longs
+ *
+ *  f/D are floats/doubles (always native order/size)
+ *  
+ *  v is a void pointer (always native size)
+ *
+ *  s is a zero-terminated string.  REPEAT is repeat.
+ *
+ *  S is a zero-padded string of maximum length REPEAT.  We write
+ *  up-to a NULL character or REPEAT characters, whichever comes
+ *  first.  We then write NULL characters up to a total of REPEAT
+ *  characters.  Special case: If REPEAT is not specified, we write
+ *  the string as a non-NULL-terminated string (note that it can't be
+ *  unpacked easily then).
+ *
+ *  r is a byte array of NEXT bytes.  NEXT is the next argument and is
+ *  an integer.  REPEAT is repeat.  (r is from "raw")
+ *
+ *  R is a byte array of REPEAT bytes.  REPEAT must be specified.
+ *
+ *  p is a Pascal string.  The string passed is a NULL-termiated
+ *  string of less than 256 character.  The string writen is a
+ *  non-NULL-terminated string with a byte before the string storing
+ *  the string length.  REPEAT is repeat.
+ *
+ *  Mnemonics: (B)yte, s(H)ort, (I)nteger, (F)loat, (D)ouble, (V)oid
+ *  pointer, (S)tring, (R)aw
+ *
+ *  pack was mostly inspired by Python's pack, with some awareness of
+ *  Perl's pack.  We don't do Python 0-repeat-is-alignment.  Submit a
+ *  patch if you really want it.
+ *
+ *  Returns: bytes packed; -1 if error.
+ *
+ **/
 gint
 gnet_pack (const gchar* format, gchar* buffer, const guint len, ...)
 {
@@ -296,7 +297,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	case 'f':  { PACK(float, double);			break;  }
 	case 'd':  { PACK(double, double);			break;  }
 
-	case 'P':  { PACK2(void*, void*, void*, 4); 		break;	}
+	case 'v':  { PACK2(void*, void*, void*, 4); 		break;	}
 
 	case 's':
 	  { 
@@ -470,13 +471,20 @@ gnet_calcsize (const gchar* format)
 	case 'l':case 'L': { size = (sizemode?4:sizeof(long));	break; }
 	case 'f':  { size = sizeof(float); break; }
 	case 'd':  { size = sizeof(double); break;}
-	case 'P':  { size = sizeof(void*); break;}
+	case 'v':  { size = sizeof(void*); break;}
 
-	case 's':  { size = 1; 	break; }		/* string 	*/
-	case 'S':  { size = mult; mult = 1; break; }	/* zero string  */
-	case 'r':  { size = 1; break; }			/* raw		*/
-	case 'R':  { size = 0; break; }			/* raw w/ len	*/
-	case 'p':  { size = 1; break; }			/* pascal	*/
+	  /* string: size = 1 * mult */
+	case 's':  { size = 1; break; }
+
+	  /* null-padded string: size = mult ? mult : 0 */
+	case 'S':  { size = mult; mult = 1; break; }
+
+	  /* raw: size = 0 */
+	case 'r':  { size = 0; break; }
+	case 'R':  { size = 0; break; }
+
+	  /* pascal: size = 1 * mult */
+	case 'p':  { size = 1; break; }
 
 	case '0':case '1':case '2':case '3':case '4':
 	case '5':case '6':case '7':case '8':case '9':
@@ -566,13 +574,19 @@ gnet_calcsize (const gchar* format)
  *
  *  The unpack format string is a list of types.  Each type is
  *  represented by a character.  Most types can be prefixed by an
- *  integer, which represents how many times it is repeated (eg, "4i2b"
- *  is equivalent to "iiiibb".  
+ *  integer, which represents how many times it is repeated (eg,
+ *  "4i2b" is equivalent to "iiiibb".
  *
  *  In unpack, the arguments must be pointers to the appropriate type.
  *  Strings and byte arrays are allocated dynamicly (by g_new).  The
  *  caller is responsible for g_free()-ing it.
  *
+ *  Native size/order is the default.  If the first character of
+ *  FORMAT is < then little endian order and standard size are used.
+ *  If the first character is > or !, then big endian (or network)
+ *  order and standard size are used.  Standard sizes are 1 byte for
+ *  chars, 2 bytes for shorts, and 4 bytes for ints and longs.
+ * 
  *  x is a pad byte.  The byte is skipped and not stored.  We do not
  *  check its value.
  *
@@ -586,7 +600,7 @@ gnet_calcsize (const gchar* format)
  * 
  *  f/D are floats/doubles (always native order/size)
  *    
- *  P is a void pointer (always native order/size)
+ *  v is a void pointer (always native size)
  * 
  *  s is a zero-terminated string.  REPEAT is repeat.
  * 
@@ -601,20 +615,13 @@ gnet_calcsize (const gchar* format)
  * 
  *  String/byte array memory is allocated by unpack.
  * 
- *  Native size/order is the default.  If the first character of FORMAT
- *  is <, little endian order and standard size is used.  If the first
- *  character is > or !, big endian (or network) order and standard
- *  size is used.  Standard sizes are 1 byte for chars, 2 bytes for
- *  shorts, and 4 bytes for ints and longs.
- * 
  *  Mnemonics: sHort, Integer, Float, Double, Pointer, String, Raw
  * 
  *  unpack was mostly inspired by Python's unpack, with some awareness
  *  of Perl's unpack.
  * 
  *  Returns: bytes unpacked; -1 if error.
- *
- */
+ * */
 gint 
 gnet_unpack (const gchar* format, gchar* buffer, gint len, ...)
 {
@@ -679,7 +686,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 	case 'f':  { UNPACK(float);			break;  }
 	case 'd':  { UNPACK(double);			break;  }
 
-	case 'P':  { UNPACK2(void*, void*, 4); 		break;	}
+	case 'v':  { UNPACK2(void*, void*, 4); 		break;	}
 
 	case 's':
 	  { 

@@ -1,3 +1,16 @@
+Sun Oct 29 17:50:46 2000  David Helder  <dhelder@umich.edu>
+
+	* examples/echoserver.c: Fixed non-blocking server example.  It
+	    had a couple problems.  It should not have switched on the
+	    condition, because it's a bit field, not an enum.  It should
+	    have done better error checking too.
+
+	* BUGS: Added
+
+	* src/pack.c: Change 'P' to 'v' for void pointer.  Void
+	   pointer will always be native size.
+	* src/pack.c: Updated docs
+	
 Thu Oct 26 16:23:29 2000  David Helder  <dhelder@umich.edu>
 
 	* gnet.spec.in (Group): Integrated Benjamin Kahn's patch.
