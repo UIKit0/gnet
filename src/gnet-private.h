@@ -1,6 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
- * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2000-2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -305,10 +305,11 @@ typedef struct _GInetAddrNewListState
 
 #endif
 #else				/* Windows */
-  int 		WSAhandle;
-  char 		hostentBuffer[MAXGETHOSTSTRUCT];
-  int 		errorcode;
   gboolean 	in_callback;
+  CRITICAL_SECTION mutex;
+  gboolean	is_cancelled;
+  gboolean	lookup_failed;
+  guint 	source;
 #endif
 
 } GInetAddrNewListState;
@@ -323,7 +324,6 @@ typedef struct _GInetAddrNewState
   gboolean			in_callback;
 
 } GInetAddrNewState;
-
 
 
 gboolean gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
@@ -354,6 +354,12 @@ typedef struct _GInetAddrReverseAsyncState
   int WSAhandle;
   char hostentBuffer[MAXGETHOSTSTRUCT];
   int errorcode;
+
+  CRITICAL_SECTION mutex;
+  gboolean	is_cancelled;
+  gchar*	name;
+  guint 	source;
+
 #endif
 
 } GInetAddrReverseAsyncState;
@@ -420,8 +426,6 @@ typedef struct _GTcpSocketConnectState
 
 extern HWND  gnet_hWnd; 
 extern GHashTable *gnet_hash;
-extern HANDLE gnet_Mutex; 
-extern HANDLE gnet_hostent_Mutex;
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
 #define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
 

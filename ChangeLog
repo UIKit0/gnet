@@ -1,3 +1,24 @@
+Mon Dec 8 2003 Andrew Lanoix <alanoix@umich.edu>
+
+	* src/gnet-private.c(gnet_private_create_listen_socket):
+		Declare sockfd as type SOCKET to make compiler happy.
+		On Unix, SOCKET is defined as an int. 
+	* src/inetaddr.c(gnet_inetaddr_get_interface_to): "
+	* src/*: Get rid of hostent mutex since one hostent per thread
+		on Windows according to MSDN.
+	* src/gnet-private.h: Delete hostent mutex releated code and add
+		new changes for IPv6 for the below functions.
+	* src/inetaddr.c: Include process.h, 
+		Add support for IPv6 on Windows for the following functions 
+		and update related docs about them.
+			gnet_inetaddr_new_list_async()
+			gnet_inetaddr_new_list_async_cancel()
+			gnet_inetaddr_get_name_async()
+			gnet_inetaddr_get_name_async_cancel()
+	* src/inetaddr.c(gnet_inetaddr_list_interfaces): Update
+		note so that 10 interface limit only applies to IPv4
+		only systems on Windows, not IPv6 systems.
+
 Tue Oct 28 19:02:40 2003  David Helder  <dhelder@gizmolabs.org>
 
 	* src/inetaddr.c (inetaddr_get_name_async_pthread): On

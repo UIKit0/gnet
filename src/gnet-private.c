@@ -35,7 +35,7 @@ int
 gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
 {
   int family;
-  int sockfd;
+  SOCKET sockfd;
 
   if (iface)
     {
@@ -112,65 +112,12 @@ gnet_private_io_channel_new (int sockfd)
   return iochannel;
 }
 
-
-
-/* 
-
-   Below is the Windows specific code and a general idea of how
-   things were implemented.
-
-   In the Windows Port, not much was needed to be done for the sync
-   TCP, UDP and Mcast functions. The Async TCP functions needed to be
-   rewritten.
-
-   To accomplish this we use one GIOchannel to handle all the TCP
-   async functions and their callbacks. This is different from the
-   forking *nix version of Gnet.
-
-   The async functions do all the 'parent' code and the functions then
-   add the "state" information (containing the user and Gnet's
-   bookkeeping data) into private global hashes.  Then they do the
-   appropriate WinSock2 WSAAsync* function (the 'child'), which will
-   returns a HANDLE.  This HANDLE is typecasted and returned to the
-   user as their ID.  This number will also double as a key into the
-   hash. Note that WinSock2 WSAAsyncGetXY task handles are
-   unique. (sockfd is used in gnet_tcp_socket_new_async)
-
-   When the WinSock async call is complete, it posts a message that
-   will be pickup by gnet_MainCallBack(). The wParam in the MSG
-   contains the original async task handle returned by the WinSock2
-   async functions. The high 16 bits of lParm contain the error
-   information. We use the macros defined in WinSock2.h to extract
-   this. The 'message' parameter identifies which async callback we
-   are dealing with.  Typcased names of these are #define-d in
-   gnet.h. We then do any necessary work and then call the gnet async
-   function's callback, removing the data record from the correct
-   hash. Then these callbacks call the user's callback with the user's
-   data.
-
-   If the user calls an async cancel function, then we remove and
-   destroy the data from the hash.  A WinSock 2 async call is
-   destroyed by WSACancelAsyncRequest(HANDLE);.
-
-	 UPDATE: As of March 2001, many of the problems in glib's iochannel
-	 code were fixed so only a few gnet functions still use this method.
-
-   I believe I have taken care of the multi-threaded issues by using
-   mutexes.  
-
-*/
-
 #ifdef GNET_WIN32
 
 static WNDCLASSEX gnetWndClass;
 HWND  gnet_hWnd; 
 static guint gnet_io_watch_ID;
 static GIOChannel *gnet_iochannel;
-	
-GHashTable *gnet_hash;
-
-HANDLE gnet_Mutex; 
-HANDLE gnet_hostent_Mutex;
 
 int gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata);
 
@@ -185,15 +132,13 @@ DllMain(HINSTANCE hinstDLL,
 	DWORD fdwReason,
 	LPVOID lpvReserved);
 
+/* This function is still necessary (even though it does nothing) since it 
+	presence works around an issue in the Glib main loop. */
+
 int 
 gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 {
   MSG msg;
-
-  gpointer data;
-  GInetAddrNewListState* IAstate;
-  GInetAddrReverseAsyncState *IARstate;
-
   int i;
 
   while ((i = PeekMessage (&msg, gnet_hWnd, 0, 0, PM_REMOVE)))
@@ -202,31 +147,10 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
     {
 		case IA_NEW_MSG:
 		{
-			WaitForSingleObject(gnet_Mutex, INFINITE);
-			data = g_hash_table_lookup(gnet_hash, (gpointer)msg.wParam);
-			g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
-			ReleaseMutex(gnet_Mutex);
-		
-			IAstate = (GInetAddrNewListState*) data;
-			IAstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
-
-			/* Now call the callback function */
-			gnet_inetaddr_new_list_async_cb(NULL, G_IO_IN, (gpointer)IAstate);
-
 			break;
 		}
 		case GET_NAME_MSG:
 		{
-			WaitForSingleObject(gnet_Mutex, INFINITE);
-			data = g_hash_table_lookup(gnet_hash, (gpointer)msg.wParam);
-			g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
-			ReleaseMutex(gnet_Mutex);
-
-			IARstate = (GInetAddrReverseAsyncState*) data;
-			IARstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
-			
-			/* Now call the callback function */
-			gnet_inetaddr_get_name_async_cb(NULL, G_IO_IN, (gpointer)IARstate);
 			break;
 		}
 	} /* switch */
@@ -356,32 +280,12 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 	gnet_iochannel = g_io_channel_win32_new_messages((unsigned int)gnet_hWnd);
 
 	/* Add a watch */
+	
 	gnet_io_watch_ID = g_io_add_watch(gnet_iochannel,
 					  (GIOCondition)(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 					  gnet_MainCallBack, 
 					  NULL);
-
-	gnet_hash = g_hash_table_new(NULL, NULL);	
-
-	gnet_Mutex = CreateMutex( 
-				 NULL,                       /* no security attributes */
-				 FALSE,                      /* initially not owned */
-				 "gnet_Mutex");  /* name of mutex */
-
-	if (gnet_Mutex == NULL) 
-	  {
-	    return FALSE;
-	  }
-
-	gnet_hostent_Mutex = CreateMutex( 
-					 NULL,                       /* no security attributes */
-					 FALSE,                      /* initially not owned */
-					 "gnet_hostent_Mutex");  /* name of mutex */
-
-	if (gnet_hostent_Mutex == NULL) 
-	  {
-	    return FALSE;
-	  }
+					  
 	break;
       }
     case DLL_THREAD_ATTACH:
