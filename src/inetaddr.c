@@ -601,7 +601,10 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
 
 
 	    }
+
 	  /* Otherwise, we got a 0 because there was an error */
+	  else
+	    goto error;
 
 	  /* Call back */
 	  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
@@ -614,6 +617,7 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
     }
   /* otherwise, there was an error */
 
+ error:
   (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
   gnet_inetaddr_new_async_cancel(state);
   return FALSE;
