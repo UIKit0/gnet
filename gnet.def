@@ -16,8 +16,10 @@ EXPORTS
 	;
 	gnet_inetaddr_list_interfaces
 	gnet_inetaddr_new
+	gnet_inetaddr_new_any 
 	gnet_inetaddr_new_async
 	gnet_inetaddr_new_async_cancel
+	gnet_inetaddr_new_nonblock 
 	gnet_inetaddr_clone
 	gnet_inetaddr_delete
 	gnet_inetaddr_ref
