@@ -99,10 +99,14 @@ normal_echoclient(gchar* hostname, gint port)
       packet = gnet_udp_packet_receive_new (buffer, sizeof(buffer));
       n = gnet_udp_socket_receive (socket, packet);
       if (n == 0) break;
+      gnet_inetaddr_delete (packet->addr);
       gnet_udp_packet_delete (packet);
 
       /* Write out */
       fwrite(buffer, n, 1, stdout);
     }
+
+  gnet_inetaddr_delete (addr);
+  gnet_udp_socket_delete (socket);
 }
 

@@ -37,33 +37,91 @@ int
 main(int argc, char** argv)
 {
   ClientType client_type = NORMAL;
+  gchar* hostname;
+  gint port;
+  int i;
 
-  if (argc != 3 && argc != 4)
+  if (argc < 3 || argc > 6)
     usage(EXIT_FAILURE);
 
-  if (argc == 4)
+  i = 1;
+  if (strcmp(argv[1], "--normal") == 0)
     {
-      if (strcmp(argv[1], "--async") == 0)
-	client_type = ASYNC;
-      else if (strcmp(argv[1], "--object") == 0)
-	client_type = OBJECT;
-      else
-	usage(EXIT_FAILURE);
+      client_type = NORMAL;
+      i++;
     }
+  else if (strcmp(argv[1], "--async") == 0)
+    {
+      client_type = ASYNC;
+      i++;
+    }
+  else if (strcmp(argv[1], "--object") == 0)
+    {
+      client_type = OBJECT;
+      i++;
+    }
+
+  hostname = argv[i++];
+  port = atoi(argv[i++]);
+
+  if (i < argc)
+    {
+      char*      socks_hostname = NULL;
+      int        socks_port = GNET_SOCKS_PORT;
+      GInetAddr* socks_ia;
+
+      socks_hostname = argv[i++];
+      if (i < argc)
+	socks_port = atoi(argv[i++]);
+
+      socks_ia = gnet_inetaddr_new (socks_hostname, socks_port);
+      if (!socks_ia)
+	{
+	  fprintf (stderr, "Bad SOCKS server address: %s:%d\n", 
+		   socks_hostname, socks_port);
+	  exit (EXIT_FAILURE);
+	}
+      gnet_socks_set_server (socks_ia);
+      gnet_inetaddr_delete (socks_ia);
+
+      gnet_socks_set_enabled (TRUE);
+    }
+
+  if (gnet_socks_get_enabled())
+    {
+      GInetAddr* socks_ia;
+
+      socks_ia = gnet_socks_get_server();
+      if (socks_ia)
+	{
+	  gchar* cname;
+
+	  cname = gnet_inetaddr_get_canonical_name(socks_ia);
+
+	  g_print ("SOCKS server is %s:%d\n", cname,
+		   gnet_inetaddr_get_port(socks_ia));
+
+	  g_free (cname);
+	  gnet_inetaddr_delete (socks_ia);
+	}
+      else
+	g_print ("SOCKS enabled, but no SOCKS server\n");
+    }
+
 
   switch (client_type)
     {
     case NORMAL:
       g_print ("Normal echo client running\n");
-      normal_echoclient(argv[argc-2], atoi(argv[argc-1]));
+      normal_echoclient(hostname, port);
       break;
     case ASYNC:
       g_print ("Asynchronous echo client running\n");
-      async_echoclient(argv[argc-2], atoi(argv[argc-1]));
+      async_echoclient(hostname, port);
       break;
     case OBJECT:
       g_print ("Object echo client running\n");
-      object_echoclient(argv[argc-2], atoi(argv[argc-1]));
+      object_echoclient(hostname, port);
       break;
     default:
       g_assert_not_reached();
@@ -76,7 +134,7 @@ main(int argc, char** argv)
 static void
 usage (int status)
 {
-  g_print ("usage: echoclient [(nothing)|--async|--object] <server> <port>\n");
+  g_print ("usage: echoclient [--normal|--async|--object] <server> <port> [SOCKS server] [SOCKS port]\n");
   exit(status);
 }
 
@@ -115,7 +173,6 @@ normal_echoclient(gchar* hostname, gint port)
   iochannel = gnet_tcp_socket_get_iochannel(socket);
   g_assert (iochannel != NULL);
 
-
   while (fgets(buffer, sizeof(buffer), stdin) != 0)
     {
       n = strlen(buffer);
@@ -131,6 +188,9 @@ normal_echoclient(gchar* hostname, gint port)
   if (error != G_IO_ERROR_NONE) 
     g_print ("IO error (%d)\n", error);
 
+  gnet_inetaddr_delete (addr);
+  g_io_channel_unref (iochannel);
+  gnet_tcp_socket_delete (socket);
 }
 
 
@@ -148,6 +208,10 @@ static gboolean async_client_sin_iofunc (GIOChannel* iochannel,
 static gboolean async_client_in_iofunc (GIOChannel* iochannel, 
 					GIOCondition condition, 
 					gpointer data);
+
+static GIOChannel* async_in;
+static GIOChannel* async_sin;
+static GTcpSocket* async_socket;
 
 
 static void
@@ -172,9 +236,6 @@ static void
 async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
 		       GTcpSocketConnectAsyncStatus status, gpointer data)
 {
-  GIOChannel* in;
-  GIOChannel* sin;
-
   if (status != GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK)
     {
       fprintf (stderr, "Error: Could not connect (status = %d)\n", status);
@@ -183,14 +244,17 @@ async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
 
   fprintf (stderr, "connected\n");
 
+  async_socket = socket;
+  gnet_inetaddr_delete (ia);
+
   /* Read from socket */
-  sin = gnet_tcp_socket_get_iochannel (socket);
-  g_io_add_watch (sin, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
+  async_sin = gnet_tcp_socket_get_iochannel (socket);
+  g_io_add_watch (async_sin, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 		  async_client_sin_iofunc, NULL);
   /* Read from stdin */
-  in = g_io_channel_unix_new (fileno(stdin));
-  g_io_add_watch(in, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
-		 async_client_in_iofunc, sin);
+  async_in = g_io_channel_unix_new (fileno(stdin));
+  g_io_add_watch(async_in, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
+		 async_client_in_iofunc, async_sin);
 
 }
 
@@ -227,9 +291,9 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Check for EOF */
       else if (bytes_read == 0)
 	{
-	  /* Really we should free all our resources here, but
-             whatever */
-	  goto error;
+	  g_io_channel_unref (async_in);
+	  g_io_channel_unref (async_sin);
+	  gnet_tcp_socket_delete (async_socket);
 	}
 
       /* Otherwise, print */

@@ -44,7 +44,7 @@ gnet_url_new (const gchar* url)
   gurl = g_new0 (GURL, 1);
 
   /* Skip initial whitespace */
-  while (*url && isspace(*url))
+  while (*url && isspace((int)*url))
     ++url;
   p = url;
 
@@ -102,7 +102,7 @@ gnet_url_new (const gchar* url)
       /* Port */
       if (*p == ':')
 	{
-	  for (++p; isdigit(*p); ++p)
+	  for (++p; isdigit((int)*p); ++p)
 	    gurl->port = gurl->port * 10 + (*p - '0');
 	}
 

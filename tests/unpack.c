@@ -473,61 +473,79 @@ main(int argc, char* argv[])
   gnet_unpack ("ss", hello, 12, &s1, &s2);
   printf ("\noutput:    %s %s\n", s1, s2);
   printf ("should be: hello there\n");
+  g_free (s1);
+  g_free (s2);
 
   s1 = s2 = NULL;
   gnet_unpack ("2s", hello, 12, &s1, &s2);
   printf ("\noutput:    %s %s\n", s1, s2);
   printf ("should be: hello there\n");
+  g_free (s1);
+  g_free (s2);
 
   s1 = NULL;
   gnet_unpack ("8S", hello, 6, &s1);
-  printf ("\noutput:    %s (%d)\n", s1, s1[7]);
+  printf ("\noutput:    %s (%d)\n", s1, s1[6]);
   printf ("should be: hello (0)\n");
+  g_free (s1);
 
   s1 = NULL;
   gnet_unpack ("6S", hello, 6, &s1);
   printf ("\noutput:    %s\n", s1);
   printf ("should be: hello\n");
+  g_free (s1);
 
   s1 = NULL;
   gnet_unpack ("4S", hello, 6, &s1);
   printf ("\noutput:    %s\n", s1);
   printf ("should be: hell\n");
+  g_free (s1);
 
   s1 = s2 = NULL;
   gnet_unpack ("6S6S", hello, 12, &s1, &s2);
   printf ("\noutput:    %s %s\n", s1, s2);
   printf ("should be: hello there\n");
+  g_free (s1);
+  g_free (s2);
 
   s1 = s2 = NULL;
   gnet_unpack ("r", hello, 6, &s1, 6);
   printf ("\noutput:    %s\n", s1);
   printf ("should be: hello\n");
+  g_free (s1);
 
   s1 = s2 = NULL;
   gnet_unpack ("2r", hello, 12, &s1, 6, &s2, 6);
   printf ("\noutput:    %s %s\n", s1, s2);
   printf ("should be: hello there\n");
+  g_free (s1);
+  g_free (s2);
 
   s1 = NULL;
   gnet_unpack ("6R", hello, 6, &s1);
   printf ("\noutput:    %s\n", s1);
   printf ("should be: hello\n");
+  g_free (s1);
 
   s1 = s2 = NULL;
   gnet_unpack ("6R6R", hello, 12, &s1, &s2);
   printf ("\noutput:    %s %s\n", s1, s2);
   printf ("should be: hello there\n");
+  g_free (s1);
+  g_free (s2);
 
   s1 = NULL;
   gnet_unpack ("p", hellop, 6, &s1);
   printf ("\noutput:    %s\n", s1);
   printf ("should be: hello\n");
+  g_free (s1);
 
   s1 = s2 = NULL;
   gnet_unpack ("2p", hellop, 12, &s1, &s2);
   printf ("\noutput:    %s %s\n", s1, s2);
   printf ("should be: hello there\n");
+  g_free (s1);
+  g_free (s2);
 
   return 0;
 }

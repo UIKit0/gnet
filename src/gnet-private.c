@@ -38,6 +38,7 @@ gnet_private_inetaddr_sockaddr_new(const struct sockaddr sa)
   GInetAddr* ia = g_new0(GInetAddr, 1);
 
   ia->sa = sa;
+  ia->ref_count = 1;
 
   return ia;
 }

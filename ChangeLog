@@ -1,3 +1,52 @@
+Thu Apr 18 14:13:30 2002  David Helder  <dhelder@umich.edu>
+
+	* src/socks-private.c (gnet_private_socks_tcp_socket_new): Delete
+	     socks server address.
+	* src/socks-private.c (gnet_private_socks_tcp_socket_new_async): "
+
+	* src/gnet-private.c (gnet_private_inetaddr_sockaddr_new): Set
+	    ref_count to 1.  These weren't getting deleted before.
+	* src/inetaddr.c (gnet_inetaddr_new_any): "
+	
+	* src/pack.c (gnet_vunpack): Fix bad mem deref when zeroing
+	    out extra mem.
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async_cancel): Don't
+	    delete ia - caller owns!.
+
+	* src/url.c (gnet_url_new): isdigit((int)) cast
+	* src/url.c (gnet_url_new): "
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async_cb): Delete
+	    old name first.
+
+	* src/gnet-private.h (_GInetAddrAsyncState ): Add IOChannel field.
+	* src/inetaddr.c (gnet_inetaddr_new_async): Save the IOChannel
+	* src/inetaddr.c (gnet_inetaddr_new_async_cancel): Unref the
+	    IOChannel.
+	* src/inetaddr.c (*_get_name_async_*): As above for these funcs.
+	* src/tcp.c (*_new_async_*): As above for these funcs.
+
+	* src/inetaddr.c (gnet_inetaddr_new_async_cb): Don't
+	    clear the watch.  This isn't necessary now that we
+	    have the in_callback flag.
+
+	* tests/dnstest.c (reverse_inetaddr_cb): Don't free name -
+	    inetaddr owns it, just cname.
+
+	* tests/dnstest.c (reverse_inetaddr_cb): Delete inetaddr.
+
+	* examples/echoserver.c (async_client_iofunc): Fix number of
+	    bytes moved.  Use g_memmove().
+
+	* examples/echoserver.c (ob_client_func): Don't add a '\n'.  It
+	    wasn't needed and wrote past the end of the array.
+	
+	* examples/echoclient.c: Merged echoclient-socks here 
+	* tests/echoclient-socks.c: Removed
+
+	* tests/pack,unpack,dnstest: Memory leak fixes
+	
 Mon Apr 15 14:05:21 2002  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_get_name_async): Handle

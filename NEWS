@@ -9,6 +9,7 @@ Changes in Gnet
 -----
 * gnet_tcp_socket_connect() bug fixes
 * HP compile fix
+* Many small memory and IOChannel leak fixes
 
 
 1.1.2 ("Cornmeal 2" release)

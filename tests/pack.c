@@ -583,128 +583,156 @@ main(int argc, char** argv)
   len = gnet_pack_strdup ("x", &str);
   print_bytes (str, len);
   printf ("should be: 00\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("b", &str, 0x17);
   print_bytes (str, len);
   printf ("should be: 17\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("b", &str, 0xf1);
   print_bytes (str, len);
   printf ("should be: f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("B", &str, 0x17);
   print_bytes (str, len);
   printf ("should be: 17\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("B", &str, 0xf1);
   print_bytes (str, len);
   printf ("should be: f1\n");
+  g_free (str);
 
 
   len = len = gnet_pack_strdup ("h", &str, 0x0102);
   print_bytes (str, len);
   printf ("should be: 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("h", &str, 0xf001);
   print_bytes (str, len);
   printf ("should be: 01 f0\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("h", &str, 0x01f0);
   print_bytes (str, len);
   printf ("should be: f0 01\n");
+  g_free (str);
 
 
   len = gnet_pack_strdup ("H", &str, 0x0102);
   print_bytes (str, len);
   printf ("should be: 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("H", &str, 0xf001);
   print_bytes (str, len);
   printf ("should be: 01 f0\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("H", &str, 0x01f0);
   print_bytes (str, len);
   printf ("should be: f0 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("i", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("i", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("i", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("I", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("I", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("I", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("l", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("l", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("l", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("L", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("L", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("L", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("f", &str, 23.43);
   print_bytes (str, len);
   printf ("should be: ?\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("d", &str, 43.22);
   print_bytes (str, len);
   printf ("should be: ?\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("v", &str, (void*) 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("v", &str, (void*) 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("v", &str, (void*) 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   printf ("\n\n********************\n");
   printf ("little endian tests\n");
@@ -713,120 +741,145 @@ main(int argc, char** argv)
   len = gnet_pack_strdup ("<x", &str);
   print_bytes (str, len);
   printf ("should be: 00\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<b", &str, 0x17);
   print_bytes (str, len);
   printf ("should be: 17\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<b", &str, 0xf1);
   print_bytes (str, len);
   printf ("should be: f1\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<B", &str, 0x17);
   print_bytes (str, len);
   printf ("should be: 17\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<B", &str, 0xf1);
   print_bytes (str, len);
   printf ("should be: f1\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<h", &str, 0x0102);
   print_bytes (str, len);
   printf ("should be: 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<h", &str, 0xf001);
   print_bytes (str, len);
   printf ("should be: 01 f0\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<h", &str, 0x01f0);
   print_bytes (str, len);
   printf ("should be: f0 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<H", &str, 0x0102);
   print_bytes (str, len);
   printf ("should be: 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<H", &str, 0xf001);
   print_bytes (str, len);
   printf ("should be: 01 f0\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<H", &str, 0x01f0);
   print_bytes (str, len);
   printf ("should be: f0 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<i", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<i", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<i", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<I", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<I", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<I", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<l", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<l", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<l", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<L", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<L", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: 04 03 02 f1\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<L", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: f4 03 02 01\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup ("<f", &str, 23.43);
   print_bytes (str, len);
   printf ("should be: ?\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("<d", &str, 43.22);
   print_bytes (str, len);
   printf ("should be: ?\n");
+  g_free (str);
 
 
   /* **************************************** */
@@ -837,120 +890,145 @@ main(int argc, char** argv)
   len = gnet_pack_strdup (">x", &str);
   print_bytes (str, len);
   printf ("should be: 00\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">b", &str, 0x17);
   print_bytes (str, len);
   printf ("should be: 17\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">b", &str, 0xf1);
   print_bytes (str, len);
   printf ("should be: f1\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">B", &str, 0x17);
   print_bytes (str, len);
   printf ("should be: 17\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">B", &str, 0xf1);
   print_bytes (str, len);
   printf ("should be: f1\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">h", &str, 0x0102);
   print_bytes (str, len);
   printf ("should be: 01 02\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">h", &str, 0xf001);
   print_bytes (str, len);
   printf ("should be: f0 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">h", &str, 0x01f0);
   print_bytes (str, len);
   printf ("should be: 01 f0\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">H", &str, 0x0102);
   print_bytes (str, len);
   printf ("should be: 01 02\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">H", &str, 0xf001);
   print_bytes (str, len);
   printf ("should be: f0 01\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">H", &str, 0x01f0);
   print_bytes (str, len);
   printf ("should be: 01 f0\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">i", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 01 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">i", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: f1 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">i", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: 01 02 03 f4\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">I", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 01 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">I", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: f1 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">I", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: 01 02 03 f4\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">l", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 01 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">l", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: f1 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">l", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: 01 02 03 f4\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">L", &str, 0x01020304);
   print_bytes (str, len);
   printf ("should be: 01 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">L", &str, 0xf1020304);
   print_bytes (str, len);
   printf ("should be: f1 02 03 04\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">L", &str, 0x010203f4);
   print_bytes (str, len);
   printf ("should be: 01 02 03 f4\n");
+  g_free (str);
 
   /* ********** */
 
   len = gnet_pack_strdup (">f", &str, 23.43);
   print_bytes (str, len);
   printf ("should be: ?\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">d", &str, 43.22);
   print_bytes (str, len);
   printf ("should be: ?\n");
+  g_free (str);
 
 
   /* **************************************** */
@@ -961,14 +1039,17 @@ main(int argc, char** argv)
   len = gnet_pack_strdup ("bhb", &str, 0x00, 0x0001, 0x02);
   print_bytes (str, len);
   printf ("should be: 00 01 00 02\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("ii", &str, 0x01020304, 0x05060708);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01 08 07 06 05\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("2i", &str, 0x01020304, 0x05060708);
   print_bytes (str, len);
   printf ("should be: 04 03 02 01 08 07 06 05\n");
+  g_free (str);
 
 
 
@@ -980,14 +1061,17 @@ main(int argc, char** argv)
   len = gnet_pack_strdup (">bhb", &str, 0, 1, 2);
   print_bytes (str, len);
   printf ("should be: 00 00 01 02\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">ii", &str, 0x01020304, 0x05060708);
   print_bytes (str, len);
   printf ("should be: 01 02 03 04 05 06 07 08\n");
+  g_free (str);
 
   len = gnet_pack_strdup (">2i", &str, 0x01020304, 0x05060708);
   print_bytes (str, len);
   printf ("should be: 01 02 03 04 05 06 07 08\n");
+  g_free (str);
 
 
   /* **************************************** */
@@ -998,46 +1082,57 @@ main(int argc, char** argv)
   len = gnet_pack_strdup ("ss", &str, "hello", "there");
   print_bytes (str, len);
   printf ("should be: 68 65 6c 6c 6f 00 74 68 65 72 65 00\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("2s", &str, "there", "hello");
   print_bytes (str, len);
   printf ("should be: 74 68 65 72 65 00 68 65 6c 6c 6f 00\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("12S", &str, "booger");
   print_bytes (str, len);
   printf ("should be: 62 6f 6f 67 65 72 00 00 00 00 00 00\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("4S", &str, "david");
   print_bytes (str, len);
   printf ("should be: 64 61 76 69\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("6S", &str, "helder");
   print_bytes (str, len);
   printf ("should be: 68 65 6c 64 65 72\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("r", &str, "dcba", 4);
   print_bytes (str, len);
   printf ("should be: 64 63 62 61\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("2r", &str, "abcd", 4, "efgh", 4);
   print_bytes (str, len);
   printf ("should be: 61 62 63 64 65 66 67 68\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("4R", &str, "dcba");
   print_bytes (str, len);
   printf ("should be: 64 63 62 61\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("4R4R", &str, "efgh", "abcd");
   print_bytes (str, len);
   printf ("should be: 65 66 67 68 61 62 63 64\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("p", &str, "abcd");
   print_bytes (str, len);
   printf ("should be: 04 61 62 63 64\n");
+  g_free (str);
 
   len = gnet_pack_strdup ("2p", &str, "efgh", "abcd");
   print_bytes (str, len);
   printf ("should be: 04 65 66 67 68 04 61 62 63 64\n");
+  g_free (str);
 
   /* **************************************** */
 

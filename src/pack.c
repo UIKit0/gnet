@@ -565,7 +565,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	    gchar* s;
 
 	    s = va_arg (args, gchar*);
-	    g_return_val_if_fail (p, -1);
+	    g_return_val_if_fail (s, -1);
 
 	    if (!mult)
 	      {
@@ -908,7 +908,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 
 	    *sp = g_new(gchar, mult + 1);
 	    memcpy (*sp, buffer, slen);
-	    while (slen < mult + 1) sp[slen++] = 0;
+	    while (slen < mult + 1) (*sp)[slen++] = 0;
 	    buffer += mult;
 	    n += mult;
 

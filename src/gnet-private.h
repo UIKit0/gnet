@@ -174,6 +174,7 @@ typedef struct _GInetAddrAsyncState
   gpointer data;
   gboolean in_callback;
 #ifndef GNET_WIN32		/* UNIX */
+  GIOChannel* iochannel;
 #ifdef HAVE_LIBPTHREAD
   pthread_t pthread;
 #else
@@ -204,6 +205,7 @@ typedef struct _GInetAddrReverseAsyncState
   gpointer data;
   gboolean in_callback;
 #ifndef GNET_WIN32		/* UNIX */
+  GIOChannel* iochannel;
 #ifdef HAVE_LIBPTHREAD
   pthread_t pthread;
 #else
@@ -232,6 +234,7 @@ typedef struct _GTcpSocketAsyncState
   GTcpSocketNewAsyncFunc func;
   gpointer data;
   gint flags;
+  GIOChannel* iochannel;
   guint connect_watch;
 #ifdef GNET_WIN32
   gint errorcode;

@@ -62,18 +62,15 @@ gnet_private_socks_tcp_socket_new (const GInetAddr* addr)
   
   /* Connect to SOCKS server */
   s = gnet_tcp_socket_new_direct (ss_addr);
+  gnet_inetaddr_delete (ss_addr);
   if (!s)
-    {
-      gnet_inetaddr_delete (ss_addr);
-      return NULL;
-    }
+    return NULL;
 
   /* Negotiate connection */
   rv = socks_negotiate_connect (s, addr);
   if (rv < 0)
     {
       gnet_tcp_socket_delete (s);
-      gnet_inetaddr_delete (ss_addr);
       return NULL;
     }
 
@@ -119,13 +116,8 @@ gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr,
 
   /* Connect to SOCKS server */
   s = gnet_tcp_socket_new_async_direct (ss_addr, async_cb, ad);
-  if (!s)
-    {
-      gnet_inetaddr_delete (ss_addr);
-      return NULL;
-    }
-
-  return s;
+  gnet_inetaddr_delete (ss_addr);
+  return s;  /* s might be NULL */
 }
 
 

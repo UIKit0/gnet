@@ -24,7 +24,7 @@
 #include <gnet.h>
 
 
-#define DO_REVERSE 0
+#define DO_REVERSE 1
 #define VERBOSE 1
 
 void lookup_block(void);
@@ -102,6 +102,7 @@ lookup_block(void)
       g_print ("%d: %s -> %s\n", i, host, cname);
 #endif
 
+      gnet_inetaddr_delete (ia);
       g_free(cname);
     }
 }
@@ -138,7 +139,6 @@ lookup_async(void)
 	}
 
       gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, GINT_TO_POINTER(i));
-
 #endif
 
       g_main_iteration(FALSE);
@@ -163,12 +163,14 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 	  g_print ("Reverse DNS lookup failed\n");
 	  exit (EXIT_FAILURE);
 	}
-
 #if VERBOSE
       g_print ("%d: %s -> %s\n", i, host, cname);
 #endif
 
-      g_free(cname);
+#if (DO_REVERSE) /* Caller owns forward ia, we own reverse ia. */
+      gnet_inetaddr_delete (ia);
+#endif
+      g_free (cname);
     }
 #if VERBOSE
   else
@@ -204,12 +206,13 @@ reverse_inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status,
 #endif
 
       g_free(cname);
-      g_free(name);
     }
 #if VERBOSE
   else
     g_print("%d: error\n", i);
 #endif
+
+  gnet_inetaddr_delete (ia);
 
   runs_done++;
 

@@ -42,7 +42,7 @@ main(int argc, char** argv)
 
   if (argc !=  2 && argc != 3)
     {
-      g_print ("usage: echoserver [(nothing)|--async|--object] <port> \n");
+      fprintf (stderr, "usage: echoserver [(nothing)|--async|--object] <port> \n");
       exit(EXIT_FAILURE);
     }
 
@@ -54,7 +54,7 @@ main(int argc, char** argv)
 	server_type = OBJECT;
       else
 	{
-	  g_print ("usage: echoserver [(nothing)|--async|--object] <port> \n");
+	  fprintf (stderr, "usage: echoserver [(nothing)|--async|--object] <port> \n");
 	  exit(EXIT_FAILURE);
 	}
     }
@@ -114,6 +114,7 @@ normal_echoserver (gint p)
 
   /* Print the address */
   addr = gnet_tcp_socket_get_inetaddr(server);
+  fprintf (stderr, "saddr = %p\n", addr);
   g_assert (addr);
   name = gnet_inetaddr_get_canonical_name (addr);
   g_assert (name);
@@ -384,11 +385,10 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
        {
 	 /* Move the memory down some (you wouldn't want to do this
 	    in a performance server because it's slow!) */
-	 memmove(client_state->buffer, 
-		 &client_state->buffer[bytes_written],
-		 bytes_written);
-
 	 client_state->n -= bytes_written;
+	 g_memmove(client_state->buffer, 
+		   &client_state->buffer[bytes_written],
+		   client_state->n);
        }
 
      /* Remove OUT watch if done */
@@ -495,8 +495,7 @@ ob_client_func (GConn* conn, GConnStatus status,
       {
 	gchar* buffer_copy;
 
-	buffer_copy = g_memdup(buffer, length);
-	buffer_copy[length] = '\n';
+	buffer_copy = g_memdup (buffer, length);
 
 	gnet_conn_write (conn, buffer_copy, length, 0);
 	break;

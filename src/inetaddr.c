@@ -594,7 +594,8 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
   state->fd = pipes[0];
 
   /* Add a watch */
-  state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
+  state->iochannel = g_io_channel_unix_new(pipes[0]);
+  state->watch = g_io_add_watch(state->iochannel,
 				(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				gnet_inetaddr_new_async_cb, 
 				state);
@@ -693,9 +694,6 @@ gnet_inetaddr_new_async_cb (GIOChannel* iochannel,
   /* otherwise, there was an error */
 
  error:
-  /* Remove the watch now in case we don't return immediately */
-  g_source_remove (state->watch);
-
   state->in_callback = TRUE;
   (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
   state->in_callback = FALSE;
@@ -726,6 +724,7 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id)
 
   gnet_inetaddr_delete (state->ia);
   g_source_remove (state->watch);
+  g_io_channel_unref (state->iochannel);
 
   close (state->fd);
 # ifdef HAVE_LIBPTHREAD
@@ -1056,6 +1055,8 @@ static void* gethostbyaddr_async_child (void* arg);
  *  The Unix uses either pthreads or fork().  See the notes for
  *  gnet_inetaddr_new_async().
  *
+ *  FIX: In the next big version, this should copy ia.
+ *
  *  Returns: ID of the lookup which can be used with
  *  gnet_inetaddrr_get_name_async_cancel() to cancel it; NULL on
  *  failure.
@@ -1157,7 +1158,8 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
   state->fd = pipes[0];
 
   /* Add a watch */
-  state->watch = g_io_add_watch(g_io_channel_unix_new(pipes[0]),
+  state->iochannel = g_io_channel_unix_new(pipes[0]);
+  state->watch = g_io_add_watch(state->iochannel,
 				(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				gnet_inetaddr_get_name_async_cb, 
 				state);
@@ -1259,9 +1261,10 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
 	  /* Copy the name */
 	  name = g_new(gchar, state->buffer[0] + 1);
-	  strncpy(name, &state->buffer[1], state->buffer[0]);
+	  memcpy(name, &state->buffer[1], state->buffer[0]);
 	  name[state->buffer[0]] = '\0';
-	  state->ia->name = g_strdup(name);
+	  if (state->ia->name) g_free(state->ia->name);
+	  state->ia->name = name;
 
 	  /* Remove the watch now in case we don't return immediately */
 	  g_source_remove (state->watch);
@@ -1276,9 +1279,6 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
       /* otherwise, there was a read error */
     }
   /* otherwise, there was some error */
-
-  /* Remove the watch now in case we don't return immediately */
-  g_source_remove (state->watch);
 
   /* Call back */
   state->in_callback = TRUE;
@@ -1309,8 +1309,8 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
   if (state->in_callback)
     return;
 
-  gnet_inetaddr_delete (state->ia);
   g_source_remove (state->watch);
+  g_io_channel_unref (state->iochannel);
 
   close (state->fd);
 # ifdef HAVE_LIBPTHREAD
@@ -1885,6 +1885,7 @@ gnet_inetaddr_new_any (void)
   struct sockaddr_in* sa_in;
 
   ia = g_new0 (GInetAddr, 1);
+  ia->ref_count = 1;
   sa_in = (struct sockaddr_in*) &ia->sa;
   sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
   sa_in->sin_port = 0;

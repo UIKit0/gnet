@@ -399,7 +399,8 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   state->func = func;
   state->data = data;
   state->flags = flags;
-  state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
+  state->iochannel = GNET_SOCKET_IOCHANNEL_NEW(s->sockfd);
+  state->connect_watch = g_io_add_watch(state->iochannel,
 					GNET_ANY_IO_CONDITION,
 					gnet_tcp_socket_new_async_cb, 
 					state);
@@ -416,8 +417,10 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
   gint error, len;
 
-  /* Remove the watch now in case we don't return immediately */
   g_source_remove (state->connect_watch);
+  state->connect_watch = 0;
+  g_io_channel_unref (state->iochannel);
+  state->iochannel = NULL;
 
   errno = 0;
   if (!((condition & G_IO_IN) || (condition & G_IO_OUT)))
@@ -465,8 +468,11 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
 {
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
 
-  g_source_remove(state->connect_watch);
-  gnet_tcp_socket_delete(state->socket);
+  if (state->connect_watch)
+    g_source_remove(state->connect_watch);
+  if (state->iochannel)
+    g_io_channel_unref (state->iochannel);
+  gnet_tcp_socket_delete (state->socket);
   g_free (state);
 }
 

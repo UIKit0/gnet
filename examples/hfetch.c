@@ -121,6 +121,7 @@ hfetch(gchar* server, gint port, gchar* filename)
 
   /* Create the socket */
   socket = gnet_tcp_socket_new(addr);
+  gnet_inetaddr_delete (addr);
   g_assert (socket != NULL);
 
   /* Get the IOChannel */
