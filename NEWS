@@ -4,7 +4,7 @@ GNet NEWS
 
 Changes in Gnet
 
-2.0.2 (UNRELEASED)
+2.0.2
 -----
 * RPM fixes (thanks Bas Mevissen!)
 * Compile fixes for Sun compiler (thanks Ives Aerts!)
