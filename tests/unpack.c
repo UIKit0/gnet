@@ -57,15 +57,15 @@ static int failed = 0;
   TEST(NUM, ARG2, ANS2); 				\
   TEST(NUM, ARG3, ANS3); 				} while (0)
 
-#define TEST1S(NUM, ANS, FORMAT, ADDR, LEN, ARG1)   do {\
+#define TEST1S(NUM, ANS, FORMAT, BUF, LEN, ARG1)   do { \
   ARG1 = NULL;						\
-  gnet_unpack (FORMAT, ADDR, LEN, &ARG1);		\
+  gnet_unpack (FORMAT, BUF, LEN, &ARG1);		\
   TESTS(NUM, ARG1, ANS);  g_free(ARG1);			} while (0)
 
-#define TEST2S(NUM, ANS, ANS2, FORMAT, ADDR, LEN, ARG1, ARG2)   do {\
+#define TEST2S(NUM, ANS, ANS2, FORMAT, BUF, LEN, ARG1, ARG2)   do {\
   ARG1 = NULL;						\
   ARG2 = NULL;						\
-  gnet_unpack (FORMAT, ADDR, LEN, &ARG1, &ARG2);	\
+  gnet_unpack (FORMAT, BUF, LEN, &ARG1, &ARG2);		\
   TESTS(NUM, ARG1, ANS);  g_free(ARG1);			\
   TESTS(NUM, ARG2, ANS2); g_free(ARG2);	   		} while (0)
 
@@ -255,10 +255,14 @@ main(int argc, char* argv[])
   TEST2S (40000, "hello", "there", "ss", hello, 12, s1, s2);
   TEST2S (40010, "hello", "there", "2s", hello, 12, s1, s2);
   
-  TEST1S (40100, "hello", "8S", hello, 6, s1);  TEST(40021, s1[6], 0);
+  s1 = NULL;
+  gnet_unpack ("8S", hello, 6, &s1);
+  TESTS(40100, s1, "hello");  
+  TEST(40021, s1[6], 0);
+  g_free (s1);
+
   TEST1S (40110, "hello", "6S", hello, 6, s1);
   TEST1S (40120, "hell",  "4S", hello, 6, s1);
-
   TEST2S (40200, "hello", "there", "6S6S", hello, 12, s1, s2);
 
   s1 = s2 = NULL;

@@ -71,6 +71,12 @@ static void flipmemcpy(char* dst, char* src, guint n);
   } while(0)
 
 
+/*
+
+  Get the length of string @str.  @str is at most @n characters long.
+  @str need not be NUL-terminated (which is why we pass @n).
+
+*/
 static guint
 strlenn(char* str, guint n)
 {
@@ -772,8 +778,8 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
  *  s is a zero-terminated string.  REPEAT is repeat.
  * 
  *  S is a zero-padded string of length REPEAT.  We read REPEAT
- *  characters or until a NULL character.  Any remaining characters are
- *  filled in with 0's.  REPEAT must be specified.
+ *  characters or until a NULL character.  Any remaining characters
+ *  are filled in with 0's.  REPEAT must be specified.
  * 
  *  r is a byte array of NEXT bytes.  NEXT is the next argument and is
  *  an integer.  REPEAT is repeat.  (r is from "raw")
@@ -904,11 +910,12 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 	    g_return_val_if_fail (sp, -1);
 
 	    slen = MIN(mult, strlenn(buffer, len - n));
-	    g_return_val_if_fail (n + slen <= len, -1);
+	    g_return_val_if_fail ((n + slen) <= len, -1);
 
 	    *sp = g_new(gchar, mult + 1);
+
 	    memcpy (*sp, buffer, slen);
-	    while (slen < mult + 1) (*sp)[slen++] = 0;
+	    while (slen < (mult + 1)) (*sp)[slen++] = '\0';
 	    buffer += mult;
 	    n += mult;
 

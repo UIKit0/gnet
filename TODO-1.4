@@ -136,6 +136,20 @@ Possible changes
 ========================================
 DONE
 
+- gnet_unpack semantics change.
+
+      Unpacking with format code "S" changed.
+
+      gnet_unpack ("8S8S", "hello\0\0\0world\0\0\0", s1, s2)
+
+      In GNet 1.1:
+          yielded
+        s1 = "hello\0\0\0"
+	s2 = "\0\0world\0"
+
+      In GNet 1.4, this 
+
+
 - New function: gnet_inetaddr_new_bytes().  Creates a GInetAddr from
     raw bytes.
 

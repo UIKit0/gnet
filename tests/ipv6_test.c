@@ -30,6 +30,7 @@ int
 main (int argc, char* argv[])
 {
   GIPv6Policy ipv6_policy;
+  gchar* policy_str = NULL;
 
   gnet_init ();
 
@@ -39,20 +40,23 @@ main (int argc, char* argv[])
   switch (ipv6_policy)
     {
     case GIPV6_POLICY_IPV4_THEN_IPV6:
-      g_print ("GIPV6_POLICY_IPV4_THEN_IPV6\n");
+      policy_str = "GIPV6_POLICY_IPV4_THEN_IPV6";
       break;
     case GIPV6_POLICY_IPV6_THEN_IPV4:
-      g_print ("GIPV6_POLICY_IPV6_THEN_IPV4\n");
+      policy_str = "GIPV6_POLICY_IPV6_THEN_IPV4";
       break;
     case GIPV6_POLICY_IPV4_ONLY:
-      g_print ("GIPV6_POLICY_IPV4_ONLY\n");
+      policy_str = "GIPV6_POLICY_IPV4_ONLY";
       break;
     case GIPV6_POLICY_IPV6_ONLY:
-      g_print ("GIPV6_POLICY_IPV6_ONLY\n");
+      policy_str = "GIPV6_POLICY_IPV6_ONLY"
       break;
     default:
       failed = 1;
     }	
+
+/*   if (policy_str) */
+/*     g_print ("%s\n", policy_str); */
 
   if (failed)
     exit (1);

@@ -1,3 +1,9 @@
+Sat Dec 21 14:35:14 2002  David Helder  <dhelder@umich.edu>
+
+	* tests/unpack.c (main): Fix test 40021.  Was accessing 
+	   free'd memory.
+	* src/pack.c (gnet_vunpack): Cosmetic touches.
+
 Tue Dec 17 20:25:23 2002  David Helder  <dhelder@umich.edu>
 
 	* src/udp.c (gnet_udp_socket_new_full): Rename.  Was
