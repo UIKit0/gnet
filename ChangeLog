@@ -1,3 +1,8 @@
+Thu Jan  9 18:15:16 2003  David Helder  <dhelder@umich.edu>
+
+	* tests/client_server_test.pl: Remove IPC::Open2.
+	    We don't use it anymore.  Perl in /usr/bin.
+
 Thu Jan  9 16:35:36 2003  David Helder  <dhelder@umich.edu>
 
 	* src/tcp.c (gnet_tcp_socket_get_iochannel): Removed.  I broke so

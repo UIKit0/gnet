@@ -1,6 +1,4 @@
-#!/bin/perl -w
-
-use IPC::Open2;
+#!/usr/bin/perl -w
 
 # client_server_test.pl: Runs echoclient/echoserver pairs.
 #
