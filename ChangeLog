@@ -1,3 +1,10 @@
+Tue Feb 29 11:18:52 2000  David Helder  <dhelder@umich.edu>
+
+	* AUTO*: Version 1.0.1 (unreleased)
+	* src/gnet.c (gnet_io_channel_readline_strdup): Fixed typo bug
+	    where buffer was growing too fast.  Found by Carl Armstrong
+	    <carl@avalon.cameron.edu>.
+
 Mon Feb 28 12:38:31 2000  David Helder  <dhelder@umich.edu>
 
 	* NEWS, etc: Version 1.0.0

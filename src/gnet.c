@@ -313,7 +313,7 @@ gnet_io_channel_readline_strdup (GIOChannel    *channel,
 
       ++n;
 
-      if (len >= n)
+      if (n >= len)
         {
           len *= 2;
           buf = g_realloc(buf, len);
