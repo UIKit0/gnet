@@ -1,3 +1,15 @@
+Mon Sep 27 20:26:51 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* examples/echoclient-async.c (async_client_sin_iofunc): 
+	    Don't unref iochannel.  gnet_tcp_socket_delete() will
+	    do this.  Bug 118149.
+
+Sun Sep 26 22:13:02 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* src/gnet.c (gnet_init): 
+	    Respect HAVE_IPV6 #define in Windows code too.  Patch from
+	    David Ergo (david.ergo@alterface.com).
+
 Sun Sep 26 22:02:00 2004  David Helder  <dhelder@gizmolabs.org>
 
 	Apply patch from Stephane Rouleau (srouleau@innobec.com).
