@@ -1,3 +1,18 @@
+Thu Sep 28 22:55:57 2000  David Helder  <dhelder@umich.edu>
+
+	* gnetconfig.h.in: Added
+	* Makefile.am: Install in library
+	* gnet-config.h.in: Add gnetconfig.h
+	* src/gnet.h: Fixed version stuff
+
+	* src/gnet-private.h: Include sys/param if available.
+	
+	* src/*: Small windows fixes
+	
+Thu Sep 28 21:40:15 2000  David Helder  <dhelder@umich.edu>
+
+	* src/gnet-private.h: Added Andy's 2nd patch.
+
 Wed Sep 27 01:01:49 2000  David Helder  <dhelder@umich.edu>
 
 	* *: First pass at merging in Andy's Win32 port.  Compiles in

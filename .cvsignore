@@ -25,3 +25,4 @@ configure
 install-sh
 mkinstalldirs
 missing
+gnetconfig.h

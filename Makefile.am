@@ -4,7 +4,7 @@ SUBDIRS = src examples doc
 
 @SET_MAKE@
 
-EXTRA_DIST=TODO HACKING	gnet.m4
+EXTRA_DIST=TODO HACKING	gnet.m4 gnetconfig.h gnetconfig.h.in
 
 bin_SCRIPTS=gnet-config
 BUILT_SOURCES=gnet-config
@@ -12,6 +12,9 @@ gnet-config: gnet-config.in
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet.m4
+
+configincludedir = $(pkglibdir)/include
+configinclude_DATA = gnetconfig.h
 
 WEBPATH=$(HOME)/public_html/misc/gnet
 DEBPATH=$(HOME)/public_html/misc/debian
@@ -27,6 +30,7 @@ DEBSRC=gnet_$(VERSION)-1.tar.gz
 RPMFILE=/usr/src/redhat/RPMS/i386/gnet-$(VERSION)-*.i386.rpm
 RPMFILEDEV=/usr/src/redhat/RPMS/i386/gnet-devel-$(VERSION)-*.i386.rpm
 RPMFILESRC=/usr/src/redhat/SRPMS/gnet-$(VERSION)-*.src.rpm
+
 
 snapshot:
 	$(MAKE) dist distdir=$(PACKAGE)`date +"%y%m%d"`

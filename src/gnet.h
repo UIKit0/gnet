@@ -22,6 +22,7 @@
 
 #include <glib.h>
 
+#include "gnetconfig.h"
 #include "inetaddr.h"
 #include "udp.h"
 #include "mcast.h"
@@ -32,12 +33,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifdef G_OS_WIN32
+#  define GNET_EXPORT GLIB_VAR
+#else
+#  define GNET_EXPORT GUTILS_C_VAR
+#endif
 
-GUTILS_C_VAR const guint gnet_major_version;
-GUTILS_C_VAR const guint gnet_minor_version;
-GUTILS_C_VAR const guint gnet_micro_version;
-GUTILS_C_VAR const guint gnet_interface_age;
-GUTILS_C_VAR const guint gnet_binary_age;
+GNET_EXPORT const guint gnet_major_version;
+GNET_EXPORT const guint gnet_minor_version;
+GNET_EXPORT const guint gnet_micro_version;
+GNET_EXPORT const guint gnet_interface_age;
+GNET_EXPORT const guint gnet_binary_age;
 
 /**
  *  GNET_CHECK_VERSION:

@@ -31,6 +31,14 @@
 #include <signal.h>
 #include <fcntl.h>
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+
+#include <glib.h>
+#include "gnet.h"
+#include "gnetconfig.h"
+
 #ifndef G_OS_WIN32  /*********** Unix specific ***********/
 
 #include <unistd.h>
@@ -64,11 +72,9 @@
 
 #else	/*********** Windows specific ***********/
 
-#include "config-win32.h"
 #include <windows.h>
 #include <winbase.h>
 #include <winuser.h>
-#include <winsock2.h>
 #include <ws2tcpip.h>
 
 #define socklen_t gint32
@@ -77,9 +83,6 @@
 #define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_win32_new_stream_socket(SOCKFD)
 
 #endif	/*********** End Windows specific ***********/
-
-#include <glib.h>
-#include "gnet.h"
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16

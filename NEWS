@@ -4,6 +4,10 @@ GNet NEWS
 
 Changes in Gnet
 
+1.0.4 (unreleased)
+-----
+* Windows port
+
 1.0.3
 -----
 * Fixed bug in gnet_inetaddr_new_async

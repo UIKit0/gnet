@@ -22,6 +22,10 @@
 
 #include <config.h>
 
+#ifdef   G_OS_WIN32
+#include <winsock2.h>	/* This needs to be here */
+#endif
+
 
 /* **************************************** */
 
