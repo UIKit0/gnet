@@ -1,3 +1,13 @@
+Thu Dec 13 09:50:26 2001  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Added --enable-glib2 (From Mark Ferlatte).  I also
+	    changed it so GNet will build against 1.3/2.0 if the build
+	    against 1.2 fails.
+	
+	* INSTALL: New INSTALL file.
+
+	* README: Updated installation info.
+	
 Tue Dec 11 21:23:06 2001  David Helder  <dhelder@umich.edu>
 
 	* gnet.pc.in (Libs): Fixed typos.

@@ -76,6 +76,10 @@ AC_ARG_ENABLE(debug,
 	      [GNET_DEBUG_FLAGS="-DG_DISABLE_ASSERT -DG_DISABLE_CHECKS"])
 AC_SUBST(GNET_DEBUG_FLAGS)
 
+AC_ARG_ENABLE(glib2,
+	      AC_HELP_STRING([--enable-glib2],
+			     [prefer glib 2.0 over glib 1.2]))
+
 ###############################
 # Check for programs
 AC_PROG_CC
@@ -105,8 +109,14 @@ if test "$pthread_libs"; then
 fi
 AC_SUBST(pthread_libs)
 
-# Try to find glib
-if test "x${PKGCONFIG}" = "xyes"; then
+if test "x${enable_glib2}" != "xyes"; then
+	AM_PATH_GLIB([1.2.10],
+		     ,
+		     [enable_glib2=yes],
+		     [gthread])
+fi
+
+if test "x${PKGCONFIG}" = "xyes" -a "x${enable_glib2}" = "xyes"; then
 	# Check for 2.0, then 1.2
 	PKG_CHECK_MODULES(GLIB,
 			  [glib-2.0],
@@ -117,13 +127,14 @@ if test "x${PKGCONFIG}" = "xyes"; then
 			  ,
 			  [PKG_CHECK_MODULES(GTHREAD, gthread)])
 fi
+
+
 # If pkg-config wasn't found, or didn't work
 if test "x${GLIB_CFLAGS}" = "x"; then
-	AM_PATH_GLIB([1.2.10],
-		     ,
-		     [AC_MSG_ERROR([glib could not be found])],
-		     [gthread])
+   AC_MSG_ERROR([glib could not be found])
 fi
+
+
 # These SUBSTs are primarily for gnet-config and gnet.pc
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
