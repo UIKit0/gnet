@@ -1,3 +1,9 @@
+Mon Aug  6 13:31:37 2001  David Helder  <dhelder@umich.edu>
+
+	* tests/dnstest.c (main): Clean-up.  Now blocks by default.
+	* src/inetaddr.c (inet_aton): Fix our inet_aton to understand
+	   255.255.255.255.  This function was in gnet-private.h.
+	
 Fri Aug  3 10:59:15 2001  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_async): Same as

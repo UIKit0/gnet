@@ -45,24 +45,15 @@ gint runs_done = 0;
 int
 main(int argc, char** argv)
 {
-  gboolean block = FALSE;
+  gboolean block = TRUE;
 
   if (argc < 2 || argc > 4)
     usage();
 
   host = argv[1];
 
-  if (argc >= 3)
-    {
-
-      if (strcmp(argv[2], "block") == 0)
-	{
-	  g_print ("Using blocking DNS\n");
-	  block = TRUE;
-	}
-      else
-	g_print ("Using non-blocking DNS\n");
-    }
+  if (argc >= 3 && !strcmp(argv[2], "async"))
+    block = FALSE;
 
   if (argc >= 4)
     {
@@ -71,9 +62,15 @@ main(int argc, char** argv)
 
 
   if (block)
-    lookup_block();
+    {
+      g_print ("Using blocking DNS\n");
+      lookup_block();
+    }
   else
-    lookup_async();
+    {
+      g_print ("Using asynchronous DNS\n");
+      lookup_async();
+    }
 
   exit(EXIT_SUCCESS);
 }

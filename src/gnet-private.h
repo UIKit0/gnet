@@ -273,20 +273,6 @@ extern HANDLE gnet_hostent_Mutex;
 #define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
 #define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_asymc */
 
-/* Windows does not have inet_aton, but it does have inet_addr.  TODO:
-   We should write a better inet_aton because inet_addr doesn't catch
-   255.255.255.255 properly. */
-
-static int
-inet_aton(const char *cp, struct in_addr *inp)
-{
-  inp->s_addr = inet_addr(cp);
-  if (inp->s_addr == INADDR_NONE)
-    return 0;
-  return 1;
-}
-
-
 #endif
 
 

@@ -341,6 +341,21 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 
 
 
+#ifdef GNET_WIN32
+
+/* TODO: Use Window's inet_aton if they ever implement it. */
+static int
+inet_aton(const char *cp, struct in_addr *inp)
+{
+  inp->s_addr = inet_addr(cp);
+  if (inp->s_addr == INADDR_NONE && strcmp (cp, "255.255.255.255"))
+    return 0;
+  return 1;
+}
+
+#endif /* GNET_WIN32 */
+
+
 
 
 /* **************************************** */
@@ -458,7 +473,6 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 			 GInetAddrNewAsyncFunc func, gpointer data)
 {
   int pipes[2];
-  struct in_addr inaddr;
   GInetAddr* ia;
   struct sockaddr_in* sa_in;
   GInetAddrAsyncState* state;
