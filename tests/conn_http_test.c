@@ -338,12 +338,15 @@ static gboolean
 test_post (const gchar *artist, const gchar *album)
 {
 	GConnHttp   *http;
-	gchar       *postdata, *buf, *tag;
+	gchar       *postdata, *buf, *tag, *artist_esc, *album_esc;
 	gsize        buflen;
 	
 	g_print ("\n=====> Testing POST \n");
 
-	postdata = g_markup_printf_escaped(
+	/* g_markup_printf_escaped() only exists in Glib-2.4 and later */
+	artist_esc = g_markup_escape_text (artist, -1);
+	album_esc = g_markup_escape_text (album, -1);
+	postdata = g_strdup_printf (
 	                "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 	                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
 	                " xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
@@ -363,8 +366,10 @@ test_post (const gchar *artist, const gchar *album)
 	                "</q2:ArtistRequest>"
 	                "</soap:Body>"
 	                "</soap:Envelope>",
-	                artist, album);
-	             
+	                artist_esc, album_esc);
+
+	g_free (artist_esc);
+	g_free (album_esc);
 
 	http = gnet_conn_http_new();
 

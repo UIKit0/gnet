@@ -1,3 +1,9 @@
+2005-02-01  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* tests/conn_http_test.c: (test_post):
+	  Make ConnHttp test compile on GLib versions < 2.4
+	  which don't have g_markup_printf_escaped()
+	  
 Thu Oct  7 21:25:18 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* src/conn-http.h: 
