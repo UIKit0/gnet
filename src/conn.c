@@ -20,6 +20,7 @@
 
 #include "conn.h"
 
+#include <memory.h> /* required for windows */
 
 
 typedef struct _QueuedWrite

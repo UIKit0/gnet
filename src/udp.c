@@ -94,7 +94,7 @@ gnet_udp_socket_new_interface (const GInetAddr* iface)
   if (setsockopt(s->sockfd, SOL_SOCKET, SO_BROADCAST, 
 		 (void*) &on, sizeof(on)) != 0)
     {
-      close (s->sockfd);
+      GNET_CLOSE_SOCKET(s->sockfd);
       return NULL;
     }
 

@@ -325,7 +325,7 @@ gnet_io_channel_readline_strdup (GIOChannel    *channel,
 
 /* **************************************** */
 
-#ifndef GNET_WIN32	/* New stuff, not ported to Win32 yet */
+
 /* ************************************************************ */
 
 typedef struct _GNetIOChannelWriteAsyncState
@@ -755,5 +755,5 @@ gnet_io_channel_readline_check_func (gchar* buffer, guint length,
 
   return 0;
 }
-#endif
+
 

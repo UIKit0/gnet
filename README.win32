@@ -2,8 +2,7 @@
 
 This is a CVS snapshot of GNet.
 This snapshot was compiled with development GNet code.
-The pack/unpack funtions are the only 1.2 code that has been 
-tested an exported.
+The 1.2 code has not been tested on windows.
 
 This requires GLib 1.3 snapshot 20010301.
 [http://www.gimp.org/win32/glib-dev-20010301.zip]
