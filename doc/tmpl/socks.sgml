@@ -1,0 +1,55 @@
+<!-- ##### SECTION Title ##### -->
+socks
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### MACRO GNET_SOCKS_PORT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gnet_socks_get_enabled ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_socks_set_enabled ##### -->
+<para>
+
+</para>
+
+@enabled: 
+
+
+<!-- ##### FUNCTION gnet_socks_get_server ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_socks_set_server ##### -->
+<para>
+
+</para>
+
+@ia: 
+
+
