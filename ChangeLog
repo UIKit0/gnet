@@ -1,3 +1,8 @@
+Thu Oct 26 16:23:29 2000  David Helder  <dhelder@umich.edu>
+
+	* gnet.spec.in (Group): Integrated Benjamin Kahn's patch.
+	   lib/gnet wasn't being include in the dev RPM.
+	
 Sat Oct 21 01:09:52 2000  David Helder  <dhelder@umich.edu>
 
 	* examples/unpack.c: Added
