@@ -490,10 +490,12 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 # ifdef HAVE_LIBPTHREAD			/* Pthread */
   {
     pthread_t pthread;
-    void* args[2];
+    void** args;
 
+    args = g_new (void*, 2);
     args[0] = (void*) name;
-    args[1] = &pipes[1];
+    args[1] = g_new (int, 1);
+    *(int*) args[1] = pipes[1];
 
     if (pthread_create (&pthread, NULL/*&pthread_attr*/, gethostbyname_async_child, args))
       {
@@ -513,9 +515,12 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
     errno = 0;
     if ((pid = fork()) == 0)
       {
-	void* args[2];
+	void** args;
+
+	args = g_new (void*, 2);
 	args[0] = (void*) name;
-	args[1] = &pipes[1];
+	args[1] = g_new (int, 1);
+	*(int*) args[1] = pipes[1];
 
 	gethostbyname_async_child (args);
 
@@ -601,6 +606,8 @@ gethostbyname_async_child (void* arg) /* pthread_create friendly */
     }
 
   /* Close the socket */
+  g_free (args[1]);
+  g_free (args);
   close(outfd);
 
   return NULL;
