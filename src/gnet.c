@@ -45,9 +45,9 @@ const guint gnet_binary_age = GNET_BINARY_AGE;
  * (this is rare, but it can happen and is often difficult to detect
  * when it does).
  *
- * Returns: G_IO_ERROR_NONE if everything is ok; something else
+ * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes writen by modifying
- * the integer pointed to by bytes_written.
+ * the integer pointed to by @bytes_written.
  *
  **/
 GIOError
@@ -56,25 +56,30 @@ gnet_io_channel_writen (GIOChannel    *channel,
 			guint          len,
 			guint         *bytes_written)
 {
-  guint written = 0;
-  guint n = 0;
-  GIOError error;
+  guint nleft;
+  guint nwritten;
+  gchar* ptr;
+  GIOError error = G_IO_ERROR_NONE;
 
-  do
+  ptr = buf;
+  nleft = len;
+
+  while (nleft > 0)
     {
-      error = g_io_channel_write(channel, &buf[written], 
-				 len - written, &n);
+      if ((error = g_io_channel_write(channel, ptr, nleft, &nwritten))
+	  != G_IO_ERROR_NONE)
+	{
+	  if (error == G_IO_ERROR_AGAIN)
+	    nwritten = 0;
+	  else
+	    break;
+	}
 
-      if (error == G_IO_ERROR_NONE)
-	written += n;
-
+      nleft -= nwritten;
+      ptr += nwritten;
     }
-  while ((written != len) && 
-	 (error != G_IO_ERROR_NONE || error == G_IO_ERROR_AGAIN));
 
-  /* TODO: should account for an EINTR in Unix. */
-
-  *bytes_written = written;
+  *bytes_written = (len - nleft);
 
   return error;
 }
@@ -98,7 +103,8 @@ gnet_io_channel_writen (GIOChannel    *channel,
  *
  * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes read by modifying the
- * integer pointed to by bytes_read.
+ * integer pointed to by @bytes_read.  If @bytes_read is 0, the end of
+ * the file has been reached (eg, the socket has been closed).
  *
  **/
 GIOError
@@ -107,24 +113,32 @@ gnet_io_channel_readn (GIOChannel    *channel,
 		       guint          len,
 		       guint         *bytes_read)
 {
-  guint read = 0;
-  guint n = 0;
-  GIOError error;
+  guint nleft;
+  guint nread;
+  gchar* ptr;
+  GIOError error = G_IO_ERROR_NONE;
 
-  do
+  ptr = buf;
+  nleft = len;
+
+  while (nleft > 0)
     {
-      error = g_io_channel_read(channel, &buf[read], 
-				 len - read, &n);
+      if ((error = g_io_channel_read(channel, buf, nleft, &nread))
+	  !=  G_IO_ERROR_NONE)
+	{
+	  if (error == G_IO_ERROR_AGAIN)
+	    nread = 0;
+	  else
+	    break;
+	}
+      else if (nread == 0)
+	break;
 
-      if (error == G_IO_ERROR_NONE)
-	read += n;
+      nleft -= nread;
+      ptr += nread;
     }
-  while ((read != len) && 
-	 (error != G_IO_ERROR_NONE || error == G_IO_ERROR_AGAIN));
 
-  /* TODO: should account for an EINTR in Unix. */
-
-  *bytes_read = read;
+  *bytes_read = (len - nleft);
 
   return error;
 }
@@ -144,18 +158,17 @@ gnet_io_channel_readn (GIOChannel    *channel,
  * 
  * Warnings: (in the gotcha sense, not the bug sense)
  * 
- * If the buffer is full and the last character is not a newline, the
- * line was truncated.  If the buffer is not full and the last
- * character is not a newline, then the channel was closed.  So, do
- * not assume the buffer ends with a newline.
+ * 1. If the buffer is full and the last character is not a newline,
+ * the line was truncated.  So, do not assume the buffer ends with a
+ * newline.
  *
- * Also, @bytes_read is actually the number of bytes put in the
- * buffer.  That is, it includes the terminating null character.
+ * 2. @bytes_read is actually the number of bytes put in the buffer.
+ * That is, it includes the terminating null character.
  * 
- * Which is related to another subtlety - null characters can appear
- * in the line your read in before the terminating null.  If this
- * matters in your program, check the string length of the buffer
- * against the bytes read.
+ * 3. Null characters can appear in the line before the terminating
+ * null (I could send the string "Hello world\0\n").  If this matters
+ * in your program, check the string length of the buffer against the
+ * bytes read.
  *
  * I hope this isn't too confusing.  Usually the function works as you
  * expect it to if you have a big enough buffer.  If you have the
@@ -163,7 +176,8 @@ gnet_io_channel_readn (GIOChannel    *channel,
  *
  * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes read by modifying the
- * integer pointed to by bytes_read.
+ * integer pointed to by @bytes_read (this number includes the
+ * newline).
  * 
  **/
 GIOError
@@ -172,35 +186,44 @@ gnet_io_channel_readline (GIOChannel    *channel,
 			  guint          len,
 			  guint         *bytes_read)
 {
-  guint read = 0;
-  gchar onebyte;
-  gchar* p = buf;
-  guint n;
+  guint n, rc;
+  gchar c, *ptr;
   GIOError error = G_IO_ERROR_NONE;
 
+  ptr = buf;
 
-  for (read = 1; read < len; ++read)
+  for (n = 1; n < len; ++n)
     {
     try_again:
-      error = gnet_io_channel_readn(channel, &onebyte, 1, &n);
+      error = gnet_io_channel_readn(channel, &c, 1, &rc);
 
-      if (error == G_IO_ERROR_AGAIN)
-	goto try_again;
+      if (error == G_IO_ERROR_NONE && rc == 1)		/* read 1 char */
+	{
+	  *ptr++ = c;
+	  if (c == '\n')
+	    break;
+	}
+      else if (error == G_IO_ERROR_NONE && rc == 0)	/* read EOF */
+	{
+	  if (n == 1)	/* no data read */
+	    {
+	      *bytes_read = 0;
+	      return G_IO_ERROR_NONE;
+	    }
+	  else		/* some data read */
+	    break;
+	}
+      else
+	{
+	  if (error == G_IO_ERROR_AGAIN)
+	    goto try_again;
 
-      if ((error != G_IO_ERROR_NONE) || (n != 1))
-	break;
-
-      *p = onebyte;
-      p++;
-
-      if (onebyte == '\n')
-	break;
-
-      /* TODO: should account for an EINTR in Unix. */
+	  return error;
+	}
     }
 
-  *p = 0;
-  *bytes_read = read;
+  *ptr = 0;
+  *bytes_read = n;
 
   return error;
 }

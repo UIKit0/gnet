@@ -1,3 +1,18 @@
+
+Tue Jan 25 12:28:52 2000  David A Helder  <dhelder@umich.edu>
+
+	* auto: Upped version to 0.1.7
+	* src/gnet.c:
+	    Fixed read/write functions.  Basically brought in line with
+	    Steven's code, which I know to be correct.  readn didn't
+	    handle EOF properly.
+	* src/tcp.c (gnet_tcp_socket_server_accept): Use select
+	    so we don't suck up all the CPU time (duh).
+	* examples/echoclient.c (main): Write the strlen of the
+	    line, not strlen + 1.
+	* examples/echoserver.c, hfetch.c: Unref the iochannel after
+	    closing it.
+	
 Tue Jan 25 12:01:33 2000  David A Helder  <dhelder@umich.edu>
 
 	* README: Clean-ups
