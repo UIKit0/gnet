@@ -326,9 +326,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
       {
 	g_source_remove(gnet_io_watch_ID);
 	g_free(gnet_iochannel);
-/* 	DestroyWindow(gnet_hWnd); */
-/* FIX DestroyWindow causes problems according to DanielKO.  It works
-   if removed.  Andy - take a look at this.  -DAH */
+ 	DestroyWindow(gnet_hWnd); 
 
 	/*CleanUp WinSock 2 */
 	WSACleanup();
