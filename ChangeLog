@@ -1,3 +1,14 @@
+Thu Sep 26 20:10:23 2002  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Add --enable-threadsafe-gethostbyname option.
+	* src/inetaddr.c (gnet_gethostbyaddr): Add threadsafe
+	    gethostbyaddr() variant.
+	    (gnet_gethostbyname): "
+
+	* configure.ac: Define GTHREAD_CFLAGS if gthread module
+	    is available.  This is used to determine if a gthreads
+	    implementation of gethostbyname_r is possible.
+
 Thu Sep 26 18:33:16 2002  David Helder  <dhelder@umich.edu>
 
 	* NEWS, TODO: Updates

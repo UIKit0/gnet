@@ -123,7 +123,7 @@ AC_SUBST(pthread_libs)
 
 if test "x${enable_glib2}" != "xyes"; then
 	AM_PATH_GLIB([1.2.10],
-		     ,
+		     GTHREAD_CFLAGS=" ",
 		     [enable_glib2=yes],
 		     [gthread])
 fi
@@ -206,8 +206,23 @@ CFLAGS="$CFLAGS -D_REENTRANT -DGNET_EXPERIMENTAL"
 ###############################
 # Check for library functions
 
-# Look for a gethostbyname_r we can use (we assume that if the use has
+# On some systems, gethostbyname is thread-safe
+AC_ARG_ENABLE(threadsafe_gethostbyname,
+	      AC_HELP_STRING([--enable-threadsafe-gethostbyname],
+			     [assume gethostbyname() is threadsafe]))
+
+# Look for a gethostbyname_r we can use (we assume that if the user has
 # gethostbyname_r, they also have gethostbyaddr_r)
+
+AC_MSG_CHECKING([for threadsafe gethostbyname()])
+if test "x$enable_threadsafe_gethostbyname" = "xyes" ; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_GETHOSTBYNAME_THREADSAFE, 1, 
+	[Define if gethostbyname is threadsafe])
+  HAVE_GETHOSTBYNAME_THREADSAFE=1
+else
+  AC_MSG_RESULT(no)
+fi
 
 # First, look for the glibc varient
 AC_MSG_CHECKING([for glibc gethostbyname_r])
@@ -263,18 +278,21 @@ AC_TRY_LINK([#include <netdb.h>],
 	    [AC_MSG_RESULT([no])])
 
 # We're stuck without gethostbyname_r.  Use Glib threads.
-if test -z "$HAVE_GETHOSTBYNAME_R" -a "$GTHREAD_CFLAGS"; then
+if test -z "$HAVE_GETHOSTBYNAME_THREADSAFE" -a -z "$HAVE_GETHOSTBYNAME_R" -a "$GTHREAD_CFLAGS"; then
 	AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX, 1,
                 [Define if gethostbyname requires a mutex for thread safety])
 	HAVE_GETHOSTBYNAME_R=yes
 fi
 
 # Duh-oh.  We don't have _any_ thread safety, so warn the builder
-if test -z "$HAVE_GETHOSTBYNAME_R"; then
-	AC_MSG_WARN([You have neither gethostbyname_r() or Glib
-threads.  This means that calls to gethostbyname() (called by the Gnet
-address functions) will not be thread safe.  This build of Gnet could
-malfunction if used in programs that use threads.])  
+if test -z "$HAVE_GETHOSTBYNAME_THREADSAFE" -a -z "$HAVE_GETHOSTBYNAME_R"; then
+	AC_MSG_WARN([
+You have neither gethostbyname_r() or GLib threads.  Calls
+to gethostbyname() (called by the GNet address functions) 
+may not be thread safe.  This build of GNet could malfunction
+if used in programs that use threads.  If your system has a
+thread-safe version of gethostbyname(), pass the option
+--enable-threadsafe-gethostbyname to configure.])  
 fi
 		
 ###############################

@@ -50,6 +50,7 @@ gboolean
 gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicename)
 {
   gboolean rv = FALSE;
+
 #ifndef GNET_WIN32
   struct in_addr inaddr;
 
@@ -63,6 +64,28 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
       return TRUE;
     }
 #endif
+
+
+#ifdef HAVE_GETHOSTBYNAME_THREADSAFE
+  {
+    struct hostent* he;
+
+    he = gethostbyname(hostname);
+    if (he != NULL && he->h_addr_list[0] != NULL)
+      {
+	if (sa)
+	  {
+	    sa->sin_family = he->h_addrtype;
+	    memcpy(&sa->sin_addr, he->h_addr_list[0], he->h_length);
+	  }
+
+	if (nicename && he->h_name)
+	  *nicename = g_strdup(he->h_name);
+
+	rv = TRUE;
+      }
+  }
+#else
 #ifdef HAVE_GETHOSTBYNAME_R_GLIBC
   {
     struct hostent result_buf, *result;
@@ -233,6 +256,7 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 #endif
 #endif
 #endif
+#endif
 
   return rv;
 }
@@ -251,6 +275,16 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 {
   gchar* rv = NULL;
 
+
+#ifdef HAVE_GETHOSTBYNAME_THREADSAFE
+  {
+    struct hostent* he;
+
+    he = gethostbyaddr(addr, length, type);
+    if (he != NULL && he->h_name != NULL)
+      rv = g_strdup(he->h_name);
+  }
+#else
 #ifdef HAVE_GETHOSTBYNAME_R_GLIBC
   {
     struct hostent result_buf, *result;
@@ -351,6 +385,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }
+#endif
 #endif
 #endif
 #endif
