@@ -12,6 +12,9 @@ Changes in Gnet
    - escaping of high Latin-1 characters
    - base64 encoding
    - doc fixes (gnet_base64_encode)
+   - fix crash when doing dns lookup on ipv6-enabled
+     win32 systems (only if gnet has been built
+     using configure/autotools)
 (Unreleased)
 
 2.0.5

@@ -96,6 +96,10 @@ SOURCE=.\conn.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\conn-http.c
+# End Source File
+# Begin Source File
+
 SOURCE=".\gnet-private.c"
 # End Source File
 # Begin Source File
@@ -165,6 +169,10 @@ SOURCE=.\config.h
 # Begin Source File
 
 SOURCE=.\conn.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\conn-http.h
 # End Source File
 # Begin Source File
 
