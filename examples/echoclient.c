@@ -21,7 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet/gnet.h>
+#ifdef G_OS_WIN32
+	#include <gnet.h>
+#else
+	#include <gnet/gnet.h>
+#endif
 
 
 
