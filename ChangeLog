@@ -1,3 +1,9 @@
+Tue Dec 24 14:28:14 2002  David Helder  <dhelder@umich.edu>
+
+	* src/usagi_ifaddrs.c (usagi_getifaddrs): Compile fix.
+	    Add ";"'s to default case.  Some compiler complains
+	    about this.  Thanks Murray!
+
 Sat Dec 21 14:35:14 2002  David Helder  <dhelder@umich.edu>
 
 	* tests/unpack.c (main): Fix test 40021.  Was accessing 

@@ -655,6 +655,7 @@ usagi_getifaddrs (struct ifaddrs **ifap)
 			case IFLA_QDISC:
 			  break;
 			default:
+			  ;
 			}
 		      break;
 		    case RTM_NEWADDR:
@@ -698,6 +699,7 @@ usagi_getifaddrs (struct ifaddrs **ifap)
 			case IFA_CACHEINFO:
 			  break;
 			default:
+			  ;
 			}
 		    }
 		}
