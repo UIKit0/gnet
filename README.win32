@@ -1,84 +1,59 @@
-          *** IMPORTANT *** 
+GNet README for Windows
+-----------------------
 
-This is a STABLE release of GNet 1.1 on Windows.
+This document contains:
+ - General Windows Specific Information
+ - Compiling GNet on Windows
 
-This snapshot was compiled with extra development GNet code.
-That code has not been tested on windows. See README for
-a list of Experimental code.
-
-This release of GNet is links to libglib-2.0-0.dll.
-You will have to rebuild if you have a newer version.
-
-Join or checkout the mailing lists at
-http://www.gnetlibrary.org/ for the most
-up-to-date information.
-
-          ******************
-
-GNet README for Win32
----------------------
-
-This document contains
- - General Win32 Specific Information
- - MINGW/GCC & CYGWIN Notes
- - MSVC 6.0 Notes
- - HACKING/TODO on Win32
-
-
-General Win32 Specific Information
+General Windows Specific Information
 ----------------------------------
 
-The Windows port requires either Windows 95 (with the Winsock2 patch)
-or better, or Windows NT (with Service Pack 4) or better. 
+GNet 2.0 on Windows requires at least glib-2.2.3. 
+See: http://www.gimp.org/~tml/gimp/win32/downloads.html
 
-gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
+For IPv6 support you need at least Windows XP SP1 or Windows 2003 
+(and both with the IPv6 stacks installed). GNet will automatically 
+detect at runtime, not compile time, if IPv6 is supported and set the 
+"IPv6 policy". Note that if IPv6 is installed, GNet will default to 
+use IPv6. Since Windows is a “dual stack” operating system this may 
+lead to your IPv4 only application to fail if the IPv6 stack is 
+installed since the bind() default is IPv6. You should explicitly 
+set the GNet "IPv6 policy” with 
+gnet_ipv6_set_policy(GIPV6_POLICY_IPV4_ONLY); after gnet_init(); 
+if your application is IPv4 only.
 
-gnet_private_inetaddr_list_interfaces() does not support more than 10
-interfaces.
+I used Windows 2000 SP4 and Windows XP SP1 to test GNet 2.0.
+I used Windows 98 and Windows NT 4 SP6a to test prior versions 
+of GNet however these versions of Windows have reached “end-of-life” 
+according to Microsoft. Theoretically all that is required is 
+Windows 95 (with the Winsock2 patch) or better, or Windows NT 
+(with Service Pack 4) or better.
+
+On Windows if you do not have IPv6 installed then 
+gnet_inetaddr_list_interfaces() will return up to 10 interfaces.
 
 Reminder that on windows, text files have extra "\r" in them where as
-on *NIX they do not. This will throw off SHA & MD5 if you don't filter
+on UNIX they do not. This will throw off SHA & MD5 if you do not filter
 the extra characters out before calling those functions.
 
-MINGW/GCC & CYGWIN Notes
-------------------------
+Compiling GNet on Windows
+-------------------------
 
-Compiling GNet on windows with gcc/mingw is supported. 
-[see http://mingw.sourceforge.net/] 
-A makefile to build GNet is included in the zip. 
-I have tested with Mingw 2.0.
+Microsoft Visual C++ .NET 2002, 2003 and Mingw/GCC should compile 
+GNet 2.0 without any issues. The few warnings that appear can be 
+ignored. Microsoft Visual C++ 6.0 users will have to upgrade to 
+the latest Platform SDK. (Note that GNet is written in C, not C++.)
 
-You can use/link GNet with gcc/mingw. A ".a" is included in the zip.
-A makefile is provided to compile the example and test programs.
+A mingw/gcc makefile is provided. Microsoft Visual C++ users 
+should look at and base their projects off this gcc makefile. A 
+.dsp file may be in this distribution but it is likely out of date.
+ 
+You should compile GNet 2.0 on Windows with the -mno-cygwin, 
+-mms-bitfields and -DGNET_EXPERIMENTAL=1 options for gcc and 
+define GNET_EXPERIMENTAL when compiling with Microsoft Visual C++. 
+Note that the “Experimental” code such as the Conn API has now 
+stabilized on Windows.
 
-When compiling your program use the "-lws2_32 switch"
-example:
-gcc -g -Wall -mno-cygwin -mcpu=pentium -I../glib -I. -I../gnet 
--L../glib -L../gnet hostinfo.c -o hostinfo -lgnet-1.1 -lglib-2.0-0 -lws2_32
-
-MSVC 6.0 Notes
---------------
-
-How to link your project to the Gnet DLL uing MSVC 6.0:
-Download the latest version of Glib for Win32 and copy the header
-files and glib-X.Y.dll and glib-X.Y.lib to the gnet project folder. Do
-the same for GNet. Remember change your project settings to include
-glib-X.Y.lib gnet-X.Y.lib in the link tab.
-
-How to compile GNet with MSVC 6.0:
-Download the latest version of Glib for Win32 and copy the header
-files and glib-X.Y.dll and glib-X.Y.lib to your project folder.
-Download the latest version of Gnet for Win32 and a .dsp file is 
-provided to build the project.
-
-
-HACKING/TODO on Win32
----------------------
-
-For a general description on how GNet for Win32 was implemented see
-halfway down gnet-private.c.
-
-FIX: gnet_inetaddr_gethostname() so it can handle hostnames over 256 chars.
-
-FIX: gnet_private_inetaddr_list_interfaces() so it support more than
-10 Interfaces.
+Also note that -mno-cygwin means do not link to the cygwin 
+dll, link to MSVCRT when using cygwin tools. Linking to cygwin 
+is not supported.

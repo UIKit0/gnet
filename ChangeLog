@@ -1,3 +1,7 @@
+Sun Jan  4 2004 Andrew Lanoix <alanoix@umich.edu>
+
+	* README.win32: Update for GNet 2.0
+
 Sun Dec 28 2003 Andrew Lanoix <alanoix@umich.edu>
 
 	*src/tcp.c: typecasting cleanup
