@@ -29,7 +29,7 @@ const guint gnet_binary_age = GNET_BINARY_AGE;
 
 
 static gboolean ipv6_detect_envvar (void);
-static gboolean ipv6_detect_socket (void);
+static gboolean ipv6_detect_iface (void);
 
 
 /**
@@ -52,7 +52,7 @@ gnet_init (void)
 
   /* Auto-detect IPv6 policy.  Set it to IPv4 if auto-detection fails. */
   if (!ipv6_detect_envvar())
-    if (!ipv6_detect_socket())
+    if (!ipv6_detect_iface())
       gnet_ipv6_set_policy (GIPV6_POLICY_IPV4_ONLY);
 
 /*    g_print ("ipv6 policy is %d\n", gnet_ipv6_get_policy()); */
@@ -112,34 +112,36 @@ ipv6_detect_envvar (void)
 
 /* 
 
-   Auto-detect IPv6 policy.  We attempt to create IPv4 and IPv6
-   sockets and base policy on whether this succeeds.  If we have both,
-   we favor IPv4 over IPv6.  In my experience, people have better IPv4
-   connections than IPv6 connections, which tend to be software
-   tunnels.
+   Auto-detect IPv6 policy.  We get a list of interfaces and set
+   policy based on whether IPv4 and/or IPv6 interfaces exist.
+
+   Note if we have both IPv4 and IPv6 that we favor IPv4 over IPv6.
+   In my experience, people have better IPv4 connections than IPv6
+   connections, which tend to be software tunnels.
 
 */
 static gboolean
-ipv6_detect_socket (void)
+ipv6_detect_iface (void)
 {
-  int sockfd;
+  GList* ifaces;
+  GList* i;
   gboolean have_ipv4 = FALSE;
   gboolean have_ipv6 = FALSE;
   GIPv6Policy policy;
 
-  sockfd = socket (AF_INET, SOCK_DGRAM, 0);
-  if (sockfd != -1)
+  ifaces = gnet_inetaddr_list_interfaces ();
+  for (i = ifaces; i != NULL; i = i->next)
     {
-      have_ipv4 = TRUE;
-      GNET_CLOSE_SOCKET (sockfd);
-    }
+      GInetAddr* iface = (GInetAddr*) i->data;
 
-  sockfd = socket (AF_INET6, SOCK_DGRAM, 0);
-  if (sockfd != -1)
-    {
-      have_ipv6 = TRUE;
-      GNET_CLOSE_SOCKET (sockfd);
+      if (gnet_inetaddr_is_ipv4(iface))
+	have_ipv4 = TRUE;
+      else if (gnet_inetaddr_is_ipv6(iface))
+	have_ipv6 = TRUE;
+
+      gnet_inetaddr_delete (iface);
     }
+  g_list_free (ifaces); 
 
   if (have_ipv4 && have_ipv6)
     policy = GIPV6_POLICY_IPV4_THEN_IPV6;
@@ -154,32 +156,3 @@ ipv6_detect_socket (void)
 
   return TRUE;
 }
-
-
-
-
-/*
-
-  This is the old way of doing it.  We get the list of interfaces and
-  set policy based on whether there are IPv4 or IPv6 interfaces.  My
-  fear is that interfaces 
-
-
- */
-#if 0
-  GList* ifaces;
-  GList* i;
-
-  ifaces = gnet_inetaddr_list_interfaces ();
-  for (i = ifaces; i != NULL; i = i->next)
-    {
-      GInetAddr* iface = (GInetAddr*) i->data;
-
-      if (gnet_inetaddr_is_ipv4(iface))
-	have_ipv4 = TRUE;
-      else if (gnet_inetaddr_is_ipv6(iface))
-	have_ipv6 = TRUE;
-
-      gnet_inetaddr_delete (iface);
-    }
-#endif

@@ -34,9 +34,7 @@ typedef struct _QueuedWrite
 
 static void conn_check_queued_writes (GConn* conn);
 
-static void conn_new_cb (GTcpSocket* socket, 
-			 GTcpSocketNewAsyncStatus status, 
-			 gpointer user_data);
+static void conn_new_cb (GTcpSocket* socket, gpointer user_data);
 
 static void conn_connect_cb (GTcpSocket* socket,
 			     GTcpSocketConnectAsyncStatus status, 
@@ -237,9 +235,7 @@ gnet_conn_connect (GConn* conn, guint timeout)
 
 
 static void
-conn_new_cb (GTcpSocket* socket, 
-	     GTcpSocketNewAsyncStatus status, 
-	     gpointer user_data)
+conn_new_cb (GTcpSocket* socket, gpointer user_data)
 {
   GConn* conn = (GConn*) user_data;
   GConnStatus st = GNET_CONN_STATUS_ERROR;
@@ -254,7 +250,7 @@ conn_new_cb (GTcpSocket* socket,
       conn->connect_timeout = 0;
     }
 
-  if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
+  if (socket)
     {
       conn->socket = socket;
       conn->iochannel = gnet_tcp_socket_get_io_channel (socket);

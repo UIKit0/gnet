@@ -48,22 +48,6 @@ typedef struct _GInetAddr GInetAddr;
 
 
 /**
- *   GInetAddrAsyncStatus:
- * 
- *   Status of a asynchronous lookup (from a
- *   gnet_inetaddr_SOMETHING_async() function), passed by
- *   GInetAddrSOMETHINGFunc.  More errors may be added in the future,
- *   so it's best to compare against %GINETADDR_ASYNC_STATUS_OK.
- *
- **/
-typedef enum {
-  GINETADDR_ASYNC_STATUS_OK,
-  GINETADDR_ASYNC_STATUS_ERROR
-} GInetAddrAsyncStatus;
-
-
-
-/**
  *   GInetAddrNewAsyncID:
  * 
  *   ID of an asynchronous GInetAddr creation/lookup started with
@@ -78,15 +62,13 @@ typedef gpointer GInetAddrNewAsyncID;
 /**
  *   GInetAddrNewAsyncFunc:
  *   @inetaddr: InetAddr that was looked up (callee owned)
- *   @status: Status of the lookup
  *   @data: User data
  *   
- *   Callback for gnet_inetaddr_new_async().  Callee owns the address;
- *   the callee should delete the address when it is done with it.
+ *   Callback for gnet_inetaddr_new_async().  Callee owns the address.
+ *   The address will be NULL if the lookup failed.
  *
  **/
 typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr, 
-				      GInetAddrAsyncStatus status, 
 				      gpointer data);
 
 
@@ -110,12 +92,10 @@ typedef gpointer GInetAddrNewListAsyncID;
  *   @data: User data
  *   
  *   Callback for gnet_inetaddr_new_list_async().  Callee owns the
- *   list of GInetAddr's; the callee should delete the addresses and
- *   the list when it is done with them.
+ *   list of GInetAddr's.  The list is NULL if the lookup failed.
  *
  **/
 typedef void (*GInetAddrNewListAsyncFunc)(GList* ialist, 
-					  GInetAddrAsyncStatus status, 
 					  gpointer data);
 
 
@@ -172,15 +152,13 @@ typedef gpointer GInetAddrGetNameAsyncID;
 /**
  *   GInetAddrGetNameAsyncFunc:
  *   @name: Canonical name of the address (callee owned)
- *   @status: Status of the lookup
  *   @data: User data
  *   
  *   Callback for gnet_inetaddr_get_name_async().  Callee owns the
- *   name; the callee should delete the name when it is done with it.
+ *   name.  The name will be NULL if the lookup failed.
  *
  **/
 typedef void (*GInetAddrGetNameAsyncFunc)(gchar* name,
-					  GInetAddrAsyncStatus status,
 					  gpointer data);
 
 

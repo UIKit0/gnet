@@ -1,3 +1,17 @@
+Thu Jan  9 16:24:36 2003  David Helder  <dhelder@umich.edu>
+
+	* tests/pack.c: Fixed output in 2 big-ending pointer packing tests
+
+	* src/tcp.{ch}: Remove status from GTcpSocketNewAsyncFunc.
+	    NULL now signifies error (as it did before).
+	* src/inetaddr.{ch}: Reomve status from GInetAddrNewAsyncFunc,
+	    GInetAddrGetNameAsyncFunc.  NULL now signifies error (as it
+	    did before)
+	
+	* src/{conn.c,socks.c}: Update.
+	
+	* src/gnet.c (ipv6_detect_iface): Use interface list again.
+
 Thu Jan  9 15:09:16 2003  David Helder  <dhelder@umich.edu>
 
 	* tests/client_server_test.pl, testfile: New echoclient/echoserver tester.

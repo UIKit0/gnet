@@ -88,7 +88,7 @@ struct async_data
   gpointer data;
 };
 
-static void async_cb (GTcpSocket* socket, GTcpSocketNewAsyncStatus status, gpointer data);
+static void async_cb (GTcpSocket* socket, gpointer data);
 
 
 GTcpSocketNewAsyncID
@@ -123,11 +123,11 @@ gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr,
 
 
 static void
-async_cb (GTcpSocket* socket, GTcpSocketNewAsyncStatus status, gpointer data)
+async_cb (GTcpSocket* socket, gpointer data)
 {
   struct async_data* ad = (struct async_data*) data;
   
-  if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
+  if (socket != NULL)
     {
       int rv;
 
@@ -135,14 +135,14 @@ async_cb (GTcpSocket* socket, GTcpSocketNewAsyncStatus status, gpointer data)
       if (rv < 0)
 	goto error;
 
-      (ad->func)(socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, ad->data);
+      (ad->func)(socket, ad->data);
       gnet_inetaddr_delete (ad->addr);
       g_free (ad);
       return;
     }
 
  error:
-  (ad->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, ad->data);
+  (ad->func)(NULL, ad->data);
   gnet_inetaddr_delete (ad->addr);
   g_free (ad);
 }

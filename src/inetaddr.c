@@ -618,8 +618,7 @@ gnet_inetaddr_new_list (const gchar* name, gint port)
 /* gnet_inetaddr_new_async()		    */
 
 static void
-inetaddr_new_async_cb (GList* ialist, GInetAddrAsyncStatus status, 
-		       gpointer data);
+inetaddr_new_async_cb (GList* ialist, gpointer data);
 
 /**
  *  gnet_inetaddr_new_async:
@@ -680,14 +679,13 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id)
 
 
 static void
-inetaddr_new_async_cb (GList* ialist, GInetAddrAsyncStatus status, 
-		       gpointer data)
+inetaddr_new_async_cb (GList* ialist, gpointer data)
 {
   GInetAddrNewState* state = (GInetAddrNewState*) data;
 
   state->in_callback = TRUE;
 
-  if (status == GINETADDR_ASYNC_STATUS_OK)
+  if (!ialist)
     {
       GInetAddr* ia;
 
@@ -699,11 +697,11 @@ inetaddr_new_async_cb (GList* ialist, GInetAddrAsyncStatus status,
       ialist = g_list_remove (ialist, ia);    /* Remove from list */
       ialist_free (ialist);		      /* Delete list */
 
-      (*state->func)(ia, GINETADDR_ASYNC_STATUS_OK, state->data);
+      (*state->func)(ia, state->data);
     }
   else
     {
-      (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+      (*state->func)(NULL, state->data);
     }
 
   state->in_callback = FALSE;
@@ -1043,9 +1041,9 @@ inetaddr_new_list_async_pthread_dispatch (gpointer data)
 
   /* Upcall */
   if (!state->lookup_failed)
-    (*state->func)(state->ias, GINETADDR_ASYNC_STATUS_OK, state->data);
+    (*state->func)(state->ias, state->data);
   else
-    (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+    (*state->func)(NULL, state->data);
 
   /* Delete state */
   g_source_remove (state->source);
@@ -1199,7 +1197,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 
 	  /* Make callback (callee owns list) */
 	  state->in_callback = TRUE;
-	  (*state->func)(state->ias, GINETADDR_ASYNC_STATUS_OK, state->data);
+	  (*state->func)(state->ias, state->data);
 	  state->in_callback = FALSE;
 	  gnet_inetaddr_new_async_cancel (state);
 	  return FALSE;
@@ -1210,7 +1208,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
   /* otherwise, there was an error */
 
   state->in_callback = TRUE;
-  (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+  (*state->func)(NULL, state->data);
   state->in_callback = FALSE;
   gnet_inetaddr_new_async_cancel(state);
   return FALSE;
@@ -1308,9 +1306,9 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
   if (state->errorcode)
     {
       state->in_callback = TRUE;
-      (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+      (*state->func)(NULL, state->data);
       state->in_callback = FALSE;
-      g_free(state);
+      g_free (state);
       return FALSE;
     }
 
@@ -1322,7 +1320,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
   state->ia->name = g_strdup(result->h_name);
 
   state->in_callback = TRUE;
-  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, state->data);
+  (*state->func)(state->ia, state->data);
   state->in_callback = FALSE;
   g_free(state);
 
@@ -1825,8 +1823,7 @@ inetaddr_get_name_async_pthread_dispatch (gpointer data)
   pthread_mutex_lock (&state->mutex);
 
   /* Upcall */
-  (*state->func)(state->name, GINETADDR_ASYNC_STATUS_OK, 
-		 state->data);
+  (*state->func)(state->name, state->data);
 
   /* Delete state */
   gnet_inetaddr_delete (state->ia);
@@ -1946,7 +1943,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
 	  /* Call back */
 	  state->in_callback = TRUE;
-	  (*state->func)(name, GINETADDR_ASYNC_STATUS_OK, state->data);
+	  (*state->func)(name, state->data);
 	  state->in_callback = FALSE;
 	  gnet_inetaddr_get_name_async_cancel(state);
 	  return FALSE;
@@ -1957,7 +1954,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
   /* Call back */
   state->in_callback = TRUE;
-  (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+  (*state->func)(NULL, state->data);
   state->in_callback = FALSE;
   gnet_inetaddr_get_name_async_cancel(state);
   return FALSE;
@@ -2048,7 +2045,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
   if (state->errorcode)
     {
-      (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
+      (*state->func)(NULL, state->data);
       return FALSE;
     }
 
@@ -2056,7 +2053,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
   name = NULL;
   name = g_strdup(state->ia->name);
 
-  (*state->func)(name, GINETADDR_ASYNC_STATUS_OK, state->data);
+  (*state->func)(name, state->data);
 
   gnet_inetaddr_delete (state->ia);
   g_free(state);

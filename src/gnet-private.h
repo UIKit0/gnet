@@ -323,13 +323,9 @@ typedef struct _SocketWatchAsyncState
 } SocketWatchAsyncState;
 #endif
 
-void gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list,
-					  GInetAddrAsyncStatus status, 
-					  gpointer data);
+void gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data);
 
-void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
-				    GTcpSocketConnectAsyncStatus status, 
-				    gpointer data);
+void gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, gpointer data);
 
 typedef struct _GTcpSocketConnectState 
 {

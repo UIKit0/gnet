@@ -4,16 +4,6 @@ GNet 1.4 (or 2.0)
 Please email gnet-dev@gnetlibrary.org with your comments.
 
 
-API cleanup
-
-    Do inetaddr async funcs need an error status?  Isn't NULL enough?
-
-    Rename: new_X -> new_with_X
-    Rename: port_new to new_with_port
-
-    Clean UDP API.  The packet stuff is inconsistent for send vs. receive.
-
-
 Experimental changes
 
 - conn/server and iochannel become "normal"
@@ -41,25 +31,13 @@ New features
 
 Possible changes
 
-- New Inetaddr functions:
-    
-    gint 
-    gnet_inetaddr_name_to_port (gchar* service, gchar* proto)	    
-        [Uses getservbyname()]
-
-    Maps the service-protocol pair to a port number.  @proto can be
-    "tcp", "udp", or NULL.  Usually, the port numbers for the TCP and
-    UDP service are identical.  On Unix systems, functionality depends
-    on the /etc/services file.
-    
-
-    gchar*    
-    gnet_inetaddr_port_to_name (int port, gchar* proto)		
-        [Uses getservbyport()]
-
 
 ========================================
 DONE
+
+- Remove status field from funcs GTcpSocketNewAsyncFunc,
+    GInetAddrNewAsyncFunc, GInetAddrGetNameAsyncFunc.  Now NULL
+    signifies that an error occured.
 
 - IPv6 support.  IPv6 policy.
 
@@ -92,14 +70,12 @@ DONE
 
     BINARY AND SOURCE-CODE INCOMPATIBLE
 
-    There are are source-code compatible macros, but the semantics
-    have changed.  get_io_channel() no longer refs 
+    The new get_io_channel() does not ref the IOChannel before
+    returning it.  The old get_iochannel() did this, which was
+    bug-prone.
 
-    (Note that get_io_channel() is also not binary compatible -
-     the ref/unref semantics have changed)
-
-- GInetAddrNewAsyncFunc's inetaddr should be callee owned.  It's a
-    new() function so this makes more sense.
+- GInetAddrNewAsyncFunc's inetaddr is now callee owned.  It's a new()
+    function so this makes more sense.
 
     BINARY INCOMPATIBLE: May result in memory leaks.
 
@@ -110,8 +86,9 @@ DONE
     SOURCE-CODE INCOMPATIBLE: Easy to update.
 
 - Rename URL to URI.  Some field names renamed.
+- URI module is no longer experimental.
 
-    SOURCE-CODE INCOMPATIBLE
+    SOURCE-CODE INCOMPATIBLE: Easy to update.
 
 - Header files should go into gnet-MAJOR-MINOR, so different versions
     can co-exist.
@@ -122,12 +99,6 @@ DONE
 
     BUILD INCOMPATIBLE: Developers should now use pkg-config
 
-- gnet_*_get_io_channel() does not ref the channel before returning
-    it.  
-
-    BINARY INCOMPATIBLE: Check for unnecessary g_io_channel_unref()'s.
-
-- URI module is no longer experimental.
 
 
 
@@ -175,3 +146,27 @@ NOT DONE
     need to defer socket creation and keep track of what options have
     been set, which is messy and bug-prone.  Binding a socket for an
     outgoing connection is rarely needed.
+
+
+
+- New Inetaddr functions:
+    
+    gint 
+    gnet_inetaddr_name_to_port (gchar* service, gchar* proto)	    
+        [Uses getservbyname()]
+
+    Maps the service-protocol pair to a port number.  @proto can be
+    "tcp", "udp", or NULL.  Usually, the port numbers for the TCP and
+    UDP service are identical.  On Unix systems, functionality depends
+    on the /etc/services file.
+    
+
+    gchar*    
+    gnet_inetaddr_port_to_name (int port, gchar* proto)		
+        [Uses getservbyport()]
+
+
+    ***REJECTED*** getservbyname()/getservbyport() are common and easy
+    to use.  Providing a GNet wrapper around them would not be
+    significantly more helpful or convient.
+

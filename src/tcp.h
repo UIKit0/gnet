@@ -99,31 +99,15 @@ typedef gpointer GTcpSocketNewAsyncID;
 
 
 /**
- *   GTcpSocketAsyncStatus:
- * 
- *   Status for connecting via gnet_tcp_socket_new_async(), passed by
- *   GTcpSocketNewAsyncFunc.  More errors may be added in the future,
- *   so it's best to compare against %GTCP_SOCKET_NEW_ASYNC_STATUS_OK.
- *
- **/
-typedef enum {
-  GTCP_SOCKET_NEW_ASYNC_STATUS_OK,
-  GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR
-} GTcpSocketNewAsyncStatus;
-
-
-
-/**
  *   GTcpSocketNewAsyncFunc:
  *   @socket: Socket that was connecting
- *   @status: Status of the connection
  *   @data: User data
  *   
- *   Callback for gnet_tcp_socket_new_async().
+ *   Callback for gnet_tcp_socket_new_async().  The socket will be
+ *   NULL if the connection failed.
  *
  **/
 typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket, 
-				       GTcpSocketNewAsyncStatus status, 
 				       gpointer data);
 
 

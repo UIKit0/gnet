@@ -118,13 +118,11 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
 
 
 void
-gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list,
-				     GInetAddrAsyncStatus status, 
-				     gpointer data)
+gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
-  if (status == GINETADDR_ASYNC_STATUS_OK) /* Success */
+  if (ia_list != NULL) /* Success */
     {
       GList* i;
 
@@ -178,9 +176,7 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list,
 
 
 void 
-gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, 
-				GTcpSocketConnectAsyncStatus status, 
-				gpointer data)
+gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
@@ -189,7 +185,7 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket,
   state->tcp_id = NULL;
 
   /* Success */
-  if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
+  if (socket != NULL)
     {
       state->in_callback = TRUE;
       (*state->func)(socket, GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK, state->data);
@@ -498,13 +494,13 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
     goto error;
 
   /* Success */
-  (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
+  (*state->func)(state->socket, state->data);
   g_free(state);
   return FALSE;
 
   /* Error */
  error:
-  (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
+  (*state->func)(NULL, state->data);
   gnet_tcp_socket_delete (state->socket);
   g_free(state);
 
@@ -554,7 +550,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd == INVALID_SOCKET)
     {
-      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+      (func)(NULL, data);
       return NULL;
     }
 	
@@ -598,7 +594,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   if (state->connect_watch <= 0)
     {
-      (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
+      (func)(NULL, data);
       return NULL;
     }
 
@@ -617,12 +613,12 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   if (condition & G_IO_ERR)
     goto error;
 
-  (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
+  (*state->func)(state->socket, state->data);
   g_free (state);
   return FALSE;
 
  error:
-  (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
+  (*state->func)(NULL, state->data);
   gnet_tcp_socket_delete (state->socket);
   g_free (state);
   return FALSE;
