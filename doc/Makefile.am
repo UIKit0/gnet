@@ -207,4 +207,10 @@ dist-hook: dist-check-gtkdoc dist-hook-local
 	-cp $(srcdir)/xml/*.xml $(distdir)/xml
 	-cp $(srcdir)/html/* $(distdir)/html
 
-.PHONY : dist-hook-local
+# dist-hook-local added as hack to fix make distcheck (tpm)
+dist-hook-local: version.xml
+	files='version.xml';				\
+	for f in $$files; do					\
+	  if test -f $$f; then d=.; else d=$(srcdir); fi;	\
+	  cp $$d/$$f $(distdir) || exit 1; done
+

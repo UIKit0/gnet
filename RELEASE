@@ -1,4 +1,10 @@
 
+Creating the release tarball:
+ - do 'make distcheck'
+ - make sure the created tarball
+   really incnludes the HTML docs
+   (try 'make dist' if not)
+
 Adding new source files:
  - add to GNET.DSP
  - add to src/Makefile.am

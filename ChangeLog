@@ -1,3 +1,17 @@
+2005-02-20  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* RELEASE:
+	  Before release, check whether the created tarball 
+	  really contains the HTML docs.
+
+	* doc/Makefile.am:
+	  Fix 'make distcheck' which the previous commit broke
+	  (version.xml needs to be copied to built dir apparently)
+	  
+	* gnet.def:
+	  Make DllMain a stdcall (use DllMain@12) to keep GNU ld
+	  and gcc from complaining on win32 (patch by Gisle Vanem).
+
 2005-02-19  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* configure.ac:
@@ -22,7 +36,7 @@
 	  
 	* gnet.def:
 	  Make sure the new gnet_conn_http_* and gnet_http_get symbols
-	  are exported in the win32 DLLs.
+	  are exported in the win32 DLLs (patch by Gisle Vanem)
 
 === release 2.0.6 ===
 

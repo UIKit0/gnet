@@ -1,6 +1,6 @@
 EXPORTS
 	;
-	DllMain
+	DllMain@12
 	;
 	gnet_major_version
 	gnet_minor_version
