@@ -2,7 +2,12 @@
 GNet NEWS
 ---------
 
-Changes in Gnet
+Changes in GNet
+
+2.0.8 (unreleased)
+------------------
+* gnet_init() can safely be called
+  more than once now
 
 2.0.7
 -----

@@ -60,6 +60,14 @@ void gnet_win32_at_exit()
 void
 gnet_init (void)
 {
+  static gboolean  been_here; /* FALSE */
+
+  if (been_here)
+    return;
+
+  /* TODO: use atomic ops once we require Glib-2.4 */
+  been_here = TRUE;
+
 #ifdef G_THREADS_ENABLED
 #ifndef GNET_WIN32 
   if (!g_thread_supported ()) 

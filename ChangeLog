@@ -1,3 +1,17 @@
+2005-03-10  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* configure.ac
+	  Set to 2.0.8
+	  
+	* NEWS:
+	* src/gnet.c: (gnet_init):
+	  Return if gnet_init() has been called before,
+	  making sure that gnet_init() can safely be called
+	  multiple times. This is useful for example for
+	  libraries depending on GNet that want to call
+	  gnet_init() from their own init function instead
+	  of depending on it being called from the application.
+
 2005-02-23  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* NEWS:
