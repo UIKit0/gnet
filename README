@@ -3,28 +3,30 @@ GNet README
 -----------
 
 GNet is a simple network library.  It is written in C,
-object-oriented, and built upon GLib.  It is intended to be small,
-fast, easy-to-use, and easy to port.  GNet comes with documentation
-and examples.  It is licensed under the GNU Library General Public
-Licence.
+object-oriented, and built upon GLib.  It is intended to be easy to
+use and port.  GNet comes with documentation and examples.  It is
+licensed under the GNU Library General Public Licence.
 
 Features:
   * TCP "client" and "server" sockets
-  * UDP and IP Multicast
-  * Internet address abstraction
+  * UDP and IP Multicast sockets
+  * High-level TCP connection and server objects
   * Asynchronous socket IO
+  * Internet address abstraction
   * Asynchronous DNS lookup
+  * IPv4 and IPv6 support
   * Byte packing and unpacking
-  * URLs (Experimental)
-  * Server and Conn objects (Experimental)
-  * SOCKS support (Experimental)
+  * URI parsing
+  * SHA and MD5 hashes
+  * Base64 encoding and decoding
+  * SOCKS support
 
 GNet has been ported to Linux, *BSD, MacOSX, Solaris, HP, MacOS X, and
 Windows.  It may work on other operating systems also.
 
-GNet requires GLib 1.2, available at www.gtk.org.  Or, if you have a
-system with packages (e.g., Red Hat or Debian), look for the latest
-glib package.
+GNet requires GLib 1.2 or 2.0/2.2, available at www.gtk.org.  Or, if
+you have a system with packages (e.g., Red Hat or Debian), look for
+the latest glib package.
 
 Comments and questions should be sent to gnet@gnetlibrary.org.
 
@@ -111,8 +113,7 @@ License
 =======
 
 Read COPYING for information on the license.  GNet is under the GNU
-LGPL.  In a nutshell: You can share GNet with your friends and make
-changes to it, but it's not our fault if it breaks your computer.
+Lesser General Public License.
 
 
 Applications that use GNet

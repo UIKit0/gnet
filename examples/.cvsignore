@@ -20,3 +20,4 @@ echoclient-async
 echoclient-gconn
 echoserver-async
 echoserver-gserver
+dnslookup

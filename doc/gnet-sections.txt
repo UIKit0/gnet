@@ -131,6 +131,7 @@ gnet_udp_socket_set_ttl
 <SECTION>
 <FILE>conn</FILE>
 GConn
+GConnEvent
 GConnEventType
 GConnFunc
 gnet_conn_new

@@ -4,7 +4,6 @@ UDP
 <!-- ##### SECTION Short_Description ##### -->
 UDP socket
 
-
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 This module provides support for UDP sockets.  UDP is an internet
@@ -38,7 +37,6 @@ packet is dropped.  The TTL can be set by calling
 gnet_udp_socket_get_ttl().  The default value is sufficient for most
 applications.
 </para>
-
 
 <!-- ##### SECTION See_Also ##### -->
 <para>

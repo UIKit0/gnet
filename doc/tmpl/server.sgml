@@ -1,17 +1,25 @@
 <!-- ##### SECTION Title ##### -->
-server
+Server
 
 <!-- ##### SECTION Short_Description ##### -->
-
+TCP server object
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
+A #GServer represents a TCP server.  #GServer is a thin wrapper around a
+TCP server socket.  To create a new #GServer, call gnet_server_new().
+One of the arguments is a callback function that is called with a new
+#GConn whenever a new client connects.  Remember to call
+gnet_conn_set_callback() on the new #GConn to set the #GConn callback.
+To delete a #GServer, call gnet_server_delete().
+</para>
 
+<para>
+See also #GConn and the echoserver-gserver example.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
 <para>
-
 </para>
 
 <!-- ##### STRUCT GServer ##### -->

@@ -35,11 +35,11 @@ extern "C" {
 
 /**
  *  GServer
- *  @iface: Interface address
- *  @port: Port number
+ *  @iface: interface address
+ *  @port: port number
  *  @socket: TCP server socket
- *  @func: Callback function
- *  @user_data: User data for callback function
+ *  @func: callback function
+ *  @user_data: user data for callback
  *
  *  #GServer is a high-level interface to a TCP server socket.  The
  *  callback is called with a #GConn whenever a new connection is
@@ -51,9 +51,9 @@ typedef struct _GServer GServer;
 
 /**
  *   GServerFunc:
- *   @server: Server
- *   @conn: New connection (or NULL if error)
- *   @user_data: User data specified in gnet_server_new()
+ *   @server: server
+ *   @conn: new connection (or NULL if error)
+ *   @user_data: user data specified in gnet_server_new()
  *   
  *   Callback for gnet_server_new().  When a client connects, this
  *   callback is called with a new connection.  If the server fails,

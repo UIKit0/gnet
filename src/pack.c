@@ -180,18 +180,28 @@ flipmemcpy(char* dst, char* src, guint n)
 
 
 /**
- *  gnet_pack:
- *  @format: Data format
- *  @buffer: Buffer to pack to
- *  @length: Length of @buffer
- *  @Varargs: Variables to pack from
- *
+ *  gnet_pack
+ *  @format: pack data format
+ *  @buffer: buffer to pack to
+ *  @length: length of @buffer
+ *  @Varargs: variables to pack from
+ *  
  *  Write @Varargs to @buffer.  @format is a string that describes the
  *  @Varargs and how they are to be packed.  This string is a list of
  *  characters, each describing the type of an argument in @Varargs.
- *  For example, call gnet_pack("ib", buf, len, myint, mybyte) to pack
- *  the integer myint and a byte mybyte into a buffer of at least 5
- *  bytes.
+ *
+ *  An example:
+ *
+ *  <informalexample>
+ *  <programlisting>
+ *  char buf[5];
+ *  int myint = 42;
+ *  int mybyte = 23;
+ *  &space;
+ *  gnet_pack("!ib", buf, sizeof(buf), myint, mybyte);
+ *  &comstart; Now buf is { 42, 0, 0, 0, 23 }; &comend;
+ *  </programlisting>
+ *  </informalexample>
  *
  *  As a shortcut, most types can be prefixed by an integer to specify
  *  how many times the type is repeated.  For example, "4i2b" is
@@ -227,7 +237,7 @@ flipmemcpy(char* dst, char* src, guint n)
  *  S is a zero-padded string of maximum length REPEAT.  We write
  *  up-to a NULL character or REPEAT characters, whichever comes
  *  first.  We then write NULL characters up to a total of REPEAT
- *  characters.  Special case: If REPEAT is not specified, we write
+ *  characters.  Special case: if REPEAT is not specified, we write
  *  the string as a non-NULL-terminated string (note that it can't be
  *  unpacked easily then).
  *
@@ -248,7 +258,7 @@ flipmemcpy(char* dst, char* src, guint n)
  *  Python's than Perl's.  Note that in GNet, a repeat of 0 does not
  *  align the data (as in Python).
  *
- *  Returns: bytes packed; -1 if error.
+ *  Returns: number of bytes packed; -1 if error.
  *
  **/
 gint
@@ -267,9 +277,9 @@ gnet_pack (const gchar* format, gchar* buffer, const guint length, ...)
 
 /**
  *  gnet_pack_strdup
- *  @format: Pack format
- *  @bufferp: Pointer to a buffer (buffer is caller owned)
- *  @Varargs: Variables to pack from
+ *  @format: pack data format
+ *  @bufferp: pointer to a buffer (buffer is caller owned)
+ *  @Varargs: variables to pack from
  *
  *  Write @Varargs into a buffer pointed to by @bufferp.  The buffer
  *  is allocated by the function and is caller owned.  See gnet_pack()
@@ -313,14 +323,14 @@ gnet_pack_strdup (const gchar* format, gchar** bufferp, ...)
 /* **************************************** */
 
 /**
- *  gnet_calcsize:
- *  @format: Pack format
- *  @Varargs: Variables
+ *  gnet_calcsize
+ *  @format: pack data format
+ *  @Varargs: variables
  *
  *  Calculate the size of the buffer needed to pack @Varargs by the
  *  given format.  See gnet_pack() for more information.
  *
- *  Returns: number of bytes required to pack; -1 if error.
+ *  Returns: number of bytes required to pack; -1 on error.
  *  
  **/
 gint
@@ -338,9 +348,9 @@ gnet_calcsize (const gchar* format, ...)
 
 
 /**
- *  gnet_vcalcsize:
- *  @format: Pack format
- *  @args: Var args
+ *  gnet_vcalcsize
+ *  @format: pack data format
+ *  @args: var args
  *
  *  Var arg interface to gnet_calcsize().  See gnet_calcsize() for
  *  additional information.
@@ -491,11 +501,11 @@ gnet_vcalcsize (const gchar* format, va_list args)
 
 
 /**
- *  gnet_vpack:
- *  @format: Pack format
- *  @buffer: Buffer to pack to
- *  @length: Length of buffer
- *  @args: Var args
+ *  gnet_vpack
+ *  @format: pack data format
+ *  @buffer: buffer to pack to
+ *  @length: length of @buffer
+ *  @args: var args
  *
  *  Var arg interface to gnet_pack().  See gnet_pack() for more
  *  information.
@@ -752,21 +762,32 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
 /* **************************************** */
 
 /**
- *  gnet_unpack:
- *  @format: Data format
- *  @buffer: Buffer to unpack from
- *  @length: Length of @buffer
- *  @Varargs: Addresses of variables to unpack to
+ *  gnet_unpack
+ *  @format: unpack data format
+ *  @buffer: buffer to unpack from
+ *  @length: length of @buffer
+ *  @Varargs: addresses of variables to unpack to
  *
  *  Read the data in @buffer into @Varargs.  @format is a string that
  *  describes the @Varargs and how they are to be packed.  This string
  *  is a list of characters, each describing the type of an argument
- *  in @Varargs.  For example, call gnet_unpack("ib", buf, len,
- *  &myint, &mybyte) to unpack the buffer into the integer myint and
- *  the byte mybyte.
+ *  in @Varargs.  
+
+ *  An example:
+ *
+ *  <informalexample>
+ *  <programlisting>
+ *  char buf[5] = { 42, 0, 0, 0, 23 };
+ *  int myint;
+ *  int mybyte;
+ *  &space;
+ *  gnet_unpack("!ib", buf, sizeof(buf), &amp;myint, &amp;mybyte);
+ *  &comstart; Now myint is 42 and mybyte is 23 &comend;
+ *  </programlisting>
+ *  </informalexample>
  *
  *  In unpack, the arguments must be pointers to the appropriate type.
- *  Strings and byte arrays are allocated dynamicly (by g_new).  The
+ *  Strings and byte arrays are allocated dynamicly (by g_new()).  The
  *  caller is responsible for g_free()-ing it.
  *
  *  As a shortcut, most types can be prefixed by an integer to specify
@@ -806,7 +827,8 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
  *  string and the string follows.  The unpacked string will be a
  *  normal, NULL-terminated string.  REPEAT is repeat.
  *
- *  Returns: bytes unpacked; -1 if error.
+ *  Returns: number of bytes unpacked; -1 if error.  The bytes are
+ *  unpacked to the variables pointed to by the @Varargs.
  * 
  **/
 gint 
@@ -824,16 +846,16 @@ gnet_unpack (const gchar* format, gchar* buffer, guint length, ...)
 
 
 /**
- *  gnet_vunpack:
- *  @format: Unpack format
- *  @buffer: Buffer to unpack from
- *  @length: Length of buffer
- *  @args: Var args
+ *  gnet_vunpack
+ *  @format: unpack data format
+ *  @buffer: buffer to unpack from
+ *  @length: length of @buffer
+ *  @args: var args
  *
  *  Var arg interface to gnet_unpack().  See gnet_unpack() for more
  *  information.
  *
- *  Returns: bytes packed; -1 if error.
+ *  Returns: number of bytes packed; -1 if error.
  *
  **/
 gint 

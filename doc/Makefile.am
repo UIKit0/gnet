@@ -4,57 +4,185 @@
 DOC_MODULE=gnet
 
 # The top-level SGML file.
-DOC_MAIN_SGML_FILE=gnet.sgml
+DOC_MAIN_SGML_FILE=gnet-docs.sgml
 
-# The directory containing the source code (if it contains documentation).
-DOC_SOURCE_DIR=..
+# The directory containing the source code. Relative to $(srcdir)
+DOC_SOURCE_DIR=$(top_srcdir)/src
 
-HTML_DIR=$(prefix)/share/doc/libgnet$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)-dev/html
+# Extra options to supply to gtkdoc-scan
+SCAN_OPTIONS=
+
+# Extra options to supply to gtkdoc-mkdb
+MKDB_OPTIONS=--sgml-mode --output-format=xml
+
+# Extra options to supply to gtkdoc-fixref
+FIXXREF_OPTIONS=
+
+# Used for dependencies
+HFILE_GLOB=$(top_srcdir)/src/*.h
+CFILE_GLOB=$(top_srcdir)/src/*.c
+
+# Headers to ignore
+IGNORE_HFILES=			\
+	acconfig.h		\
+	config.h		\
+	gnetconfig.h		\
+	gnet-private.h 		\
+	socks-private.h 	\
+	scheduler.h 		\
+	usagi_ifaddrs.h
+
+# Extra files to add when scanning
+EXTRA_HFILES=
+
+# Images to copy into HTML directory
+HTML_IMAGES =
+
+# Extra SGML files that are included by $(DOC_MAIN_SGML_FILE)
+content_files =
+
+# Other files to distribute
+extra_files =
+
+# CFLAGS and LDFLAGS for compiling scan program. Only needed
+# if $(DOC_MODULE).types is non-empty.
+GTKDOC_CFLAGS =
+GTKDOC_LIBS =
+
+# Commands for compiling and linking 
+GTKDOC_CC=$(LIBTOOL) --mode=compile $(CC)
+GTKDOC_LD=$(LIBTOOL) --mode=link $(CC)
+
+
+####################################
+# Everything below here is generic #
+####################################
+
+# We set GPATH here; this gives us semantics for GNU make
+# which are more like other make's VPATH, when it comes to
+# whether a source that is a target of one rule is then
+# searched for in VPATH/GPATH.
+#
+GPATH = $(srcdir)
 
 TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
 
-scan:
-	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR)/src --ignore-headers="acconfig.h config.h gnetconfig.h gnet-private.h socks-private.h scheduler.h usagi_ifaddrs.h"
+EXTRA_DIST = 				\
+	$(content_files)		\
+	$(extra_files)			\
+	$(HTML_IMAGES)			\
+	$(DOC_MAIN_SGML_FILE)		\
+	$(DOC_MODULE).types		\
+	$(DOC_MODULE)-sections.txt	\
+	$(DOC_MODULE)-overrides.txt
 
-templates: scan
-	gtkdoc-mktmpl --module=$(DOC_MODULE)
+DOC_STAMPS=scan-build.stamp tmpl-build.stamp sgml-build.stamp html-build.stamp \
+	   $(srcdir)/tmpl.stamp $(srcdir)/sgml.stamp $(srcdir)/html.stamp
 
-sgml:
-	gtkdoc-mkdb --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR)
+SCANOBJ_FILES = 		 \
+	$(DOC_MODULE).args 	 \
+	$(DOC_MODULE).hierarchy  \
+	$(DOC_MODULE).interfaces \
+	$(DOC_MODULE).prerequisites \
+	$(DOC_MODULE).signals
 
-html:
-	if ! test -d html ; then mkdir html ; fi
-	-cd html && gtkdoc-mkhtml $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
+if ENABLE_GTK_DOC
+all-local: html-build.stamp
+
+#### scan ####
+
+scan-build.stamp: $(HFILE_GLOB)
+	@echo '*** Scanning header files ***'
+	if grep -l '^..*$$' $(srcdir)/$(DOC_MODULE).types > /dev/null ; then \
+	    CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" CFLAGS="$(GTKDOC_CFLAGS)" LDFLAGS="$(GTKDOC_LIBS)" gtkdoc-scangobj --module=$(DOC_MODULE) --output-dir=$(srcdir) ; \
+	else \
+	    cd $(srcdir) ; \
+	    for i in $(SCANOBJ_FILES) ; do \
+               test -f $$i || touch $$i ; \
+	    done \
+	fi
+	cd $(srcdir) && \
+	  gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="$(IGNORE_HFILES)" $(SCAN_OPTIONS) $(EXTRA_HFILES)
+	touch scan-build.stamp
+
+$(DOC_MODULE)-decl.txt $(SCANOBJ_FILES): scan-build.stamp
+	@true
+
+#### templates ####
+
+tmpl-build.stamp: $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt
+	@echo '*** Rebuilding template files ***'
+	cd $(srcdir) && gtkdoc-mktmpl --module=$(DOC_MODULE)
+	touch tmpl-build.stamp
+
+tmpl.stamp: tmpl-build.stamp
+	@true
+
+#### sgml ####
+
+sgml-build.stamp: tmpl.stamp $(CFILE_GLOB) $(srcdir)/tmpl/*.sgml
+	@echo '*** Building SGML ***'
+	cd $(srcdir) && \
+	gtkdoc-mkdb --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) $(MKDB_OPTIONS)
+	touch sgml-build.stamp
+
+sgml.stamp: sgml-build.stamp
+	@true
+
+#### html ####
+
+html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
+	@echo '*** Building HTML ***'
+	rm -rf $(srcdir)/html 
+	mkdir $(srcdir)/html
+	cd $(srcdir)/html && gtkdoc-mkhtml $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
+	test "x$(HTML_IMAGES)" = "x" || ( cd $(srcdir) && cp $(HTML_IMAGES) html )
+	@echo '-- Fixing Crossreferences' 
+	cd $(srcdir) && gtkdoc-fixxref --module-dir=html --html-dir=$(HTML_DIR) $(FIXXREF_OPTIONS)
+	touch html-build.stamp
+endif
+
+##############
 
 clean-local:
-	rm -f *~ *.bak *.hierarchy *.signals *-unused.txt
+	rm -f *~ *.bak $(SCANOBJ_FILES) *-unused.txt $(DOC_STAMPS)
 
 maintainer-clean-local: clean
-	rm -rf sgml html $(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt 
+	cd $(srcdir) && rm -rf sgml html $(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt
 
-gnet-decl-list.txt : templates
-
-gnet-sections.txt : scan
-	cp gnet-decl-list.txt gnet-sections.txt
-
-rebuild: gnet-sections.txt templates sgml html
-
-install-data-local: 
+install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(TARGET_DIR)
-	-@INSTALL@ -m 0644 $(srcdir)/html/*.html $(DESTDIR)$(TARGET_DIR)
-	-@INSTALL@ -m 0644 $(srcdir)/html/index.sgml $(DESTDIR)$(TARGET_DIR)
-	-(cd $(DESTDIR); gtkdoc-fixxref --module=$(DOC_MODULE) --html-dir=$(HTML_DIR))
-	-mv $(HTML_DIR)/$(DOC_MODULE)/* $(HTML_DIR)
-	-rm -rf $(HTML_DIR)/$(DOC_MODULE)
-	-(cd $(HTML_DIR); ln -s book1.html index.html)
+	(installfiles=`echo $(srcdir)/html/*`; \
+	if test "$$installfiles" = '$(srcdir)/html/*'; \
+	then echo '-- Nothing to install' ; \
+	else \
+	  for i in $$installfiles; do \
+	    echo '-- Installing '$$i ; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(TARGET_DIR); \
+	  done; \
+	  echo '-- Installing $(srcdir)/html/index.sgml' ; \
+	  $(INSTALL_DATA) $(srcdir)/html/index.sgml $(DESTDIR)$(TARGET_DIR); \
+	fi)
 
-dist-hook:
-	(cd $(srcdir) ; tar cvf - html/*.html html/*.sgml) | (cd $(distdir); tar xf -)
+#
+# Require gtk-doc when making dist
+#
+if ENABLE_GTK_DOC
+dist-check-gtkdoc:
+else
+dist-check-gtkdoc:
+	@echo "*** gtk-doc must be installed and enabled in order to make dist"
+	@false
+endif
 
-copyweb:
-	rm -rf $(HOME)/public_html/misc/gnet/docs/*
-	cp -f html/*.html $(HOME)/public_html/misc/gnet/docs
-	cp -f $(HOME)/public_html/misc/gnet/docs/book1.html $(HOME)/public_html/misc/gnet/docs/index.html
-	chmod -R a+rX $(HOME)/public_html/misc/gnet/docs
+dist-hook: dist-check-gtkdoc dist-hook-local
+	mkdir $(distdir)/tmpl
+	mkdir $(distdir)/xml
+	mkdir $(distdir)/html
+	-cp $(srcdir)/tmpl/*.sgml $(distdir)/tmpl
+	-cp $(srcdir)/sgml/*.xml $(distdir)/xml
+	-cp $(srcdir)/html/* $(distdir)/html
 
-.PHONY : html sgml templates scan
+.PHONY : dist-hook-local
+
+

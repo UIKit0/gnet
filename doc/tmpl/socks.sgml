@@ -6,13 +6,13 @@ SOCKS proxy
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-SOCKS is TCP proxy protocol.  Typically, a host behind a firewall uses
-SOCKS to connect to hosts outside the firewall via a SOCKS proxy
+SOCKS is a TCP proxy protocol.  Typically, a host behind a firewall
+uses SOCKS to connect to hosts outside the firewall via a SOCKS proxy
 server.  To open a TCP connection, a SOCKS client connects to a SOCKS
 server and the SOCKS server connects to the destination.  Data is then
 forwarded between the client and the destination by the SOCKS server.
-GNet supports SOCKS versions 4 and 5.  Version 5 support includes
-support for server sockets.
+GNet supports SOCKS versions 4 and 5.  Version 5 includes support for
+server sockets.
 </para>
 
 <para>
@@ -22,7 +22,6 @@ To disable SOCKS support, call gnet_socks_set_enabled() and pass
 FALSE.  The SOCKS_VERSION environment variable controls which SOCKS
 version is used.  The default is version 5.
 </para>
-
 
 <!-- ##### SECTION See_Also ##### -->
 <para>

@@ -33,16 +33,16 @@ extern "C" {
 
 /**
  *   GConnEventType
- *   @GNET_CONN_ERROR: Error
- *   @GNET_CONN_CONNECT: Connect
- *   @GNET_CONN_CLOSE: Close
+ *   @GNET_CONN_ERROR: Connection error
+ *   @GNET_CONN_CONNECT: Connection complete
+ *   @GNET_CONN_CLOSE: Connection closed
  *   @GNET_CONN_TIMEOUT: Timeout
- *   @GNET_CONN_READ: Read
- *   @GNET_CONN_WRITE: Write
- *   @GNET_CONN_READABLE: Readable
- *   @GNET_CONN_WRITABLE: Writable
+ *   @GNET_CONN_READ: Read complete
+ *   @GNET_CONN_WRITE: Write complete
+ *   @GNET_CONN_READABLE: Connection is readable
+ *   @GNET_CONN_WRITABLE: Connection is writable
  *
- *   Event type.  Used by #GConnEvent
+ *   Event type.  Used by #GConnEvent.
  *
  **/
 typedef enum {
@@ -59,16 +59,21 @@ typedef enum {
 
 /**
  *  GConnEvent
+ *  @type: event type
+ *  @buffer: buffer
+ *  @length: buffer length
  *
- *  GConn Event.  Buffer and length are set only on READ events.
+ *  GConn Event.  @buffer and @length are set only on #GNET_CONN_READ
+ *  events.  The buffer is caller-owned.
  *
  **/
-typedef struct _GConnEvent
+typedef struct _GConnEvent GConnEvent;
+struct _GConnEvent
 {
   GConnEventType type;
   gchar*	 buffer;
   gint		 length;
-} GConnEvent;
+};
 
 
 
@@ -99,9 +104,8 @@ typedef struct _GConnEvent
  *  @func: private
  *  @user_data: private
  *
- *  TCP Connection.  This is an easier to use interface than
- *  #GTcpSocket.  Some of the fields are public and can be read but
- *  should not be written to.
+ *  TCP Connection.  Some of the fields are public, but do not set
+ *  these fields.
  *
  **/
 typedef struct _GConn GConn;
@@ -110,33 +114,35 @@ typedef struct _GConn GConn;
 /**
  *  GConnFunc
  *  @conn: #GConn
- *  @event: Event (caller owned)
- *  @user_data: User data specified in gnet_conn_new()
+ *  @event: event (caller owned)
+ *  @user_data: user data specified in gnet_conn_new()
  * 
- *  Callback for #GConn.  Possible events:
+ *  Callback for #GConn.  
  *
- *  GNET_CONN_ERROR: #GConn error.  The event occurs if the connection
+ *  Possible events:
+ *
+ *  %GNET_CONN_ERROR: #GConn error.  The event occurs if the connection
  *  fails somehow.  The connection is closed before this event occurs.
  *
- *  GNET_CONN_CONNECT: Completion of gnet_conn_connect().
+ *  %GNET_CONN_CONNECT: Completion of gnet_conn_connect().
  *
- *  GNET_CONN_CLOSE: Connection has been closed.  The event does not
+ *  %GNET_CONN_CLOSE: Connection has been closed.  The event does not
  *  occur as a result of calling gnet_conn_disconnect(),
  *  gnet_conn_unref(), or gnet_conn_delete().
  *
- *  GNET_CONN_TIMEOUT: Timer set by gnet_conn_timeout() expires.
+ *  %GNET_CONN_TIMEOUT: Timer set by gnet_conn_timeout() expires.
  *
- *  GNET_CONN_READ: Data has been read.  This event occurs as a result
+ *  %GNET_CONN_READ: Data has been read.  This event occurs as a result
  *  of calling gnet_conn_read(), gnet_conn_readn(), or
  *  gnet_conn_readline().  buffer and length are set in the event
- *  object.  The buffer is callee owned.
+ *  object.  The buffer is caller owned.
  *
- *  GNET_CONN_WRITE: Data has been written.  This event occurs as a
+ *  %GNET_CONN_WRITE: Data has been written.  This event occurs as a
  *  result of calling gnet_conn_write().
  *
- *  GNET_CONN_READABLE: The socket is readable.
+ *  %GNET_CONN_READABLE: The connection is readable.
  *
- *  GNET_CONN_WRITABLE: The socket is writable.
+ *  %GNET_CONN_WRITABLE: The connection is writable.
  *
  **/
 typedef void (*GConnFunc)(GConn* conn, GConnEvent* event, gpointer user_data);
@@ -145,7 +151,6 @@ typedef void (*GConnFunc)(GConn* conn, GConnEvent* event, gpointer user_data);
 struct _GConn
 {
   /* Public */
-
   gchar*			hostname;
   gint				port;
 
@@ -155,7 +160,6 @@ struct _GConn
 
 
   /* Private */
-
   guint				ref_count;
   guint				ref_count_internal;
 

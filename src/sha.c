@@ -433,22 +433,22 @@ SHAFinal( char *key, SHA_CTX *shaInfo )
 struct _GSHA
 {
   SHA_CTX	ctx;
-  guchar 	digest[GNET_SHA_HASH_LENGTH];
+  gchar 	digest[GNET_SHA_HASH_LENGTH];
 };
 
 
 /**
  *  gnet_sha_new:
- *  @buffer: Buffer to hash
- *  @length: Length of that buffer
+ *  @buffer: buffer to hash
+ *  @length: length of @buffer
  * 
- *  Create an SHA hash of the buffer.
+ *  Create a SHA hash of @buffer.
  *
  *  Returns: a new #GSHA.
  *
  **/
 GSHA*           
-gnet_sha_new (const guint8* buffer, guint length)
+gnet_sha_new (const gchar* buffer, guint length)
 {
   GSHA* gsha;
 
@@ -464,10 +464,9 @@ gnet_sha_new (const guint8* buffer, guint length)
 
 /**
  *  gnet_sha_new_string:
- *  @str: Hexidecimal string
+ *  @str: hexidecimal string
  * 
- *  Create an SHA hash from a hexidecimal string.  The string must be
- *  of length greater than or equal to %GNET_SHA_HASH_LENGTH * 2.
+ *  Create a SHA hash from a hexidecimal string.
  *
  *  Returns: a new #GSHA.
  *
@@ -527,10 +526,10 @@ gnet_sha_new_string (const gchar* str)
 
 
 /**
- *  gnet_sha_clone:
- *  @gsha: SHA to clone.
+ *  gnet_sha_clone
+ *  @gsha: a #GSHA
  * 
- *  Create a SHA from another one.
+ *  Create a SHA by copying a #GSHA.
  *
  *  Returns: a new #GSHA.
  *
@@ -552,8 +551,8 @@ gnet_sha_clone (const GSHA* gsha)
 
 
 /** 
- *  gnet_sha_delete:
- *  @gsha: #GSHA to delete
+ *  gnet_sha_delete
+ *  @gsha: a #GSHA
  *
  *  Delete a #GSHA.
  *
@@ -570,12 +569,13 @@ gnet_sha_delete (GSHA* gsha)
 
 
 /**
- *  gnet_sha_new_incremental:
+ *  gnet_sha_new_incremental
  *
- *  Create a SHA hash in incremental mode.  After creating the #GSHA, call
- *  gnet_sha_update() and gnet_sha_final().
+ *  Create a SHA hash incrementally.  After creating the #GSHA, call
+ *  gnet_sha_update() one or more times to hash more data.  Finally,
+ *  call gnet_sha_final() to compute the final hash value.
  *
- *  Returns: new GSHA
+ *  Returns: a new #GSHA
  *
  **/
 GSHA*		
@@ -590,17 +590,18 @@ gnet_sha_new_incremental (void)
 
 
 /**
- *  gnet_sha_update:
- *  @gsha: #GSHA to update
- *  @buffer: Buffer to add
- *  @length: Length of that buffer
+ *  gnet_sha_update
+ *  @gsha: a #GSHA
+ *  @buffer: buffer to add
+ *  @length: length of @buffer
  *
- *  Update the hash with buffer.  This may be called several times on
- *  an incremental hash before being finalized.
+ *  Update the hash with @buffer.  This may be called several times on
+ *  a hash created by gnet_sha_new_incremental() before being
+ *  finalized by calling gnet_sha_final().
  * 
  **/
 void
-gnet_sha_update (GSHA* gsha, const guchar* buffer, guint length)
+gnet_sha_update (GSHA* gsha, const gchar* buffer, guint length)
 {
   g_return_if_fail (gsha);
 
@@ -609,12 +610,12 @@ gnet_sha_update (GSHA* gsha, const guchar* buffer, guint length)
 
 
 /**
- *  gnet_sha_final:
- *  @gsha: #GSHA to finalize
+ *  gnet_sha_final
+ *  @gsha: a #GSHA
  *
- *  Calcuate the final hash value.  This is called on a #GSHA created
- *  using gnet_sha_new_incremental() and updated using gnet_sha_update()
- *  possibly several times.  
+ *  Calcuate the final hash value @gsha.  This is called on a #GSHA
+ *  created by gnet_sha_new_incremental() and updated by one or more
+ *  calls to gnet_sha_update().
  *
  **/
 void
@@ -630,9 +631,9 @@ gnet_sha_final (GSHA* gsha)
 /* **************************************** */
 
 /**
- *  gnet_sha_equal:
- *  @p1: Pointer to first #GSHA.
- *  @p2: Pointer to second #GSHA.
+ *  gnet_sha_equal
+ *  @p1: first #GSHA.
+ *  @p2: second #GSHA.
  *
  *  Compare two #GSHA's.  
  *
@@ -656,12 +657,13 @@ gnet_sha_equal (gconstpointer p1, gconstpointer p2)
 
 /**
  *  gnet_sha_hash
- *  @p: GSHA to get hash value of
+ *  @p: a #GSHA
  *
  *  Hash the GSHA hash value.  This is not the actual SHA hash, but a
- *  hash of this hash.
+ *  hash of this hash.  This hash can be used with the GLib
+ *  GHashTable.
  *
- *  Returns: hash value.
+ *  Returns: the hash value.
  *
  **/
 guint
@@ -679,22 +681,21 @@ gnet_sha_hash (gconstpointer p)
 
 
 /**
- *  gnet_sha_get_digest:
- *  @gsha: #GSHA to get hash digest from
+ *  gnet_sha_get_digest
+ *  @gsha: a #GSHA
  *
- *  Get the SHA hash digest.  
+ *  Get the raw SHA hash digest.  
  *
- *  Returns: buffer containing the SHA hash digest.  The buffer is
- *  GNET_SHA_HASH_LENGTH bytes long.  The #GSHA owns the buffer - do
- *  not free it.
+ *  Returns: callee-owned buffer containing the SHA hash digest.  The
+ *  buffer is %GNET_SHA_HASH_LENGTH bytes long.
  *
  **/
-guint8*        	
+gchar*        	
 gnet_sha_get_digest (const GSHA* gsha)
 {
   g_return_val_if_fail (gsha, NULL);
   
-  return (guint8*) gsha->digest;
+  return (gchar*) gsha->digest;
 }
 
 
@@ -704,14 +705,14 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
 			      'c', 'd', 'e', 'f' };
 
 /**
- *  gnet_sha_get_string:
- *  @gsha: #GSHA to get hash from
+ *  gnet_sha_get_string
+ *  @gsha: a #GSHA
  *
- *  Get a hash string.  
+ *  Get the digest represented a string.
  *
- *  Returns: Hexadecimal string representing the hash.  The string is
- *  of length 2 * %GNET_SHA_HASH_LENGTH and null terminated.  The
- *  caller must free the string.
+ *  Returns: a hexadecimal string representing the hash.  The string
+ *  is 2 * %GNET_SHA_HASH_LENGTH bytes long and NULL terminated.  The
+ *  string is caller owned.
  *
  **/
 gchar*          
@@ -733,15 +734,16 @@ gnet_sha_get_string (const GSHA* gsha)
 
 
 /**
- * gnet_sha_copy_string:
- * @gsha: #GSHA to get hash from
- * @buffer: Buffer of length of at least 2 * %GNET_SHA_HASH_LENGTH
+ * gnet_sha_copy_string
+ * @gsha: a #GSHA
+ * @buffer: buffer at least 2 * %GNET_SHA_HASH_LENGTH bytes long
  *
- * Copy the hash string into the buffer.
+ * Copy the digest represented as a string into @buffer.  The string
+ * is not NULL terminated.
  * 
  **/
 void
-gnet_sha_copy_string (const GSHA* gsha, guchar* buffer)
+gnet_sha_copy_string (const GSHA* gsha, gchar* buffer)
 {
   guint i;
 

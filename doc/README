@@ -1,0 +1,43 @@
+
+GNet Documentation notes
+
+
+gtk-doc is required to build the documentation.  Only developers would
+need to build the docs.  All distributions should include the docs
+pre-built.
+
+
+To build the documentation:
+
+> make scan
+> make templates
+> make sgml
+> make html
+
+
+
+Style notes
+
+* Arguments 
+
+  @arg: argument argument
+
+  - The first word is not capitalized.
+  - There is no period.
+
+  Also note:
+  - Parameter names should be as descriptive as possible.  Use
+    words instead of abbreviations.  E.g.:
+      * "buffer" instead of "buf"
+      * "length" instead of "len"
+
+    Exceptions: "src" and "dst" are ok.
+
+
+* Return values
+
+  Returns: something.  Something else happens.
+
+  - The first word is not capitalized
+  - There is a period so that the first sentence reads as a sentence
+  - There can be more than one sentence.

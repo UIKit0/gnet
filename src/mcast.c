@@ -342,6 +342,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
  *        <entry>unrestricted (global)</entry>
  *      </row>
  *    </tbody>
+ *    </tgroup>
  *  </table>
  *
  *  Returns: the TTL (an integer between 0 and 255), -1 if the kernel

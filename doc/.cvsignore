@@ -11,3 +11,5 @@ html.stamp
 sgml.stamp
 tmpl.stamp
 gnet-undocumented.txt
+xml
+gnet-docs.sgml

@@ -26,11 +26,11 @@ static gboolean   socks_enabled = FALSE;
 
 
 /**
- *  gnet_socks_get_enabled:
+ *  gnet_socks_get_enabled
  *
- *  Determine whether GNet SOCKS support is enabled.
+ *  Determine whether SOCKS support is enabled.
  *
- *  Returns: TRUE if SOCKS is enabled.
+ *  Returns: TRUE if SOCKS is enabled, FALSE otherwise.
  *
  **/
 gboolean
@@ -41,10 +41,10 @@ gnet_socks_get_enabled (void)
 
 
 /**
- *  gnet_socks_set_enabled:
- *  @enabled: Is SOCKS support enabled?
+ *  gnet_socks_set_enabled
+ *  @enabled: is SOCKS support enabled?
  *
- *  Set whether GNet SOCKS support is enabled.
+ *  Set whether SOCKS support is enabled.
  *
  **/
 void
@@ -60,25 +60,20 @@ gnet_socks_set_enabled (gboolean enabled)
 
 
 /**
- *  gnet_socks_get_server:
+ *  gnet_socks_get_server
  *
- *  Get the address of the SOCKS server used for TCP connections.
- *  Checks the gnet_socks_set_server() value and, if not set, the
- *  SOCKS_SERVER environment variable.  The SOCKS_SERVER enviroment
- *  variable can be in the form HOSTNAME or HOSTNAME:PORT.
+ *  Get the address of the SOCKS server.  This function checks the
+ *  gnet_socks_set_server() value and, if not set, the SOCKS_SERVER
+ *  environment variable.  The SOCKS_SERVER enviroment variable should
+ *  be in the form HOSTNAME or HOSTNAME:PORT.
  *
- *  Returns: Copy of the address; NULL if no server or SOCKS is
- *  disabled.
+ *  Returns: copy of the address or NULL if there is no server.
  *
  **/
 GInetAddr*
 gnet_socks_get_server (void)
 {
   GInetAddr* rv = NULL;
-
-  /* Server technically isn't set if SOCKS is disabled */
-  if (!socks_enabled)
-    return NULL;
 
   /* Auto-detect socks server */
   if (!socks_server)
@@ -93,8 +88,10 @@ gnet_socks_get_server (void)
 	  int i;
 	  GInetAddr* addr;
 	  
-	  for (i = 0; var[i] && var[i] != ':'; ++i) ;
-	  if (i == 0) return NULL;
+	  for (i = 0; var[i] && var[i] != ':'; ++i) 
+	    ;
+	  if (i == 0) 
+	    return NULL;
 	  hostname = g_strndup (var, i);
 
 	  if (var[i])
@@ -131,7 +128,7 @@ gnet_socks_get_server (void)
  *  gnet_socks_set_server:
  *  @ia: SOCKS server address
  *
- *  Set the address of the SOCKS server used for TCP connections.
+ *  Set the address of the SOCKS server.
  *
  **/
 void

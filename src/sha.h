@@ -34,22 +34,22 @@ typedef struct _GSHA GSHA;
 #define GNET_SHA_HASH_LENGTH	20
 
 
-GSHA*   gnet_sha_new (const guint8* buffer, guint length);
+GSHA*   gnet_sha_new (const gchar* buffer, guint length);
 GSHA*	gnet_sha_new_string (const gchar* str);
 GSHA*   gnet_sha_clone (const GSHA* gsha);
 void    gnet_sha_delete (GSHA* gsha);
 	
 GSHA*	gnet_sha_new_incremental (void);
-void	gnet_sha_update (GSHA* gsha, const guchar* buffer, guint length);
+void	gnet_sha_update (GSHA* gsha, const gchar* buffer, guint length);
 void	gnet_sha_final (GSHA* gsha);
 	
 gint 	gnet_sha_equal (gconstpointer p1, gconstpointer p2);
 guint	gnet_sha_hash (gconstpointer p);
 	
-guint8* gnet_sha_get_digest (const GSHA* gsha);
+gchar*  gnet_sha_get_digest (const GSHA* gsha);
 gchar*  gnet_sha_get_string (const GSHA* gsha);
 	
-void	gnet_sha_copy_string (const GSHA* gsha, guint8* buffer);
+void	gnet_sha_copy_string (const GSHA* gsha, gchar* buffer);
 
 
 #ifdef __cplusplus

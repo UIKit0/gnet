@@ -26,7 +26,6 @@ Use gnet_mcast_socket_set_loopback() to set whether packets sent
 should also be received.  By default.... FIX
 </para>
 
-
 <!-- ##### SECTION See_Also ##### -->
 <para>
 

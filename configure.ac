@@ -366,7 +366,6 @@ to configure.  The function's manpage may be able to tell you whether
 it is thread-safe or not.
 
 ])
-
 fi
 
 
@@ -385,6 +384,34 @@ if test "x$GCC" = "xyes"; then
 fi
 
 		
+###############################
+# GTK-DOC
+
+AC_ARG_WITH(html-dir, [  --with-html-dir=PATH    path to installed docs])
+if test "x$with_html_dir" = "x" ; then
+  HTML_DIR=$datadir/doc/libgnet$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION-dev/html
+else
+  HTML_DIR=$with_html_dir
+fi
+echo $HTML_DIR
+AC_SUBST(HTML_DIR)
+
+AC_CHECK_PROG(GTKDOC, [gtkdoc-mkdb], [yes], [no])
+
+AC_ARG_ENABLE(gtk-doc, [  --enable-gtk-doc  Use gtk-doc to build documentation [default=no]], enable_gtk_doc="$enableval", enable_gtk_doc=no)
+
+if test x$enable_gtk_doc = xauto ; then
+  if test x$GTKDOC = xyes ; then
+    enable_gtk_doc=yes
+  else
+    enable_gtk_doc=no 
+  fi
+fi
+
+AM_CONDITIONAL(ENABLE_GTK_DOC, test x$enable_gtk_doc = xyes)
+
+
+
 ###############################
 # Outputs
 AM_CONFIG_HEADER(config.h)

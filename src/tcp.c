@@ -858,6 +858,7 @@ gnet_tcp_socket_server_new (gint port)
 }
 
 
+/* FIX: Don't pass the port */
 /**
  *  gnet_tcp_socket_server_new_interface:
  *  @iface: Interface to bind to (NULL for all interfaces)

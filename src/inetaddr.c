@@ -2722,7 +2722,7 @@ gnet_inetaddr_gethostaddr (void)
  *
  *  Create a #GInetAddr with the address INADDR_ANY and port 0.  This
  *  is useful for creating default addresses for binding.  The
- *  address's name will be "<INADDR_ANY>".
+ *  address's name will be "&lt;INADDR_ANY&gt;".
  *
  *  Returns: INADDR_ANY #GInetAddr.
  *

@@ -4,7 +4,6 @@ Inetaddr
 <!-- ##### SECTION Short_Description ##### -->
 Internet Address
 
-
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 GInetAddr represents an internet address.  This module provides
@@ -56,7 +55,6 @@ useful for automatically configuring peer-to-peer applications.  Note
 that by default, the gnet_tcp_socket_server_new() binds to all
 interfaces.
 </para>
-
 
 <!-- ##### SECTION See_Also ##### -->
 <para>

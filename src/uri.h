@@ -53,7 +53,7 @@ struct _GURI
   gchar* path;
   gchar* query;
   gchar* fragment;
-} GURI;
+};
 
 
 

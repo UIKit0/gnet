@@ -1,3 +1,15 @@
+Wed Jan 29 21:23:57 2003  David Helder  <dhelder@umich.edu>
+
+	* src/md5.[hc]: s/guchar and gint8/gchar/
+	* src/sha.[hc]: s/guchar and gint8/gchar/
+
+	* src/socks.c (gnet_socks_get_server): Return the socks
+	   server even if socks in disabled.
+
+	* tests, examples: Renames.  Moved dnstest and hostinfo to
+	    examples.
+	* *: Doc updates.
+	
 Tue Jan 28 23:17:30 2003  David Helder  <dhelder@umich.edu>
 
 	* *: Doc updates.  Still rough.

@@ -39,14 +39,13 @@ void lookup_block_single (int run);
 void lookup_block_list (int run);
 
 void lookup_async_forward(int run);
-void inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, gpointer data);
+void inetaddr_cb(GInetAddr* inetaddr, gpointer data);
 
 void lookup_async_forward_list (int run);
-void list_cb(GList* ialist, GInetAddrAsyncStatus status, gpointer data);
+void list_cb(GList* ialist, gpointer data);
 
 void lookup_async_reverse(int run);
-void reverse_inetaddr_cb(gchar* name, GInetAddrAsyncStatus status, 
-			 gpointer data);
+void reverse_inetaddr_cb(gchar* name, gpointer data);
 
 
 void usage(void);
@@ -224,11 +223,11 @@ lookup_async_forward (int run)
 
 
 void
-inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
+inetaddr_cb(GInetAddr* ia, gpointer data)
 {
   int i = GPOINTER_TO_INT(data);
 
-  if (status == GINETADDR_ASYNC_STATUS_OK)
+  if (ia)
     {
       gchar* cname;
 
@@ -266,11 +265,11 @@ lookup_async_forward_list (int run)
 
 
 void
-list_cb(GList* ialist, GInetAddrAsyncStatus status, gpointer data)
+list_cb(GList* ialist, gpointer data)
 {
   int run = GPOINTER_TO_INT(data);
 
-  if (status == GINETADDR_ASYNC_STATUS_OK)
+  if (ialist)
     {
       GList* i;
 
@@ -330,13 +329,12 @@ lookup_async_reverse (int run)
 
 
 void
-reverse_inetaddr_cb (gchar* name, GInetAddrAsyncStatus status, 
-		     gpointer data)
+reverse_inetaddr_cb (gchar* name, gpointer data)
 {
   struct ReverseState* rs = (struct ReverseState*) data;
 
 
-  if (status == GINETADDR_ASYNC_STATUS_OK)
+  if (name)
     {
       gchar* cname;
 
@@ -371,7 +369,7 @@ reverse_inetaddr_cb (gchar* name, GInetAddrAsyncStatus status,
 void
 usage(void)
 {
-  g_print ("dnstest -a -r -s -n <num runs> <host>\n");
+  g_print ("dnslookup -a -r -s -n <num runs> <host>\n");
   g_print ("  -a                asynchronous\n");
   g_print ("  -r                reverse lookup\n");
   g_print ("  -s                single forward lookup\n");

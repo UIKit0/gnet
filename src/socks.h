@@ -36,7 +36,7 @@ extern "C" {
 /**
  *  GNET_SOCKS_PORT
  *
- *  Default port for SOCKS protocol.
+ *  Default port for the SOCKS protocol.
  **/
 #define GNET_SOCKS_PORT 1080
 

@@ -28,18 +28,18 @@ static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpo
 
 /**
  *  gnet_server_new:
- *  @iface: Interface to bind to (NULL for any interface)
- *  @port: Port to bind to (0 for any port)
- *  @func: Callback to call when a connection is accepted
- *  @user_data: Data to pass to callback.
+ *  @iface: interface to bind to (NULL for any interface)
+ *  @port: port to bind to (0 for any port)
+ *  @func: callback to call when a connection is accepted
+ *  @user_data: data to pass to callback
  *
  *  Create a new #GServer object representing a server.  Normally,
- *  @iface is NULL to bind to all interfaces and @port is a specific
- *  number.  The callback is called whenever a new connection arrives
- *  or if there is a server error.  The callback is not called again
- *  after a server error.
+ *  @iface is set to NULL to bind to all interfaces and @port is a
+ *  specific number.  The callback is called whenever a new connection
+ *  arrives or if there is a server error.  The callback is not called
+ *  again after a server error.
  *
- *  Returns: A new #GServer.
+ *  Returns: a new #GServer.
  *
  **/
 GServer*
@@ -73,7 +73,7 @@ gnet_server_new (const GInetAddr* iface, gint port,
 
 /**
  *  gnet_server_delete:
- *  @server: Server to delete.
+ *  @server: #GServer to delete.
  *
  *  Close and delete a #GServer.
  *

@@ -115,7 +115,7 @@ do
   fi
 done
 
-conf_flags="--enable-maintainer-mode --enable-compile-warnings --enable-debug=yes"
+conf_flags="--enable-maintainer-mode --enable-compile-warnings --enable-debug=yes --enable-gtk-doc=auto"
 
 if test x$NOCONFIGURE = x; then
   echo Running $srcdir/configure $conf_flags "$@" ...
