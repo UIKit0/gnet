@@ -7,7 +7,7 @@ AC_PREREQ([2.52])
 
 ###############################
 # Init autoconf and automake
-AC_INIT([gnet], [1.1.4], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [1.1.5], [gnet@gnetlibrary.org])
 # CANONICAL_TARGET has to occur before INIT_AUTOMAKE, for reasons I don't
 # fully understand
 AC_CANONICAL_TARGET
@@ -30,9 +30,9 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=1
 GNET_MINOR_VERSION=1
-GNET_MICRO_VERSION=4
-GNET_INTERFACE_AGE=3
-GNET_BINARY_AGE=4
+GNET_MICRO_VERSION=5
+GNET_INTERFACE_AGE=4
+GNET_BINARY_AGE=5
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
