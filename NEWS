@@ -4,7 +4,7 @@ GNet NEWS
 
 Changes in Gnet
 
-1.1.1 ("Cornmeal" release, UNRELEASED)
+1.1.1 ("Cornmeal" release)
 -----
 * Experimental Unix sockets support
 * Experimental SOCKS support

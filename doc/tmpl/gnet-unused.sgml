@@ -264,15 +264,6 @@ Internal interfaces
 
 @conn: 
 
-<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
-<para>
-
-</para>
-
-@ia: 
-@func: 
-@data: 
-
 <!-- ##### FUNCTION gnet_inetaddr_sockaddr_new ##### -->
 <para>
 

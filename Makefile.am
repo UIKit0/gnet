@@ -26,8 +26,8 @@ $(pkgconfig_DATA): config.status
 configincludedir = $(pkglibdir)/include
 configinclude_DATA = gnetconfig.h
 
-WEBPATH=/n/misc/home/www/gnetlibrary.org/html
-DEBPATH=$(HOME)/public_html/misc/debian
+WEBPATH=/n/mesh/home/www/gnetlibrary.org/html
+DEBPATH=$(HOME)/public_html/mesh/debian
 
 DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING
 
@@ -52,13 +52,13 @@ copyweb:
 	cp -f doc/html/book1.html doc/html/index.html
 	-(cd $(WEBPATH); chmod a+r $(DOCS))
 	-cp -f $(TARBALL) $(WEBPATH)/src
-	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)/deb
-	-cp -f debian-temp/$(DEBSRC) $(WEBPATH)/deb
+#	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(WEBPATH)/deb
+#	-cp -f debian-temp/$(DEBSRC) $(WEBPATH)/deb
 	-cp -f $(RPMFILE) $(RPMFILEDEV) $(RPMFILESRC) $(WEBPATH)/rpm
 	-chmod a+r $(WEBPATH)/src/* $(WEBPATH)/deb/* $(WEBPATH)/rpm/*
-	-rm -f $(DEBPATH)/dists/unstable/main/binary-i386/libs/libgnet*
-	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(DEBPATH)/dists/unstable/main/binary-i386/libs
-	-(cd $(DEBPATH); ./setup.sh)
+#	-rm -f $(DEBPATH)/dists/unstable/main/binary-i386/libs/libgnet*
+#	-cp -f debian-temp/$(DEBFILE) debian-temp/$(DEBFILEDEV) $(DEBPATH)/dists/unstable/main/binary-i386/libs
+#	-(cd $(DEBPATH); ./setup.sh)
 
 deb:
 	rm -rf debian-temp

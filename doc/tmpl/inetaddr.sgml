@@ -132,6 +132,18 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
+<para>
+
+</para>
+
+@ia: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@func: 
+@data: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_get_name_async ##### -->
 <para>
 
