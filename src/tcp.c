@@ -1,6 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000-2003  David Helder
- * Copyright (C) 2000-2003  Andrew Lanoix
+ * Copyright (C) 2000-2004  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -600,7 +600,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   state->connect_watch = 
     g_io_add_watch(gnet_private_io_channel_new(s->sockfd),
-		   G_IO_IN | G_IO_OUT | G_IO_ERR,
+		   GNET_ANY_IO_CONDITION,
 		   gnet_tcp_socket_new_async_cb, 
 		   state);
 

@@ -1,6 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
- * Copyright (C) 2003  Andrew Lanoix
+ * Copyright (C) 2003-2004  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -44,7 +44,9 @@
     (C)->watch_flags &= ~(FLAG);			\
     if ((C)->iochannel) {				\
       if ((C)->watch) g_source_remove ((C)->watch);	\
-      (C)->watch = g_io_add_watch ((C)->iochannel, (C)->watch_flags, async_cb, (C)); \
+      (C)->watch = (C)->watch_flags ? g_io_add_watch ((C)->iochannel, \
+                                                      (C)->watch_flags, \
+                                                      async_cb, (C)) : 0; \
  }}} while (0)
 
 #define UNSET_WATCH (C, FLAG)
