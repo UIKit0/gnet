@@ -5,7 +5,7 @@
 EXTRA_PROGRAMS = echoserver echoclient 	\
 		 echoserver-udp echoclient-udp	\
 		 hfetch sdr ljoust
-EXTRA_DIST     = ljoust.c
+EXTRA_DIST     = ljoust.c makefile.mingw
 CLEANFILES     = $(EXTRA_PROGRAMS) ljoust
 
 INCLUDES += `gnet-config --cflags`

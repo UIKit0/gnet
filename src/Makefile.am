@@ -6,6 +6,8 @@ INCLUDES = -DG_LOG_DOMAIN=\"GNet\" @GNET_DEBUG_FLAGS@
 
 gnetincludedir = $(includedir)/gnet
 
+EXTRA_DIST=makefile.mingw
+
 lib_LTLIBRARIES = libgnet.la
 
 libgnet_la_LDFLAGS = \

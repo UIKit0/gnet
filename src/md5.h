@@ -24,6 +24,7 @@ typedef struct _GMD5 GMD5;
 
 GMD5*   gnet_md5_new (const guchar* buffer, guint length);
 GMD5*	gnet_md5_new_string (const gchar* str);
+GMD5*   gnet_md5_clone (const GMD5* gmd5);
 void    gnet_md5_delete (GMD5* gmd5);
 	
 GMD5*	gnet_md5_new_incremental (void);

@@ -4,9 +4,14 @@ GNet NEWS
 
 Changes in Gnet
 
+1.1.1 ("Cornmeal" release, UNRELEASED)
+-----
+* gnet_{sha,md5}_clone functions
+* MacOSX port
+
+
 1.1.0 ("Oatmeal" release)
 -----
-
 * UDP supports broadcast
 * TCP/UDP supports multiple interfaces
 * Various new internet address helper functions

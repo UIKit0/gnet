@@ -1,0 +1,12 @@
+
+To compile GNet on MacOS X (and NeXT, OpenStep and other similar OS's)
+you need to disable smart preprocessing.  To do this, instead of just
+running configure run:
+
+csh/tcsh:
+  % setenv CFLAGS -traditional-cpp
+  % ./configure
+
+sh/bash:
+  % CFLAGS=-traditional-cpp ./configure
+

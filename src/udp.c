@@ -240,16 +240,14 @@ gnet_udp_socket_receive (GUdpSocket* s, GUdpPacket* packet)
 gboolean
 gnet_udp_socket_has_packet (const GUdpSocket* s)
 {
-  struct pollfd pfd;
+  fd_set readfds;
+  struct timeval timeout = {0, 0};
 
-  pfd.fd = s->sockfd;
-  pfd.events = POLLIN | POLLPRI;
-  pfd.revents = 0;
-
-  if (poll(&pfd, 1, 0) >= 0)
+  FD_ZERO (&readfds);
+  FD_SET (s->sockfd, &readfds);
+  if ((select(s->sockfd + 1, &readfds, NULL, NULL, &timeout)) == 1)
     {
-      if ((pfd.events & pfd.revents) != 0)
-	return TRUE;
+      return TRUE;
     }
 
   return FALSE;

@@ -526,6 +526,32 @@ gnet_sha_new_string (const gchar* str)
 }
 
 
+
+/**
+ *  gnet_sha_clone:
+ *  @gsha: SHA to clone.
+ * 
+ *  Create a SHA from another one.
+ *
+ *  Returns: a new #GSHA.
+ *
+ **/
+GSHA*           
+gnet_sha_clone (const GSHA* gsha)
+{
+  GSHA* gsha2;
+
+  g_return_val_if_fail (gsha, NULL);
+
+  gsha2      = g_new0 (GSHA, 1);
+  gsha2->ctx = gsha->ctx;
+  memcpy (gsha2->digest, gsha->digest, sizeof(gsha->digest));
+
+  return gsha2;
+}
+
+
+
 /** 
  *  gnet_sha_delete:
  *  @gsha: #GSHA to delete

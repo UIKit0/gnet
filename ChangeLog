@@ -1,3 +1,28 @@
+Thu May 31 10:46:30 2001  David Helder  <dhelder@umich.edu>
+
+
+Thu May 31 10:39:56 2001  David Helder  <dhelder@umich.edu>
+
+	* Makefile.am (EXTRA_DIST): Add README.win32 GNET.DSP
+	     config.h.win32 gnet.def
+	* */Makefile.am: Add makefile.mingw
+	
+	* configure.in: Version is now 1.1.1 [unreleased]
+	
+	* configure.in: Remove poll check
+	* src/udp.c (gnet_udp_socket_has_packet): Use select,
+	   not poll.
+	* src/gnet-private.h: Remove poll
+	* README.macosx: Added
+	* Makefile.am: Added README.macosx to 
+	   EXTRA_DIST
+	* AUTHORS: Added Eric Cronin for above
+
+	* src/sha.c (gnet_sha_clone): Added.
+	* src/md5.c (gnet_md5_clone): Added.
+
+	* debian/control.in: Sync with README
+
 Thu May 24 21:20:09 2001  David Helder  <dhelder@umich.edu>
 
 	* gnet.spec.in: Change name back to 'gnet'.  I don't

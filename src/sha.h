@@ -24,6 +24,7 @@ typedef struct _GSHA GSHA;
 
 GSHA*   gnet_sha_new (const guint8* buffer, guint length);
 GSHA*	gnet_sha_new_string (const gchar* str);
+GSHA*   gnet_sha_clone (const GSHA* gsha);
 void    gnet_sha_delete (GSHA* gsha);
 	
 GSHA*	gnet_sha_new_incremental (void);

@@ -46,9 +46,6 @@
 
 #include <unistd.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_SYS_POLL_H
-#include <sys/poll.h>
-#endif
 #include <sys/socket.h>
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>

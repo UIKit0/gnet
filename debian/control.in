@@ -16,10 +16,8 @@ Description: Developer files for GNet network library
  and easy to port.
  .
  Features:
-   * TCP 'client' sockets
-   * TCP 'server' sockets
-   * UDP
-   * IP Multicast
+   * TCP "client" and "server" sockets
+   * UDP and IP Multicast
    * Internet address abstraction
    * Asynchronous socket IO
    * Asynchronous DNS lookup
@@ -39,10 +37,8 @@ Description: GNet network library
  and easy to port.
  .
  Features:
-   * TCP 'client' sockets
-   * TCP 'server' sockets
-   * UDP
-   * IP Multicast
+   * TCP "client" and "server" sockets
+   * UDP and IP Multicast
    * Internet address abstraction
    * Asynchronous socket IO
    * Asynchronous DNS lookup

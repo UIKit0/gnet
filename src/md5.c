@@ -403,6 +403,32 @@ gnet_md5_new_string (const gchar* str)
 }
 
 
+
+/**
+ *  gnet_md5_clone:
+ *  @gmd5: MD5 to clone.
+ * 
+ *  Create a MD5 from another one.
+ *
+ *  Returns: a new #GMD5.
+ *
+ **/
+GMD5*           
+gnet_md5_clone (const GMD5* gmd5)
+{
+  GMD5* gmd52;
+
+  g_return_val_if_fail (gmd5, NULL);
+
+  gmd52      = g_new0 (GMD5, 1);
+  gmd52->ctx = gmd5->ctx;
+  memcpy (gmd52->digest, gmd5->digest, sizeof(gmd5->digest));
+
+  return gmd52;
+}
+
+
+
 /** 
  *  gnet_md5_delete:
  *  @gmd5: #GMD5 to delete
