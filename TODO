@@ -11,7 +11,6 @@ Before 0.2 (first major release):
 
   Programming
    - More portability fixes
-   - Add ref counts to structures.
 
   Documentation
    - Write a manpage for gnet-config (start with the one for glib).
@@ -28,6 +27,17 @@ Long term:
 
     - Add more error types
 
+    - Differentiate between creating and connecting.  
+
+	So you'd have:
+
+	tcp_socket_new(void)            (this just calls socket())
+	tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
+
+	The advantage is that we could set options and also allow the
+	user to bind to a specific address if the user is on a
+	multi-homed system.
+
     - Perl-style pack and unpack functions
 
         These don't have to be exact clones.  There are some things I
@@ -42,10 +52,19 @@ Long term:
       * Add option to use ADNS? (and update license)
       * Consider modifying glibc/BIND code?
 
+    - Add lightweight intraprocess communication stuff via IOChannel.  I'd
+	like a shared buffer and a message queue.  These should be simple
+	to do.
+
     - Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
 
     - Better support for multihomed systems (I'm not sure what's 
 	needed)
+
+    - Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel).  sendfile
+	is available on Linux and Windows, but I'm sure the semantics
+	are different (that's why having this function would be
+	handy).  We would also want to 
 
     - gnet_inetaddr_new will give you localhost if you give it an
 	hostname of "" in Linux.  Is this true on all systems?  If
@@ -86,6 +105,9 @@ Long term:
 
 	The GTK doc folks are working on a new standard for describing
 	interfaces.  Use this when it's done.
+
+    - It would be nice to support out-of-band data, but I have no idea
+	how it would affect the GLib event loop.  
 
     - Some sort of network configuration widget?
 
