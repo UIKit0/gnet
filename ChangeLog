@@ -1,3 +1,8 @@
+Sun Apr  9 15:19:16 2000  David Helder  <dhelder@umich.edu>
+
+	* autogen.sh: Added Gnome-like autogen script
+	* auto*: Removed
+
 Thu Apr  6 16:14:16 2000  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_async): Don't watch PRI or
