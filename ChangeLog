@@ -1,3 +1,12 @@
+Tue Sep 10 20:35:27:39 2002 Andrew Lanoix <alanoix@umich.edu>
+
+	* README.win32: Update
+	* GNET.DSP: Link to Glib 2.0
+	* gnet.def: Add new funcs
+	* examples\makefile.mingw: Update
+	* tests\makefile.mingw: Update
+	* src\makefile.mingw: Update
+
 Wed Sep 04 21:54:47:06 2002 Andrew Lanoix <alanoix@umich.edu>
 
 	* src/gnet.c (gnet_init): Don't do anything on win32

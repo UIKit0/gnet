@@ -1,6 +1,6 @@
 CC = gcc
-FLAGS = -g -Wall -mno-cygwin -mpentium -fnative-struct -DGNET_EXPERIMENTAL=1
-LINK =  -lgnet-1.1 -lglib-1.3 -lws2_32
+FLAGS = -g -Wall -mno-cygwin -mcpu=pentium -DGNET_EXPERIMENTAL=1
+LINK =  -lgnet-1.1 -lglib-2.0-0 -lws2_32
 INC = -I../glib -I. -I../gnet -L../glib -L../gnet
 all:
 	$(CC) $(FLAGS) $(INC) echoserver.c -o echoserver $(LINK)
@@ -8,3 +8,4 @@ all:
 	$(CC) $(FLAGS) $(INC) echoserver-udp.c -o udp-server $(LINK)
 	$(CC) $(FLAGS) $(INC) echoclient-udp.c -o udp-client $(LINK)
 	$(CC) $(FLAGS) $(INC) hfetch.c -o hfetch $(LINK)
+	$(CC) $(FLAGS) $(INC) hash.c -o hash $(LINK)

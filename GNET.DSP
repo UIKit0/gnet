@@ -8,12 +8,12 @@ CFG=gnet - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "Gnet.mak".
+!MESSAGE NMAKE /f "GNET.MAK".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "Gnet.mak" CFG="gnet - Win32 Debug"
+!MESSAGE NMAKE /f "GNET.MAK" CFG="gnet - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 glib-1.3.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"Release/gnet-1.1.dll"
+# ADD LINK32 glib-2.0.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"Release/gnet-1.1.dll"
 
 !ELSEIF  "$(CFG)" == "gnet - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 glib-1.3.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"Debug/gnet-1.1.dll" /pdbtype:sept
+# ADD LINK32 glib-2.0.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"Debug/gnet-1.1.dll" /pdbtype:sept
 
 !ENDIF 
 
@@ -133,6 +133,14 @@ SOURCE=.\server.c
 # Begin Source File
 
 SOURCE=.\sha.c
+# End Source File
+# Begin Source File
+
+SOURCE=".\socks-private.c"
+# End Source File
+# Begin Source File
+
+SOURCE=.\socks.c
 # End Source File
 # Begin Source File
 
@@ -205,6 +213,14 @@ SOURCE=.\server.h
 # Begin Source File
 
 SOURCE=.\sha.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\socks-private.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\socks.h
 # End Source File
 # Begin Source File
 

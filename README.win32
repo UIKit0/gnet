@@ -6,20 +6,8 @@ This snapshot was compiled with extra development GNet code.
 That code has not been tested on windows. See README for
 a list of Experimental code.
 
-I am using Glib CVS HEAD checked out on 2001-7-24.
-A checkout at a later date may not compile or work. Tor is back 
-and working on a new release of glib.
-
-If you don't want to compile GLib and are willing to use
-an old buggy release use GLib 1.3 snapshot 20010301.
-[http://www.gimp.org/win32/glib-dev-20010301.zip]
-That glib snapshot has two confirmed problems:
-1) glib's socket iochannels are not freed properly,
-which causes Winsock to run out of buffer space over time.
-[It is fixed in GLIB's CVS]
-2) glib's window handle callback code always calls back,
-GNet in this release ignores those extra callbacks. [It is
-fixed in GLIB's CVS]
+This release of GNet is links to libglib-2.0-0.dll.
+You will have to rebuild if you have a newer version.
 
 Join or checkout the mailing lists at
 http://www.gnetlibrary.org/ for the most
@@ -55,18 +43,18 @@ the extra characters out before calling those functions.
 MINGW/GCC & CYGWIN Notes
 ------------------------
 
-Compiling GNet on windows with gcc/mingw is supported. You first need to patch 
-w32api up to version 0.5 or later. [see http://mingw.sourceforge.net/] 
+Compiling GNet on windows with gcc/mingw is supported. 
+[see http://mingw.sourceforge.net/] 
 A makefile to build GNet is included in the zip. 
-[UPDATE: I have not tested Mingw 1.0 with GNet]
+I have tested with Mingw 2.0.
 
 You can use/link GNet with gcc/mingw. A ".a" is included in the zip.
-A makefile is provided to compile the example programs.
+A makefile is provided to compile the example and test programs.
 
 When compiling your program use the "-lws2_32 switch"
 example:
-gcc -g -Wall -mno-cygwin -mpentium -fnative-struct -I../glib -I. -I../gnet 
--L../glib -L../gnet hostinfo.c -o hostinfo -lgnet-1.0 -lglib-1.3 -lws2_32
+gcc -g -Wall -mno-cygwin -mcpu=pentium -I../glib -I. -I../gnet 
+-L../glib -L../gnet hostinfo.c -o hostinfo -lgnet-1.1 -lglib-2.0-0 -lws2_32
 
 MSVC 6.0 Notes
 --------------

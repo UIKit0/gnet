@@ -1,6 +1,6 @@
 CC = gcc
-FLAGS = -g -Wall -mno-cygwin -mpentium -fnative-struct -DGNET_EXPERIMENTAL=1
-LINK =  -lgnet-1.1 -lglib-1.3 -lws2_32
+FLAGS = -g -Wall -mno-cygwin -mcpu=pentium -DGNET_EXPERIMENTAL=1
+LINK =  -lgnet-1.1 -lglib-2.0-0 -lws2_32
 INC = -I../glib -I. -I../gnet -L../glib -L../gnet
 all:
 	$(CC) $(FLAGS) $(INC) hostinfo.c -o hostinfo $(LINK)
@@ -8,3 +8,4 @@ all:
 	$(CC) $(FLAGS) $(INC) pack.c -o pack $(LINK)
 	$(CC) $(FLAGS) $(INC) unpack.c -o unpack $(LINK)
 	$(CC) $(FLAGS) $(INC) hash.c -o hash $(LINK)
+	$(CC) $(FLAGS) $(INC) url_test.c -o url_test $(LINK)

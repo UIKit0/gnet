@@ -1,8 +1,8 @@
 CC = gcc
-FLAGS = -g -Wall -mno-cygwin -mpentium -fnative-struct -DGNET_EXPERIMENTAL=1
-INCLUDE = -I../glib -I. -L../glib
-LIBS = -lglib-1.3 -lws2_32
-OFILES = udp.o tcp.o iochannel.o inetaddr.o mcast.o gnet.o gnet-private.o sha.o md5.o url.o pack.o conn.o server.o
+FLAGS = -g -Wall -mno-cygwin -mcpu=pentium -DGNET_EXPERIMENTAL=1
+INCLUDE = -I../glib -I. -L../glib -L.
+LIBS = -lglib-2.0-0 -lws2_32
+OFILES = udp.o tcp.o iochannel.o inetaddr.o mcast.o gnet.o gnet-private.o sha.o md5.o url.o pack.o conn.o server.o socks.o socks-private.o
 
 all:
 	$(CC) $(FLAGS) $(INCLUDE) -c udp.c
@@ -18,4 +18,6 @@ all:
 	$(CC) $(FLAGS) $(INCLUDE) -c pack.c
 	$(CC) $(FLAGS) $(INCLUDE) -c conn.c
 	$(CC) $(FLAGS) $(INCLUDE) -c server.c
+	$(CC) $(FLAGS) $(INCLUDE) -c socks.c
+	$(CC) $(FLAGS) $(INCLUDE) -c socks-private.c
 	dllwrap $(INCLUDE) --export-all --output-def gnet.def --implib libgnet-1.1.a -o gnet-1.1.dll $(OFILES) $(LIBS)
