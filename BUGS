@@ -15,7 +15,7 @@ looping.  (Newer versions of GLib may warn when this happens.)
 One solution is to not set more than one watch per iochannel.  In many
 situations this is difficult to do.  In newer versions of Jungle
 Monkey, there is a single demultiplexer function that acts as the only
-watch and calls the appropriate IO handler.  An simpler alternative is
+watch and calls the appropriate IO handler.  A simpler alternative is
 to replace the limited poll with an unlimited poll.  This requires
 distributing an additional file and some autoconf magic.  See Jungle
 Monkey 0.1.10 for an example of how to do this.

@@ -1,3 +1,10 @@
+Fri Jun  8 15:26:41 2001  David Helder  <dhelder@umich.edu>
+
+	* examples/echoserver.c (async_server_iofunc): Should be
+	   accept_nonblcok in async_server_iofunc, not accept.
+	
+	* BUGS: Typo
+
 Thu May 31 10:46:30 2001  David Helder  <dhelder@umich.edu>
 
 	* Makefile.am (EXTRA_DIST): Add README.win32 GNET.DSP

@@ -99,7 +99,7 @@ normal_echoserver(gint port)
   server = gnet_tcp_socket_server_new(port);
   g_assert (server != NULL);
 
-  while ((client = gnet_tcp_socket_server_accept(server)) != NULL)
+  while ((client = gnet_tcp_socket_server_accept (server)) != NULL)
     {
       ioclient = gnet_tcp_socket_get_iochannel(client);
       g_assert (ioclient != NULL);
@@ -194,8 +194,8 @@ async_server_iofunc (GIOChannel* iochannel, GIOCondition condition,
       GIOChannel* client_iochannel = NULL;
       ClientState* client_state = NULL;
 
-      client = gnet_tcp_socket_server_accept(server);
-      g_assert (client != NULL);
+      client = gnet_tcp_socket_server_accept_nonblock (server);
+      if (!client) return TRUE;
 
       client_iochannel = gnet_tcp_socket_get_iochannel(client);
       g_assert (client_iochannel != NULL);

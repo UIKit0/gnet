@@ -6,7 +6,7 @@ Makefile
 libtool
 gnet-config
 config.cache
-gnet-*.tar.gz
+gnet*.tar.gz
 gnet.spec
 config.guess
 config.sub

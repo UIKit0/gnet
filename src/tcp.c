@@ -437,13 +437,13 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   state->data = data;
   state->socket->sockfd = sockfd;
 
-	state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
+  state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
 					G_IO_IN | G_IO_ERR,
 					gnet_tcp_socket_new_async_cb, 
 					state);
 
 
-	if (state->connect_watch <= 0)
+  if (state->connect_watch <= 0)
     {
       (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
       return NULL;
