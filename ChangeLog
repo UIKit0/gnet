@@ -1,3 +1,8 @@
+Wed Feb  5 12:26:29 2003  David Helder  <dhelder@umich.edu>
+
+	* src/base64.c: Patch from fredo
+	* tests/base64_test.c: Test from fredo.
+
 Tue Feb  4 20:05:23 2003  David Helder  <dhelder@umich.edu>
 
 	* tests/Makefile.am (ipv6_test_SOURCES): Fix ipv6_test_SOURCES

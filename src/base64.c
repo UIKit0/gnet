@@ -87,11 +87,11 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
 
   /* Calculate required length of dst.  4 bytes of dst are needed for
      every 3 bytes of src. */
-  *dstlenp = (((srclen + 2) / 3) * 4);
+  *dstlenp = (((srclen + 2) / 3) * 4)+5;
   if (strict)
     *dstlenp += (*dstlenp / 72);	/* Handle trailing \n */
 
-  dst = g_new(gchar, *dstlenp + 1);
+  dst = g_new(gchar, *dstlenp );
 
   /* bulk encoding */
   dstpos = 0;
@@ -117,7 +117,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
       output[2] = ((input[1] & 0x0f) << 2) + (input[2] >> 6);
       output[3] = (input[2] & 0x3f);
 
-      g_assert ((dstpos + 4) > *dstlenp);
+      g_assert ((dstpos + 4) < *dstlenp);
 
       /* Map output to the Base64 alphabet */
       dst[dstpos++] = gnet_Base64[(guint) output[0]];
@@ -142,7 +142,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
       output[1] = ((input[0] & 0x03) << 4) + (input[1] >> 4);
       output[2] = ((input[1] & 0x0f) << 2) + (input[2] >> 6);
 
-      g_assert ((dstpos + 4) > *dstlenp);
+      g_assert ((dstpos + 4) < *dstlenp);
 
       dst[dstpos++] = gnet_Base64[(guint) output[0]];
       dst[dstpos++] = gnet_Base64[(guint) output[1]];
@@ -155,7 +155,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
       dst[dstpos++] = gnet_Pad64;
     }
 
-  g_assert (dstpos >= *dstlenp);
+  g_assert (dstpos <= *dstlenp);
 
   dst[dstpos] = '\0';
 
@@ -315,7 +315,7 @@ gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp)
 	    return NULL;
 	  }
       }
-
+  dst[dstidx]=0;
   *dstlenp = dstidx;
   return dst;
 }

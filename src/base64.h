@@ -1,17 +1,6 @@
-/***********************************************************************
- *                   _     _                     __   _  _
- *   __ _ _ __   ___| |_  | |__   __ _ ___  ___ / /_ | || |
- *  / _` | '_ \ / _ \ __| | '_ \ / _` / __|/ _ \ '_ \| || |_
- * | (_| | | | |  __/ |_  | |_) | (_| \__ \  __/ (_) |__   _|
- *  \__, |_| |_|\___|\__| |_.__/ \__,_|___/\___|\___/   |_|
- *  |___/
- *
- *  created by Alfred Reibenschuh <alfredreibenschuh@gmx.net>,
- *  under the ``GNU Library General Public License´´ (see below).
- *
- ***********************************************************************
- *
+/* GNet Base 64 module
  * Copyright (C) 2003 Free Software Foundation
+ * Created by Alfred Reibenschuh <alfredreibenschuh@gmx.net>,
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -24,10 +13,11 @@
  * Library General Public License for more details.
  *
  * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the Free
- * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- ***********************************************************************/
+ * License along with this library; if not, write to the 
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA  02111-1307, USA.
+ */
+
 
 #ifndef _GNET_BASE64_H
 #define _GNET_BASE64_H

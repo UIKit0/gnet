@@ -119,13 +119,14 @@ pass.  It's easy:
   All 6 tests passed
   ==================
 
-
-Please run the client/server test also.  It's a perl script call
-tests/client_server_test.pl.  Run it from the tests directory.
+The above tests do not use the network.  There are some tests that do
+use the network.  To enable them, either run autogen.sh or pass
+--enable-network-tests=yes to configure.
 
 Please write automated tests for new modules when appropriate.  Place
 the test in the tests directory and add it to the Makefile.am.  Test
-programs should exit(0) if successful and exit(1) otherwise.
+programs should exit(0) if successful and exit(1) otherwise.  Tests
+that use the network should
 
 
 
