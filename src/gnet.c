@@ -82,8 +82,8 @@ ipv6_detect_envvar (void)
   if (envvar == NULL)
      return FALSE;
 
-  loc4 = index (envvar, '4');
-  loc6 = index (envvar, '6');
+  loc4 = strchr (envvar, '4');
+  loc6 = strchr (envvar, '6');
 
   if (loc4 && loc6)
     {

@@ -1,3 +1,7 @@
+Tue Apr 15 11:07:52 2003  David Helder  <dhelder@umich.edu>
+
+	* src/gnet.c (ipv6_detect_envvar): s/index/strchr/
+
 Sun Apr 13 17:50:23 2003  David Helder  <dhelder@umich.edu>
 
 	* doc/Makefile.am (maintainer-clean-local): Fix clean rule.
