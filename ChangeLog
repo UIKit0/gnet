@@ -1,3 +1,8 @@
+Tue May 13 22:31:19 2003  David Helder  <dhelder@umich.edu>
+
+	* NEWS: 2.0.3
+	* configure.ac (GNET_BINARY_AGE): "
+
 Tue May 13 14:58:28 2003  David Helder  <dhelder@umich.edu>
 
 	* README: Added Gnome Jabber.

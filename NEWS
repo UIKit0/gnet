@@ -4,6 +4,11 @@ GNet NEWS
 
 Changes in Gnet
 
+2.0.3
+-----
+* Minor bug fix in TCP connect
+* Win32 compile/bug fixes (note: additional work still needed)
+
 2.0.2
 -----
 * RPM fixes (thanks Bas Mevissen!)
