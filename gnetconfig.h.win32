@@ -1,0 +1,12 @@
+/* This file is hand crafted for Win32 */
+
+#ifndef GNETCONFIG_H
+#define GNETCONFIG_H
+
+#define GNET_MAJOR_VERSION 1
+#define GNET_MINOR_VERSION 0
+#define GNET_MICRO_VERSION 4
+#define GNET_INTERFACE_AGE 4
+#define GNET_BINARY_AGE    4
+
+#endif /* GNETCONFIG_H */

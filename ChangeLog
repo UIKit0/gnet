@@ -1,3 +1,8 @@
+Mon Oct  3 00:05:33 2000  Andrew Lanoix <alanoix@umich.edu>
+
+	* Added: gnetconfig.h.win32, config.h.win32
+	* Code now compiles with both Glib 1.2, 1.3 on Win32
+
 Mon Oct  2 11:19:12 2000  David Helder  <dhelder@umich.edu>
 
 	* src/gnet-private.c: Remove include config.h 
