@@ -157,8 +157,8 @@ main(int argc, char** argv)
   if (sizeof(void*) == 4)
     {
       TEST1 (11100, "01020304", "v", sizeof(void*), (void*) 0x01020304);
-      TEST1 (11110, "01020304", "v", sizeof(void*), (void*) 0xf1020304);
-      TEST1 (11120, "01020304", "v", sizeof(void*), (void*) 0x010203f4);
+      TEST1 (11110, "f1020304", "v", sizeof(void*), (void*) 0xf1020304);
+      TEST1 (11120, "010203f4", "v", sizeof(void*), (void*) 0x010203f4);
     }
 
   TEST3 (11200, "00000102", "bhb", 4,  0x00, 0x0001, 0x02);
