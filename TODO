@@ -56,6 +56,9 @@ Long term:
 	like a shared buffer and a message queue.  These should be simple
 	to do.
 
+    - Maybe add gnet_inetaddr_canonical_new, which creates a GInetAddr from
+	a canonical name.
+
     - Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
 
     - Better support for multihomed systems (I'm not sure what's 
