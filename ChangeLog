@@ -1,3 +1,12 @@
+Fri Jan 24 15:33:13 2003  David Helder  <dhelder@umich.edu>
+
+	* src/base64.[hc]: Added.  Contributed by Alfred Reibenschuh
+	<alfredreibenschuh@gmx.net>
+
+	* src/iochannel.c (gnet_io_channel_writen): bytes_written is
+	    optional.
+	* *: More doc work
+	
 Tue Jan 21 16:51:45 2003  David Helder  <dhelder@umich.edu>
 
 	* src/unix.[hc]: No longer experimental

@@ -3,28 +3,21 @@ GNet 1.4 (or 2.0)
 
 Please email gnet-dev@gnetlibrary.org with your comments.
 
+========================================
 
-Experimental changes
+API
+
+- readn/writen returns GIOStatus.  GIOStatus is an improvement on
+    GIOError added to GLib in version 2.0.  The main feature is that
+    it has an EOF status.
 
 
 Docs and examples
-
-- Document iochannel functions.
-
 - Add server example that uses pthreads or gthreads.
 
 
-New features
+Use G_BEGIN_DECLS
 
-- New URL functions: http_escape, http_unescape.  
-
-    Does someone have code for this (or want to write code for this)?
-    Are there any other URL functions we should have?
-    
-    COMPATIBLE: New API
-
-
-Possible changes
 
 
 ========================================

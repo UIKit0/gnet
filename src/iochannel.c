@@ -25,37 +25,41 @@
 
 /**
  * gnet_io_channel_writen:
- * @channel: the channel to write to
- * @buf: the buffer to read from
- * @len: length of the buffer
- * @bytes_written: pointer to integer for the function to store the
- * number of bytes writen.
+ * @channel: Channel to write to
+ * @buffer: Buffer to read from
+ * @length: Length of @buffer
+ * @bytes_written: Pointer to integer for us to store the
+ *   number of bytes written (optional)
  * 
- * Write all @len bytes in the buffer to the channel.  This is
- * basically a wrapper around g_io_channel_write().  The problem with
- * g_io_channel_write() is that it may not write all the bytes in the
- * buffer and return a short count even when there was not an error
- * (this is rare, but it can happen and is often difficult to detect
- * when it does).
+ * Write all @length bytes in @buffer to @channel.  If @bytes_written
+ * is set, the number of bytes written is stored in the integer it
+ * points to.  This is only useful in determining the number of bytes
+ * actually written if an error occurs.
  *
- * Returns: %G_IO_ERROR_NONE if everything is ok; something else
- * otherwise.  Also, returns the number of bytes written by modifying
- * the integer pointed to by @bytes_written.
+ * This function is essentially a wrapper around g_io_channel_write().
+ * The problem with g_io_channel_write() is that it may not write all
+ * the bytes in the buffer and return a short count even when there
+ * was not an error.  This is rare, but possible, and often difficult
+ * to detect when it does happen.
+ *
+ * Returns: %G_IO_ERROR_NONE if successful; something else otherwise.
+ * The number of bytes written is stored in the integer pointed to by
+ * @bytes_written.
  *
  **/
 GIOError
-gnet_io_channel_writen (GIOChannel    *channel, 
-			gpointer       buf, 
-			guint          len,
-			guint         *bytes_written)
+gnet_io_channel_writen (GIOChannel* channel, 
+			gpointer    buffer, 
+			guint       length,
+			guint*      bytes_written)
 {
   guint nleft;
   guint nwritten;
   gchar* ptr;
   GIOError error = G_IO_ERROR_NONE;
 
-  ptr = buf;
-  nleft = len;
+  ptr = buffer;
+  nleft = length;
 
   while (nleft > 0)
     {
@@ -72,7 +76,8 @@ gnet_io_channel_writen (GIOChannel    *channel,
       ptr += nwritten;
     }
 
-  *bytes_written = (len - nleft);
+  if (bytes_written)
+    *bytes_written = (length - nleft);
 
   return error;
 }
@@ -80,18 +85,22 @@ gnet_io_channel_writen (GIOChannel    *channel,
 
 /**
  * gnet_io_channel_readn:
- * @channel: the channel to read from
- * @buf: the buffer to write to
- * @len: the length of the buffer
- * @bytes_read: pointer to integer for the function to store the 
- * number of of bytes read.
+ * @channel: channel to read from
+ * @buffer: buffer to write to
+ * @length: length of the buffer
+ * @bytes_read: Pointer to integer for the function to store the 
+ * number of of bytes read (optional)
  *
- * Read exactly @len bytes from the channel the buffer to the channel.
- * This is basically a wrapper around g_io_channel_read().  The
- * problem with g_io_channel_read() is that it may not read all the
- * bytes wanted and return a short count even when there was not an
- * error (this is rare, but it can happen and is often difficult to
- * detect when it does).
+ * Read exactly @length bytes from @channel into @buffer.  If
+ * @bytes_read is set, the number of bytes read is stored in the
+ * integer it points to.  This is only useful in determining the
+ * number of bytes actually read if an error occurs.
+ *
+ * This function is essentially a wrapper around g_io_channel_read().
+ * The problem with g_io_channel_read() is that it may not read all
+ * the bytes requested and return a short count even when there was
+ * not an error (this is rare, but it can happen and is often
+ * difficult to detect when it does).
  *
  * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes read by modifying the
@@ -100,18 +109,18 @@ gnet_io_channel_writen (GIOChannel    *channel,
  *
  **/
 GIOError
-gnet_io_channel_readn (GIOChannel    *channel, 
-		       gpointer       buf, 
-		       guint          len,
-		       guint         *bytes_read)
+gnet_io_channel_readn (GIOChannel* channel, 
+		       gpointer    buffer, 
+		       guint       length,
+		       guint*      bytes_read)
 {
   guint nleft;
   guint nread;
   gchar* ptr;
   GIOError error = G_IO_ERROR_NONE;
 
-  ptr = buf;
-  nleft = len;
+  ptr = buffer;
+  nleft = length;
 
   while (nleft > 0)
     {
@@ -130,7 +139,8 @@ gnet_io_channel_readn (GIOChannel    *channel,
       ptr += nread;
     }
 
-  *bytes_read = (len - nleft);
+  if (bytes_read)
+    *bytes_read = (length - nleft);
 
   return error;
 }
@@ -139,8 +149,8 @@ gnet_io_channel_readn (GIOChannel    *channel,
 /**
  * gnet_io_channel_readline:
  * @channel: the channel to read from
- * @buf: the buffer to write to
- * @len: length of the buffer
+ * @buffer: the buffer to write to
+ * @length: length of the buffer
  * @bytes_read: pointer to integer for the function to store the 
  *   number of of bytes read.
  *
@@ -169,23 +179,23 @@ gnet_io_channel_readn (GIOChannel    *channel,
  * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes read by modifying the
  * integer pointed to by @bytes_read (this number includes the
- * newline).  If an error is returned, the contents of @buf and
+ * newline).  If an error is returned, the contents of @buffer and
  * @bytes_read are undefined.
  * 
  **/
 GIOError
-gnet_io_channel_readline (GIOChannel    *channel, 
-			  gchar         *buf, 
-			  guint          len,
-			  guint         *bytes_read)
+gnet_io_channel_readline (GIOChannel* channel, 
+			  gchar*      buffer, 
+			  guint       length,
+			  guint*      bytes_read)
 {
   guint n, rc;
   gchar c, *ptr;
   GIOError error = G_IO_ERROR_NONE;
 
-  ptr = buf;
+  ptr = buffer;
 
-  for (n = 1; n < len; ++n)
+  for (n = 1; n < length; ++n)
     {
     try_again:
       error = gnet_io_channel_readn(channel, &c, 1, &rc);
@@ -226,7 +236,7 @@ gnet_io_channel_readline (GIOChannel    *channel,
 /**
  * gnet_io_channel_readline_strdup:
  * @channel: the channel to read from
- * @buf_ptr: pointer to gchar* for the functin to store the new buffer
+ * @bufferp: pointer to gchar* for the functin to store the new buffer
  * @bytes_read: pointer to integer for the function to store the 
  *   number of of bytes read.
  *
@@ -251,22 +261,22 @@ gnet_io_channel_readline (GIOChannel    *channel,
  * Returns: %G_IO_ERROR_NONE if everything is ok; something else
  * otherwise.  Also, returns the number of bytes read by modifying the
  * integer pointed to by @bytes_read (this number includes the
- * newline), and the data through the pointer pointed to by @buf_ptr.
+ * newline), and the data through the pointer pointed to by @bufferp.
  * This data should be freed with g_free().  If an error is returned,
- * the contents of @buf_ptr and @bytes_read are undefined.
+ * the contents of @bufferp and @bytes_read are undefined.
  *
  **/
 GIOError
-gnet_io_channel_readline_strdup (GIOChannel    *channel, 
-				 gchar         **buf_ptr, 
-				 guint         *bytes_read)
+gnet_io_channel_readline_strdup (GIOChannel* channel, 
+				 gchar**     bufferp, 
+				 guint*      bytes_read)
 {
-  guint rc, n, len;
+  guint rc, n, length;
   gchar c, *ptr, *buf;
   GIOError error = G_IO_ERROR_NONE;
 
-  len = 100;
-  buf = (gchar *)g_malloc(len);
+  length = 100;
+  buf = (gchar *)g_malloc(length);
   ptr = buf;
   n = 1;
 
@@ -286,7 +296,7 @@ gnet_io_channel_readline_strdup (GIOChannel    *channel,
           if (n == 1)   /* no data read */
             {
               *bytes_read = 0;
-	      *buf_ptr = NULL;
+	      *bufferp = NULL;
 	      g_free(buf);
 
               return G_IO_ERROR_NONE;
@@ -306,16 +316,16 @@ gnet_io_channel_readline_strdup (GIOChannel    *channel,
 
       ++n;
 
-      if (n >= len)
+      if (n >= length)
         {
-          len *= 2;
-          buf = g_realloc(buf, len);
+          length *= 2;
+          buf = g_realloc(buf, length);
           ptr = buf + n - 1;
         }
     }
 
   *ptr = 0;
-  *buf_ptr = buf;
+  *bufferp = buf;
   *bytes_read = n;
 
   return error;

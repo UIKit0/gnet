@@ -22,14 +22,14 @@
 
 #include <glib.h>
 
-gint gnet_pack (const gchar* format, gchar* buffer, const guint len, ...);
-gint gnet_pack_strdup (const gchar* format, gchar** buffer, ...);
-gint gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args);
+gint gnet_pack (const gchar* format, gchar* buffer, const guint length, ...);
+gint gnet_pack_strdup (const gchar* format, gchar** bufferp, ...);
+gint gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args);
 
 gint gnet_calcsize (const gchar* format, ...);
 gint gnet_vcalcsize (const gchar* format, va_list args);
      
-gint gnet_unpack (const gchar* format, gchar* buffer, guint len, ...);
-gint gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args);
+gint gnet_unpack (const gchar* format, gchar* buffer, guint length, ...);
+gint gnet_vunpack (const gchar* format, gchar* buffer, guint length, va_list args);
 
 #endif /* _GNET_PACK_H */

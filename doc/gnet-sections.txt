@@ -216,6 +216,7 @@ gnet_sha_copy_string
 
 <SECTION>
 <FILE>uri</FILE>
+GURI
 gnet_uri_new
 gnet_uri_new_fields
 gnet_uri_new_fields_all

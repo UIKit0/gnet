@@ -109,11 +109,14 @@ for ($i = 0; $i < 32; $i++)
  *  gnet_uri_new:
  *  @uri: URI string
  *
- *  Create a #GURI from the URI argument.  Fields are set to NULL if
- *  they are not set.  The path does not necessarily start with a /.
- *  The parser is not validating -- it will accept some malformed URI.
+ *  Create a #GURI from a string.  Empty fields are set to NULL.  The
+ *  parser does not validate the URI -- it will accept some malformed
+ *  URI.  URIs are usually in the form
+ *  scheme://userinfo@hostname:port/path?query#fragment
+ *
+ *  Hint: The path does not necessarily start with a /.
  *  
- *  Returns: A new #GURI, or NULL if there was a failure.
+ *  Returns: a new #GURI, or NULL if there was a failure.
  *
  **/
 GURI* 

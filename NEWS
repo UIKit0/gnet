@@ -5,6 +5,11 @@ GNet NEWS
 Changes in Gnet
 
 
+1.3.1 (UNRELEASED DEVELOPERS release)
+-----
+* New Base64 module (by Alfred Reibenschuh)
+
+
 1.3.0 ("Tomacco" DEVELOPERS release)
 -----
 * IPv6 support

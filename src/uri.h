@@ -37,6 +37,21 @@ extern "C" {
 
 */
 
+/**
+ *
+ *  GURI
+ *  @scheme: Scheme (or protocol)
+ *  @userinfo: User info
+ *  @hostname: Host name
+ *  @port: Port number
+ *  @path: Path
+ *  @query: Query
+ *  @fragment: Fragment
+ *
+ *  The #GURI structure represents a URI.  All fields in this
+ *  structure are publicly readable.
+ *
+ **/
 typedef struct _GURI
 {
   gchar* scheme;

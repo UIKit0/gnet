@@ -37,6 +37,7 @@
 #include "md5.h"
 #include "sha.h"
 #include "ipv6.h"
+#include "base64.h"
 
 #ifndef GNET_WIN32
 #  include "unix.h"

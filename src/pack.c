@@ -129,7 +129,7 @@ flipmemcpy(char* dst, char* src, guint n)
     for (mult=(mult?mult:1); mult; --mult)			\
       {								\
         TYPE t;							\
-        g_return_val_if_fail (n + sizeof(TYPE) <= len, -1);	\
+        g_return_val_if_fail (n + sizeof(TYPE) <= length, -1);	\
         t = (TYPE) va_arg (args, VTYPE);                        \
         MEMCPY(buffer, (char*) &t, sizeof(TYPE));               \
         buffer += sizeof(TYPE);					\
@@ -147,7 +147,7 @@ flipmemcpy(char* dst, char* src, guint n)
         if (sizemode == 0)						\
           {								\
              TYPENATIVE t;						\
-             g_return_val_if_fail (n + sizeof(TYPENATIVE) <= len, -1);	\
+             g_return_val_if_fail (n + sizeof(TYPENATIVE) <= length, -1);\
              t = (TYPENATIVE) va_arg (args, VTYPE);                    	\
              MEMCPY(buffer, (char*) &t, sizeof(TYPENATIVE));            \
              buffer += sizeof(TYPENATIVE);				\
@@ -156,7 +156,7 @@ flipmemcpy(char* dst, char* src, guint n)
         else if (sizemode == 1)						\
           {								\
              TYPESTD t;							\
-             g_return_val_if_fail (n + sizeof(TYPESTD) <= len, -1);	\
+             g_return_val_if_fail (n + sizeof(TYPESTD) <= length, -1);	\
              t = (TYPESTD) va_arg (args, VTYPE);               		\
              LEMEMCPY(buffer, (char*) &t, sizeof(TYPESTD));             \
              buffer += sizeof(TYPESTD);					\
@@ -165,7 +165,7 @@ flipmemcpy(char* dst, char* src, guint n)
         else if (sizemode == 2)						\
           {								\
              TYPESTD t;							\
-             g_return_val_if_fail (n + sizeof(TYPESTD) <= len, -1);	\
+             g_return_val_if_fail (n + sizeof(TYPESTD) <= length, -1);	\
              t = (TYPESTD) va_arg (args, VTYPE);                       	\
              BEMEMCPY(buffer, (char*) &t, sizeof(TYPESTD));             \
              buffer += sizeof(TYPESTD);					\
@@ -181,36 +181,48 @@ flipmemcpy(char* dst, char* src, guint n)
 
 /**
  *  gnet_pack:
- *  @format: Pack format
+ *  @format: Data format
  *  @buffer: Buffer to pack to
- *  @len: Length of buffer
+ *  @length: Length of @buffer
  *  @Varargs: Variables to pack from
  *
- *  The pack format string is a list of types.  Each type is
- *  represented by a character.  Most types can be prefixed by an
- *  integer, which represents how many times it is repeated (eg,
- *  "4i2b" is equivalent to "iiiibb".
+ *  Write @Varargs to @buffer.  @format is a string that describes the
+ *  @Varargs and how they are to be packed.  This string is a list of
+ *  characters, each describing the type of an argument in @Varargs.
+ *  For example, call gnet_pack("ib", buf, len, myint, mybyte) to pack
+ *  the integer myint and a byte mybyte into a buffer of at least 5
+ *  bytes.
  *
- *  Native size/order is the default.  If the first character of
- *  FORMAT is < then little endian order and standard size are used.
- *  If the first character is > or !, then big endian (or network)
- *  order and standard size are used.  Standard sizes are 1 byte for
- *  chars, 2 bytes for shorts, and 4 bytes for ints and longs.
- *  x is a pad byte.  The pad byte is the NULL character.
+ *  As a shortcut, most types can be prefixed by an integer to specify
+ *  how many times the type is repeated.  For example, "4i2b" is
+ *  equivalent to "iiiibb".  This repeat argument is refered below to
+ *  as REPEAT.
  *
- *  b/B are signed/unsigned chars
+ *  Native byte order and sizes are used by default.  If the first
+ *  character of @format is < then little endian order and standard
+ *  sizes are used.  If the first character is > or !, then big endian
+ *  (or network) order and standard size are used.  Standard sizes are
+ *  1 byte for chars, 2 bytes for shorts, and 4 bytes for ints and
+ *  longs.
  *
- *  h/H are signed/unsigned shorts
+ *  The types:
  *
- *  i/I are signed/unsigned ints
+ *  x is a NULL character.  It can be used for padding.  It does not
+ *  correspond to an argument in @Varargs.
  *
- *  l/L are signed/unsigned longs
+ *  b/B is a signed/unsigned char.
  *
- *  f/D are floats/doubles (always native order/size)
+ *  h/H is a signed/unsigned short.
+ *
+ *  i/I is a signed/unsigned int.
+ *
+ *  l/L is a signed/unsigned long.
+ *
+ *  f/D is a float/double (always native order/size).
  *  
- *  v is a void pointer (always native size)
+ *  v is a void pointer (always native size).
  *
- *  s is a zero-terminated string.  REPEAT is repeat.
+ *  s is a zero-terminated string.
  *
  *  S is a zero-padded string of maximum length REPEAT.  We write
  *  up-to a NULL character or REPEAT characters, whichever comes
@@ -219,8 +231,8 @@ flipmemcpy(char* dst, char* src, guint n)
  *  the string as a non-NULL-terminated string (note that it can't be
  *  unpacked easily then).
  *
- *  r is a byte array of NEXT bytes.  NEXT is the next argument and is
- *  an integer.  REPEAT is repeat.  (r is from "raw")
+ *  r is a byte array of NEXT bytes.  NEXT is the next argument passed
+ *  to gnet_pack() and is an integer.
  *
  *  R is a byte array of REPEAT bytes.  REPEAT must be specified.
  *
@@ -232,21 +244,21 @@ flipmemcpy(char* dst, char* src, guint n)
  *  Mnemonics: (B)yte, s(H)ort, (I)nteger, (F)loat, (D)ouble, (V)oid
  *  pointer, (S)tring, (R)aw
  *
- *  pack was mostly inspired by Python's pack, with some awareness of
- *  Perl's pack.  We don't do Python 0-repeat-is-alignment.  Submit a
- *  patch if you really want it.
+ *  Pack was inspired by Python's and Perl's pack.  It is more like
+ *  Python's than Perl's.  Note that in GNet, a repeat of 0 does not
+ *  align the data (as in Python).
  *
  *  Returns: bytes packed; -1 if error.
  *
  **/
 gint
-gnet_pack (const gchar* format, gchar* buffer, const guint len, ...)
+gnet_pack (const gchar* format, gchar* buffer, const guint length, ...)
 {
   va_list args;
   gint rv;
   
-  va_start (args, len);
-  rv = gnet_vpack (format, buffer, len, args);
+  va_start (args, length);
+  rv = gnet_vpack (format, buffer, length, args);
   va_end (args);
 
   return rv;
@@ -255,42 +267,43 @@ gnet_pack (const gchar* format, gchar* buffer, const guint len, ...)
 
 /**
  *  gnet_pack_strdup
- *  @format: Pack format (see gnet_pack)
- *  @buffer: Pointer to buffer to allocate and pack to
+ *  @format: Pack format
+ *  @bufferp: Pointer to a buffer (buffer is caller owned)
  *  @Varargs: Variables to pack from
  *
- *  Packs the arguments into an allocated buffer.  Caller is
- *  responsible for deallocating the buffer.
+ *  Write @Varargs into a buffer pointed to by @bufferp.  The buffer
+ *  is allocated by the function and is caller owned.  See gnet_pack()
+ *  for more information.
  *
  *  Returns: bytes packed; -1 if error.
  *
  **/
 gint
-gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
+gnet_pack_strdup (const gchar* format, gchar** bufferp, ...)
 {
   va_list args;
   gint size;
   gint rv;
   
   g_return_val_if_fail (format, -1);
-  g_return_val_if_fail (buffer, -1);
+  g_return_val_if_fail (bufferp, -1);
 
   /* Get size */
-  va_start (args, buffer);
+  va_start (args, bufferp);
   size = gnet_vcalcsize (format, args);
   va_end (args);
   g_return_val_if_fail (size >= 0, -1);
   if (size == 0)
     {
-      *buffer = NULL;
+      *bufferp = NULL;
       return 0;
     }
 
-  *buffer = g_new (gchar, size);
+  *bufferp = g_new (gchar, size);
 
   /* Pack */
-  va_start (args, buffer);
-  rv = gnet_vpack (format, *buffer, size, args);
+  va_start (args, bufferp);
+  rv = gnet_vpack (format, *bufferp, size, args);
   va_end (args);
 
   return rv;
@@ -304,8 +317,8 @@ gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
  *  @format: Pack format
  *  @Varargs: Variables
  *
- *  Calculate the size of the buffer needed to pack the given format.
- *  All arguments should be passed.
+ *  Calculate the size of the buffer needed to pack @Varargs by the
+ *  given format.  See gnet_pack() for more information.
  *
  *  Returns: number of bytes required to pack; -1 if error.
  *  
@@ -327,9 +340,9 @@ gnet_calcsize (const gchar* format, ...)
 /**
  *  gnet_vcalcsize:
  *  @format: Pack format
- *  @args: var args
+ *  @args: Var args
  *
- *  Var arg interface to gnet_calcsize().  Size gnet_calcsize() for
+ *  Var arg interface to gnet_calcsize().  See gnet_calcsize() for
  *  additional information.
  *
  *  Returns: number of bytes required to pack; -1 if error.
@@ -479,19 +492,19 @@ gnet_vcalcsize (const gchar* format, va_list args)
 
 /**
  *  gnet_vpack:
- *  @format: Pack format (see gnet_pack)
+ *  @format: Pack format
  *  @buffer: Buffer to pack to
- *  @len: Length of buffer
- *  @args: var args
+ *  @length: Length of buffer
+ *  @args: Var args
  *
- *  Var arg interface to gnet_pack().  See gnet_pack() for format
+ *  Var arg interface to gnet_pack().  See gnet_pack() for more
  *  information.
  *
  *  Returns: bytes packed; -1 if error.
  *
  **/
 gint
-gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
+gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args)
 {
   guint n = 0;
   gchar* p = (gchar*) format;
@@ -500,7 +513,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 
   g_return_val_if_fail (format, -1);
   g_return_val_if_fail (buffer, -1);
-  g_return_val_if_fail (len, -1);
+  g_return_val_if_fail (length, -1);
 
   switch (*p)
     {
@@ -518,7 +531,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	  {	
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		g_return_val_if_fail (n + 1 <= len, -1);
+		g_return_val_if_fail (n + 1 <= length, -1);
 		*buffer++ = 0;	++n; 
 	      }
 
@@ -555,7 +568,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 		g_return_val_if_fail (s, -1);
 
 		slen = strlen(s);
-		g_return_val_if_fail (n + slen + 1 <= len, -1);
+		g_return_val_if_fail (n + slen + 1 <= length, -1);
 
 		memcpy (buffer, s, slen + 1);	/* include the 0 */
 		buffer += slen + 1;
@@ -578,7 +591,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 		guint slen;
 
 		slen = strlen(s);
-		g_return_val_if_fail (n + slen <= len, -1);
+		g_return_val_if_fail (n + slen <= length, -1);
 
 		memcpy (buffer, s, slen);	/* don't include the 0 */
 		buffer += slen;
@@ -588,7 +601,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	      {
 		guint i;
 
-		g_return_val_if_fail (n + mult <= len, -1);
+		g_return_val_if_fail (n + mult <= length, -1);
 
 		for (i = 0; i < mult && s[i]; ++i)
 		  *buffer++ = s[i];
@@ -613,7 +626,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 		ln = va_arg (args, guint);
 
 		g_return_val_if_fail (s, -1);
-		g_return_val_if_fail (n + ln <= len, -1);
+		g_return_val_if_fail (n + ln <= length, -1);
 
 		memcpy(buffer, s, ln);
 		buffer += ln;
@@ -632,7 +645,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	    g_return_val_if_fail (s, -1);
 
 	    g_return_val_if_fail (mult, -1);
-	    g_return_val_if_fail (n + mult <= len, -1);
+	    g_return_val_if_fail (n + mult <= length, -1);
 
 	    memcpy (buffer, s, mult);
 	    buffer += mult;
@@ -653,7 +666,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 
 		slen = strlen(s);
 		g_return_val_if_fail (n < 256, -1);
-		g_return_val_if_fail (n + slen + 1 <= len, -1);
+		g_return_val_if_fail (n + slen + 1 <= length, -1);
 
 		*buffer++ = slen;
 		memcpy (buffer, s, slen);   
@@ -690,7 +703,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
     for (mult=(mult?mult:1); mult; --mult)			\
       {								\
         TYPE* t;						\
-        g_return_val_if_fail (n + sizeof(TYPE) <= len, FALSE);	\
+        g_return_val_if_fail (n + sizeof(TYPE) <= length, FALSE);	\
         t = va_arg (args, TYPE*);                               \
         MEMCPY((char*) t, buffer, sizeof(TYPE));                \
         buffer += sizeof(TYPE);					\
@@ -707,7 +720,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
         if (sizemode == 0)						\
           {								\
              TYPENATIVE* t;						\
-             g_return_val_if_fail (n + sizeof(TYPENATIVE) <= len, -1);	\
+             g_return_val_if_fail (n + sizeof(TYPENATIVE) <= length, -1);	\
              t = va_arg (args, TYPENATIVE*);                           	\
              MEMCPY((char*) t, buffer, sizeof(TYPENATIVE));             \
              buffer += sizeof(TYPENATIVE);				\
@@ -716,7 +729,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
         else if (sizemode == 1)						\
           {								\
              TYPESTD* t;						\
-             g_return_val_if_fail (n + sizeof(TYPESTD) <= len, -1);	\
+             g_return_val_if_fail (n + sizeof(TYPESTD) <= length, -1);	\
              t = va_arg (args, TYPESTD*);                           	\
              LEMEMCPY((char*) t, buffer, sizeof(TYPESTD));              \
              buffer += sizeof(TYPESTD);					\
@@ -725,7 +738,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
         else if (sizemode == 2)						\
           {								\
              TYPESTD* t;						\
-             g_return_val_if_fail (n + sizeof(TYPESTD) <= len, -1);	\
+             g_return_val_if_fail (n + sizeof(TYPESTD) <= length, -1);	\
              t = va_arg (args, TYPESTD*);                           	\
              BEMEMCPY((char*) t, buffer, sizeof(TYPESTD));              \
              buffer += sizeof(TYPESTD);					\
@@ -740,70 +753,70 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 
 /**
  *  gnet_unpack:
- *  @format: Unpack format
+ *  @format: Data format
  *  @buffer: Buffer to unpack from
- *  @len: Length of buffer
+ *  @length: Length of @buffer
  *  @Varargs: Addresses of variables to unpack to
  *
- *  The unpack format string is a list of types.  Each type is
- *  represented by a character.  Most types can be prefixed by an
- *  integer, which represents how many times it is repeated (eg,
- *  "4i2b" is equivalent to "iiiibb".
+ *  Read the data in @buffer into @Varargs.  @format is a string that
+ *  describes the @Varargs and how they are to be packed.  This string
+ *  is a list of characters, each describing the type of an argument
+ *  in @Varargs.  For example, call gnet_unpack("ib", buf, len,
+ *  &myint, &mybyte) to unpack the buffer into the integer myint and
+ *  the byte mybyte.
  *
  *  In unpack, the arguments must be pointers to the appropriate type.
  *  Strings and byte arrays are allocated dynamicly (by g_new).  The
  *  caller is responsible for g_free()-ing it.
  *
- *  Native size/order is the default.  If the first character of
- *  FORMAT is < then little endian order and standard size are used.
- *  If the first character is > or !, then big endian (or network)
- *  order and standard size are used.  Standard sizes are 1 byte for
- *  chars, 2 bytes for shorts, and 4 bytes for ints and longs.
- * 
+ *  As a shortcut, most types can be prefixed by an integer to specify
+ *  how many times the type is repeated.  For example, "4i2b" is
+ *  equivalent to "iiiibb".  This repeat argument is refered below to
+ *  as REPEAT.
+ *
+ *  The types:
+ *
  *  x is a pad byte.  The byte is skipped and not stored.  We do not
  *  check its value.
  *
- *  b/B are signed/unsigned chars
+ *  b/B is a signed/unsigned char.
  *
- *  h/H are signed/unsigned shorts (h is from sHort)
- * 
- *  i/I are signed/unsigned ints
- * 
- *  l/L are signed/unsigned longs
- * 
- *  f/D are floats/doubles (always native order/size)
- *    
- *  v is a void pointer (always native size)
- * 
- *  s is a zero-terminated string.  REPEAT is repeat.
- * 
+ *  h/H is a signed/unsigned short.
+ *
+ *  i/I is a signed/unsigned int.
+ *
+ *  l/L is a signed/unsigned long.
+ *
+ *  f/D is a float/double (always native order/size).
+ *  
+ *  v is a void pointer (always native size).
+ *
+ *  s is a zero-terminated string.
+ *
  *  S is a zero-padded string of length REPEAT.  We read REPEAT
  *  characters or until a NULL character.  Any remaining characters
  *  are filled in with 0's.  REPEAT must be specified.
  * 
  *  r is a byte array of NEXT bytes.  NEXT is the next argument and is
- *  an integer.  REPEAT is repeat.  (r is from "raw")
+ *  an integer.  REPEAT is repeat.
  * 
  *  R is a byte array of REPEAT bytes.  REPEAT must be specified.
  * 
- *  String/byte array memory is allocated by unpack.
- * 
- *  Mnemonics: sHort, Integer, Float, Double, Pointer, String, Raw
- * 
- *  unpack was mostly inspired by Python's unpack, with some awareness
- *  of Perl's unpack.
- * 
+ *  p is a Pascal string.  The first byte read is the length of the
+ *  string and the string follows.  The unpacked string will be a
+ *  normal, NULL-terminated string.  REPEAT is repeat.
+ *
  *  Returns: bytes unpacked; -1 if error.
  * 
  **/
 gint 
-gnet_unpack (const gchar* format, gchar* buffer, guint len, ...)
+gnet_unpack (const gchar* format, gchar* buffer, guint length, ...)
 {
   va_list args;
   gint rv;
   
-  va_start (args, len);
-  rv = gnet_vunpack (format, buffer, len, args);
+  va_start (args, length);
+  rv = gnet_vunpack (format, buffer, length, args);
   va_end (args);
 
   return rv;
@@ -812,19 +825,19 @@ gnet_unpack (const gchar* format, gchar* buffer, guint len, ...)
 
 /**
  *  gnet_vunpack:
- *  @format: Unpack format (see below)
+ *  @format: Unpack format
  *  @buffer: Buffer to unpack from
- *  @len: Length of buffer
- *  @args: var args
+ *  @length: Length of buffer
+ *  @args: Var args
  *
- *  Var arg interface to gnet_unpack().  See gnet_unpack() for format
+ *  Var arg interface to gnet_unpack().  See gnet_unpack() for more
  *  information.
  *
  *  Returns: bytes packed; -1 if error.
  *
  **/
 gint 
-gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
+gnet_vunpack (const gchar* format, gchar* buffer, guint length, va_list args)
 {
   guint n = 0;
   gchar* p = (gchar*) format;
@@ -849,7 +862,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 	case 'x': 
 	  {	
 	    mult = mult? mult:1;
-	    g_return_val_if_fail (n + mult <= len, FALSE);
+	    g_return_val_if_fail (n + mult <= length, FALSE);
 
 	    buffer += mult;
 	    n += mult;
@@ -885,8 +898,8 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 		sp = va_arg (args, gchar**);
 		g_return_val_if_fail (sp, -1);
 
-		slen = strlenn(buffer, len - n);
-		g_return_val_if_fail (n + slen <= len, FALSE);
+		slen = strlenn(buffer, length - n);
+		g_return_val_if_fail (n + slen <= length, FALSE);
 
 		*sp = g_new(gchar, slen + 1);
 		memcpy (*sp, buffer, slen);
@@ -909,8 +922,8 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 	    sp = va_arg (args, gchar**);
 	    g_return_val_if_fail (sp, -1);
 
-	    slen = MIN(mult, strlenn(buffer, len - n));
-	    g_return_val_if_fail ((n + slen) <= len, -1);
+	    slen = MIN(mult, strlenn(buffer, length - n));
+	    g_return_val_if_fail ((n + slen) <= length, -1);
 
 	    *sp = g_new(gchar, mult + 1);
 
@@ -933,7 +946,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 		ln = va_arg (args, guint);
 
 		g_return_val_if_fail (sp, -1);
-		g_return_val_if_fail (n + ln <= len, FALSE);
+		g_return_val_if_fail (n + ln <= length, FALSE);
 
 		*sp = g_new(char, ln);
 		memcpy(*sp, buffer, ln);
@@ -952,7 +965,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 	    g_return_val_if_fail (sp, -1);
 
 	    g_return_val_if_fail (mult, -1);
-	    g_return_val_if_fail (n + mult <= len, -1);
+	    g_return_val_if_fail (n + mult <= length, -1);
 
 	    *sp = g_new(char, mult);
 	    memcpy(*sp, buffer, mult);
@@ -971,11 +984,11 @@ gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 
 		sp = va_arg (args, gchar**);
 		g_return_val_if_fail (sp, -1);
-		g_return_val_if_fail (n + 1 <= len, FALSE);
+		g_return_val_if_fail (n + 1 <= length, FALSE);
 
 		slen = *buffer++; 
 		++n;
-		g_return_val_if_fail (n + slen <= len, FALSE);
+		g_return_val_if_fail (n + slen <= length, FALSE);
 
 		*sp = g_new(gchar, slen + 1);
 		memcpy (*sp, buffer, slen); 

@@ -27,24 +27,24 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-GIOError gnet_io_channel_writen (GIOChannel    *channel, 
-				 gpointer       buf, 
-				 guint          len,
-				 guint         *bytes_written);
+GIOError gnet_io_channel_writen (GIOChannel*   channel, 
+				 gpointer      buffer, 
+				 guint         length,
+				 guint*        bytes_written);
 
-GIOError gnet_io_channel_readn (GIOChannel    *channel, 
-				 gpointer      buf, 
-				 guint         len,
-				 guint        *bytes_read);
+GIOError gnet_io_channel_readn (GIOChannel*    channel, 
+				 gpointer      buffer, 
+				 guint         length,
+				 guint*        bytes_read);
 
-GIOError gnet_io_channel_readline (GIOChannel    *channel, 
-				   gchar         *buf, 
-				   guint          len,
-				   guint         *bytes_read);
+GIOError gnet_io_channel_readline (GIOChannel* channel, 
+				   gchar*      buffer, 
+				   guint       length,
+				   guint*      bytes_read);
 
-GIOError gnet_io_channel_readline_strdup (GIOChannel    *channel, 
-					  gchar         **buf_ptr, 
-					  guint         *bytes_read);
+GIOError gnet_io_channel_readline_strdup (GIOChannel*   channel, 
+					  gchar**       bufferp, 
+					  guint*        bytes_read);
 
 
 #ifdef __cplusplus
