@@ -4,11 +4,17 @@ GNet NEWS
 
 Changes in Gnet
 
-2.0.5
+2.0.5 (UNRELEASED)
 -----
-* Desciptor leak fixed in TCP sockets (thanks Hans Petter Jansson!)
+* Many Win32 fixes (thanks Andy Lanoix, Hans Petter Jansson, Tor 
+			Lillqvist, Tim Muller!)
+* Desciptor leak fixed in TCP sockets (thanks Hans!)
+* GConn 100% CPU bug fix (thanks Andreas Rottmann!)
 * Bug fix for URIs with high Latin-1 characters (thanks Emmanuel Saracco!)
-
+* IPv6 fix for inetaddr_get_canonical_name()
+* New echoserver-partyline example (thanks Andy!)
+* Miscellaneous clean-ups (thanks Michael Alger, Tim Muller, 
+		Stephane Loeuillet!)
 
 2.0.4
 -----
