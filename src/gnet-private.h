@@ -29,10 +29,9 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
-#ifndef __EMX__
+#ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
-
 #include <sys/socket.h>
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>

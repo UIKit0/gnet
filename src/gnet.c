@@ -233,7 +233,7 @@ gnet_io_channel_readline (GIOChannel    *channel,
 /**
  * gnet_io_channel_readline_strdup:
  * @channel: the channel to read from
- * @buf: pointer to gchar* for the functin to store the new buffer
+ * @buf_ptr: pointer to gchar* for the functin to store the new buffer
  * @bytes_read: pointer to integer for the function to store the 
  *   number of of bytes read.
  *

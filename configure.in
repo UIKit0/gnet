@@ -158,6 +158,7 @@ AC_CHECK_LIB(resolv, main)
 AC_HEADER_STDC
 
 AC_CHECK_HEADERS(sys/sockio.h, AC_DEFINE(HAVE_SYS_SOCKIO_H))
+AC_CHECK_HEADERS(sys/poll.h,   AC_DEFINE(HAVE_SYS_POLL_H))
 
 
 # ****************************************

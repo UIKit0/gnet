@@ -2481,6 +2481,49 @@ else
 fi
 done
 
+for ac_hdr in sys/poll.h
+do
+ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
+echo "configure:2489: checking for $ac_hdr" >&5
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2494 "configure"
+#include "confdefs.h"
+#include <$ac_hdr>
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:2499: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ cat >> confdefs.h <<\EOF
+#define HAVE_SYS_POLL_H 1
+EOF
+
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
 
 
 # ****************************************
@@ -2499,12 +2542,12 @@ fi
 # Check if we have gethostbyname_r (we assume that if the user has gethostbyname_r,
 # that they have a similar gethostbyaddr_r).
 echo $ac_n "checking for gethostbyname_r""... $ac_c" 1>&6
-echo "configure:2503: checking for gethostbyname_r" >&5
+echo "configure:2546: checking for gethostbyname_r" >&5
 if eval "test \"`echo '$''{'ac_cv_func_gethostbyname_r'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2508 "configure"
+#line 2551 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char gethostbyname_r(); below.  */
@@ -2527,7 +2570,7 @@ gethostbyname_r();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2531: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2574: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_gethostbyname_r=yes"
 else
@@ -2545,9 +2588,9 @@ if eval "test \"`echo '$ac_cv_func_'gethostbyname_r`\" = yes"; then
 
   
   echo $ac_n "checking for glibc gethostbyname_r""... $ac_c" 1>&6
-echo "configure:2549: checking for glibc gethostbyname_r" >&5
+echo "configure:2592: checking for glibc gethostbyname_r" >&5
   cat > conftest.$ac_ext <<EOF
-#line 2551 "configure"
+#line 2594 "configure"
 #include "confdefs.h"
 	#include <netdb.h>
 int main() {
@@ -2562,7 +2605,7 @@ int main() {
 	
 ; return 0; }
 EOF
-if { (eval echo configure:2566: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2609: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   
 
@@ -2584,9 +2627,9 @@ else
     
   echo "$ac_t""no" 1>&6
   echo $ac_n "checking for Solaris/Irix gethostbyname_r""... $ac_c" 1>&6
-echo "configure:2588: checking for Solaris/Irix gethostbyname_r" >&5
+echo "configure:2631: checking for Solaris/Irix gethostbyname_r" >&5
   cat > conftest.$ac_ext <<EOF
-#line 2590 "configure"
+#line 2633 "configure"
 #include "confdefs.h"
  #include <netdb.h>
 int main() {
@@ -2600,7 +2643,7 @@ int main() {
 	
 ; return 0; }
 EOF
-if { (eval echo configure:2604: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2647: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   
 
@@ -2621,9 +2664,9 @@ else
     
   echo "$ac_t""no" 1>&6
   echo $ac_n "checking for HP-UX gethostbyname_r""... $ac_c" 1>&6
-echo "configure:2625: checking for HP-UX gethostbyname_r" >&5
+echo "configure:2668: checking for HP-UX gethostbyname_r" >&5
   cat > conftest.$ac_ext <<EOF
-#line 2627 "configure"
+#line 2670 "configure"
 #include "confdefs.h"
  #include <netdb.h>
 int main() {
@@ -2634,7 +2677,7 @@ int main() {
         
 ; return 0; }
 EOF
-if { (eval echo configure:2638: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2681: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   
         
@@ -2720,7 +2763,7 @@ fi
   # Extract the first word of "glib-config", so it can be a program name with args.
 set dummy glib-config; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2724: checking for $ac_word" >&5
+echo "configure:2767: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_GLIB_CONFIG'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2755,7 +2798,7 @@ fi
 
   min_glib_version=1.2.0
   echo $ac_n "checking for GLIB - version >= $min_glib_version""... $ac_c" 1>&6
-echo "configure:2759: checking for GLIB - version >= $min_glib_version" >&5
+echo "configure:2802: checking for GLIB - version >= $min_glib_version" >&5
   no_glib=""
   if test "$GLIB_CONFIG" = "no" ; then
     no_glib=yes
@@ -2778,7 +2821,7 @@ echo "configure:2759: checking for GLIB - version >= $min_glib_version" >&5
   echo $ac_n "cross compiling; assumed OK... $ac_c"
 else
   cat > conftest.$ac_ext <<EOF
-#line 2782 "configure"
+#line 2825 "configure"
 #include "confdefs.h"
 
 #include <glib.h>
@@ -2854,7 +2897,7 @@ main ()
 }
 
 EOF
-if { (eval echo configure:2858: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2901: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   :
 else
@@ -2891,7 +2934,7 @@ EOF
           CFLAGS="$CFLAGS $GLIB_CFLAGS"
           LIBS="$LIBS $GLIB_LIBS"
           cat > conftest.$ac_ext <<EOF
-#line 2895 "configure"
+#line 2938 "configure"
 #include "confdefs.h"
 
 #include <glib.h>
@@ -2901,7 +2944,7 @@ int main() {
  return ((glib_major_version) || (glib_minor_version) || (glib_micro_version)); 
 ; return 0; }
 EOF
-if { (eval echo configure:2905: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2948: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
    echo "*** The test program compiled, but did not run. This usually means"
           echo "*** that the run-time linker is not finding GLIB or finding the wrong"

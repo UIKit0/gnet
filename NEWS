@@ -4,13 +4,13 @@ GNet NEWS
 
 Changes in Gnet
 
-0.1.9 (unreleased)
+0.1.9
 -----
-* "nonblock" functions renamed to "async"
 * async functions now cancelable
 * Added *_ref and *_unref functions
-* Added Jacques Fortier's gnet_iochannel_readline_strdup
-* Jacques Fortier added to AUTHORS
+* Added gnet_iochannel_readline_strdup
+* "nonblock" functions renamed to "async"
+* Jacques Fortier added to AUTHORS for gnet_iochannel_readline_strdup
 * Not binary compatable with 0.1.8
 
 0.1.8

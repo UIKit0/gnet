@@ -51,8 +51,8 @@ typedef struct _GInetAddr GInetAddr;
  *
  **/
 typedef enum {
-  GINETADDR_ASYNC_STATUS_ERROR,
-  GINETADDR_ASYNC_STATUS_OK
+  GINETADDR_ASYNC_STATUS_OK,
+  GINETADDR_ASYNC_STATUS_ERROR
 } GInetAddrAsyncStatus;
 
 

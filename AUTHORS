@@ -7,7 +7,7 @@ GNet authors and other contributors
 Authors
 -------
 David Helder 	   <dhelder@umich.edu>		    Original version, Deb's
-Xavier Nicolovici  <nicolovi@club-internet.fr>    FTP protocol, gnet.spec.in
+Xavier Nicolovici  <nicolovi@club-internet.fr>      FTP protocol, gnet.spec.in
 Soeren Sandmann	   <sandmann@daimi.au.dk>	    HP-UX portability fixes
 Jacques Fortier    <jfortier@seul.org>		    gnet_iochannel_readline_strdup()
 

@@ -140,7 +140,7 @@ gnet_mcast_socket_delete(GMcastSocket* ms)
 
 /**
  *  gnet_mcast_socket_ref
- *  @ia: GMcastSocket to reference
+ *  @s: GMcastSocket to reference
  *
  *  Increment the reference counter of the GMcastSocket.
  *
@@ -156,7 +156,7 @@ gnet_mcast_socket_ref(GMcastSocket* s)
 
 /**
  *  gnet_mcast_socket_unref
- *  @ia: GMcastSocket to unreference
+ *  @s: GMcastSocket to unreference
  *
  *  Remove a reference from the GMcastSocket.  When reference count
  *  reaches 0, the socket is deleted.

@@ -68,6 +68,12 @@
 @sa: 
 @Returns: 
 
+<!-- ##### ENUM GInetAddrNonblockStatus ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION gnet_private_inetaddr_list_interfaces ##### -->
 <para>
 
@@ -81,13 +87,15 @@
 </para>
 
 
-<!-- ##### FUNCTION inetaddr_set_port ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
 <para>
 
 </para>
 
-@ia: 
-@port: 
+@addr: 
+@func: 
+@data: 
+@Returns: 
 
 <!-- ##### FUNCTION udp_socket_send ##### -->
 <para>
@@ -98,6 +106,14 @@
 @packet: 
 @Returns: 
 @socket: 
+
+<!-- ##### FUNCTION inetaddr_set_port ##### -->
+<para>
+
+</para>
+
+@ia: 
+@port: 
 
 <!-- ##### FUNCTION inetaddr_clone ##### -->
 <para>
@@ -114,6 +130,15 @@
 
 @s: 
 @socket: 
+
+<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
+<para>
+
+</para>
+
+@ia: 
+@func: 
+@data: 
 
 <!-- ##### FUNCTION tcp_socket_new_nonblock ##### -->
 <para>
@@ -166,6 +191,16 @@
 @socket: 
 @Returns: 
 
+<!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
+<para>
+
+</para>
+
+@name: 
+@port: 
+@func: 
+@data: 
+
 <!-- ##### FUNCTION mcast_socket_join_group ##### -->
 <para>
 
@@ -212,6 +247,12 @@
 @port: 
 @Returns: 
 
+<!-- ##### ENUM GTcpSocketNonblockStatus ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION inetaddr_get_canonical_name ##### -->
 <para>
 
@@ -245,6 +286,16 @@
 @val: 
 @Returns: 
 
+<!-- ##### USER_FUNCTION GInetAddrReverseNonblockFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@name: 
+@data: 
+
 <!-- ##### FUNCTION gnet_udp_socket_get_MTU ##### -->
 <para>
 
@@ -272,6 +323,15 @@
 @port: 
 @Returns: 
 
+<!-- ##### USER_FUNCTION GInetAddrNonblockFunc ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@status: 
+@data: 
+
 <!-- ##### FUNCTION mcast_socket_set_loopback ##### -->
 <para>
 
@@ -289,6 +349,15 @@
 @ms: 
 @ia: 
 @Returns: 
+
+<!-- ##### USER_FUNCTION GTcpSocketNonblockFunc ##### -->
+<para>
+
+</para>
+
+@socket: 
+@status: 
+@data: 
 
 <!-- ##### FUNCTION inetaddr_delete ##### -->
 <para>
@@ -376,6 +445,16 @@
 @socket: 
 @Returns: 
 
+<!-- ##### FUNCTION gnet_tcp_socket_connect_nonblock ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@func: 
+@data: 
+
 <!-- ##### FUNCTION inetaddr_sockaddr_new ##### -->
 <para>
 
@@ -433,14 +512,6 @@
 
 @Returns: 
 
-<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
-<para>
-
-</para>
-
-@us: 
-@Returns: 
-
 <!-- ##### FUNCTION inetaddr_noport_equal ##### -->
 <para>
 
@@ -448,6 +519,14 @@
 
 @p1: 
 @p2: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_get_ttl ##### -->
+<para>
+
+</para>
+
+@us: 
 @Returns: 
 
 <!-- ##### FUNCTION udp_socket_set_ttl ##### -->

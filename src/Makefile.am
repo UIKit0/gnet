@@ -27,4 +27,4 @@ gnetinclude_HEADERS = 		\
 	tcp.h			\
         udp.h
 
-EXTRA_DIST = ftp.h ftp.c gnet-private.h
+EXTRA_DIST = gnet-private.h

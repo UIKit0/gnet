@@ -25,7 +25,7 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_tcp_socket_connect_nonblock ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_connect_async ##### -->
 <para>
 
 </para>
@@ -34,6 +34,15 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @port: 
 @func: 
 @data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_connect_async_cancel ##### -->
+<para>
+
+</para>
+
+@id: 
 
 
 <!-- ##### USER_FUNCTION GTcpSocketConnectFunc ##### -->
@@ -62,7 +71,7 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_tcp_socket_new_nonblock ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_new_async ##### -->
 <para>
 
 </para>
@@ -73,7 +82,15 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @Returns: 
 
 
-<!-- ##### USER_FUNCTION GTcpSocketNonblockFunc ##### -->
+<!-- ##### FUNCTION gnet_tcp_socket_new_async_cancel ##### -->
+<para>
+
+</para>
+
+@id: 
+
+
+<!-- ##### USER_FUNCTION GTcpSocketAsyncFunc ##### -->
 <para>
 
 </para>
@@ -83,13 +100,29 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @data: 
 
 
-<!-- ##### ENUM GTcpSocketNonblockStatus ##### -->
+<!-- ##### ENUM GTcpSocketAsyncStatus ##### -->
 <para>
 
 </para>
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_ref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_unref ##### -->
 <para>
 
 </para>

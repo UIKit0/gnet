@@ -25,7 +25,7 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_inetaddr_new_nonblock ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_new_async ##### -->
 <para>
 
 </para>
@@ -34,9 +34,18 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @port: 
 @func: 
 @data: 
+@Returns: 
 
 
-<!-- ##### USER_FUNCTION GInetAddrNonblockFunc ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_new_async_cancel ##### -->
+<para>
+
+</para>
+
+@id: 
+
+
+<!-- ##### USER_FUNCTION GInetAddrAsyncFunc ##### -->
 <para>
 
 </para>
@@ -46,7 +55,7 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @data: 
 
 
-<!-- ##### ENUM GInetAddrNonblockStatus ##### -->
+<!-- ##### ENUM GInetAddrAsyncStatus ##### -->
 <para>
 
 </para>
@@ -69,6 +78,22 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @ia: 
 
 
+<!-- ##### FUNCTION gnet_inetaddr_ref ##### -->
+<para>
+
+</para>
+
+@ia: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_unref ##### -->
+<para>
+
+</para>
+
+@ia: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_get_name ##### -->
 <para>
 
@@ -78,7 +103,7 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_inetaddr_get_name_nonblock ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_get_name_async ##### -->
 <para>
 
 </para>
@@ -86,9 +111,18 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 @ia: 
 @func: 
 @data: 
+@Returns: 
 
 
-<!-- ##### USER_FUNCTION GInetAddrReverseNonblockFunc ##### -->
+<!-- ##### FUNCTION gnet_inetaddr_get_name_async_cancel ##### -->
+<para>
+
+</para>
+
+@id: 
+
+
+<!-- ##### USER_FUNCTION GInetAddrReverseAsyncFunc ##### -->
 <para>
 
 </para>

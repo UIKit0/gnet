@@ -429,7 +429,7 @@ gnet_tcp_socket_delete(GTcpSocket* s)
 
 /**
  *  gnet_tcp_socket_ref
- *  @ia: GTcpSocket to reference
+ *  @s: GTcpSocket to reference
  *
  *  Increment the reference counter of the GTcpSocket.
  *
@@ -445,7 +445,7 @@ gnet_tcp_socket_ref(GTcpSocket* s)
 
 /**
  *  gnet_tcp_socket_unref
- *  @ia: GTcpSocket to unreference
+ *  @s: GTcpSocket to unreference
  *
  *  Remove a reference from the GTcpSocket.  When reference count
  *  reaches 0, the socket is deleted.

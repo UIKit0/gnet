@@ -50,9 +50,9 @@ typedef struct _GTcpSocket GTcpSocket;
  *
  **/
 typedef enum {
+  GTCP_CONNECT_STATUS_OK,
   GTCP_CONNECT_STATUS_INETADDR_ERROR,
-  GTCP_CONNECT_STATUS_TCP_ERROR,
-  GTCP_CONNECT_STATUS_OK
+  GTCP_CONNECT_STATUS_TCP_ERROR
 } GTcpSocketConnectStatus;
 
 
@@ -82,8 +82,8 @@ typedef void (*GTcpSocketConnectFunc)(GTcpSocket* socket,
  *
  **/
 typedef enum {
-  GTCP_SOCKET_ASYNC_STATUS_ERROR,
-  GTCP_SOCKET_ASYNC_STATUS_OK
+  GTCP_SOCKET_ASYNC_STATUS_OK,
+  GTCP_SOCKET_ASYNC_STATUS_ERROR
 } GTcpSocketAsyncStatus;
 
 

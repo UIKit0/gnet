@@ -61,3 +61,14 @@ includes some utility functions for working with glib IOChannels.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_io_channel_readline_strdup ##### -->
+<para>
+
+</para>
+
+@channel: 
+@buf_ptr: 
+@bytes_read: 
+@Returns: 
+
+

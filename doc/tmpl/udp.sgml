@@ -47,6 +47,22 @@ plan to use this structure to send or receive the packet.
 @s: 
 
 
+<!-- ##### FUNCTION gnet_udp_socket_ref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_udp_socket_unref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
 <!-- ##### FUNCTION gnet_udp_socket_send ##### -->
 <para>
 

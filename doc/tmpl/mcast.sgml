@@ -51,6 +51,22 @@ then use the UDP functions.
 @ms: 
 
 
+<!-- ##### FUNCTION gnet_mcast_socket_ref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_mcast_socket_unref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
 <!-- ##### FUNCTION gnet_mcast_socket_join_group ##### -->
 <para>
 

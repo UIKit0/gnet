@@ -90,7 +90,7 @@ gnet_udp_socket_delete(GUdpSocket* s)
 
 /**
  *  gnet_udp_socket_ref
- *  @ia: GUdpSocket to reference
+ *  @s: GUdpSocket to reference
  *
  *  Increment the reference counter of the GUdpSocket.
  *
@@ -106,7 +106,7 @@ gnet_udp_socket_ref(GUdpSocket* s)
 
 /**
  *  gnet_udp_socket_unref
- *  @ia: GUdpSocket to unreference
+ *  @s: GUdpSocket to unreference
  *
  *  Remove a reference from the GUdpSocket.  When reference count
  *  reaches 0, the socket is deleted.
