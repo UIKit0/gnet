@@ -1,3 +1,9 @@
+Wed Jul 30 20:24:54 2003  Andrew Lanoix <alanoix@umich.edu>
+
+	*src/gnet-private.c (gnet_MainCallBack): Make PeekMessage()
+	    condition of while loop. 
+            Found by Hans Petter Jansson <hpj@ximian.com>.
+
 Mon Jul 28 20:19:34 2003  David Helder  <dhelder@umich.edu>
 
 	* NEWS: Update for 2.0.4
@@ -24,7 +30,7 @@ Mon Jul 21 21:04:25 2003  David Helder  <dhelder@umich.edu>
 	   returns a struct hostent*, not an int.  Patch from 
 	   charles.  Fixes bug #118023.
 
-Wed Jun 11 20:29:44.29    Andrew Lanoix <alanoix@umich.edu>
+Wed Jun 11 20:29:44 2003  Andrew Lanoix <alanoix@umich.edu>
 
 	*src/tcp.c (gnet_tcp_socket_server_accept): Pass size of
 		sockaddr_storage to accept() to get address of incoming
@@ -32,7 +38,7 @@ Wed Jun 11 20:29:44.29    Andrew Lanoix <alanoix@umich.edu>
 	*src/tcp.c (gnet_tcp_socket_server_accept_nonblock): "
 	*src/tcp.c: Fix typecasting to satisfy Visual Studio
 		
-Sat Jun  6 17:07:19.73    Andrew Lanoix <alanoix@umich.edu>
+Sat Jun  6 17:07:19 2003  Andrew Lanoix <alanoix@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): 
 		&state->ias->data should be state->ias->data.

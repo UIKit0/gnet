@@ -1,6 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
- * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2000-2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -183,43 +183,41 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
 
   int i;
 
-  /*Take the msg off the message queue */
-  i = PeekMessage (&msg, gnet_hWnd, 0, 0, PM_REMOVE); 
-  if (!i)
-    return 1; /* you have a buggy version of glib that is calling this func when it shouldn't*/
-
-  switch (msg.message) 
+  while ((i = PeekMessage (&msg, gnet_hWnd, 0, 0, PM_REMOVE)))
+  {
+	switch (msg.message) 
     {
-    case IA_NEW_MSG:
-      {
-	WaitForSingleObject(gnet_Mutex, INFINITE);
-	data = g_hash_table_lookup(gnet_hash, (gpointer)msg.wParam);
-	g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
-	ReleaseMutex(gnet_Mutex);
+		case IA_NEW_MSG:
+		{
+			WaitForSingleObject(gnet_Mutex, INFINITE);
+			data = g_hash_table_lookup(gnet_hash, (gpointer)msg.wParam);
+			g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
+			ReleaseMutex(gnet_Mutex);
 		
-	IAstate = (GInetAddrNewListState*) data;
-	IAstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
+			IAstate = (GInetAddrNewListState*) data;
+			IAstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
 
-	/* Now call the callback function */
-	gnet_inetaddr_new_list_async_cb(NULL, G_IO_IN, (gpointer)IAstate);
+			/* Now call the callback function */
+			gnet_inetaddr_new_list_async_cb(NULL, G_IO_IN, (gpointer)IAstate);
 
-	break;
-      }
-    case GET_NAME_MSG:
-      {
-	WaitForSingleObject(gnet_Mutex, INFINITE);
-	data = g_hash_table_lookup(gnet_hash, (gpointer)msg.wParam);
-	g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
-	ReleaseMutex(gnet_Mutex);
+			break;
+		}
+		case GET_NAME_MSG:
+		{
+			WaitForSingleObject(gnet_Mutex, INFINITE);
+			data = g_hash_table_lookup(gnet_hash, (gpointer)msg.wParam);
+			g_hash_table_remove(gnet_hash, (gpointer)msg.wParam);
+			ReleaseMutex(gnet_Mutex);
 
-	IARstate = (GInetAddrReverseAsyncState*) data;
-	IARstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
+			IARstate = (GInetAddrReverseAsyncState*) data;
+			IARstate->errorcode = WSAGETASYNCERROR(msg.lParam); /* NULL if OK */
 			
-	/* Now call the callback function */
-	gnet_inetaddr_get_name_async_cb(NULL, G_IO_IN, (gpointer)IARstate);
-	break;
-      }
-    }
+			/* Now call the callback function */
+			gnet_inetaddr_get_name_async_cb(NULL, G_IO_IN, (gpointer)IARstate);
+			break;
+		}
+	} /* switch */
+  } /* while */
 
   return 1;
 }
