@@ -26,6 +26,8 @@ Description: Developer files for GNet network library
    * Byte packing and unpacking
    * URLs (Experimental)
    * Server and Conn objects (Experimental)
+ .
+ The GNet homepage is at http://www.gnetlibrary.org
 
 Package: libgnet@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@
 Architecture: any
@@ -47,3 +49,5 @@ Description: GNet network library
    * Byte packing and unpacking
    * URLs (Experimental)
    * Server and Conn objects (Experimental)
+ .
+ The GNet homepage is at http://www.gnetlibrary.org

@@ -125,7 +125,7 @@ main ()
                gnet_major_version, gnet_minor_version, gnet_micro_version);
         printf("*** You need a version of GNet newer than %d.%d.%d. The latest version of\n",
 	       major, minor, micro);
-        printf("*** GNet is always available from http://www.eecs.umich.edu/~dhelder/misc/gnet.\n");
+        printf("*** GNet is always available from http://www.gnetlibrary.org.\n");
         printf("***\n");
         printf("*** If you have already installed a sufficiently new version, this error\n");
         printf("*** probably means that the wrong copy of the gnet-config shell script is\n");

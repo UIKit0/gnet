@@ -28,7 +28,7 @@ latest glib package.
 
 Comments and questions should be sent to gnet-dev@eecs.umich.edu.
 
-The GNet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet.
+The GNet homepage is at http://www.gnetlibrary.org
 
 
 Install
@@ -65,7 +65,7 @@ Developer info
 ==============
 
 API documentation lives on the GNet homepage (specifically, at
-http://www.gnetlibrary.org//docs)
+http://www.gnetlibrary.org/docs)
 
 The URL, Server, and Conn modules are experimental and part of the
 IOChannel module is also experimental.  The GNet development team

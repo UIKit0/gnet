@@ -74,7 +74,7 @@ static void flipmemcpy(char* dst, char* src, guint n);
 static guint
 strlenn(char* str, guint n)
 {
-  int len = 0;
+  guint len = 0;
 
   while (*str++ && len < n) ++len;
 

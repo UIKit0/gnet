@@ -10,7 +10,7 @@ Release:   %rel
 Copyright: LGPL
 Group: Libraries/Network
 Source0:   gnet-%{PACKAGE_VERSION}.tar.gz
-URL:       http://www.eecs.umich.edu/~dhelder/misc/gnet
+URL:       http://www.gnetlibrary.org
 BuildRoot: /var/tmp/gnet-%{PACKAGE_VERSION}-root
 Docdir: %{prefix}/doc
 Packager: Xavier Nicolovici <nicolovi@club-internet.fr>
@@ -41,7 +41,7 @@ latest glib package.
 Comments, questions, and bug reports should be sent to
 gnet-dev@eecs.umich.edu.
 
-The Gnet homepage is at http://www.eecs.umich.edu/~dhelder/misc/gnet
+The Gnet homepage is at http://www.gnetlibrary.org
 
 %package devel
 Summary: Header files for the Gnet library

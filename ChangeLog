@@ -1,11 +1,21 @@
+Tue May 22 23:25:59 2001  David Helder  <dhelder@umich.edu>
+
+	* src/pack.c (strlenn): Fixed sign issue
+
+Tue May 22 16:45:01 2001  David Helder  <dhelder@umich.edu>
+
+	* gnet.m4: Fix URL
+	* README (Features): Fix URL
+	* debian/control.in: Add URL
+
 Tue May 22 22:21:31 2001  Andrw Lanoix  <alanoix@umich.edu>
 
-	*server.h: #include "gnetconfig.h"
+	* server.h: #include "gnetconfig.h"
 
-	*tcp.h: removed 2 unused vars in windows code
-	*gnet-private.c: removed 2 unused vars in windows code
+	* tcp.h: removed 2 unused vars in windows code
+	* gnet-private.c: removed 2 unused vars in windows code
 
-	*udp.c: gnet_udp_socket_has_packet()[win32 version]
+	* udp.c: gnet_udp_socket_has_packet()[win32 version]
           change gint arg to u_long arg to get rid of warning
 
 Tue May 22 09:59:57 2001  David Helder  <dhelder@umich.edu>
