@@ -1,3 +1,11 @@
+Wed May 14 00:48:22 2003  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Update version (unreleased)
+
+	* src/tcp.c (gnet_tcp_socket_server_accept): cast to 
+	   struc t sockaddr (Win32)
+	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock): " 
+
 Tue May 13 23:54:59 2003  David Helder  <dhelder@umich.edu>
 
 	* src/gnet-private.h (in_addr_t): define for win32. (guint32)

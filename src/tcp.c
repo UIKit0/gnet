@@ -1138,7 +1138,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
 
   /* Don't force the socket into blocking mode */
 
-  sockfd = accept(socket->sockfd, &sa, NULL);
+  sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, NULL);
   /* if it fails, looping isn't going to help */
 
   if (sockfd == INVALID_SOCKET)
@@ -1183,7 +1183,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   if(ioctlsocket(socket->sockfd, FIONBIO, &arg))
     return NULL;
 
-  sockfd = accept(socket->sockfd, &sa, NULL);
+  sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, NULL);
   /* if it fails, looping isn't going to help */
 
   if (sockfd == INVALID_SOCKET)
