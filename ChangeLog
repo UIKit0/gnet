@@ -1,10 +1,15 @@
+Wed Feb 19 14:34:34 2003  David Helder  <dhelder@umich.edu>
+
+	* gnet.spec.in: Don't build with --enable-debug=yes.  This enables
+	   -Werror and messes up SRPM builds.
+
 Mon Jan 20 16:11:27 2003  David Helder  <dhelder@umich.edu>
 
 	* src/server.c (server_accept_cb): Set conn ref_count to 1.
 
 Thu Jan  9 16:26:04 2003  David Helder  <dhelder@umich.edu>
 
-	* tests/pack.c: Fixed output in 2 big-ending pointer packing tests
+	* tests/pack.c: Fixed output in 2 big-endian pointer packing tests
 
 Sat Jan  4 14:04:47 2003  David Helder  <dhelder@umich.edu>
 

@@ -53,12 +53,10 @@ library.
 %ifarch alpha
    CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" ./configure --host=alpha-redhat-linux\
 	--prefix=%{prefix} \
-	--enable-debug=yes \
 	--with-gnu-ld
 %else
    CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" ./configure \
 	--prefix=%{prefix} \
-	--enable-debug=yes \
 	--with-gnu-ld 
 %endif
 make
