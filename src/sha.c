@@ -463,7 +463,7 @@ gnet_sha_new (const guint8* buffer, guint length)
 
 
 /**
- *  gnet_sha_new:
+ *  gnet_sha_new_string:
  *  @buffer: Buffer to hash
  *  @length: Length of that buffer
  * 

@@ -165,7 +165,7 @@ gnet_url_new_fields (const gchar* protocol, const gchar* hostname,
 
 
 /**
- *  gnet_url_new_fields:
+ *  gnet_url_new_fields_all:
  *  @protocol: protocol
  *  @user: user
  *  @password: password

@@ -46,6 +46,15 @@ MD5 Hash
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_md5_clone ##### -->
+<para>
+
+</para>
+
+@gmd5: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_md5_delete ##### -->
 <para>
 

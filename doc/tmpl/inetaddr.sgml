@@ -20,6 +20,9 @@ addresses are used (eg, addresses in the form 141.213.8.59).
 
 </para>
 
+@name: 
+@sa: 
+@ref_count: 
 
 <!-- ##### FUNCTION gnet_inetaddr_new ##### -->
 <para>

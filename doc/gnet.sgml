@@ -2,6 +2,7 @@
 <!entity gnet SYSTEM "sgml/gnet.sgml">
 <!entity inetaddr SYSTEM "sgml/inetaddr.sgml">
 <!entity tcp SYSTEM "sgml/tcp.sgml">
+<!entity unix SYSTEM "sgml/unix.sgml">
 <!entity udp SYSTEM "sgml/udp.sgml">
 <!entity mcast SYSTEM "sgml/mcast.sgml">
 <!entity iochannel SYSTEM "sgml/iochannel.sgml">
@@ -311,6 +312,7 @@ AM_PATH_GNET(&lt;version number&gt;,
     &gnet;
     &inetaddr;
     &tcp;
+    &unix;
     &udp;
     &mcast;
     &iochannel;

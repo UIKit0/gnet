@@ -35,6 +35,22 @@ Universal Resource Locator (e.g. http://www.gnetlibrary.org/index.html)
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_url_new_fields_all ##### -->
+<para>
+
+</para>
+
+@protocol: 
+@user: 
+@password: 
+@hostname: 
+@port: 
+@resource: 
+@query: 
+@fragment: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_url_clone ##### -->
 <para>
 
@@ -89,6 +105,24 @@ Universal Resource Locator (e.g. http://www.gnetlibrary.org/index.html)
 @protocol: 
 
 
+<!-- ##### FUNCTION gnet_url_set_user ##### -->
+<para>
+
+</para>
+
+@url: 
+@user: 
+
+
+<!-- ##### FUNCTION gnet_url_set_password ##### -->
+<para>
+
+</para>
+
+@url: 
+@password: 
+
+
 <!-- ##### FUNCTION gnet_url_set_hostname ##### -->
 <para>
 
@@ -114,5 +148,23 @@ Universal Resource Locator (e.g. http://www.gnetlibrary.org/index.html)
 
 @url: 
 @resource: 
+
+
+<!-- ##### FUNCTION gnet_url_set_query ##### -->
+<para>
+
+</para>
+
+@url: 
+@query: 
+
+
+<!-- ##### FUNCTION gnet_url_set_fragment ##### -->
+<para>
+
+</para>
+
+@url: 
+@fragment: 
 
 

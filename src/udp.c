@@ -168,7 +168,7 @@ gnet_udp_socket_unref (GUdpSocket* s)
 
 
 /**
- *  gnet_upd_socket_send:
+ *  gnet_udp_socket_send:
  *  @s: #GUdpSocket to use to send.
  *  @packet: Packet to send.
  *

@@ -813,7 +813,7 @@ gnet_tcp_socket_server_new (gint port)
 
 
 /**
- *  gnet_tcp_socket_server_interface_new:
+ *  gnet_tcp_socket_server_new_interface:
  *  @iface: Interface to bind to
  *
  *  Create and open a new #GTcpSocket bound to the specified

@@ -1,0 +1,114 @@
+<!-- ##### SECTION Title ##### -->
+Unix
+
+<!-- ##### SECTION Short_Description ##### -->
+Unix Sockets
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Unix Sockets are only available on Unix systems.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GUnixSocket ##### -->
+<para>
+
+</para>
+
+@sockfd: 
+@sa: 
+@ref_count: 
+@server: 
+@iochannel: 
+
+<!-- ##### FUNCTION gnet_unix_socket_connect ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_new ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_delete ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_ref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_unref ##### -->
+<para>
+
+</para>
+
+@s: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_get_iochannel ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_get_path ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_server_new ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_server_accept ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_server_accept_nonblock ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+

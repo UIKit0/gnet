@@ -1,6 +1,11 @@
-Tue Oct 23 10:26:17 2001  David Helder  <dhelder@umich.edu>
+Tue Oct 23 10:50:10 2001  David Helder  <dhelder@umich.edu>
 
-	* config.h.in: Added GNET_UNIX.
+	* doc/gnet-sections.txt: Updated
+	* *: Doc fixes
+
+	* src/ftp.[ch]: Removed
+
+Tue Oct 23 10:26:17 2001  David Helder  <dhelder@umich.edu>
 
 	* *: Integrate Mark Ferlatte's Unix patch.
 

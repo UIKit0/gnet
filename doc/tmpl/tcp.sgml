@@ -20,6 +20,10 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 </para>
 
+@sockfd: 
+@sa: 
+@ref_count: 
+@iochannel: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_connect ##### -->
 <para>

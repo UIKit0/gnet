@@ -340,7 +340,7 @@ gnet_md5_new (const guint8* buffer, guint length)
 
 
 /**
- *  gnet_md5_new:
+ *  gnet_md5_new_string:
  *  @buffer: Buffer to hash
  *  @length: Length of that buffer
  * 

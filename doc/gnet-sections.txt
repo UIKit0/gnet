@@ -99,6 +99,21 @@ gnet_tcp_socket_server_accept_nonblock
 </SECTION>
 
 <SECTION>
+<FILE>unix</FILE>
+GUnixSocket
+gnet_unix_socket_connect
+gnet_unix_socket_new
+gnet_unix_socket_delete
+gnet_unix_socket_ref
+gnet_unix_socket_unref
+gnet_unix_socket_get_iochannel
+gnet_unix_socket_get_path
+gnet_unix_socket_server_new
+gnet_unix_socket_server_accept
+gnet_unix_socket_server_accept_nonblock
+</SECTION>
+
+<SECTION>
 <FILE>udp</FILE>
 GUdpSocket
 gnet_udp_socket_new
@@ -180,15 +195,20 @@ gnet_server_delete
 <FILE>url</FILE>
 gnet_url_new
 gnet_url_new_fields
+gnet_url_new_fields_all
 gnet_url_clone
 gnet_url_delete
 gnet_url_hash
 gnet_url_equal
 gnet_url_get_nice_string
 gnet_url_set_protocol
+gnet_url_set_user
+gnet_url_set_password
 gnet_url_set_hostname
 gnet_url_set_port
 gnet_url_set_resource
+gnet_url_set_query
+gnet_url_set_fragment
 </SECTION>
 
 <SECTION>
@@ -208,6 +228,7 @@ GMD5
 GNET_MD5_HASH_LENGTH
 gnet_md5_new
 gnet_md5_new_string
+gnet_md5_clone
 gnet_md5_delete
 gnet_md5_new_incremental
 gnet_md5_update
@@ -225,6 +246,7 @@ GSHA
 GNET_SHA_HASH_LENGTH
 gnet_sha_new
 gnet_sha_new_string
+gnet_sha_clone
 gnet_sha_delete
 gnet_sha_new_incremental
 gnet_sha_update

@@ -22,6 +22,10 @@ then use the UDP functions.
 
 </para>
 
+@sockfd: 
+@sa: 
+@ref_count: 
+@iochannel: 
 
 <!-- ##### FUNCTION gnet_mcast_socket_new ##### -->
 <para>

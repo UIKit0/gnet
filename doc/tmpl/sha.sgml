@@ -46,6 +46,15 @@ SHA Hash
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_sha_clone ##### -->
+<para>
+
+</para>
+
+@gsha: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_sha_delete ##### -->
 <para>
 
