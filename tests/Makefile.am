@@ -2,20 +2,13 @@
 
 @SET_MAKE@
 
-INCLUDES = \
-	-I$(top_srcdir)/src \
-	$(GLIB_CFLAGS)
-
+INCLUDES = -I$(top_srcdir)/src $(GLIB_CFLAGS)
 LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS)
 
-# Automatic tests
 TESTS = hash pack unpack url_test
+EXTRA_PROGRAMS = $(TESTS) hostinfo dnstest
+CLEANFILES = $(TESTS)
 
-# Manual tests
-noinst_PROGRAMS = 	\
-	dnstest		\
-	hostinfo	\
-	$(TESTS)
 
 #####
 
@@ -27,3 +20,5 @@ unpack_LDADD	  = $(top_builddir)/src/libgnet.la
 url_test_SOURCES  = url_test.c
 url_test_LDADD    = $(top_builddir)/src/libgnet.la
 
+tests: $(EXTRA_PROGRAMS)
+.PHONY: tests

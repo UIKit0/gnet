@@ -68,7 +68,8 @@ AC_ARG_ENABLE(glib2,
 
 ####################
 # Debug
-AC_ARG_ENABLE(debug, [  --enable-debug=[no/minimum/yes] turn on debugging (default=minimum],,enable_debug=minimum)
+
+AC_ARG_ENABLE(debug, [  --enable-debug=[no/minimum/yes]  turn on debugging (default=minimum],,enable_debug=minimum)
 
 AC_MSG_CHECKING([debug level])
 if test "x$enable_debug" = "xyes"; then
