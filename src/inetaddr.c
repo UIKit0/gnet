@@ -192,7 +192,7 @@ gnet_gethostbyname(const char* hostname)
     /* If GLIB_MUTEX is not defined, either getaddrinfo() is
        thread-safe, or we don't have mutexes. */
 #   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
-      G_LOCK (dnslock);
+    G_LOCK (dnslock);
 #   endif
 
     rv = getaddrinfo (hostname, NULL, &hints, &res);
@@ -244,7 +244,7 @@ gnet_gethostbyname(const char* hostname)
       freeaddrinfo (res);
 
 #   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
-      G_UNLOCK (dnslock);
+    G_UNLOCK (dnslock);
 #   endif
   }
 #else
@@ -288,23 +288,21 @@ gnet_gethostbyname(const char* hostname)
 #else
 #ifdef HAVE_GETHOSTBYNAME_R_SOLARIS
   {
+    size_t len = 8192; /* Stevens suggest this size should be adequate */
+    char * buf = NULL;
     struct hostent result;
-    size_t len;
-    char* buf;
-    int herr;
-    int rv;
+    struct hostent* he;
 
-    len = 1024;
-    buf = g_new(gchar, len);
-
-    while ((rv = gethostbyname_r (hostname, &result, buf, len, &herr)) 
-	   == ERANGE)
+    do
       {
-	len *= 2;
 	buf = g_renew (gchar, buf, len);
+	errno = 0;
+	he = gethostbyname_r (hostname, &result, buf, len, &h_errno);
+	len += 1024;
       }
+    while (errno == ERANGE);
 
-    if (!rv)
+    if (he)
       list = hostent2ialist(&result);
 
   done:
@@ -341,14 +339,14 @@ gnet_gethostbyname(const char* hostname)
     struct hostent* he;
 
 #   ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
-      G_LOCK (dnslock);
+    G_LOCK (dnslock);
 #   endif
 
     he = gethostbyname(hostname);
     list = hostent2ialist(he);
 
 #   ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
-      G_UNLOCK (dnslock);
+    G_UNLOCK (dnslock);
 #   endif
   }
 #endif

@@ -8,6 +8,7 @@ Changes in Gnet
 -----
 * Minor memory leak fixed in internet addresses
 * Compile and regression test fixes for 64-bit systems
+* Compile fix for Solaris
 
 2.0.3
 -----
