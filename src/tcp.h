@@ -222,6 +222,9 @@ GTcpSocketNewAsyncID gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 						       gpointer data);
 
 
+/* GNet 1.1 compatibility function (DEPRICATED) */
+GIOChannel* gnet_tcp_socket_get_iochannel (GTcpSocket* socket);
+
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */

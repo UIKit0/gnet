@@ -20,6 +20,13 @@ Experimental changes
    covered by GLib 2.0.
 
 
+Docs and examples
+
+- Document iochannel functions.
+
+- Add server example that uses pthreads.
+
+
 New features
 
 - New URL functions: http_escape, http_unescape.  
@@ -145,7 +152,10 @@ DONE
 
 - gnet_*_get_iochannel() renamed gnet_*_get_io_channel()
 
-    SOURCE-CODE INCOMPATIBLE    
+    BINARY AND SOURCE-CODE INCOMPATIBLE
+
+    There are are source-code compatible macros, but the semantics
+    have changed.  get_io_channel() no longer refs 
 
     (Note that get_io_channel() is also not binary compatible -
      the ref/unref semantics have changed)

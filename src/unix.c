@@ -163,6 +163,24 @@ gnet_unix_socket_get_io_channel(GUnixSocket *socket)
 }
 
 
+/* GNet 1.1 compatibility function (DEPRICATED) */
+GIOChannel* 
+gnet_unix_socket_get_iochannel (GUnixSocket* socket)
+{
+  GIOChannel* iochannel;
+
+  g_return_val_if_fail (socket != NULL, NULL);
+
+  iochannel = gnet_unix_socket_get_io_channel (socket);
+  if (!iochannel)
+    return NULL;
+
+  g_io_channel_ref (iochannel);
+
+  return iochannel;
+}
+
+
 /**
  *  gnet_unix_socket_get_path:
  *  @socket: GUnixSocket to get the path of.

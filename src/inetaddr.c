@@ -33,16 +33,49 @@
 /* **************************************** */
 
 static GList* gnet_gethostbyname(const char* hostname);
-static GList* hostent2ialist (const struct hostent* he);
-static void   ialist_free (GList* ialist);
 static gchar* gnet_gethostbyaddr(const struct sockaddr_storage* sa);
+static void   ialist_free (GList* ialist);
 
-#ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
+
+#if defined(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX) \
+   || defined(HAVE_GETADDRINFO_GLIB_MUTEX)
 #  ifndef G_THREADS_ENABLED
 #    error Using GLib Mutex but thread are not enabled.
 #  endif
 G_LOCK_DEFINE (dnslock);
 #endif
+
+
+#if !defined(HAVE_GETADDRINFO)
+static GList* hostent2ialist (const struct hostent* he);
+
+static GList*
+hostent2ialist (const struct hostent* he)
+{
+  GList* list = NULL;
+  int i;
+
+  if (!he)
+    return NULL;
+
+  for (i = 0; he->h_addr_list[i]; ++i)
+    {
+      GInetAddr* ia;
+
+      ia = g_new0(GInetAddr, 1);
+      ia->ref_count = 1;
+      ia->sa.ss_family = he->h_addrtype;
+      memcpy (GNET_SOCKADDR_ADDRP(ia->sa), he->h_addr_list[i], he->h_length);
+      list = g_list_prepend(list, ia);
+    }
+
+  /* list is returned backwards */
+  return list;
+}
+
+#endif
+
+
 
 /* Thread safe gethostbyname.  Maps hostname to list of
    sockaddr_storage pointers. */
@@ -252,31 +285,6 @@ gnet_gethostbyname(const char* hostname)
 }
 
 
-static GList*
-hostent2ialist (const struct hostent* he)
-{
-  GList* list = NULL;
-  int i;
-
-  if (!he)
-    return NULL;
-
-  for (i = 0; he->h_addr_list[i]; ++i)
-    {
-      GInetAddr* ia;
-
-      ia = g_new0(GInetAddr, 1);
-      ia->ref_count = 1;
-      ia->sa.ss_family = he->h_addrtype;
-      memcpy (GNET_SOCKADDR_ADDRP(ia->sa), he->h_addr_list[i], he->h_length);
-      list = g_list_prepend(list, ia);
-    }
-
-  /* list is returned backwards */
-  return list;
-}
-
-
 /* Free list of GInetAddr's.  We assume name hasn't been allocated. */
 static void
 ialist_free (GList* ialist)
@@ -288,6 +296,7 @@ ialist_free (GList* ialist)
 
   g_list_free (ialist);
 }
+
 
 
 /* 

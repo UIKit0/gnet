@@ -101,6 +101,9 @@ GUdpPacket* gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr
 void gnet_udp_packet_delete (GUdpPacket* packet);
 
 
+/* GNet 1.1 compatibility macro (DEPRICATED) */
+GIOChannel* gnet_udp_socket_get_iochannel (GUdpSocket* socket);
+
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */

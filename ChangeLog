@@ -1,3 +1,12 @@
+Thu Dec 12 14:03:05 2002  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c: Fix compile warnings.
+
+	* src/{tcp, udp,unix}.h (gnet_*_socket_get_iochannel): Add
+	    compatibility functions.  These are depricated.  Note
+	    they ref the iochannel before they return it, which is
+	    non-intuitive.
+	    
 Sun Dec  8 21:34:16 2002  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c: New inetaddr_new_list{_async} functions.
