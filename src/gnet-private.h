@@ -71,7 +71,11 @@
 #include <netdb.h>
 
 #ifndef socklen_t
-#define socklen_t size_t
+#  ifdef GNET_APPLE_DARWIN
+#    define socklen_t int	/* socklen_t is int in Darwin */
+#  else
+#    define socklen_t size_t	/* it's size_t on all other Unixes */
+#  endif
 #endif
 
 #define GNET_CLOSE_SOCKET(SOCKFD) close(SOCKFD)

@@ -8,9 +8,7 @@ AC_PREREQ([2.52])
 ###############################
 # Init autoconf and automake
 AC_INIT([gnet], [1.3.0], [gnet@gnetlibrary.org])
-# CANONICAL_TARGET has to occur before INIT_AUTOMAKE, for reasons I don't
-# fully understand
-AC_CANONICAL_TARGET
+AC_CANONICAL_BUILD
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 # Activate maintainer mode
 AM_MAINTAINER_MODE
@@ -99,6 +97,18 @@ AC_PROG_MAKE_SET
 AC_CHECK_PROG(PKGCONFIG, [pkg-config], [yes])
 AM_PROG_LIBTOOL
 
+####################
+# Mac OS X
+
+# MacOSX doesn't define socklen_t, so we must define it to be an
+# 'int'.  On all other systems, it's size_t.
+case $build in
+  *-apple-darwin*)
+    AC_DEFINE(GNET_APPLE_DARWIN, 1,
+              [Define if building on Apple Darwin])
+esac
+
+
 ###############################
 # Check for libraries
 AC_CHECK_LIB([socket], [main])
@@ -174,7 +184,6 @@ AC_TRY_CPP([#include <linux/netlink.h>],
 	     AC_MSG_RESULT(yes)	     
              AC_DEFINE(HAVE_LINUX_NETLINK_H, 1,
 	       [Define if linux/netlink.h header exists])
-	     AC_MSG_RESULT(yes)
            ],[
              AC_MSG_RESULT(no)
            ])
@@ -243,6 +252,7 @@ AC_CHECK_FUNC(getaddrinfo,
     AC_DEFINE(HAVE_GETADDRINFO_THREADSAFE, 1, 
 	[Define if getaddrinfo is threadsafe])
   else
+    AC_MSG_RESULT(no)
     # If there is no threadsafe getaddrinfo, use a Glib mutex.
     if test "x$GTHREAD_CFLAGS" != "x"; then
       AC_DEFINE(HAVE_GETADDRINFO_GLIB_MUTEX, 1,

@@ -1,3 +1,11 @@
+Wed Jan  1 17:14:54 2003  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Output clean-ups.
+
+	* configure.ac: Check for Apple Darwin
+	* src/gnet-private.h (socklen_t): Define to be 'int'
+	    on Apple Darwin.
+	
 Tue Dec 24 14:28:14 2002  David Helder  <dhelder@umich.edu>
 
 	* src/usagi_ifaddrs.c (usagi_getifaddrs): Compile fix.
