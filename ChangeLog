@@ -1,3 +1,15 @@
+Fri Nov  9 14:27:45 2001  David Helder  <dhelder@umich.edu>
+
+	* configure.in: Check for the gthread module and set CFLAGS,
+ 	    LIBS, glib_cflags, and glib_libs as appropriate.
+
+	* src/inetaddr.c (gnet_gethostbyname, gnet_gethostbyaddr):
+	    Initialize gthreads if not initialized in Glib-Mutex
+	    case.  This caused seg faults in some FreeBSDs.
+
+	* gnet.m4 (AM_PATH_GNET): Remove modules.  gthread is
+		not a gnet module.
+
 Mon Oct 29 16:27:55 2001  David Helder  <dhelder@umich.edu>
 
 	* src/unix.c: Unlink socket on delete, doc fixes

@@ -150,9 +150,6 @@ AM_PATH_GLIB(1.2.0,
 glib_cflags=`$GLIB_CONFIG --cflags glib`
 glib_libs=`$GLIB_CONFIG --libs glib`
 
-AC_SUBST(glib_cflags)
-AC_SUBST(glib_libs)
-
 
 # Need network libraries
 AC_CHECK_LIB(nsl, main)
@@ -279,15 +276,22 @@ AC_CHECK_FUNC(gethostbyname_r,
 )])
 
 
-dnl If we don't have gethostbyname_r, try to use Glib mutexes
+dnl If we don't have gethostbyname_r, use Glib threads
 if test -z "$HAVE_GETHOSTBYNAME_R"; then
 
-  AM_PATH_GLIB(1.2.0, AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX), [
-      AC_MSG_WARN(You have neither Glib threads nor the function gethostbyname_r.
+  AM_PATH_GLIB(1.2.0, 
+	       [AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX)
+	        LIBS="$LIBS $GLIB_LIBS" 
+		CFLAGS="$CFLAGS $GLIB_CFLAGS"
+	        glib_cflags=`$GLIB_CONFIG --cflags glib gthread`
+	        glib_libs=`$GLIB_CONFIG --libs glib gthread`],[
+	      AC_MSG_WARN(You have neither Glib threads nor the function gethostbyname_r.
 This means that calls to gethostbyname (called by the GNet address functions) will
-not be thread safe so could malfunction in programs that use threads.)
-    ])
+not be thread safe so could malfunction in programs that use threads.)], [gthread])
 fi
+
+AC_SUBST(glib_cflags)
+AC_SUBST(glib_libs)
 
 
 # ########################################

@@ -37,6 +37,9 @@ static gchar* gnet_gethostbyaddr(const char* addr, size_t length, int type);
 
 /* TODO: Move this to an init function */
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
+#  ifndef G_THREADS_ENABLED
+#    error Using GLib Mutex but thread are not enabled.
+#  endif
 G_LOCK_DEFINE (gethostbyname);
 #endif
 
@@ -148,6 +151,9 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_in* sa, gchar** nicenam
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
   {
     struct hostent* he;
+
+    if (!g_threads_got_initialized)
+      g_thread_init (NULL);
 
     G_LOCK (gethostbyname);
     he = gethostbyname(hostname);
@@ -304,6 +310,9 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 #ifdef HAVE_GETHOSTBYNAME_R_GLIB_MUTEX
   {
     struct hostent* he;
+
+    if (!g_threads_got_initialized)
+      g_thread_init (NULL);
 
     G_LOCK (gethostbyname);
     he = gethostbyaddr(addr, length, type);

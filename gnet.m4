@@ -17,15 +17,6 @@ AC_ARG_WITH(gnet-exec-prefix,[  --with-gnet-exec-prefix=PFX Exec prefix where GN
 AC_ARG_ENABLE(gnettest, [  --disable-gnettest       Do not try to compile and run a test GNet program],
 		    , enable_gnettest=yes)
 
-  for module in . $4
-  do
-      case "$module" in
-         gthread) 
-             gnet_config_args="$gnet_config_args gthread"
-         ;;
-      esac
-  done
-
   if test x$gnet_config_exec_prefix != x ; then
      gnet_config_args="$gnet_config_args --exec-prefix=$gnet_config_exec_prefix"
      if test x${GNET_CONFIG+set} != xset ; then
