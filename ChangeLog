@@ -1,3 +1,8 @@
+Mon Sep 23 15:31:52 2002  David Helder  <dhelder@umich.edu>
+
+	* Makefile.am (EXTRA_DIST): Move more extra dist here.
+	    depcomp is no longer needed evidently.
+
 Mon Sep 23 14:43:21 2002  David Helder  <dhelder@umich.edu>
 
 	* autogen.sh: Don't include macros dir if there isn't one.

@@ -47,5 +47,3 @@ gnetinclude_HEADERS = 		\
 	url.h			\
 	conn.h			\
 	server.h
-
-EXTRA_DIST = gnet-private.h socks-private.h

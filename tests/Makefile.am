@@ -2,8 +2,6 @@
 
 @SET_MAKE@
 
-EXTRA_DIST = makefile.mingw
-
 INCLUDES = \
 	-I$(top_srcdir)/src \
 	$(GLIB_CFLAGS)

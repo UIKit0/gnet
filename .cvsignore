@@ -22,3 +22,4 @@ mkinstalldirs
 missing
 gnetconfig.h
 gnet.pc
+autom4te.cache
