@@ -123,6 +123,8 @@ gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr,
       tcp_id = gnet_tcp_socket_new_async (inetaddr, 
 					  gnet_tcp_socket_connect_tcp_cb, 
 					  state);
+      gnet_inetaddr_delete (inetaddr);
+
       /* gnet_tcp_socket_new_async() may call the callback before it
 	 returns.  state may have been deleted. */
       if (tcp_id)
@@ -398,7 +400,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   state->func = func;
   state->data = data;
   state->flags = flags;
-  state->iochannel = gnet_private_iochannel_new(s->sockfd);
+  state->iochannel = gnet_private_io_channel_new(s->sockfd);
   state->connect_watch = g_io_add_watch(state->iochannel,
 					GNET_ANY_IO_CONDITION,
 					gnet_tcp_socket_new_async_cb, 
@@ -541,7 +543,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   state->socket->sockfd = sockfd;
 
   state->connect_watch = 
-    g_io_add_watch(gnet_private_iochannel_new(s->sockfd),
+    g_io_add_watch(gnet_private_io_channel_new(s->sockfd),
 		   G_IO_IN | G_IO_ERR,
 		   gnet_tcp_socket_new_async_cb, 
 		   state);
@@ -649,7 +651,7 @@ gnet_tcp_socket_unref(GTcpSocket* s)
       GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
 
       if (s->iochannel)
-	g_io_channel_unref(s->iochannel);
+	g_io_channel_unref (s->iochannel);
 
       g_free(s);
     }
@@ -658,7 +660,7 @@ gnet_tcp_socket_unref(GTcpSocket* s)
 
 
 /**
- *  gnet_tcp_socket_get_iochannel:
+ *  gnet_tcp_socket_get_io_channel:
  *  @socket: GTcpSocket to get GIOChannel from.
  *
  *  Get the #GIOChannel for the #GTcpSocket.
@@ -670,23 +672,20 @@ gnet_tcp_socket_unref(GTcpSocket* s)
  *  connections.  If you can read from it, there's a connection
  *  waiting.
  *
- *  There is one channel for every socket.  This function refs the
- *  channel before returning it.  You should unref the channel when
- *  you are done with it.  However, you should not close the channel -
- *  this is done when you delete the socket.
+ *  There is one channel for every socket.  If the channel is refed
+ *  then it must be unrefed eventually.  Do not close the channel --
+ *  this is done when the socket is deleted.
  *
  *  Returns: A #GIOChannel; NULL on failure.
  *
  **/
 GIOChannel* 
-gnet_tcp_socket_get_iochannel(GTcpSocket* socket)
+gnet_tcp_socket_get_io_channel (GTcpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = gnet_private_iochannel_new(socket->sockfd);
-   
-  g_io_channel_ref (socket->iochannel);
+    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
 
   return socket->iochannel;
 }
@@ -1180,11 +1179,10 @@ gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
   socket->accept_data = user_data;
 
   /* Add read watch */
-  iochannel = gnet_tcp_socket_get_iochannel (socket);
+  iochannel = gnet_tcp_socket_get_io_channel (socket);
   socket->accept_watch = g_io_add_watch(iochannel, 
 					G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 					tcp_socket_server_accept_async_cb, socket);
-  g_io_channel_unref (iochannel);
 }
 
 

@@ -78,16 +78,12 @@ typedef gpointer GInetAddrNewAsyncID;
 
 /**
  *   GInetAddrNewAsyncFunc:
- *   @inetaddr: InetAddr that was looked up (caller owned)
+ *   @inetaddr: InetAddr that was looked up (callee owned)
  *   @status: Status of the lookup
  *   @data: User data
  *   
- *   Callback for gnet_inetaddr_new_async().  Caller owns the address;
- *   the callee should copy it if necessary.  FIX: In next major
- *   version, make inetaddr callee owned.  GInetAddrGetNameAsyncFunc
- *   and GTcpSocketConnectAsyncFunc both pass callee owned data.
- *
- *   Callback for gnet_inetaddr_new_async().
+ *   Callback for gnet_inetaddr_new_async().  Callee owns the address;
+ *   the callee should delete the address when it is done with it.
  *
  **/
 typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr, 
@@ -132,20 +128,16 @@ typedef gpointer GInetAddrGetNameAsyncID;
 
 /**
  *   GInetAddrGetNameAsyncFunc:
- *   @inetaddr: InetAddr whose was looked up
+ *   @name: Canonical name of the address (callee owned)
  *   @status: Status of the lookup
- *   @name: Nice name of the address (callee owned)
  *   @data: User data
  *   
- *   Callback for gnet_inetaddr_get_name_async().  Delete the name
- *   when you're done with it.  The GInetAddr is the GInetAddr passed
- *   to gnet_inetaddr_get_name_async() -- the address is not copied.
- *   (FIX: In 1.2.0, don't pass the InetAddr.)
+ *   Callback for gnet_inetaddr_get_name_async().  Callee owns the
+ *   name; the callee should delete the name when it is done with it.
  *
  **/
-typedef void (*GInetAddrGetNameAsyncFunc)(GInetAddr* inetaddr, 
-					  GInetAddrAsyncStatus status, 
-					  gchar* name,
+typedef void (*GInetAddrGetNameAsyncFunc)(gchar* name,
+					  GInetAddrAsyncStatus status,
 					  gpointer data);
 
 

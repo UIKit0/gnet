@@ -1,3 +1,59 @@
+Mon Oct 21 23:24:30 2002  David Helder  <dhelder@umich.edu>
+
+	* *: HEAD is now GNet 1.3, to become GNet 1.4.  GNet 1.1 
+	    is in the "GNET_1_1" CVS branch.
+	
+	* src/inetaddr.c: get_name_async cleanups.  Fixed
+	    a bug in cancelling async reverse DNS lookups in Win32.
+
+	* configure.ac: Update version to 1.3.0.  GNet 1.1 is in the
+	    GNET_1_1 branch.
+	* Makefile.am (configincludedir): "
+	* gnet-config.in (cflags): "
+	* gnet.spec.in: "
+	* gnet.pc.in (Cflags): "
+
+	* src/tcp.c (gnet_tcp_socket_get_io_channel), udp.c, 
+	    unix.c: Don't ref the io_channel.
+	* src/conn.c (gnet_conn_disconnect): Don't unref iochannel.
+	* src/socks-private.c (gnet_private_socks_tcp_socket_server_accept_async): "
+	* src/socks-private.c (socks_negotiate_connect): "
+	* src/socks-private.c (socks5_negotiate_bind): "
+	* src/socks-private.c (gnet_private_socks_tcp_socket_server_accept): "
+	* src/tcp.c (gnet_tcp_socket_server_accept_async): "
+	* examples/echoclient.c (normal_echoclient): "
+	* examples/echoserver-unix.c: "
+	* examples/echoserver.c: "
+	* examples/hfetch.c (hfetch): "
+
+	* src/url.[ch]: s/url/uri/.  Re-ordered fields.
+	* src/url.c (gnet_uri_new_fields_all): Fix bug - 
+	    fields weren't copied right.
+
+	* glib-config.in, Makefile.am, doc/glib-config.1.in, 
+	    doc/Makefile.am: Remove glib-config.
+
+	* src/Makefile.am (gnetincludedir): Put headers into gnet-1.3.
+
+	* src/inetaddr.h: Changed prototypes of GInetAddrNewAsyncFunc and
+	    GInetAddrGetNameAsyncFunc
+	* src/iochannel.h: " GNetIOChannelReadAsyncFunc
+
+	* src/inetaddr.c (inetaddr_new_async_pthread_dispatch): 
+	    Address is callee owned.
+	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): Delete
+	    the address.
+
+	* src/*: s/get_iochannel/get_io_channel/, 
+	    s/iochannel_new/io_channel_new/
+
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): Remove
+	   check for "localhost".
+
+	* configure.ac: Turn on warnings after tests are done.
+	   Simplified test logic.  Passing -ansi, etc to gcc
+	   more than once doesn't seem to hurt.
+
 Mon Oct 21 17:28:57 2002  David Helder  <dhelder@umich.edu>
 
 	* tests/Makefile.am (EXTRA_PROGRAMS): Make tests EXTRA, not

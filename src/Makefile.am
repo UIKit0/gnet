@@ -5,7 +5,7 @@
 INCLUDES = -DG_LOG_DOMAIN=\"GNet\" @GNET_DEBUG_FLAGS@ \
 	$(GLIB_CFLAGS) $(GTHREAD_CFLAGS)
 
-gnetincludedir = $(includedir)/gnet
+gnetincludedir = $(includedir)/gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)
 
 lib_LTLIBRARIES = libgnet.la
 
@@ -28,7 +28,7 @@ libgnet_la_SOURCES = 		\
 	md5.c			\
 	sha.c			\
 	pack.c			\
-	url.c			\
+	uri.c			\
 	conn.c			\
 	server.c
 
@@ -44,6 +44,6 @@ gnetinclude_HEADERS = 		\
 	md5.h			\
 	sha.h			\
 	pack.h			\
-	url.h			\
+	uri.h			\
 	conn.h			\
 	server.h

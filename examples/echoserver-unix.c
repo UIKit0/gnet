@@ -107,7 +107,7 @@ normal_echoserver(gchar *path)
   g_assert(server != NULL);
 
   while ((client = gnet_unix_socket_server_accept(server)) != NULL) {
-    ioclient = gnet_unix_socket_get_iochannel(client);
+    ioclient = gnet_unix_socket_get_io_channel(client);
     g_assert(ioclient != NULL);
 
     while ((e = gnet_io_channel_readline(ioclient, buffer,
@@ -122,15 +122,13 @@ normal_echoserver(gchar *path)
       fprintf(stderr,
 	      "\nRecieved error %d (closing socket).\n",
 	      e);
-    g_io_channel_unref(ioclient);
-    gnet_unix_socket_delete(client);
+    gnet_unix_socket_delete (client);
   }
 }
 
 typedef struct
 {
   GUnixSocket *socket;
-  GIOChannel *iochannel;
   guint out_watch;
   gchar buffer[1024];
   guint n;
@@ -148,7 +146,6 @@ clientstate_delete(client_state *state)
 {
   if (state->out_watch)
     g_source_remove(state->out_watch);
-  g_io_channel_unref(state->iochannel);
   gnet_unix_socket_delete(state->socket);
   g_free(state);
 }
@@ -166,7 +163,7 @@ async_echoserver(gchar *path)
   main_loop = g_main_new(FALSE);
 
   /* Add a watch for incoming clients */
-  iochannel = gnet_unix_socket_get_iochannel(server);
+  iochannel = gnet_unix_socket_get_io_channel(server);
   g_io_add_watch(iochannel,
 		 G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
 		 async_server_iofunc, server);
@@ -189,12 +186,11 @@ async_server_iofunc(GIOChannel *iochannel, GIOCondition c, gpointer data)
     client = gnet_unix_socket_server_accept(server);
     g_assert(client != NULL);
 
-    client_iochannel = gnet_unix_socket_get_iochannel(client);
+    client_iochannel = gnet_unix_socket_get_io_channel(client);
     g_assert(client_iochannel != NULL);
 
     cs = g_new0(client_state, 1);
     cs->socket = client;
-    cs->iochannel = client_iochannel;
 
     g_io_add_watch(client_iochannel,
 		   G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,

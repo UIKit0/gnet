@@ -172,7 +172,7 @@ normal_echoclient(gchar* hostname, gint port)
     }
 
   /* Get the IOChannel */
-  iochannel = gnet_tcp_socket_get_iochannel(socket);
+  iochannel = gnet_tcp_socket_get_io_channel(socket);
   g_assert (iochannel != NULL);
 
   while (fgets(buffer, sizeof(buffer), stdin) != 0)
@@ -191,7 +191,6 @@ normal_echoclient(gchar* hostname, gint port)
     g_print ("IO error (%d)\n", error);
 
   gnet_inetaddr_delete (addr);
-  g_io_channel_unref (iochannel);
   gnet_tcp_socket_delete (socket);
 }
 
@@ -250,7 +249,7 @@ async_client_connfunc (GTcpSocket* socket, GInetAddr* ia,
   gnet_inetaddr_delete (ia);
 
   /* Read from socket */
-  async_sin = gnet_tcp_socket_get_iochannel (socket);
+  async_sin = gnet_tcp_socket_get_io_channel (socket);
   g_io_add_watch (async_sin, G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 		  async_client_sin_iofunc, NULL);
   /* Read from stdin */
@@ -383,7 +382,7 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
 
 
   /* Read stuff from the server */
-  server = gnet_tcp_socket_get_iochannel(socket);
+  server = gnet_tcp_socket_get_io_channel(socket);
   g_io_add_watch(iochannel, 
 		 G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 		 async_server_iofunc, server);

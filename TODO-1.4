@@ -1,64 +1,23 @@
 
-GNet 1.1
+GNet 1.4
 
 Please email gnet-dev@gnetlibrary.org with your comments.
 
 
 API cleanup
 
-- Simplify callbacks.  They shouldn't include extraneous arguments.
-    See GInetAddrGetNameAsyncFunc.  Also make the status the first
-    argument.
+- TCP new async's callback may be called in the create function.
+    Maybe fix this to be consistent with InetAddr.
 
-    Easy.
-    SOURCE-CODE INCOMPATIBLE: Easy to autoconf around.
-
-- GInetAddrNewAsyncFunc's inetaddr should be callee owned.  It's a
-    new() function so this makes more sense.
-
-    Easy.
-    BINARY INCOMPATIBLE: May result in memory leaks.)
-
-- Remove "localhost" check from gnet_inetaddr_new_nonblock().
-
-    Easy.  
-    BINARY INCOMPATIBLE: Probably no one will notice.
-
-- Change "iochannel" to "io_channel" in functions to be consistent
-    with GLib.
-
-    Easy.  Maybe include macros so old calls work.  
-    SOURCE-CODE INCOMPATIBLE: Annoying to autoconf around.
-
-- URL field renaming/reordering
-
-    protocol -> scheme
-    resource -> path
-    put in order
-    
-    Easy.  Keep, but depricate, old set functions.
-    SOURCE-CODE INCOMPATIBLE: url module is experimental though
-
-- Don't ref iochannels before returning them.  This is annoying.
-
-    Easy.
-    BINARY INCOMPATIBLE: But the "right thing" as discussed.
-
-- Header files should go into gnet-MAJOR-MINOR, so different versions
-    can co-exist.
-
-    Easy.
-    COMPATIBLE: Developers should use gnet-config or pkg-config.
+- Move udp_mcast_ttl to mcast?
 
 
 Experimental changes
 
-- URL module become normal
+- conn/server and iochannel become "normal"
 
-    This is fairly mature.
-
-I need to look at conn/server and iochannel again.  Some of the
-iochannel helper functions may be covered by GLib 2.0.
+   Review code again.  Some of the iochannel helper functions may be
+   covered by GLib 2.0.
 
 
 New features
@@ -103,6 +62,7 @@ New features
     addresses.  If gnet_inetaddr_new() uses
     gnet_inetaddr_new_list(), this may break compatibility.
     
+    inetaddr_bytes_new(const guint8* addr, const gint length);
     
     gint 
     gnet_inetaddr_get_service (gchar* service, gchar* proto)
@@ -150,13 +110,6 @@ Possible changes
     SOURCE-CODE INCOMPATIBLE: Difficult to update.
 
 
-- Rename URL URI
-
-    Our URL module should handle URIs, a superset of URLs.
-
-    SOURCE-CODE INCOMPATIBLE: Easy to update.
-
-
 - Derive TcpSocket/UdpSocket from IOChannel
 
     There's a one-to-one correspondence between the two.  A socket is
@@ -165,3 +118,53 @@ Possible changes
     which could hurt performance.
 
     MOSTLY-COMPATIBLE: socket_get_iochannel would be needed.
+
+    Likewise, derive server and conn from TcpSocket
+
+
+
+========================================
+DONE
+
+- Remove "localhost" check from gnet_inetaddr_new_nonblock().
+
+    BINARY INCOMPATIBLE: But very minor.
+
+- gnet_*_get_iochannel() renamed gnet_*_get_io_channel()
+
+    SOURCE-CODE INCOMPATIBLE    
+
+    (Note that get_io_channel() is also not binary compatible -
+     the ref/unref semantics have changed)
+
+- GInetAddrNewAsyncFunc's inetaddr should be callee owned.  It's a
+    new() function so this makes more sense.
+
+    BINARY INCOMPATIBLE: May result in memory leaks.
+
+- Simplify callbacks.  Prototypes of GInetAddrGetNameAsyncFunc,
+    GInetAddrGetNameAsyncFunc, and GNetIOChannelReadAsyncFunc
+    have been changed.
+
+    SOURCE-CODE INCOMPATIBLE: Easy to update.
+
+- Rename URL to URI.  Some field names renamed.
+
+    SOURCE-CODE INCOMPATIBLE
+
+- Header files should go into gnet-MAJOR-MINOR, so different versions
+    can co-exist.
+
+    COMPATIBLE: Developers should use pkg-config.
+
+- Remove gnet-config
+
+    BUILD INCOMPATIBLE: Developers should now use pkg-config
+
+- gnet_*_get_io_channel() does not ref the channel before returning
+    it.  
+
+    BINARY INCOMPATIBLE: Check for unnecessary g_io_channel_unref()'s.
+
+- URI module is no longer experimental.
+

@@ -126,7 +126,7 @@ normal_echoserver (gint p)
   while ((client = gnet_tcp_socket_server_accept (server)) != NULL)
     {
       /* Get IOChannel */
-      ioclient = gnet_tcp_socket_get_iochannel(client);
+      ioclient = gnet_tcp_socket_get_io_channel(client);
       g_assert (ioclient);
 
       /* Print the address */
@@ -147,8 +147,6 @@ normal_echoserver (gint p)
 
       if (error != G_IO_ERROR_NONE)
 	fprintf (stderr, "\nReceived error %d (closing socket).\n", error);
-
-      g_io_channel_unref (ioclient);
       gnet_tcp_socket_delete (client);
 
       g_print ("Connection from %s:%d closed\n", name, port);
@@ -174,7 +172,6 @@ typedef struct
   GTcpSocket* socket;
   gchar* name;
   gint port;
-  GIOChannel* iochannel;
   guint watch_flags;
   guint watch;
   gchar buffer[1024];
@@ -199,7 +196,6 @@ static void
 clientstate_delete (ClientState* state)
 {
   g_source_remove (state->watch);
-  g_io_channel_unref (state->iochannel);
   gnet_tcp_socket_delete (state->socket);
   g_free (state->name);
   g_free (state);
@@ -267,14 +263,13 @@ async_accept (GTcpSocket* server, GTcpSocket* client, gpointer data)
       g_print ("Accepted connection from %s:%d\n", name, port);
       gnet_inetaddr_delete (addr);
 
-      client_iochannel = gnet_tcp_socket_get_iochannel (client);
+      client_iochannel = gnet_tcp_socket_get_io_channel (client);
       g_assert (client_iochannel != NULL);
 
       client_state = g_new0(ClientState, 1);
       client_state->socket = client;
       client_state->name = name;
       client_state->port = port;
-      client_state->iochannel = client_iochannel;
       client_state->watch_flags = G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL;
       client_state->watch = 
 	g_io_add_watch (client_iochannel, client_state->watch_flags,

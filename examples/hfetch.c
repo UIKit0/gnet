@@ -126,7 +126,7 @@ hfetch(gchar* server, gint port, gchar* filename)
   g_assert (socket != NULL);
 
   /* Get the IOChannel */
-  iochannel = gnet_tcp_socket_get_iochannel(socket);
+  iochannel = gnet_tcp_socket_get_io_channel(socket);
   g_assert (iochannel != NULL);
 
   /* Send the command */
@@ -155,7 +155,6 @@ hfetch(gchar* server, gint port, gchar* filename)
       fwrite(buffer, n, 1, stdout);
     }
   
-  g_io_channel_unref(iochannel);
   gnet_tcp_socket_delete(socket);
 }
 

@@ -76,8 +76,8 @@
 
 #define GNET_CLOSE_SOCKET(SOCKFD) close(SOCKFD)
 
-/* Use gnet_private_iochannel_new() to create iochannels */
-#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
+/* Use gnet_private_io_channel_new() to create iochannels */
+#define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
 
 #else	/*********** Windows specific ***********/
 
@@ -90,8 +90,8 @@
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
 
-/* Use gnet_private_iochannel_new() to create iochannels */
-#define GNET_SOCKET_IOCHANNEL_NEW(SOCKFD) g_io_channel_win32_new_socket(SOCKFD)
+/* Use gnet_private_io_channel_new() to create iochannels */
+#define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_win32_new_socket(SOCKFD)
 
 #endif	/*********** End Windows specific ***********/
 
@@ -316,7 +316,7 @@ extern HANDLE gnet_hostent_Mutex;
 /* Private/Experimental functions */
 
 
-GIOChannel* gnet_private_iochannel_new (int sockfd);
+GIOChannel* gnet_private_io_channel_new (int sockfd);
 
 GInetAddr* gnet_private_inetaddr_sockaddr_new(const struct sockaddr sa);
 

@@ -31,7 +31,7 @@
 #include "tcp.h"
 #include "socks.h"
 #include "pack.h"
-#include "url.h"
+#include "uri.h"
 #include "conn.h"
 #include "server.h"
 #include "md5.h"

@@ -241,7 +241,7 @@ conn_connect_cb (GTcpSocket* socket, GInetAddr* ia,
     {
       conn->socket = socket;
       conn->inetaddr = ia;
-      conn->iochannel = gnet_tcp_socket_get_iochannel (socket);
+      conn->iochannel = gnet_tcp_socket_get_io_channel (socket);
 
       st = GNET_CONN_STATUS_CONNECT;
 
@@ -267,7 +267,7 @@ conn_new_cb (GTcpSocket* socket,
   if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
     {
       conn->socket = socket;
-      conn->iochannel = gnet_tcp_socket_get_iochannel (socket);
+      conn->iochannel = gnet_tcp_socket_get_io_channel (socket);
 
       st = GNET_CONN_STATUS_CONNECT;
 
@@ -335,7 +335,6 @@ gnet_conn_disconnect (GConn* conn, gboolean delete_buffers)
 
   if (conn->iochannel)
     {
-      g_io_channel_unref (conn->iochannel);
       conn->iochannel = NULL;
     }
 

@@ -11,11 +11,6 @@ Features
 
 - Move udp_mcast_ttl to mcast?
 
-- URL cleanup.  Need to sync with RFC.
-
-- Put include files in gnet-MAJOR.MINOR so multiple development
-    packages can be installed.
-
 - Support IPv6.  
 
     Someone with an IPv6 system needs to do this and test it.  I don't
@@ -59,29 +54,6 @@ Features
     fake it if we don't have it.
 
 
-API Fixes
----------
-
-- Simplify callbacks.  They shouldn't include extraneous arguments.
-    See GInetAddrGetNameAsyncFunc.  Also make the status the first
-    argument.
-
-- GInetAddrNewAsyncFunc's inetaddr should be callee owned.  It's a
-    new() function so this makes more sense.
-
-- Remove "localhost" check from gnet_inetaddr_new_nonblock().
-
-- Change "iochannel" to "io_channel" in functions to be consistent
-    with GLib.
-
-- URL cleanups (see header)
-
-- Don't ref iochannels before returning them.  This is annoying.
-
-- Header files should go into gnet-MAJOR-MINOR, so different versions
-    can co-exist.
-
-
 Internal Improvements
 ---------------------
 
@@ -97,7 +69,6 @@ Internal Improvements
 
 
 
-
 Other
 -----
 
@@ -110,10 +81,6 @@ Undecided (things discussed, but not decided on)
 ---------
 
 - Add more error types
-
-- Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it).
-    Add an argument for interface name, which maybe could come from
-    the list_interfaces function.
 
 - Clean up GIOChannel usage.  
 
@@ -149,7 +116,7 @@ Undecided (things discussed, but not decided on)
 
 - Add lightweight intraprocess communication stuff via IOChannel.  I'd
     like a shared buffer and a message queue.  These should be simple
-    to do.  (GLib 1.4/2.0 might have some of this?)
+    to do.  (GLib 2.0 might have some of this?)
 
 
 Never (things that will probably never become part of GNet)

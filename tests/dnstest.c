@@ -24,14 +24,14 @@
 #include <gnet.h>
 
 
-int do_reverse = 0;
+int do_reverse = 1;
 int verbose = 1;
 
 void lookup_block(void);
 void lookup_async(void);
 void inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, gpointer data);
-void reverse_inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, 
-			 gchar* name, gpointer data);
+void reverse_inetaddr_cb(gchar* name, GInetAddrAsyncStatus status, 
+			 gpointer data);
 
 
 void usage(void);
@@ -40,6 +40,14 @@ void usage(void);
 gint num_runs = 1;
 gchar* host = NULL;
 gint runs_done = 0;
+
+
+struct ReverseState
+{
+  GInetAddr* ia;
+  gint num;
+};
+
 
 
 int
@@ -128,6 +136,7 @@ lookup_async(void)
       if (do_reverse)
 	{
 	  GInetAddr* ia;
+	  struct ReverseState* rs;
 
 	  ia = gnet_inetaddr_new(host, 0);
 	  if (ia == NULL)
@@ -137,8 +146,12 @@ lookup_async(void)
 	      exit (EXIT_FAILURE);
 	    }
 
-	  gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, 
-				       GINT_TO_POINTER(i));
+	  rs = g_new0(struct ReverseState, 1);
+	  rs->ia = ia;
+	  rs->num = i;
+
+	  gnet_inetaddr_get_name_async(ia, reverse_inetaddr_cb, rs);
+				       
 	}
       else
 	{
@@ -188,16 +201,17 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
 
 
 void
-reverse_inetaddr_cb (GInetAddr* ia, GInetAddrAsyncStatus status, 
-		     gchar* name, gpointer data)
+reverse_inetaddr_cb (gchar* name, GInetAddrAsyncStatus status, 
+		     gpointer data)
 {
-  int i = GPOINTER_TO_INT(data);
+  struct ReverseState* rs = (struct ReverseState*) data;
+
 
   if (status == GINETADDR_ASYNC_STATUS_OK)
     {
       gchar* cname;
 
-      cname = gnet_inetaddr_get_canonical_name(ia);
+      cname = gnet_inetaddr_get_canonical_name(rs->ia);
       if (cname == NULL)
 	{
 	  g_print ("Reverse DNS lookup for %s failed\n", name);
@@ -205,14 +219,15 @@ reverse_inetaddr_cb (GInetAddr* ia, GInetAddrAsyncStatus status,
 	}
 
       if (verbose)
-	g_print ("%d: %s -> %s (reverse)\n", i, cname, name);
+	g_print ("%d: %s -> %s (reverse)\n", rs->num, cname, name);
 
       g_free(cname);
     }
   else if (verbose)
-    g_print("%d: error\n", i);
+    g_print("%d: error\n", rs->num);
 
-  gnet_inetaddr_delete (ia);
+  gnet_inetaddr_delete (rs->ia);
+  g_free (rs);
 
   runs_done++;
 

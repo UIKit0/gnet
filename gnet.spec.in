@@ -88,9 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-, root, root)
-%{prefix}/include/gnet
+%{prefix}/include/gnet-@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@
 %{prefix}/lib/*a
-%{prefix}/lib/gnet
+%{prefix}/lib/gnet-@GNET_MAJOR_VERSION@.@GNET_MINOR_VERSION@
 %{prefix}/lib/lib*.so
 
 %changelog

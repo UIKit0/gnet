@@ -166,7 +166,7 @@ void gnet_tcp_socket_unref (GTcpSocket* s);
 
 /* ********** */
 
-GIOChannel* gnet_tcp_socket_get_iochannel (GTcpSocket* socket);
+GIOChannel* gnet_tcp_socket_get_io_channel (GTcpSocket* socket);
 GInetAddr*  gnet_tcp_socket_get_inetaddr (const GTcpSocket* socket);
 gint        gnet_tcp_socket_get_port (const GTcpSocket* socket);
 

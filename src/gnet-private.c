@@ -23,7 +23,7 @@
 
 
 /**
- * gnet_private_iochannel_new:
+ * gnet_private_io_channel_new:
  * @sockfd: socket descriptor
  *
  * Create a new IOChannel from a descriptor.  In GLib 2.0, turn off
@@ -33,11 +33,11 @@
  *
  **/
 GIOChannel* 
-gnet_private_iochannel_new (int sockfd) 
+gnet_private_io_channel_new (int sockfd) 
 {
   GIOChannel* iochannel;
 
-  iochannel = GNET_SOCKET_IOCHANNEL_NEW(sockfd);
+  iochannel = GNET_SOCKET_IO_CHANNEL_NEW(sockfd);
   if (iochannel == NULL)
     return NULL;
 

@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000-2002  David Helder
  * Copyright (C) 2000  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
@@ -504,7 +504,8 @@ static void* inetaddr_new_async_pthread (void* arg);
  *  Create a GInetAddr from a name and port asynchronously.  The
  *  callback is called once the structure is created or an error
  *  occurs during lookup.  The callback will not be called during the
- *  call to gnet_inetaddr_new_async().
+ *  call to gnet_inetaddr_new_async().  The GInetAddr passed in the
+ *  callback is callee owned.
  *
  *  The Unix version creates a pthread thread which does the lookup.
  *  If pthreads aren't available, it forks and does the lookup.
@@ -628,7 +629,7 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
 	state = g_new0(GInetAddrAsyncState, 1);
 	state->pid = pid;
 	state->fd = pipes[0];
-	state->iochannel = gnet_private_iochannel_new(pipes[0]);
+	state->iochannel = gnet_private_io_channel_new(pipes[0]);
 	state->watch = g_io_add_watch(state->iochannel,
 				      (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				      gnet_inetaddr_new_async_cb, 
@@ -746,7 +747,6 @@ inetaddr_new_async_pthread_dispatch (gpointer data)
 
   /* Delete state */
   g_source_remove (state->source);
-  gnet_inetaddr_delete (state->ia);
   pthread_mutex_unlock (&state->mutex);
   pthread_mutex_destroy (&state->mutex);
   memset (state, 0, sizeof(*state));
@@ -1020,9 +1020,9 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
  *  @port: port number (0 if the port doesn't matter)
  * 
  *  Create an internet address from a name and port, but don't block
- *  and fail if it would require blocking.  This is, if the name is a
- *  canonical name or "localhost", it returns the address.  Otherwise,
- *  it returns NULL.
+ *  and fail if it would require blocking.  Otherwise, it returns
+ *  NULL.  That is, the call will only succeed if the address is in
+ *  network address format (i.e., is not a domain name).
  *
  *  Returns: a new #GInetAddr, or NULL if there was a failure or it
  *  would require blocking.
@@ -1038,7 +1038,6 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
   g_return_val_if_fail (name, NULL);
 
   /* Try to read the name as if were dotted decimal */
- try_again:
   if (inet_aton(name, &inaddr) != 0)
     {
       ia = g_new0(GInetAddr, 1);
@@ -1048,14 +1047,6 @@ gnet_inetaddr_new_nonblock (const gchar* name, gint port)
       sa_in->sin_family = AF_INET;
       sa_in->sin_port = g_htons(port);
       memcpy(&sa_in->sin_addr, (char*) &inaddr, sizeof(struct in_addr));
-    }
-
-  /* If the name is localhost, change it to 127.0.0.1 and try again */
-  /* FIX: I don't think this is legal... */
-  else if (!strcmp (name, "localhost"))
-    {
-      name = "127.0.0.1";
-      goto try_again;
     }
 
   return ia;
@@ -1224,8 +1215,6 @@ static void* inetaddr_get_name_async_pthread (void* arg);
  *  The Unix uses either pthreads or fork().  See the notes for
  *  gnet_inetaddr_new_async().
  *
- *  FIX: In the next big version, this should copy ia.
- *
  *  Returns: ID of the lookup which can be used with
  *  gnet_inetaddrr_get_name_async_cancel() to cancel it; NULL on
  *  failure.
@@ -1243,16 +1232,11 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 
 # ifdef HAVE_LIBPTHREAD			/* Pthread */
   {
-    void** args;
     pthread_attr_t attr;
     pthread_t pthread;
     int rv;
 
     state = g_new0(GInetAddrReverseAsyncState, 1);
-
-    args = g_new (void*, 2);
-    args[0] = (void*) gnet_inetaddr_clone(ia);
-    args[1] = state;
 
     pthread_mutex_init (&state->mutex, NULL);
     pthread_mutex_lock (&state->mutex);
@@ -1261,7 +1245,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
     pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
   create_again:
-    rv = pthread_create (&pthread, &attr, inetaddr_get_name_async_pthread, args);
+    rv = pthread_create (&pthread, &attr, inetaddr_get_name_async_pthread, state);
     if (rv == EAGAIN)
       {
 	sleep(0);	/* Yield the processor */
@@ -1273,7 +1257,6 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 	pthread_mutex_unlock (&state->mutex);
 	pthread_mutex_destroy (&state->mutex);
 	pthread_attr_destroy (&attr);
-	gnet_inetaddr_delete ((GInetAddr*) args[0]);
 	g_free (state);
 	return NULL;
       }
@@ -1358,7 +1341,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 	state = g_new0(GInetAddrReverseAsyncState, 1);
 	state->pid = pid;
 	state->fd = pipes[0];
-	state->iochannel = gnet_private_iochannel_new(pipes[0]);
+	state->iochannel = gnet_private_io_channel_new(pipes[0]);
 	state->watch = g_io_add_watch(state->iochannel,
 				      (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
 				      gnet_inetaddr_get_name_async_cb, 
@@ -1383,7 +1366,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 
   /* Set up state for callback */
   g_assert (state);
-  state->ia = ia;
+  state->ia = gnet_inetaddr_clone(ia);
   state->func = func;
   state->data = data;
 
@@ -1452,15 +1435,12 @@ inetaddr_get_name_async_pthread_dispatch (gpointer data)
 
   pthread_mutex_lock (&state->mutex);
 
-  if (state->ia->name)
-    g_free (state->ia->name);
-  state->ia->name = state->name;
-
   /* Upcall */
-  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, 
-		 state->ia->name, state->data);
+  (*state->func)(state->name, GINETADDR_ASYNC_STATUS_OK, 
+		 state->data);
 
   /* Delete state */
+  gnet_inetaddr_delete (state->ia);
   g_source_remove (state->source);
   pthread_mutex_unlock (&state->mutex);
   pthread_mutex_destroy (&state->mutex);
@@ -1474,30 +1454,25 @@ inetaddr_get_name_async_pthread_dispatch (gpointer data)
 static void* 
 inetaddr_get_name_async_pthread (void* arg)
 {
-  void** args      = (void**) arg;
-  GInetAddr* ia    = (GInetAddr*) args[0];
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) args[1];
-  gchar* 	  name;
-
-  g_free (args);
-
-  /* Do lookup */
-  if (ia->name)
-    name = g_strdup (ia->name);
-  else
-    name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&ia->sa)->sin_addr, 
-			      sizeof(struct in_addr), AF_INET);
+  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) arg;
+  gchar* name;
 
   /* Lock */
   pthread_mutex_lock (&state->mutex);
      
+  /* Do lookup */
+  if (state->ia->name)
+    name = g_strdup (state->ia->name);
+  else
+    name = gnet_gethostbyaddr((char*) &((struct sockaddr_in*)&state->ia->sa)->sin_addr, 
+			      sizeof(struct in_addr), AF_INET);
+
   /* If cancelled, destroy state and exit.  The main thread is no
      longer using state. */
   if (state->is_cancelled)
     {
       g_free (name);
-
-      gnet_inetaddr_delete (ia);
+      gnet_inetaddr_delete (state->ia);
 
       pthread_mutex_unlock (&state->mutex);
       pthread_mutex_destroy (&state->mutex);
@@ -1515,7 +1490,7 @@ inetaddr_get_name_async_pthread (void* arg)
   else 	/* Lookup failed: name is canonical name */
     {
       gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-      guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
+      guchar* p = (guchar*) &(GNET_SOCKADDR_IN(state->ia->sa).sin_addr);
 
       g_snprintf (buffer, sizeof(buffer), 
 		 "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
@@ -1523,12 +1498,11 @@ inetaddr_get_name_async_pthread (void* arg)
       state->name = g_strdup(buffer);
     }
 
-  gnet_inetaddr_delete (ia);
-
   /* Add a source for reply */
   state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
 				   inetaddr_get_name_async_pthread_dispatch,
 				   state, NULL);
+
   /* Unlock */
   pthread_mutex_unlock (&state->mutex);
 
@@ -1584,7 +1558,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
 	  /* Call back */
 	  state->in_callback = TRUE;
-	  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, name, state->data);
+	  (*state->func)(name, GINETADDR_ASYNC_STATUS_OK, state->data);
 	  state->in_callback = FALSE;
 	  gnet_inetaddr_get_name_async_cancel(state);
 	  return FALSE;
@@ -1595,7 +1569,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
   /* Call back */
   state->in_callback = TRUE;
-  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, state->data);
+  (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
   state->in_callback = FALSE;
   gnet_inetaddr_get_name_async_cancel(state);
   return FALSE;
@@ -1613,6 +1587,7 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
   if (state->in_callback)
     return;
 
+  gnet_inetaddr_delete (state->ia);
   g_source_remove (state->watch);
   g_io_channel_unref (state->iochannel);
 
@@ -1643,7 +1618,7 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
 
   /* Create a structure for the call back */
   state = g_new0(GInetAddrReverseAsyncState, 1);
-  state->ia = ia;
+  state->ia = gnet_inetaddr_clone(ia);
   state->func = func;
   state->data = data;
 
@@ -1685,7 +1660,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 
   if (state->errorcode)
     {
-      (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_ERROR, NULL, state->data);
+      (*state->func)(NULL, GINETADDR_ASYNC_STATUS_ERROR, state->data);
       return FALSE;
     }
 
@@ -1693,8 +1668,9 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
   name = NULL;
   name = g_strdup(state->ia->name);
 
-  (*state->func)(state->ia, GINETADDR_ASYNC_STATUS_OK, name, state->data);
+  (*state->func)(name, GINETADDR_ASYNC_STATUS_OK, state->data);
 
+  gnet_inetaddr_delete (state->ia);
   g_free(state);
   return FALSE;
 }

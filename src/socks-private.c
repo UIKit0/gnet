@@ -157,7 +157,7 @@ socks_negotiate_connect (GTcpSocket *s, const GInetAddr *dst)
   GIOChannel *ioc;
   int ver, ret;
 
-  ioc = gnet_tcp_socket_get_iochannel(s);
+  ioc = gnet_tcp_socket_get_io_channel(s);
   ver = socks_get_version();
   if (ver == 5)
     ret = socks5_negotiate_connect (ioc, dst);
@@ -165,7 +165,6 @@ socks_negotiate_connect (GTcpSocket *s, const GInetAddr *dst)
     ret = socks4_negotiate_connect (ioc, dst);
   else
     ret = -1;
-  g_io_channel_unref(ioc);
 
   return ret;
 }
@@ -289,7 +288,7 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
   struct socks5_h s5h;
   int len;
 
-  ioc = gnet_tcp_socket_get_iochannel(socket);
+  ioc = gnet_tcp_socket_get_io_channel(socket);
 
   s5r[0] = 5;
   s5r[1] = 1;	/* no authentication */
@@ -326,7 +325,6 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
   return 0;
 
  error:
-  g_io_channel_unref(ioc);
   return -1;
 }
 
@@ -350,9 +348,8 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
   server_port = g_ntohs(GNET_SOCKADDR_IN(socket->sa).sin_port);
 
   /* this reply reveals the connecting hosts ip and port */
-  iochannel = gnet_tcp_socket_get_iochannel(socket);
+  iochannel = gnet_tcp_socket_get_io_channel(socket);
   error = gnet_io_channel_readn(iochannel, (gchar*) &s5h, 10, &len);
-  g_io_channel_unref (iochannel);
   if (error != G_IO_ERROR_NONE)
     return NULL;
 
@@ -390,13 +387,12 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
       GIOChannel* iochannel;
 
       /* This will recreate the IOChannel */
-      iochannel = gnet_tcp_socket_get_iochannel (socket);
+      iochannel = gnet_tcp_socket_get_io_channel (socket);
 
       /* Set the watch on the new IO channel */
       socket->accept_watch = g_io_add_watch(iochannel, 
 					    G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 					    socks_tcp_socket_server_accept_async_cb, socket);
-      g_io_channel_unref (iochannel);
     }
 
   return s;
@@ -419,11 +415,10 @@ gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* socket,
   socket->accept_data = user_data;
 
   /* Add read watch */
-  iochannel = gnet_tcp_socket_get_iochannel (socket);
+  iochannel = gnet_tcp_socket_get_io_channel (socket);
   socket->accept_watch = g_io_add_watch(iochannel, 
 					G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
 					socks_tcp_socket_server_accept_async_cb, socket);
-  g_io_channel_unref (iochannel);
 }
 
 

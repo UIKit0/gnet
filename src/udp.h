@@ -83,7 +83,7 @@ gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
 /* ********** */
 
 /* Do not read or write from the iochannel - it's for watches only */
-GIOChannel* gnet_udp_socket_get_iochannel (GUdpSocket* socket);
+GIOChannel* gnet_udp_socket_get_io_channel (GUdpSocket* socket);
 
 gint gnet_udp_socket_get_ttl (const GUdpSocket* us);
 gint gnet_udp_socket_set_ttl (GUdpSocket* us, int val);

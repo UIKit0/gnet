@@ -89,7 +89,7 @@ normal_echoclient(gchar* path)
   g_assert (socket != NULL);
 
   /* Get the IOChannel */
-  iochannel = gnet_unix_socket_get_iochannel(socket);
+  iochannel = gnet_unix_socket_get_io_channel(socket);
   g_assert (iochannel != NULL);
 
   while (fgets(buffer, sizeof(buffer), stdin) != 0) {

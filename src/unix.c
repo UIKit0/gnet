@@ -132,7 +132,7 @@ gnet_unix_socket_unref(GUnixSocket *s)
 }
     
 /**
- *  gnet_unix_socket_get_iochannel
+ *  gnet_unix_socket_get_io_channel
  *  @socket: GUnixSocket to get GIOChannel from.
  *
  *  Get the #GIOChannel for the #GUnixSocket.
@@ -144,22 +144,21 @@ gnet_unix_socket_unref(GUnixSocket *s)
  *  connections.  If you can read from it, there's a connection
  *  waiting to be accepted.
  *
- *  There is one channel for every socket.  This function refs the
- *  channel before returning it.  You should unref the channel when
- *  you are done with it.  However, you should not close the channel -
- *  this is done when you delete the socket.
+ *  There is one channel for every socket.  If the channel is refed
+ *  then it must be unrefed eventually.  Do not close the channel --
+ *  this is done when the socket is deleted.
  *
  *  Returns: A #GIOChannel; NULL on failure.  
  *
  **/
 GIOChannel*
-gnet_unix_socket_get_iochannel(GUnixSocket *socket)
+gnet_unix_socket_get_io_channel(GUnixSocket *socket)
 {
   g_return_val_if_fail(socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = gnet_private_iochannel_new(socket->sockfd);
-  g_io_channel_ref(socket->iochannel);
+    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
+
   return socket->iochannel;
 }
 

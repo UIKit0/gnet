@@ -307,7 +307,7 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
 
 
 /**
- *  gnet_udp_socket_get_iochannel:
+ *  gnet_udp_socket_get_io_channel:
  *  @socket: #GUdpSocket to get #GIOChannel from.
  *
  *  Get a #GIOChannel from the #GUdpSocket.  
@@ -320,24 +320,21 @@ gnet_udp_socket_has_packet(const GUdpSocket* s)
  *  gnet_udp_socket_receive() to read a packet.  If you can write to
  *  the channel, use gnet_udp_socket_send() to write a packet.
  *
- *  There is one channel for every socket.  This function refs the
- *  channel before returning it.  You should unref the channel when
- *  you are done with it.  However, you should not close the channel -
- *  this is done when you delete the socket.
+ *  There is one channel for every socket.  If the channel is refed
+ *  then it must be unrefed eventually.  Do not close the channel --
+ *  this is done when the socket is deleted.
  *
  *  Returns: A #GIOChannel; NULL on failure.
  *
  **/
 GIOChannel* 
-gnet_udp_socket_get_iochannel(GUdpSocket* socket)
+gnet_udp_socket_get_io_channel(GUdpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = gnet_private_iochannel_new(socket->sockfd);
+    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
   
-  g_io_channel_ref (socket->iochannel);
-
   return socket->iochannel;
 }
 

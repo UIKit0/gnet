@@ -12,10 +12,6 @@ EXTRA_DIST=TODO HACKING BUGS  README.macosx gnetconfig.h.in \
 	tests/makefile.mingw
 
 
-bin_SCRIPTS=gnet-config
-BUILT_SOURCES=gnet-config
-gnet-config: gnet-config.in
-
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet.m4
 
@@ -24,7 +20,7 @@ pkgconfig_DATA = gnet.pc
 
 $(pkgconfig_DATA): config.status
 
-configincludedir = $(pkglibdir)/include
+configincludedir = $(pkglibdir)-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)/include
 configinclude_DATA = gnetconfig.h
 
 WEBPATH=/n/mesh/home/www/gnetlibrary.org/html

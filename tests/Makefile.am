@@ -5,9 +5,9 @@
 INCLUDES = -I$(top_srcdir)/src $(GLIB_CFLAGS)
 LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS)
 
-TESTS = hash pack unpack url_test
+TESTS = hash pack unpack uri_test
 EXTRA_PROGRAMS = $(TESTS) hostinfo dnstest
-CLEANFILES = $(TESTS)
+CLEANFILES = $(TESTS) hostinfo dnstest
 
 
 #####
@@ -17,8 +17,8 @@ hash_LDADD	  = $(top_builddir)/src/libgnet.la
 hostinfo_LDADD	  = $(top_builddir)/src/libgnet.la
 pack_LDADD	  = $(top_builddir)/src/libgnet.la
 unpack_LDADD	  = $(top_builddir)/src/libgnet.la
-url_test_SOURCES  = url_test.c
-url_test_LDADD    = $(top_builddir)/src/libgnet.la
+uri_test_SOURCES  = uri_test.c
+uri_test_LDADD    = $(top_builddir)/src/libgnet.la
 
 tests: $(EXTRA_PROGRAMS)
 .PHONY: tests

@@ -135,7 +135,7 @@ server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpointer data)
       GConn* conn; 
 
       /* Get the iochannel */
-      iochannel = gnet_tcp_socket_get_iochannel (client);
+      iochannel = gnet_tcp_socket_get_io_channel (client);
       g_return_if_fail (iochannel);
 
       /* Create a Connection */

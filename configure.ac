@@ -7,7 +7,7 @@ AC_PREREQ([2.52])
 
 ###############################
 # Init autoconf and automake
-AC_INIT([gnet], [1.1.7], [gnet@gnetlibrary.org])
+AC_INIT([gnet], [1.3.0], [gnet@gnetlibrary.org])
 # CANONICAL_TARGET has to occur before INIT_AUTOMAKE, for reasons I don't
 # fully understand
 AC_CANONICAL_TARGET
@@ -29,10 +29,10 @@ AC_CONFIG_SRCDIR([src/gnet.c])
 # if backwards compatibility has been broken,
 # set GNET_BINARY_AGE _and_ GNET_INTERFACE_AGE to 0.
 GNET_MAJOR_VERSION=1
-GNET_MINOR_VERSION=1
-GNET_MICRO_VERSION=7
+GNET_MINOR_VERSION=3
+GNET_MICRO_VERSION=0
 GNET_INTERFACE_AGE=0
-GNET_BINARY_AGE=7
+GNET_BINARY_AGE=0
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
@@ -176,37 +176,6 @@ AC_CHECK_MEMBER([struct sockaddr.sa_len],
 # Compiler characteristics
 AC_C_CONST
 
-# If the compiler is gcc, turn on as many warnings as possible
-if test "x$GCC" = "xyes"; then
-	case " $CFLAGS " in
-		*[\ \	]-Wall[\ \	]*)
-			;;
-		*)
-			CFLAGS="$CFLAGS -Wall -Wstrict-prototypes \
-			-Wmissing-prototypes -Wmissing-declarations"
-			if test "x$enable_debug" = "xyes"; then
-			  CFLAGS="$CFLAGS -Werror"
-			fi
-			;;
-	esac
-	if test "x$enable_ansi" = "xyes"; then
-		case " $CFLAGS " in
-			*[\ \	]-ansi[\ \	]*)
-				;;
-			*)
-				CFLAGS="$CFLAGS -ansi"
-				;;
-		esac
-		case " $CFLAGS " in
-			*[\ \	]-pedantic[\ \	]*)
-				;;
-			*)
-				CFLAGS="$CFLAGS -pedantic"
-				;;
-		esac
-	fi
-fi
-
 # Use reentract functions, and compile expiramental stuff
 CFLAGS="$CFLAGS -D_REENTRANT -DGNET_EXPERIMENTAL"
 
@@ -302,20 +271,34 @@ if used in programs that use threads.  If your system has a
 thread-safe version of gethostbyname(), pass the option
 --enable-threadsafe-gethostbyname to configure.])  
 fi
+
+
+# If the compiler is gcc, turn on as many warnings as possible
+if test "x$GCC" = "xyes"; then
+  CFLAGS="$CFLAGS -Wall -Wstrict-prototypes \
+    -Wmissing-prototypes -Wmissing-declarations"
+  if test "x$enable_debug" = "xyes"; then
+    CFLAGS="$CFLAGS -Werror"
+  fi
+
+  if test "x$enable_ansi" = "xyes"; then
+    CFLAGS="$CFLAGS -ansi"
+    CFLAGS="$CFLAGS -pedantic"
+  fi
+fi
+
 		
 ###############################
 # Outputs
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_FILES([
-	gnet-config
 	Makefile
 	src/Makefile
 	examples/Makefile
 	tests/Makefile
 	doc/Makefile
-	doc/gnet-config.1
 	gnetconfig.h
 	gnet.spec
 	gnet.pc],
-	[chmod -f +x gnet-config])
+	[cp -f gnet.pc gnet-1.3.pc ])
 AC_OUTPUT

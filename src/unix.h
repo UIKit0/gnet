@@ -51,7 +51,7 @@ void gnet_unix_socket_delete (GUnixSocket *s);
 void gnet_unix_socket_ref (GUnixSocket *s);
 void gnet_unix_socket_unref (GUnixSocket *s);
 
-GIOChannel* gnet_unix_socket_get_iochannel (GUnixSocket *socket);
+GIOChannel* gnet_unix_socket_get_io_channel (GUnixSocket *socket);
 
 gchar* gnet_unix_socket_get_path (const GUnixSocket *socket);
 
