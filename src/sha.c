@@ -336,7 +336,7 @@ void
 SHAUpdate( SHA_CTX *shaInfo, guint8 const *buffer, guint count )
 {
   guint32 tmp;
-  int dataCount;
+  unsigned int dataCount;
 
   /* Update bitcount */
   tmp = shaInfo->countLo;
@@ -668,7 +668,7 @@ gnet_sha_get_digest (const GSHA* gsha)
 {
   g_return_val_if_fail (gsha, NULL);
   
-  return gsha->digest;
+  return (guint8*) gsha->digest;
 }
 
 

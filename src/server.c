@@ -27,7 +27,7 @@ static gboolean server_accept_cb (GIOChannel* listen_iochannel,
 
 
 GServer*  
-gnet_server_new (GInetAddr* interface, gint port, gboolean force_port, 
+gnet_server_new (GInetAddr* iface, gint port, gboolean force_port, 
 		GServerFunc func, gpointer user_data)
 {
   GServer* server = NULL;
@@ -41,13 +41,13 @@ gnet_server_new (GInetAddr* interface, gint port, gboolean force_port,
   /* Create a listening socket */
   if (port)
     {
-      server->socket = gnet_tcp_socket_server_new2 (interface, port);
+      server->socket = gnet_tcp_socket_server_new2 (iface, port);
       if (!server->socket && force_port)
 	goto error;
     }
 
   if (!server->socket)
-    server->socket = gnet_tcp_socket_server_new2 (interface, 0);
+    server->socket = gnet_tcp_socket_server_new2 (iface, 0);
 
   if (!server->socket)
     goto error;
@@ -58,7 +58,7 @@ gnet_server_new (GInetAddr* interface, gint port, gboolean force_port,
     goto error;
 
   /* Get the address */
-  server->interface = gnet_tcp_socket_get_inetaddr (server->socket);
+  server->iface = gnet_tcp_socket_get_inetaddr (server->socket);
 
   /* Get the iochannel */
   server->iochannel = gnet_tcp_socket_get_iochannel (server->socket);
@@ -87,7 +87,7 @@ gnet_server_delete (GServer* server)
       if (server->watch_id)      g_source_remove (server->watch_id);
       if (server->iochannel)     g_io_channel_unref (server->iochannel);
       if (server->socket)	 gnet_tcp_socket_delete (server->socket);
-      if (server->interface)     gnet_inetaddr_delete (server->interface);
+      if (server->iface)     	 gnet_inetaddr_delete (server->iface);
 
       memset (server, 0, sizeof(*server));
       g_free (server);

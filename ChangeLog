@@ -1,3 +1,14 @@
+Tue Feb 27 15:55:56 2001  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c:  Fixed const issues for Windows
+	* src/tcp.c:
+	* src/sha.c:
+
+	* src/server.[hc]: s/interface/iface because interface
+	   is reserved in MS C.
+
+	* README: Added PreViking link
+
 Fri Feb 23 7:44:14 2001  Andrew Lanoix  <alanoix@umich.edu>
 
 	*src/server.c added #include<memory.h>

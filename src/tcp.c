@@ -697,7 +697,7 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new(const gint port)
+gnet_tcp_socket_server_new(gint port)
 {
   return gnet_tcp_socket_server_new2 (NULL, port);
 }
@@ -723,7 +723,7 @@ gnet_tcp_socket_server_new(const gint port)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new2 (const GInetAddr* iface, const gint port)
+gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port)
 {
   GTcpSocket* s;
   struct sockaddr_in* sa_in;

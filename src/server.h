@@ -53,7 +53,7 @@ typedef void (*GServerFunc)(GServer* server,
 
 struct _GServer
 {
-  GInetAddr* 	interface;
+  GInetAddr* 	iface;
   gint		port;
 
   GTcpSocket* 	socket;
@@ -67,7 +67,7 @@ struct _GServer
 };
 
 
-GServer*  gnet_server_new (GInetAddr* interface, 
+GServer*  gnet_server_new (GInetAddr* iface, 
 			   gint port, gboolean force_port, 
 			   GServerFunc func, gpointer user_data);
 void      gnet_server_delete (GServer* server);

@@ -664,7 +664,7 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
 
 
 GInetAddrNewAsyncID
-gnet_inetaddr_new_async(const gchar* name, const gint port,
+gnet_inetaddr_new_async(const gchar* name, gint port,
 			GInetAddrNewAsyncFunc func, gpointer data)
 {
 
