@@ -1,8 +1,5 @@
 Thu May 31 10:46:30 2001  David Helder  <dhelder@umich.edu>
 
-
-Thu May 31 10:39:56 2001  David Helder  <dhelder@umich.edu>
-
 	* Makefile.am (EXTRA_DIST): Add README.win32 GNET.DSP
 	     config.h.win32 gnet.def
 	* */Makefile.am: Add makefile.mingw
