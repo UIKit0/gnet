@@ -28,12 +28,12 @@ static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpo
 
 /**
  *  gnet_server_new:
- *  @iface: interface to bind to (NULL for any interface)
- *  @port: port to bind to (0 for any port)
+ *  @iface: interface to bind to (NULL for all interfaces)
+ *  @port: port to bind to (0 for an arbitrary port)
  *  @func: callback to call when a connection is accepted
  *  @user_data: data to pass to callback
  *
- *  Creates a new #GServer object representing a server.  Normally,
+ *  Creates a new #GServer object representing a server.  Usually,
  *  @iface is set to NULL to bind to all interfaces and @port is a
  *  specific number.  The callback is called whenever a new connection
  *  arrives or if there is a server error.  The callback is not called
@@ -51,15 +51,16 @@ gnet_server_new (const GInetAddr* iface, gint port,
 
   g_return_val_if_fail (func, NULL);
 
-  socket = gnet_tcp_socket_server_new_interface (iface, port);
+  socket = gnet_tcp_socket_server_new_full (iface, port);
   if (!socket)
     return NULL;
 
   server = g_new0 (GServer, 1);
+  server->ref_count = 1;
   server->func = func;
   server->user_data = user_data;
   server->socket = socket;
-  server->iface = gnet_tcp_socket_get_inetaddr (server->socket);
+  server->iface = gnet_tcp_socket_get_local_inetaddr (server->socket);
   server->port  = gnet_tcp_socket_get_port (server->socket);
 
   /* Wait for new connections */
@@ -81,13 +82,47 @@ gnet_server_new (const GInetAddr* iface, gint port,
 void
 gnet_server_delete (GServer* server)
 {
-  if (server)
-    {
-      if (server->socket)	 gnet_tcp_socket_delete (server->socket);
-      if (server->iface)     	 gnet_inetaddr_delete (server->iface);
+  if (server != NULL)
+    gnet_server_unref (server);
+}
 
-      g_free (server);
-    }
+
+/**
+ *  gnet_server_ref
+ *  @server: a #GServer
+ *
+ *  Adds a reference to a #GServer.
+ *
+ **/
+void
+gnet_server_ref (GServer* server)
+{
+  g_return_if_fail (server);
+
+  server->ref_count++;
+}
+
+
+/**
+ *  gnet_server_unref
+ *  @server: a #GServer
+ *
+ *  Removes a reference from a #GServer.  A #GServer is deleted when
+ *  the reference count reaches 0.
+ *
+ **/
+void
+gnet_server_unref (GServer* server)
+{
+  server->ref_count--;
+  if (server->ref_count > 0)
+    return;
+
+  if (server->socket)	 
+    gnet_tcp_socket_delete (server->socket);
+  if (server->iface)     	 
+    gnet_inetaddr_delete (server->iface);
+  g_free (server);
 }
 
 

@@ -31,6 +31,10 @@ GInetAddrGetNameAsyncID
 GInetAddrGetNameAsyncFunc
 gnet_inetaddr_get_name_async
 gnet_inetaddr_get_name_async_cancel
+GNET_INETADDR_MAX_LEN
+gnet_inetaddr_get_length
+gnet_inetaddr_get_bytes
+gnet_inetaddr_set_bytes
 gnet_inetaddr_get_canonical_name
 gnet_inetaddr_get_port
 gnet_inetaddr_set_port
@@ -95,9 +99,9 @@ gnet_tcp_socket_delete
 gnet_tcp_socket_ref
 gnet_tcp_socket_unref
 gnet_tcp_socket_get_io_channel
-gnet_tcp_socket_get_inetaddr
-gnet_tcp_socket_get_port
+gnet_tcp_socket_get_remote_inetaddr
 gnet_tcp_socket_get_local_inetaddr
+gnet_tcp_socket_get_port
 GNetTOS
 gnet_tcp_socket_set_tos
 gnet_tcp_socket_server_new

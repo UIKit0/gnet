@@ -40,11 +40,24 @@ extern "C" {
  **/
 #define GNET_SOCKS_PORT 1080
 
+
+/**
+ *  GNET_SOCKS_VERSION
+ *  
+ *  Default version of the SOCKS protocol.
+ **/
+#define GNET_SOCKS_VERSION 5
+
+
+
 gboolean   gnet_socks_get_enabled (void);
 void	   gnet_socks_set_enabled (gboolean enabled);
 
 GInetAddr* gnet_socks_get_server (void);
-void       gnet_socks_set_server (const GInetAddr* ia);
+void       gnet_socks_set_server (const GInetAddr* inetaddr);
+
+gint	   gnet_socks_get_version (void);
+void       gnet_socks_set_version (gint version);
 
 #ifdef __cplusplus
 }

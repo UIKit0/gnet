@@ -42,9 +42,75 @@ extern "C" {
 typedef struct _GInetAddr GInetAddr;
 
 
-
-
 /* ********** */
+
+GInetAddr* gnet_inetaddr_new (const gchar* hostname, gint port);
+GInetAddr* gnet_inetaddr_new_nonblock (const gchar* hostname, gint port);
+GInetAddr* gnet_inetaddr_new_bytes (const gchar* bytes, const guint length);
+
+GList*     gnet_inetaddr_new_list (const gchar* hostname, gint port);
+void	   gnet_inetaddr_delete_list (GList* list);
+
+GInetAddr* gnet_inetaddr_clone (const GInetAddr* inetaddr);
+
+void       gnet_inetaddr_delete (GInetAddr* inetaddr);
+void 	   gnet_inetaddr_ref (GInetAddr* inetaddr);
+void 	   gnet_inetaddr_unref (GInetAddr* inetaddr);
+
+gchar*     gnet_inetaddr_get_name (/* const */ GInetAddr* inetaddr);
+gchar*     gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr);
+
+gint	   gnet_inetaddr_get_length (const GInetAddr* inetaddr);
+void	   gnet_inetaddr_get_bytes (const GInetAddr* inetaddr, gchar* buffer);
+void	   gnet_inetaddr_set_bytes (GInetAddr* inetaddr, const gchar* bytes, gint length);
+
+gchar*     gnet_inetaddr_get_canonical_name (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_canonical (const gchar* hostname);
+
+gint 	   gnet_inetaddr_get_port (const GInetAddr* inetaddr);
+void 	   gnet_inetaddr_set_port (const GInetAddr* inetaddr, gint port);
+gboolean   gnet_inetaddr_is_internet  (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_private   (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_reserved  (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_loopback  (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_multicast (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr);
+
+gboolean   gnet_inetaddr_is_ipv4      (const GInetAddr* inetaddr);
+gboolean   gnet_inetaddr_is_ipv6      (const GInetAddr* inetaddr);
+
+
+guint 	   gnet_inetaddr_hash (gconstpointer p);
+gboolean   gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2);
+gboolean   gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2);
+
+gchar*     gnet_inetaddr_get_host_name (void);
+GInetAddr* gnet_inetaddr_get_host_addr (void);
+
+
+GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
+GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr);
+GInetAddr* gnet_inetaddr_get_internet_interface (void);
+
+gboolean   gnet_inetaddr_is_internet_domainname (const gchar* hostname);
+
+GList*     gnet_inetaddr_list_interfaces (void);
+
+
+/**
+ *  GNET_INETADDR_MAX_LEN
+ *
+ *  Maximum length of a #GInetAddr's address in bytes.  This can be
+ *  used to allocate a buffer large enough for
+ *  gnet_inetaddr_get_bytes().
+ *
+ **/
+#define GNET_INETADDR_MAX_LEN 16
+
+
+
+/* **************************************** */
+/* Asynchronous functions */
 
 
 /**
@@ -72,6 +138,13 @@ typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr,
 				      gpointer data);
 
 
+GInetAddrNewAsyncID 
+gnet_inetaddr_new_async (const gchar* hostname, gint port, 
+			 GInetAddrNewAsyncFunc func, 
+			 gpointer data);
+void gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
+
+
 
 /**
  *   GInetAddrNewListAsyncID:
@@ -96,44 +169,13 @@ typedef gpointer GInetAddrNewListAsyncID;
  **/
 typedef void (*GInetAddrNewListAsyncFunc)(GList* list, gpointer data);
 
-
-
-
-/* ********** */
-
-GInetAddr* gnet_inetaddr_new (const gchar* hostname, gint port);
-
-
-GInetAddrNewAsyncID 
-           gnet_inetaddr_new_async (const gchar* hostname, gint port, 
-				    GInetAddrNewAsyncFunc func, 
-				    gpointer data);
-void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
-
-
-GList*     gnet_inetaddr_new_list (const gchar* hostname, gint port);
-void	   gnet_inetaddr_delete_list (GList* list);
-
 GInetAddrNewListAsyncID 
-           gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
-					 GInetAddrNewListAsyncFunc func, 
-					 gpointer data);
-void       gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
+gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
+			      GInetAddrNewListAsyncFunc func, 
+			      gpointer data);
+void gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
 
 
-GInetAddr* gnet_inetaddr_new_nonblock (const gchar* hostname, gint port);
-
-GInetAddr* gnet_inetaddr_new_bytes (const guint8* addr, const guint length);
-
-GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
-
-void       gnet_inetaddr_delete (GInetAddr* ia);
-
-void 	   gnet_inetaddr_ref (GInetAddr* ia);
-void 	   gnet_inetaddr_unref (GInetAddr* ia);
-
-
-/* ********** */
 
 /**
  *   GInetAddrGetNameAsyncID:
@@ -160,70 +202,13 @@ typedef void (*GInetAddrGetNameAsyncFunc)(gchar* hostname,
 					  gpointer data);
 
 
-
-
-gchar* gnet_inetaddr_get_name (/* const */ GInetAddr* ia);
-
-gchar* gnet_inetaddr_get_name_nonblock (GInetAddr* ia);
-
 GInetAddrGetNameAsyncID
-gnet_inetaddr_get_name_async (GInetAddr* ia, 
+gnet_inetaddr_get_name_async (GInetAddr* inetaddr, 
 			      GInetAddrGetNameAsyncFunc func,
 			      gpointer data);
 
 void    gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
 
-
-gchar*  gnet_inetaddr_get_canonical_name (const GInetAddr* ia);
-
-gint 	gnet_inetaddr_get_port (const GInetAddr* ia);
-void 	gnet_inetaddr_set_port (const GInetAddr* ia, guint port);
-
-/* FIX: Implement */
-/*  guint8* gnet_inetaddr_get_bytes (const GInetAddr* ia); */
-/*  void    gnet_inetaddr_set_bytes (const GInetAddr* ia, const guint8* addr, const guint length); */
-
-
-/* ********** */
-
-gboolean gnet_inetaddr_is_canonical (const gchar* hostname);
-
-gboolean gnet_inetaddr_is_internet  (const GInetAddr* inetaddr);
-gboolean gnet_inetaddr_is_private   (const GInetAddr* inetaddr);
-gboolean gnet_inetaddr_is_reserved  (const GInetAddr* inetaddr);
-gboolean gnet_inetaddr_is_loopback  (const GInetAddr* inetaddr);
-gboolean gnet_inetaddr_is_multicast (const GInetAddr* inetaddr);
-gboolean gnet_inetaddr_is_broadcast (const GInetAddr* inetaddr);
-
-gboolean gnet_inetaddr_is_ipv4      (const GInetAddr* inetaddr);
-gboolean gnet_inetaddr_is_ipv6      (const GInetAddr* inetaddr);
-
-
-/* ********** */
-
-guint gnet_inetaddr_hash (gconstpointer p);
-gint  gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2);
-gint  gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2);
-
-
-/* ********** */
-
-gchar*     gnet_inetaddr_gethostname (void);
-GInetAddr* gnet_inetaddr_gethostaddr (void);
-
-
-/* ********** */
-
-GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
-GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* addr);
-GInetAddr* gnet_inetaddr_get_internet_interface (void);
-
-gboolean   gnet_inetaddr_is_internet_domainname (const gchar* hostname);
-
-
-/* ********** */
-
-GList*     gnet_inetaddr_list_interfaces (void);
 
 
 #ifdef __cplusplus

@@ -38,6 +38,7 @@ extern "C" {
  *  @iface: interface address
  *  @port: port number
  *  @socket: TCP server socket
+ *  @ref_count: [private]
  *  @func: callback function
  *  @user_data: user data for callback
  *
@@ -73,6 +74,8 @@ struct _GServer
 
   GTcpSocket* 	socket;
 
+  guint 	ref_count;
+
   GServerFunc	func;
   gpointer	user_data;
 
@@ -84,6 +87,8 @@ GServer*  gnet_server_new (const GInetAddr* iface, gint port,
 
 void      gnet_server_delete (GServer* server);
 
+void	  gnet_server_ref (GServer* server);
+void	  gnet_server_unref (GServer* server);
 
 
 #ifdef __cplusplus

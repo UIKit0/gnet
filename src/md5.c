@@ -327,14 +327,14 @@ struct _GMD5
 GMD5*           
 gnet_md5_new (const gchar* buffer, guint length)
 {
-  GMD5* gmd5;
+  GMD5* md5;
 
-  gmd5 = g_new0 (GMD5, 1);
-  MD5Init (&gmd5->ctx);
-  MD5Update (&gmd5->ctx, buffer, length);
-  MD5Final ((gpointer) &gmd5->digest, &gmd5->ctx);
+  md5 = g_new0 (GMD5, 1);
+  MD5Init (&md5->ctx);
+  MD5Update (&md5->ctx, buffer, length);
+  MD5Final ((gpointer) &md5->digest, &md5->ctx);
 
-  return gmd5;
+  return md5;
 }
 
 
@@ -352,13 +352,13 @@ gnet_md5_new (const gchar* buffer, guint length)
 GMD5*		
 gnet_md5_new_string (const gchar* str)
 {
-  GMD5* gmd5;
+  GMD5* md5;
   guint i;
 
   g_return_val_if_fail (str, NULL);
   g_return_val_if_fail (strlen(str) >= (GNET_MD5_HASH_LENGTH * 2), NULL);
 
-  gmd5 = g_new0 (GMD5, 1);
+  md5 = g_new0 (GMD5, 1);
 
   for (i = 0; i < (GNET_MD5_HASH_LENGTH * 2); ++i)
     {
@@ -393,53 +393,53 @@ gnet_md5_new_string (const gchar* str)
 	}
 
       if (i % 2)
-	gmd5->digest[i / 2] |= val;
+	md5->digest[i / 2] |= val;
       else
-	gmd5->digest[i / 2] = val << 4;
+	md5->digest[i / 2] = val << 4;
     }
 
-  return gmd5;
+  return md5;
 }
 
 
 
 /**
  *  gnet_md5_clone
- *  @gmd5: a #GMD5
+ *  @md5: a #GMD5
  * 
  *  Copies a #GMD5.
  *
- *  Returns: a copy of @gmd5.
+ *  Returns: a copy of @md5.
  *
  **/
 GMD5*           
-gnet_md5_clone (const GMD5* gmd5)
+gnet_md5_clone (const GMD5* md5)
 {
-  GMD5* gmd52;
+  GMD5* md52;
 
-  g_return_val_if_fail (gmd5, NULL);
+  g_return_val_if_fail (md5, NULL);
 
-  gmd52      = g_new0 (GMD5, 1);
-  gmd52->ctx = gmd5->ctx;
-  memcpy (gmd52->digest, gmd5->digest, sizeof(gmd5->digest));
+  md52      = g_new0 (GMD5, 1);
+  md52->ctx = md5->ctx;
+  memcpy (md52->digest, md5->digest, sizeof(md5->digest));
 
-  return gmd52;
+  return md52;
 }
 
 
 
 /** 
  *  gnet_md5_delete
- *  @gmd5: a #GMD5
+ *  @md5: a #GMD5
  *
  *  Deletes a #GMD5.
  *
  **/
 void
-gnet_md5_delete (GMD5* gmd5)
+gnet_md5_delete (GMD5* md5)
 {
-  if (gmd5)
-    g_free (gmd5);
+  if (md5)
+    g_free (md5);
 }
 
 
@@ -457,17 +457,17 @@ gnet_md5_delete (GMD5* gmd5)
 GMD5*		
 gnet_md5_new_incremental (void)
 {
-  GMD5* gmd5;
+  GMD5* md5;
 
-  gmd5 = g_new0 (GMD5, 1);
-  MD5Init (&gmd5->ctx);
-  return gmd5;
+  md5 = g_new0 (GMD5, 1);
+  MD5Init (&md5->ctx);
+  return md5;
 }
 
 
 /**
  *  gnet_md5_update
- *  @gmd5: a #GMD5
+ *  @md5: a #GMD5
  *  @buffer: buffer to add
  *  @length: length of @buffer
  *
@@ -477,28 +477,28 @@ gnet_md5_new_incremental (void)
  * 
  **/
 void
-gnet_md5_update (GMD5* gmd5, const gchar* buffer, guint length)
+gnet_md5_update (GMD5* md5, const gchar* buffer, guint length)
 {
-  g_return_if_fail (gmd5);
+  g_return_if_fail (md5);
 
-  MD5Update (&gmd5->ctx, buffer, length);
+  MD5Update (&md5->ctx, buffer, length);
 }
 
 
 /**
  *  gnet_md5_final
- *  @gmd5: a #GMD5
+ *  @md5: a #GMD5
  *
  *  Calcuates the final hash value of a #GMD5.  This should only be
  *  called on an #GMD5 created by gnet_md5_new_incremental().
  *
  **/
 void
-gnet_md5_final (GMD5* gmd5)
+gnet_md5_final (GMD5* md5)
 {
-  g_return_if_fail (gmd5);
+  g_return_if_fail (md5);
 
-  MD5Final ((gpointer) &gmd5->digest, &gmd5->ctx);
+  MD5Final ((gpointer) &md5->digest, &md5->ctx);
 }
 
 
@@ -511,21 +511,21 @@ gnet_md5_final (GMD5* gmd5)
  *
  *  Compares two #GMD5's for equality.
  *
- *  Returns: 1 if they are equal; 0 otherwise.
+ *  Returns: TRUE if they are equal; FALSE otherwise.
  *
  **/
 gint
 gnet_md5_equal (gconstpointer p1, gconstpointer p2)
 {
-  GMD5* gmd5a = (GMD5*) p1;
-  GMD5* gmd5b = (GMD5*) p2;
+  GMD5* md5a = (GMD5*) p1;
+  GMD5* md5b = (GMD5*) p2;
   guint i;
 
   for (i = 0; i < GNET_MD5_HASH_LENGTH; ++i)
-    if (gmd5a->digest[i] != gmd5b->digest[i])
-      return 0;
+    if (md5a->digest[i] != md5b->digest[i])
+      return FALSE;
 
-  return 1;
+  return TRUE;
 }
 
 
@@ -542,12 +542,12 @@ gnet_md5_equal (gconstpointer p1, gconstpointer p2)
 guint
 gnet_md5_hash (gconstpointer p)
 {
-  const GMD5* gmd5 = (const GMD5*) p;
+  const GMD5* md5 = (const GMD5*) p;
   const guint* q;
 
-  g_return_val_if_fail (gmd5, 0);
+  g_return_val_if_fail (md5, 0);
 
-  q = (const guint*) gmd5->digest;
+  q = (const guint*) md5->digest;
 
   return (q[0] ^ q[1] ^ q[2] ^ q[3]);
 }
@@ -555,7 +555,7 @@ gnet_md5_hash (gconstpointer p)
 
 /**
  *  gnet_md5_get_digest
- *  @gmd5: a #GMD5
+ *  @md5: a #GMD5
  *
  *  Gets the raw MD5 digest.
  *
@@ -564,11 +564,11 @@ gnet_md5_hash (gconstpointer p)
  *
  **/
 gchar*        	
-gnet_md5_get_digest (const GMD5* gmd5)
+gnet_md5_get_digest (const GMD5* md5)
 {
-  g_return_val_if_fail (gmd5, NULL);
+  g_return_val_if_fail (md5, NULL);
   
-  return (gchar*) gmd5->digest;
+  return (gchar*) md5->digest;
 }
 
 
@@ -579,7 +579,7 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
 
 /**
  *  gnet_md5_get_string
- *  @gmd5: a #GMD5
+ *  @md5: a #GMD5
  *
  *  Gets the digest represented a human-readable string.
  *
@@ -589,20 +589,20 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
  *
  **/
 gchar*          
-gnet_md5_get_string (const GMD5* gmd5)
+gnet_md5_get_string (const GMD5* md5)
 {
   gchar* str;
   guint i;
 
-  g_return_val_if_fail (gmd5, NULL);
+  g_return_val_if_fail (md5, NULL);
 
   str = g_new (gchar, GNET_MD5_HASH_LENGTH * 2 + 1);
   str[GNET_MD5_HASH_LENGTH * 2] = '\0';
 
   for (i = 0; i < GNET_MD5_HASH_LENGTH; ++i)
     {
-      str[i * 2]       = bits2hex[(gmd5->digest[i] & 0xF0) >> 4];
-      str[(i * 2) + 1] = bits2hex[(gmd5->digest[i] & 0x0F)     ];
+      str[i * 2]       = bits2hex[(md5->digest[i] & 0xF0) >> 4];
+      str[(i * 2) + 1] = bits2hex[(md5->digest[i] & 0x0F)     ];
     }
 
   return str;
@@ -612,7 +612,7 @@ gnet_md5_get_string (const GMD5* gmd5)
 
 /**
  * gnet_md5_copy_string
- * @gmd5: a #GMD5
+ * @md5: a #GMD5
  * @buffer: buffer at least 2 * %GNET_MD5_HASH_LENGTH bytes long
  *
  * Copies the digest, represented as a string, into @buffer.  The
@@ -620,16 +620,16 @@ gnet_md5_get_string (const GMD5* gmd5)
  * 
  **/
 void
-gnet_md5_copy_string (const GMD5* gmd5, gchar* buffer)
+gnet_md5_copy_string (const GMD5* md5, gchar* buffer)
 {
   guint i;
 
-  g_return_if_fail (gmd5);
+  g_return_if_fail (md5);
   g_return_if_fail (buffer);
 
   for (i = 0; i < GNET_MD5_HASH_LENGTH; ++i)
     {
-      buffer[i * 2]       = bits2hex[(gmd5->digest[i] & 0xF0) >> 4];
-      buffer[(i * 2) + 1] = bits2hex[(gmd5->digest[i] & 0x0F)     ];
+      buffer[i * 2]       = bits2hex[(md5->digest[i] & 0xF0) >> 4];
+      buffer[(i * 2) + 1] = bits2hex[(md5->digest[i] & 0x0F)     ];
     }
 }

@@ -48,27 +48,27 @@ GUdpSocket* gnet_udp_socket_new (void);
 GUdpSocket* gnet_udp_socket_new_with_port (gint port);
 GUdpSocket* gnet_udp_socket_new_full (const GInetAddr* iface, gint port);
 
-void 	    gnet_udp_socket_delete (GUdpSocket* s);
+void 	    gnet_udp_socket_delete (GUdpSocket* socket);
 
-void 	    gnet_udp_socket_ref (GUdpSocket* s);
-void 	    gnet_udp_socket_unref (GUdpSocket* s);
+void 	    gnet_udp_socket_ref (GUdpSocket* socket);
+void 	    gnet_udp_socket_unref (GUdpSocket* socket);
 
 GIOChannel* gnet_udp_socket_get_io_channel (GUdpSocket* socket);
 
 
 /* ********** */
 
-gint 	 gnet_udp_socket_send (GUdpSocket* s, const gchar* buffer, 
+gint 	 gnet_udp_socket_send (GUdpSocket* socket, const gchar* buffer, 
  			       guint length, const GInetAddr* dst);
-gint 	 gnet_udp_socket_receive (GUdpSocket* s, gchar* buffer,
+gint 	 gnet_udp_socket_receive (GUdpSocket* socket, gchar* buffer,
 				  guint length, GInetAddr** src);
-gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
+gboolean gnet_udp_socket_has_packet (const GUdpSocket* socket);
 
 
 /* ********** */
 
-gint 	 gnet_udp_socket_get_ttl (const GUdpSocket* us);
-gint 	 gnet_udp_socket_set_ttl (GUdpSocket* us, gint ttl);
+gint 	 gnet_udp_socket_get_ttl (const GUdpSocket* socket);
+gint 	 gnet_udp_socket_set_ttl (GUdpSocket* socket, gint ttl);
 
 
 #ifdef __cplusplus

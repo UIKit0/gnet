@@ -67,7 +67,7 @@ GURI*	  gnet_uri_new_fields_all (const gchar* scheme, const gchar* userinfo,
 GURI*     gnet_uri_clone (const GURI* uri);
 void      gnet_uri_delete (GURI* uri);
 	       
-gint 	  gnet_uri_equal (gconstpointer p1, gconstpointer p2);
+gboolean  gnet_uri_equal (gconstpointer p1, gconstpointer p2);
 guint     gnet_uri_hash (gconstpointer p);
 
 void	  gnet_uri_escape (GURI* uri);

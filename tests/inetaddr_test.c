@@ -53,6 +53,7 @@ main (int argc, char* argv[])
   GInetAddr* inetaddr2;
   gchar* cname;
   gchar* cname2;
+  gchar bytes[GNET_INETADDR_MAX_LEN];
 
   /* **************************************** */
   /* IPv4 tests */
@@ -100,12 +101,45 @@ main (int argc, char* argv[])
   /* bytes */
   inetaddr = gnet_inetaddr_new_bytes ("\x8d\xd5\xb\x7c", 4);
   TEST ("new_bytes", inetaddr);
+
   cname = gnet_inetaddr_get_canonical_name (inetaddr);
   TEST ("new_bytes cname", cname);
   TEST ("new_bytes addr", !strcmp("141.213.11.124", cname));
-  TEST ("new_bytes port", gnet_inetaddr_get_port (inetaddr) == 0);
-  gnet_inetaddr_delete (inetaddr);
   g_free (cname);
+
+  TEST ("new_bytes port", gnet_inetaddr_get_port (inetaddr) == 0);
+  gnet_inetaddr_set_port (inetaddr, 2345);
+  TEST ("new_bytes port2", gnet_inetaddr_get_port (inetaddr) == 2345);
+
+  TEST ("new_bytes length", gnet_inetaddr_get_length (inetaddr) == 4);
+
+  gnet_inetaddr_set_bytes (inetaddr, "\x7c\xb\xd5\x8d", 4);
+  cname = gnet_inetaddr_get_canonical_name (inetaddr);
+  TEST ("set_bytes cname", cname);
+  TEST ("set_bytes addr", !strcmp("124.11.213.141", cname));
+  TEST ("set_bytes port", gnet_inetaddr_get_port (inetaddr) == 2345);
+  g_free (cname);
+
+  TEST ("new_bytes length2", gnet_inetaddr_get_length (inetaddr) == 4);
+
+  gnet_inetaddr_get_bytes (inetaddr, bytes);
+  TEST ("get_bytes addr", !memcmp(bytes, "\x7c\xb\xd5\x8d", 4));
+
+  /* IPv4 -> IPv6 via set_bytes */
+  gnet_inetaddr_set_bytes (inetaddr, "\x3f\xfe\x0b\x00" "\x0c\x18\x1f\xff"
+			   "\0\0\0\0"         "\0\0\0\x6f", 16);
+  cname = gnet_inetaddr_get_canonical_name (inetaddr);
+  TEST ("set_bytes cname6", cname);
+  TEST ("set_bytes addr6", !strcasecmp("3ffe:b00:c18:1fff::6f", cname));
+  TEST ("set_bytes port6", gnet_inetaddr_get_port (inetaddr) == 2345);
+
+  TEST ("new_bytes length6", gnet_inetaddr_get_length (inetaddr) == 16);
+
+  gnet_inetaddr_get_bytes (inetaddr, bytes);
+  TEST ("get_bytes addr", !memcmp(bytes, "\x3f\xfe\x0b\x00\x0c\x18\x1f\xff\0\0\0\0\0\0\0\x6f", 16));
+
+  g_free (cname);
+  gnet_inetaddr_delete (inetaddr);
 
 
   /* **************************************** */
@@ -249,8 +283,6 @@ main (int argc, char* argv[])
   TEST ("!domainname1", !gnet_inetaddr_is_internet_domainname ("localhost"));
   TEST ("!domainname2", !gnet_inetaddr_is_internet_domainname ("localhost.localdomain"));
   TEST ("!domainname3", !gnet_inetaddr_is_internet_domainname ("speak"));
-
-
 
   if (failed)
     exit (1);

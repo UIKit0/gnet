@@ -35,6 +35,13 @@ version is used.  The default is version 5.
 
 
 
+<!-- ##### MACRO GNET_SOCKS_VERSION ##### -->
+<para>
+
+</para>
+
+
+
 <!-- ##### FUNCTION gnet_socks_get_enabled ##### -->
 <para>
 

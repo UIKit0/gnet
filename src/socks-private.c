@@ -22,21 +22,6 @@
 #include "socks-private.h"
 
 
-static int socks_get_version (void);
-
-/* **************************************** */
-
-static int
-socks_get_version (void)
-{
-  const gchar* verc;
-
-  if ((verc = g_getenv("SOCKS_VERSION"))) 
-    return atoi(verc);
-
-  return GNET_DEFAULT_SOCKS_VERSION;
-}
-
 
 /* **************************************** */
 
@@ -158,7 +143,7 @@ socks_negotiate_connect (GTcpSocket *s, const GInetAddr *dst)
   int ver, ret;
 
   ioc = gnet_tcp_socket_get_io_channel(s);
-  ver = socks_get_version();
+  ver = gnet_socks_get_version();
   if (ver == 5)
     ret = socks5_negotiate_connect (ioc, dst);
   else if (ver == 4)
@@ -254,7 +239,7 @@ gnet_private_socks_tcp_socket_server_new (gint port)
   int			rv;
 
   /* We only support SOCKS 5 */
-  if (socks_get_version () != 5)
+  if (gnet_socks_get_version () != 5)
     return NULL;
 
   /* Get SOCKS server */

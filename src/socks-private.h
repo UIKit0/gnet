@@ -39,8 +39,6 @@ struct socks5_h {
 	guint16 dport;
 };
 
-#define GNET_DEFAULT_SOCKS_VERSION 5
-
 GTcpSocket* gnet_private_socks_tcp_socket_new (const GInetAddr* addr);
 
 GTcpSocketNewAsyncID

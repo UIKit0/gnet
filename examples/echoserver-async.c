@@ -83,7 +83,7 @@ main(int argc, char** argv)
   signal (SIGINT, async_sig_int);
 
   /* Print the address */
-  addr = gnet_tcp_socket_get_inetaddr(server);
+  addr = gnet_tcp_socket_get_local_inetaddr(server);
   g_assert (addr);
   name = gnet_inetaddr_get_canonical_name (addr);
   g_assert (name);
@@ -128,7 +128,7 @@ async_accept (GTcpSocket* server, GTcpSocket* client, gpointer data)
       ClientState* client_state;
 
       /* Print the address */
-      addr = gnet_tcp_socket_get_inetaddr(client);
+      addr = gnet_tcp_socket_get_local_inetaddr(client);
       g_assert (addr);
       name = gnet_inetaddr_get_canonical_name (addr);
       g_assert (name);

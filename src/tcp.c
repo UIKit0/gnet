@@ -30,7 +30,7 @@
  *  Creates a #GTcpSocket and connects to @hostname:@port.  This
  *  function blocks (while gnet_tcp_socket_connect_async() does not).
  *  To get the #GInetAddr of the #GTcpSocket, call
- *  gnet_tcp_socket_get_inetaddr().
+ *  gnet_tcp_socket_get_remote_inetaddr().
  *
  *  Returns: a new #GTcpSocket; NULL on error.
  **/
@@ -353,7 +353,7 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
  *  block.
  *
  *  Returns: the ID of the connection; NULL on failure.  The ID can be
- *  used with gnet_tcp_socket_connect_async_cancel() to cancel the
+ *  used with gnet_tcp_socket_new_async_cancel() to cancel the
  *  connection.
  *
  **/
@@ -389,7 +389,9 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
  *  error occurs.  The callback will not be called during the call to
  *  this function.
  *
- *  Returns: a new #GTcpSocket; NULL on error.
+ *  Returns: the ID of the connection; NULL on failure.  The ID can be
+ *  used with gnet_tcp_socket_new_async_cancel() to cancel the
+ *  connection.
  *
  **/
 GTcpSocketNewAsyncID
@@ -637,62 +639,62 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
 
 /**
  *  gnet_tcp_socket_delete
- *  @s: a #GTcpSocket
+ *  @socket: a #GTcpSocket
  *
  *  Deletes a #GTcpSocket.
  *
  **/
 void
-gnet_tcp_socket_delete (GTcpSocket* s)
+gnet_tcp_socket_delete (GTcpSocket* socket)
 {
-  if (s != NULL)
-    gnet_tcp_socket_unref(s);
+  if (socket != NULL)
+    gnet_tcp_socket_unref (socket);
 }
 
 
 
 /**
  *  gnet_tcp_socket_ref
- *  @s: a #GTcpSocket
+ *  @socket: a #GTcpSocket
  *
  *  Adds a reference to a #GTcpSocket.
  *
  **/
 void
-gnet_tcp_socket_ref (GTcpSocket* s)
+gnet_tcp_socket_ref (GTcpSocket* socket)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (socket != NULL);
 
-  ++s->ref_count;
+  ++socket->ref_count;
 }
 
 
 /**
  *  gnet_tcp_socket_unref
- *  @s: a #GTcpSocket to unreference
+ *  @socket: a #GTcpSocket to unreference
  *
  *  Removes a reference from a #GTcpSocket.  A #GTcpSocket is deleted
  *  when the reference count reaches 0.
  *
  **/
 void
-gnet_tcp_socket_unref (GTcpSocket* s)
+gnet_tcp_socket_unref (GTcpSocket* socket)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (socket != NULL);
 
-  --s->ref_count;
+  socket->ref_count--;
 
-  if (s->ref_count == 0)
+  if (socket->ref_count == 0)
     {
-      if (s->accept_watch)
-	g_source_remove (s->accept_watch);
+      if (socket->accept_watch)
+	g_source_remove (socket->accept_watch);
 
-      GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
+      GNET_CLOSE_SOCKET(socket->sockfd);/* Don't care if this fails... */
 
-      if (s->iochannel)
-	g_io_channel_unref (s->iochannel);
+      if (socket->iochannel)
+	g_io_channel_unref (socket->iochannel);
 
-      g_free(s);
+      g_free(socket);
     }
 }
 
@@ -734,20 +736,17 @@ gnet_tcp_socket_get_io_channel (GTcpSocket* socket)
 
 
 /**
- *  gnet_tcp_socket_get_inetaddr
+ *  gnet_tcp_socket_get_remote_inetaddr
  *  @socket: a #GTcpSocket
  *
- *  Gets the address of a #GTcpSocket.  If the socket is client
- *  socket, the address is that of the host it is connected to.  If
- *  the socket is a server socket, the address is that of the local
- *  host.  Note if the server socket is bound to all interfaces, the
- *  address will be 0.0.0.0 (in IPv4) or 0::0 (in IPv6).
+ *  Gets the address of the remote host from a #GTcpSocket.  This
+ *  function does not work on server sockets.
  *
  *  Returns: a #GInetAddr.
  *
  **/
 GInetAddr* 
-gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket)
+gnet_tcp_socket_get_remote_inetaddr (const GTcpSocket* socket)
 {
   GInetAddr* ia;
 
@@ -762,21 +761,52 @@ gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket)
 
 
 /**
+ *  gnet_tcp_socket_get_local_inetaddr
+ *  @socket: a #GTcpSocket
+ *
+ *  Gets the local host's address from a #GTcpSocket.
+ *
+ *  Returns: a #GInetAddr.
+ *
+ **/
+GInetAddr*  
+gnet_tcp_socket_get_local_inetaddr (const GTcpSocket* socket)
+{
+  socklen_t socklen;
+  struct sockaddr_storage sa;
+  GInetAddr* ia;
+
+  g_return_val_if_fail (socket, NULL);
+
+  socklen = sizeof(sa);
+  if (getsockname(socket->sockfd, &GNET_SOCKADDR_SA(sa), &socklen) != 0)
+    return NULL;
+
+  ia = g_new0(GInetAddr, 1);
+  ia->ref_count = 1;
+  memcpy (&ia->sa, &sa, sizeof(sa));
+
+  return ia;
+}
+
+
+/**
  *  gnet_tcp_socket_get_port
  *  @socket: a #GTcpSocket
  *
- *  Gets the port a #GTcpSocket is bound to.
+ *  Gets the port a server #GTcpSocket is bound to.
  *
  *  Returns: the port number.
  *
  **/
 gint
-gnet_tcp_socket_get_port(const GTcpSocket* socket)
+gnet_tcp_socket_get_port (const GTcpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, 0);
 
   return g_ntohs(GNET_SOCKADDR_PORT(socket->sa));
 }
+
 
 
 /* **************************************** */
@@ -839,6 +869,22 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
 
 /**
  *  gnet_tcp_socket_server_new
+ *
+ *  Creates a new #GTcpSocket bound to all interfaces and an arbitrary
+ *  port.  SOCKS is used if SOCKS is enabled.
+ *
+ *  Returns: a new #GTcpSocket; NULL on error.
+ *
+ **/
+GTcpSocket* 
+gnet_tcp_socket_server_new (void)
+{
+  return gnet_tcp_socket_server_new_full (NULL, 0);
+}
+
+
+/**
+ *  gnet_tcp_socket_server_new_with_port
  *  @port: port to bind to (0 for an arbitrary port)
  *
  *  Creates a new #GTcpSocket bound to all interfaces and port @port.
@@ -849,14 +895,14 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new (gint port)
+gnet_tcp_socket_server_new_with_port (gint port)
 {
-  return gnet_tcp_socket_server_new_interface (NULL, port);
+  return gnet_tcp_socket_server_new_full (NULL, port);
 }
 
 
 /**
- *  gnet_tcp_socket_server_new_interface
+ *  gnet_tcp_socket_server_new_full
  *  @iface: Interface to bind to (NULL for all interfaces)
  *  @port: Port to bind to (0 for an arbitrary port)
  *
@@ -869,7 +915,7 @@ gnet_tcp_socket_server_new (gint port)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
+gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
 {
   int sockfd = 0;
   struct sockaddr_storage sa;
@@ -911,7 +957,7 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
   if (bind(sockfd, &GNET_SOCKADDR_SA(sa), GNET_SOCKADDR_LEN(sa)) != 0)
     goto error;
   
-  /* Get the socket name */
+  /* Get the socket name */		/* FIX? */
   socklen = GNET_SOCKADDR_LEN(sa);
   if (getsockname(sockfd, &GNET_SOCKADDR_SA(sa), &socklen) != 0)
     goto error;

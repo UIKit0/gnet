@@ -360,17 +360,17 @@ gnet_uri_delete (GURI* uri)
  *
  *  Compares two #GURI's for equality.
  *
- *  Returns: 1 if they are equal; 0 otherwise.
+ *  Returns: TRUE if they are equal; FALSE otherwise.
  *
  **/
-gint
+gboolean
 gnet_uri_equal (gconstpointer p1, gconstpointer p2)
 {
   const GURI* uri1 = (const GURI*) p1;
   const GURI* uri2 = (const GURI*) p2;
 
-  g_return_val_if_fail (uri1, 0);
-  g_return_val_if_fail (uri2, 0);
+  g_return_val_if_fail (uri1, FALSE);
+  g_return_val_if_fail (uri2, FALSE);
 
   if (uri1->port == uri2->port &&
       !SAFESTRCMP(uri1->scheme, uri2->scheme) &&
@@ -379,9 +379,9 @@ gnet_uri_equal (gconstpointer p1, gconstpointer p2)
       !SAFESTRCMP(uri1->path, uri2->path) &&
       !SAFESTRCMP(uri1->query, uri2->query) &&
       !SAFESTRCMP(uri1->fragment, uri2->fragment))
-    return 1;
+    return TRUE;
 
-  return 0;
+  return FALSE;
 }
 
 

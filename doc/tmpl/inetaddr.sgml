@@ -297,6 +297,41 @@ be used to automatically configure peer-to-peer applications.
 @async_id: 
 
 
+<!-- ##### MACRO GNET_INETADDR_MAX_LEN ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_length ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_bytes ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@buffer: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_set_bytes ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@bytes: 
+@length: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_get_canonical_name ##### -->
 <para>
 

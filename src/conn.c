@@ -186,7 +186,7 @@ gnet_conn_new_socket (GTcpSocket* socket,
   conn->ref_count = 1;
   conn->socket = socket;
   conn->iochannel = gnet_tcp_socket_get_io_channel (socket);
-  conn->inetaddr = gnet_tcp_socket_get_inetaddr (socket);
+  conn->inetaddr = gnet_tcp_socket_get_remote_inetaddr (socket);
   conn->hostname = gnet_inetaddr_get_canonical_name (conn->inetaddr);
   conn->port = gnet_inetaddr_get_port (conn->inetaddr);
   conn->func = func;
@@ -226,7 +226,7 @@ gnet_conn_ref (GConn* conn)
 {
   g_return_if_fail (conn);
 
-  ++conn->ref_count;
+  conn->ref_count++;
 }
 
 
@@ -243,7 +243,7 @@ gnet_conn_unref (GConn* conn)
 {
   g_return_if_fail (conn);
 
-  --conn->ref_count;
+  conn->ref_count--;
   if (conn->ref_count > 0 || conn->ref_count_internal > 0)
     return;
 
@@ -281,7 +281,7 @@ unref_internal (GConn* conn)
   conn->ref_count_internal--;
   if (conn->ref_count == 0 && conn->ref_count_internal == 0)
     {
-      /* set ref_count to 1 to force deletion. */
+      /* set ref_count to 1 to force deletion on unref. */
       conn->ref_count = 1;
       gnet_conn_unref (conn);
     }
@@ -392,7 +392,7 @@ conn_connect_cb (GTcpSocket* socket,
   if (status == GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK)
     {
       conn->socket = socket;
-      conn->inetaddr = gnet_tcp_socket_get_inetaddr (socket);
+      conn->inetaddr = gnet_tcp_socket_get_remote_inetaddr (socket);
       conn->iochannel = gnet_tcp_socket_get_io_channel (socket);
       ADD_WATCH(conn, G_IO_ERR | G_IO_HUP | G_IO_NVAL);
 

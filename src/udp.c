@@ -109,39 +109,39 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 
 /**
  *  gnet_udp_socket_delete:
- *  @s: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *
  *  Deletes a #GUdpSocket.
  *
  **/
 void
-gnet_udp_socket_delete (GUdpSocket* s)
+gnet_udp_socket_delete (GUdpSocket* socket)
 {
-  if (s != NULL)
-    gnet_udp_socket_unref(s);
+  if (socket != NULL)
+    gnet_udp_socket_unref (socket);
 }
 
 
 
 /**
  *  gnet_udp_socket_ref
- *  @s: #GUdpSocket to reference
+ *  @socket: #GUdpSocket to reference
  *
  *  Adds a reference to a #GUdpSocket.
  *
  **/
 void
-gnet_udp_socket_ref (GUdpSocket* s)
+gnet_udp_socket_ref (GUdpSocket* socket)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (socket != NULL);
 
-  ++s->ref_count;
+  socket->ref_count++;
 }
 
 
 /**
  *  gnet_udp_socket_unref
- *  @s: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *
  *  Removes a reference from a #GUdpScoket.  A #GUdpSocket is deleted
  *  when the reference count reaches 0.
@@ -152,7 +152,7 @@ gnet_udp_socket_unref (GUdpSocket* s)
 {
   g_return_if_fail(s != NULL);
 
-  --s->ref_count;
+  s->ref_count--;
 
   if (s->ref_count == 0)
     {
@@ -202,7 +202,7 @@ gnet_udp_socket_get_io_channel (GUdpSocket* socket)
 
 /**
  *  gnet_udp_socket_send
- *  @s: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *  @buffer: buffer to send
  *  @length: length of @buffer
  *  @dst: destination address
@@ -213,15 +213,16 @@ gnet_udp_socket_get_io_channel (GUdpSocket* socket)
  *
  **/
 gint 
-gnet_udp_socket_send (GUdpSocket* s, const gchar* buffer, guint length, 
+gnet_udp_socket_send (GUdpSocket* socket, 
+		      const gchar* buffer, guint length, 
 		      const GInetAddr* dst)
 {
   gint bytes_sent;
 
-  g_return_val_if_fail (s,   -1);
-  g_return_val_if_fail (dst, -1);
+  g_return_val_if_fail (socket, -1);
+  g_return_val_if_fail (dst,    -1);
 
-  bytes_sent = sendto (s->sockfd, 
+  bytes_sent = sendto (socket->sockfd, 
 		       (void*) buffer, length, 0, 
 		       &GNET_SOCKADDR_SA(dst->sa), 
 		       GNET_SOCKADDR_LEN(dst->sa));
@@ -236,7 +237,7 @@ gnet_udp_socket_send (GUdpSocket* s, const gchar* buffer, guint length,
 
 /**
  *  gnet_udp_socket_receive
- *  @s: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *  @buffer: buffer to write to
  *  @length: length of @buffer
  *  @src: pointer to source address (optional)
@@ -249,17 +250,18 @@ gnet_udp_socket_send (GUdpSocket* s, const gchar* buffer, guint length,
  *
  **/
 gint 
-gnet_udp_socket_receive (GUdpSocket* s, gchar* buffer, guint length,
+gnet_udp_socket_receive (GUdpSocket* socket, 
+			 gchar* buffer, guint length,
 			 GInetAddr** src)
 {
   gint bytes_received;
   struct sockaddr_storage sa;
   gint sa_len = sizeof(struct sockaddr_storage);
 
-  g_return_val_if_fail (s,    -1);
+  g_return_val_if_fail (socket, -1);
   g_return_val_if_fail (buffer, -1);
 
-  bytes_received = recvfrom (s->sockfd, 
+  bytes_received = recvfrom (socket->sockfd, 
 			     (void*) buffer, length, 
 			     0, (struct sockaddr*) &sa, &sa_len);
 
@@ -282,7 +284,7 @@ gnet_udp_socket_receive (GUdpSocket* s, gchar* buffer, guint length,
 
 /**
  *  gnet_udp_socket_has_packet
- *  @s: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *
  *  Tests if a #GUdpSocket has a packet waiting to be received.
  *
@@ -290,14 +292,14 @@ gnet_udp_socket_receive (GUdpSocket* s, gchar* buffer, guint length,
  *
  **/
 gboolean
-gnet_udp_socket_has_packet (const GUdpSocket* s)
+gnet_udp_socket_has_packet (const GUdpSocket* socket)
 {
   fd_set readfds;
   struct timeval timeout = {0, 0};
 
   FD_ZERO (&readfds);
-  FD_SET (s->sockfd, &readfds);
-  if ((select(s->sockfd + 1, &readfds, NULL, NULL, &timeout)) == 1)
+  FD_SET (socket->sockfd, &readfds);
+  if ((select(socket->sockfd + 1, &readfds, NULL, NULL, &timeout)) == 1)
     {
       return TRUE;
     }
@@ -310,7 +312,7 @@ gnet_udp_socket_has_packet (const GUdpSocket* s)
 
 
 gboolean
-gnet_udp_socket_has_packet (const GUdpSocket* s)
+gnet_udp_socket_has_packet (const GUdpSocket* socket)
 {
   gint bytes_received;
   gchar data[1];
@@ -319,16 +321,16 @@ gnet_udp_socket_has_packet (const GUdpSocket* s)
   gint error;
 
   arg = 1;
-  ioctlsocket(s->sockfd, FIONBIO, &arg); /* set to non-blocking mode */
+  ioctlsocket(socket->sockfd, FIONBIO, &arg); /* set to non-blocking mode */
 
   packetlength = 1;
-  bytes_received = recvfrom(s->sockfd, (void*) data, packetlength, 
+  bytes_received = recvfrom(socket->sockfd, (void*) data, packetlength, 
 			    MSG_PEEK, NULL, NULL);
 
   error = WSAGetLastError();
 
   arg = 0;
-  ioctlsocket(s->sockfd, FIONBIO, &arg); /* set blocking mode */
+  ioctlsocket(socket->sockfd, FIONBIO, &arg); /* set blocking mode */
 
   if (bytes_received == SOCKET_ERROR)
     {
@@ -352,7 +354,7 @@ gnet_udp_socket_has_packet (const GUdpSocket* s)
 
 /**
  *  gnet_udp_socket_get_ttl
- *  @us: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *
  *  Gets the time-to-live (TTL) default of a #GUdpSocket.  All UDP
  *  packets have a TTL field.  This field is decremented by a router
@@ -365,7 +367,7 @@ gnet_udp_socket_has_packet (const GUdpSocket* s)
  *
  **/
 gint
-gnet_udp_socket_get_ttl (const GUdpSocket* us)
+gnet_udp_socket_get_ttl (const GUdpSocket* socket)
 {
   int ttl;
   socklen_t ttl_size;
@@ -375,16 +377,16 @@ gnet_udp_socket_get_ttl (const GUdpSocket* us)
   ttl_size = sizeof(ttl);
 
   /* Get the IPv4 TTL if it's bound to an IPv4 address */
-  if (GNET_SOCKADDR_FAMILY(us->sa) == AF_INET)
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET)
     {
-      rv = getsockopt(us->sockfd, IPPROTO_IP, IP_TTL, 
+      rv = getsockopt(socket->sockfd, IPPROTO_IP, IP_TTL, 
 		      (void*) &ttl, &ttl_size);
     }
 
   /* Or, get the IPv6 TTL if it's bound to an IPv6 address */
-  else if (GNET_SOCKADDR_FAMILY(us->sa) == AF_INET6)
+  else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
-      rv = getsockopt(us->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
+      rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
 		      (void*) &ttl, &ttl_size);
     }
   else
@@ -400,7 +402,7 @@ gnet_udp_socket_get_ttl (const GUdpSocket* us)
 
 /**
  *  gnet_udp_socket_set_ttl
- *  @us: a #GUdpSocket
+ *  @socket: a #GUdpSocket
  *  @ttl: value to set TTL to
  *
  *  Sets the time-to-live (TTL) default of a #GUdpSocket.  Set the TTL
@@ -411,7 +413,7 @@ gnet_udp_socket_get_ttl (const GUdpSocket* us)
  *
  **/
 gint
-gnet_udp_socket_set_ttl (GUdpSocket* us, gint ttl)
+gnet_udp_socket_set_ttl (GUdpSocket* socket, gint ttl)
 {
   int rv1, rv2;
   GIPv6Policy policy;
@@ -423,21 +425,21 @@ gnet_udp_socket_set_ttl (GUdpSocket* us, gint ttl)
      0::0 IPv6 and IPv6 policy allows IPv4, set IP_TTL.  In the latter case,
      if we bind to 0::0 and the host is dual-stacked, then all IPv4
      interfaces will be bound to also. */
-  if (GNET_SOCKADDR_FAMILY(us->sa) == AF_INET ||
-      (GNET_SOCKADDR_FAMILY(us->sa) == AF_INET6 &&
-       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(us->sa).sin6_addr) &&
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET ||
+      (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
+       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
     {
-      rv1 = setsockopt(us->sockfd, IPPROTO_IP, IP_TTL, 
+      rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_TTL, 
 		       (void*) &ttl, sizeof(ttl));
     }
 
 
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
-  if (GNET_SOCKADDR_FAMILY(us->sa) == AF_INET6)
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
-      rv2 = setsockopt(us->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
+      rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
 		       (void*) &ttl, sizeof(ttl));
     }
 

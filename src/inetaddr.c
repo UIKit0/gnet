@@ -1194,8 +1194,8 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 	      ia->ref_count = 1;
 	      ia->sa.ss_family = (size == 4)? AF_INET : AF_INET6;
 
-	      memcpy(GNET_SOCKADDR_ADDRP(ia->sa), buf, size);
-	      GNET_SOCKADDR_PORT(ia->sa) = g_htons(state->port);
+	      memcpy(GNET_INETADDR_ADDRP(ia), buf, size);
+	      GNET_INETADDR_PORT(ia) = g_htons(state->port);
 
 	      state->ias = g_list_prepend (state->ias, ia);
 
@@ -1433,8 +1433,8 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
 
 /**
  *  gnet_inetaddr_new_bytes
- *  @addr: address in raw bytes
- *  @length: length of @addr (4 if IPv4, 16 if IPv6)
+ *  @bytes: address in raw bytes
+ *  @length: length of @bytes (4 if IPv4, 16 if IPv6)
  * 
  *  Creates a #GInetAddr from raw bytes.  The bytes should be in
  *  network byte order (big endian).  There should be 4 bytes if it's
@@ -1445,11 +1445,11 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
  *
  **/
 GInetAddr* 
-gnet_inetaddr_new_bytes (const guint8* addr, const guint length)
+gnet_inetaddr_new_bytes (const gchar* bytes, const guint length)
 {
   GInetAddr* ia = NULL;
 
-  g_return_val_if_fail (addr, NULL);
+  g_return_val_if_fail (bytes, NULL);
 
   if (length != 4 && length != 16)
     return NULL;
@@ -1460,7 +1460,7 @@ gnet_inetaddr_new_bytes (const guint8* addr, const guint length)
     GNET_INETADDR_FAMILY(ia) = AF_INET;
   else
     GNET_INETADDR_FAMILY(ia) = AF_INET6;
-  memcpy(GNET_INETADDR_ADDRP(ia), addr, length);
+  memcpy(GNET_INETADDR_ADDRP(ia), bytes, length);
 
   return ia;
 }
@@ -1468,25 +1468,25 @@ gnet_inetaddr_new_bytes (const guint8* addr, const guint length)
 
 /**
  *   gnet_inetaddr_clone:
- *   @ia: a #GInetAddr
+ *   @inetaddr: a #GInetAddr
  *
  *   Copies a #GInetAddr.
  *
- *   Returns: a copy of @ia.
+ *   Returns: a copy of @inetaddr.
  *
  **/
 GInetAddr* 
-gnet_inetaddr_clone(const GInetAddr* ia)
+gnet_inetaddr_clone(const GInetAddr* inetaddr)
 {
   GInetAddr* cia;
 
-  g_return_val_if_fail (ia != NULL, NULL);
+  g_return_val_if_fail (inetaddr != NULL, NULL);
 
   cia = g_new0(GInetAddr, 1);
   cia->ref_count = 1;
-  cia->sa = ia->sa;
-  if (ia->name != NULL) 
-    cia->name = g_strdup(ia->name);
+  cia->sa = inetaddr->sa;
+  if (inetaddr->name != NULL) 
+    cia->name = g_strdup(inetaddr->name);
 
   return cia;
 }
@@ -1494,55 +1494,55 @@ gnet_inetaddr_clone(const GInetAddr* ia)
 
 /** 
  *  gnet_inetaddr_delete
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Deletes a #GInetAddr.
  *
  **/
 void
-gnet_inetaddr_delete (GInetAddr* ia)
+gnet_inetaddr_delete (GInetAddr* inetaddr)
 {
-  if (ia != NULL)
-    gnet_inetaddr_unref (ia);
+  if (inetaddr != NULL)
+    gnet_inetaddr_unref (inetaddr);
 }
 
 
 /**
  *  gnet_inetaddr_ref
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Adds a reference to a #GInetAddr.
  *
  **/
 void
-gnet_inetaddr_ref (GInetAddr* ia)
+gnet_inetaddr_ref (GInetAddr* inetaddr)
 {
-  g_return_if_fail(ia != NULL);
+  g_return_if_fail(inetaddr != NULL);
 
-  ++ia->ref_count;
+  inetaddr->ref_count++;
 }
 
 
 /**
  *  gnet_inetaddr_unref
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Removes a reference from a #GInetAddr.  A #GInetAddr is deleted
  *  when the reference count reaches 0.
  *
  **/
 void
-gnet_inetaddr_unref (GInetAddr* ia)
+gnet_inetaddr_unref (GInetAddr* inetaddr)
 {
-  g_return_if_fail(ia != NULL);
+  g_return_if_fail(inetaddr != NULL);
 
-  --ia->ref_count;
+  inetaddr->ref_count++;
 
-  if (ia->ref_count == 0)
+  if (inetaddr->ref_count == 0)
     {
-      if (ia->name != NULL) 
-	g_free (ia->name);
-      g_free (ia);
+      if (inetaddr->name != NULL) 
+	g_free (inetaddr->name);
+      g_free (inetaddr);
     }
 }
 
@@ -1550,53 +1550,53 @@ gnet_inetaddr_unref (GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_get_name:
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Gets the host name for a #GInetAddr.  This functions makes a
  *  reverse DNS lookup on the address so it may block.  The canonical
  *  name is returned if the address has no host name.
  *
- *  Returns: the host name for the @ia; NULL on error.
+ *  Returns: the host name for the @inetaddr; NULL on error.
  *
  **/
 gchar* 
-gnet_inetaddr_get_name (/* const */ GInetAddr* ia)
+gnet_inetaddr_get_name (/* const */ GInetAddr* inetaddr)
 {
-  g_return_val_if_fail (ia != NULL, NULL);
+  g_return_val_if_fail (inetaddr != NULL, NULL);
 
-  if (ia->name == NULL)
+  if (inetaddr->name == NULL)
     {
       gchar* name;
 
-      if ((name = gnet_gethostbyaddr(&ia->sa)) != NULL)
-	ia->name = name;
+      if ((name = gnet_gethostbyaddr(&inetaddr->sa)) != NULL)
+	inetaddr->name = name;
       else
-	ia->name = gnet_inetaddr_get_canonical_name(ia);
+	inetaddr->name = gnet_inetaddr_get_canonical_name(inetaddr);
     }
 
-  g_assert (ia->name != NULL);
-  return g_strdup(ia->name);
+  g_assert (inetaddr->name != NULL);
+  return g_strdup(inetaddr->name);
 }
 
 
 
 /**
  *  gnet_inetaddr_get_name_nonblock:
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Gets the host name for a #GInetAddr.  This function does not make
  *  a reverse DNS lookup and will fail if getting the name would
  *  require a reverse DNS lookup.
  *
- *  Returns: the host name for the @ia, or NULL if there was an error
- *  or it would require blocking.
+ *  Returns: the host name for the @inetaddr, or NULL if there was an
+ *  error or it would require blocking.
  *
  **/
 gchar* 
-gnet_inetaddr_get_name_nonblock (GInetAddr* ia)
+gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr)
 {
-  if (ia->name)
-    return g_strdup(ia->name);
+  if (inetaddr->name)
+    return g_strdup(inetaddr->name);
 
   return NULL;
 }
@@ -1612,7 +1612,7 @@ static void* inetaddr_get_name_async_pthread (void* arg);
 
 /**
  *  gnet_inetaddr_get_name_async:
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *  @func: callback function
  *  @data: data to pass to @func on the callback
  *
@@ -1628,13 +1628,13 @@ static void* inetaddr_get_name_async_pthread (void* arg);
  *
  **/
 GInetAddrGetNameAsyncID
-gnet_inetaddr_get_name_async (GInetAddr* ia, 
+gnet_inetaddr_get_name_async (GInetAddr* inetaddr, 
 			      GInetAddrGetNameAsyncFunc func,
 			      gpointer data)
 {
   GInetAddrReverseAsyncState* state = NULL;
 
-  g_return_val_if_fail(ia != NULL, NULL);
+  g_return_val_if_fail(inetaddr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
 # ifdef HAVE_LIBPTHREAD			/* Pthread */
@@ -1692,10 +1692,10 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 
 	close (pipes[0]);
 
-	if (ia->name)
-	  name = g_strdup(ia->name);
+	if (inetaddr->name)
+	  name = g_strdup(inetaddr->name);
 	else
-	  name = gnet_gethostbyaddr(&ia->sa);
+	  name = gnet_gethostbyaddr(&inetaddr->sa);
 
 	/* Write the name to the pipe.  If we didn't get a name, we
 	   just write the canonical name. */
@@ -1719,7 +1719,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 	else
 	  {
 	    gchar buffer[INET_ADDRSTRLEN];	/* defined in netinet/in.h */
-	    guchar* p = (guchar*) &(GNET_SOCKADDR_IN(ia->sa).sin_addr);
+	    guchar* p = (guchar*) &(GNET_SOCKADDR_IN(inetaddr->sa).sin_addr);
 
 	    g_snprintf(buffer, sizeof(buffer), 
 		       "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
@@ -1772,7 +1772,7 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
 
   /* Set up state for callback */
   g_assert (state);
-  state->ia = gnet_inetaddr_clone(ia);
+  state->ia = gnet_inetaddr_clone(inetaddr);
   state->func = func;
   state->data = data;
 
@@ -2009,7 +2009,7 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 
 
 GInetAddrGetNameAsyncID
-gnet_inetaddr_get_name_async(GInetAddr* ia,
+gnet_inetaddr_get_name_async(GInetAddr* inetaddr,
 			     GInetAddrGetNameAsyncFunc func,
 			     gpointer data)
 {
@@ -2017,16 +2017,16 @@ gnet_inetaddr_get_name_async(GInetAddr* ia,
   GInetAddrReverseAsyncState* state;
   struct sockaddr_in* sa_in;
 
-  g_return_val_if_fail(ia != NULL, NULL);
+  g_return_val_if_fail(inetaddr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
   /* Create a structure for the call back */
   state = g_new0(GInetAddrReverseAsyncState, 1);
-  state->ia = gnet_inetaddr_clone(ia);
+  state->ia = gnet_inetaddr_clone(inetaddr);
   state->func = func;
   state->data = data;
 
-  sa_in = (struct sockaddr_in*)&ia->sa;
+  sa_in = (struct sockaddr_in*)&inetaddr->sa;
 	
   state->WSAhandle = (int) WSAAsyncGetHostByAddr(gnet_hWnd, GET_NAME_MSG,
 						 (const char*)&sa_in->sin_addr,
@@ -2099,10 +2099,87 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 #endif		/*********** End Windows code ***********/
 
 
+/**
+ *  gnet_inetaddr_get_length
+ *  @inetaddr: a #GInetAddr
+ *
+ *  Get the length of a #GInetAddr's address in bytes.  An IPv4
+ *  address is 4 bytes long.  An IPv6 address is 16 bytes long.
+ *
+ *  Returns: the length in bytes.
+ *
+ **/
+gint
+gnet_inetaddr_get_length (const GInetAddr* inetaddr)
+{
+  g_return_val_if_fail (inetaddr, 0);
+
+  return GNET_INETADDR_ADDRLEN(inetaddr);
+}
+
+
+
+/**
+ *  gnet_inetaddr_get_bytes
+ *  @inetaddr: a #GInetAddr
+ *  @buffer: buffer to store address in
+ *
+ *  Get a #GInetAddr's address as bytes.  @buffer should be 4 bytes
+ *  long for an IPv4 address or 16 bytes long for an IPv6 address.
+ *  Use %GNET_INETADDR_MAX_LEN when allocating a static buffer and
+ *  gnet_inetaddr_get_length() when allocating a dynamic buffer.
+ *
+ **/
+void
+gnet_inetaddr_get_bytes (const GInetAddr* inetaddr, gchar* buffer)
+{
+  g_return_if_fail (inetaddr);
+  g_return_if_fail (buffer);
+
+  memcpy (buffer, GNET_INETADDR_ADDRP(inetaddr), 
+	  GNET_INETADDR_ADDRLEN(inetaddr));
+}
+
+
+/**
+ *  gnet_inetaddr_set_bytes
+ *  @inetaddr: a #GInetAddr
+ *  @bytes: address in raw bytes
+ *  @length: length of @bytes
+ *
+ *  Sets the address of a #GInetAddr from bytes.  @buffer will be
+ *  4 bytes long for an IPv4 address and 16 bytes long for an IPv6
+ *  address.
+ *
+ **/
+void
+gnet_inetaddr_set_bytes (GInetAddr* inetaddr, 
+			 const gchar* bytes, gint length)
+{
+  gint port;
+
+  g_return_if_fail (inetaddr);
+  g_return_if_fail (bytes);
+  g_return_if_fail (length == 4 || length == 16);
+
+  /* Save the port.  If the family changes and it's location moves, it
+     could be trashed. */
+  port = GNET_INETADDR_PORT(inetaddr);
+
+  if (length == 4)
+    GNET_INETADDR_FAMILY(inetaddr) = AF_INET;
+  else if (length == 16)
+    GNET_INETADDR_FAMILY(inetaddr) = AF_INET6;
+  memcpy (GNET_INETADDR_ADDRP(inetaddr), bytes, length);
+  GNET_INETADDR_PORT(inetaddr) = port;
+}
+
+
+
 
 /**
  *  gnet_inetaddr_get_canonical_name:
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Gets the canonical name of a #GInetAddr.  An IPv4 canonical name
  *  is a dotted decimal name (e.g., 141.213.8.59).  An IPv6 canonical
@@ -2112,14 +2189,14 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
  *
  **/
 gchar* 
-gnet_inetaddr_get_canonical_name(const GInetAddr* ia)
+gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
 {
   gchar buffer[INET6_ADDRSTRLEN];	/* defined in netinet/in.h */
   
-  g_return_val_if_fail (ia != NULL, NULL);
+  g_return_val_if_fail (inetaddr != NULL, NULL);
 
-  if (inet_ntop(GNET_INETADDR_FAMILY(ia), 
-		GNET_INETADDR_ADDRP(ia),
+  if (inet_ntop(GNET_INETADDR_FAMILY(inetaddr), 
+		GNET_INETADDR_ADDRP(inetaddr),
 		buffer, sizeof(buffer)) == NULL)
     return NULL;
 
@@ -2129,35 +2206,35 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* ia)
 
 /**
  *  gnet_inetaddr_get_port:
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Gets the port number of a #GInetAddr.  
  *
  *  Returns: the port number.
  */
 gint
-gnet_inetaddr_get_port(const GInetAddr* ia)
+gnet_inetaddr_get_port(const GInetAddr* inetaddr)
 {
-  g_return_val_if_fail(ia != NULL, -1);
+  g_return_val_if_fail(inetaddr != NULL, -1);
 
-  return (gint) g_ntohs(GNET_INETADDR_PORT(ia));
+  return (gint) g_ntohs(GNET_INETADDR_PORT(inetaddr));
 }
 
 
 /**
  *  gnet_inetaddr_set_port:
- *  @ia: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *  @port: new port number
  *
  *  Set the port number of a #GInetAddr.
  *
  **/
 void
-gnet_inetaddr_set_port(const GInetAddr* ia, guint port)
+gnet_inetaddr_set_port(const GInetAddr* inetaddr, gint port)
 {
-  g_return_if_fail(ia != NULL);
+  g_return_if_fail(inetaddr != NULL);
 
-  GNET_INETADDR_PORT(ia) = g_htons(port);
+  GNET_INETADDR_PORT(inetaddr) = g_htons(port);
 }
 
 
@@ -2517,22 +2594,22 @@ gnet_inetaddr_hash (gconstpointer p)
  *  Compares two #GInetAddr's for equality.  IPv4 and IPv6 addresses
  *  are always unequal.
  *
- *  Returns: 1 if they are equal; 0 otherwise.
+ *  Returns: TRUE if they are equal; FALSE otherwise.
  *
  **/
-gint 
+gboolean
 gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
 {
   const GInetAddr* ia1 = (const GInetAddr*) p1;
   const GInetAddr* ia2 = (const GInetAddr*) p2;
 
-  g_return_val_if_fail (p1, 0);
-  g_return_val_if_fail (p2, 0);
+  g_return_val_if_fail (p1, FALSE);
+  g_return_val_if_fail (p2, FALSE);
 
   /* Note network byte order doesn't matter */
 
   if (GNET_INETADDR_FAMILY(ia1) != GNET_INETADDR_FAMILY(ia2))
-    return 0;
+    return FALSE;
 
   if (GNET_INETADDR_FAMILY(ia1) == AF_INET)
     {
@@ -2541,7 +2618,7 @@ gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
 
       if ((sa_in1->sin_addr.s_addr == sa_in2->sin_addr.s_addr) &&
 	  (sa_in1->sin_port == sa_in2->sin_port))
-	return 1;
+	return TRUE;
     }
   else if (GNET_INETADDR_FAMILY(ia1) == AF_INET6)
     {
@@ -2550,12 +2627,12 @@ gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
 
       if (IN6_ARE_ADDR_EQUAL(&sa_in1->sin6_addr, &sa_in2->sin6_addr) &&
 	  (sa_in1->sin6_port == sa_in2->sin6_port))
-	return 1;
+	return TRUE;
     }
   else
     g_assert_not_reached();
 
-  return 0;
+  return FALSE;
 }
 
 
@@ -2567,11 +2644,11 @@ gnet_inetaddr_equal (gconstpointer p1, gconstpointer p2)
  *  Compares two #GInetAddr's for equality, but does not compare the
  *  port numbers.
  *
- *  Returns: 1 if they are equal; 0 otherwise.
+ *  Returns: TRUE if they are equal; FALSE otherwise.
  *
  **/
-gint 
-gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
+gboolean 
+gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2)
 {
   const GInetAddr* ia1 = (const GInetAddr*) p1;
   const GInetAddr* ia2 = (const GInetAddr*) p2;
@@ -2579,33 +2656,35 @@ gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
   /* Note network byte order doesn't matter */
 
   if (GNET_INETADDR_FAMILY(ia1) != GNET_INETADDR_FAMILY(ia2))
-    return 0;
+    return FALSE;
 
   if (GNET_INETADDR_FAMILY(ia1) == AF_INET)
     {
       struct sockaddr_in* sa_in1 = (struct sockaddr_in*) &ia1->sa;
       struct sockaddr_in* sa_in2 = (struct sockaddr_in*) &ia2->sa;
 
-      return (sa_in1->sin_addr.s_addr == sa_in2->sin_addr.s_addr);
+      if (sa_in1->sin_addr.s_addr == sa_in2->sin_addr.s_addr)
+	return TRUE;
     }
   else if (GNET_INETADDR_FAMILY(ia1) == AF_INET6)
     {
       struct sockaddr_in6* sa_in1 = (struct sockaddr_in6*) &ia1->sa;
       struct sockaddr_in6* sa_in2 = (struct sockaddr_in6*) &ia2->sa;
 
-      return ((sa_in1->sin6_addr.s6_addr32[0] == 
-	       sa_in2->sin6_addr.s6_addr32[0]) &&
-	      (sa_in1->sin6_addr.s6_addr32[1] == 
-	       sa_in2->sin6_addr.s6_addr32[1]) &&
-	      (sa_in1->sin6_addr.s6_addr32[2] == 
-	       sa_in2->sin6_addr.s6_addr32[2]) &&
-	      (sa_in1->sin6_addr.s6_addr32[3] == 
-	       sa_in2->sin6_addr.s6_addr32[3]));
+      if ((sa_in1->sin6_addr.s6_addr32[0] == 
+	   sa_in2->sin6_addr.s6_addr32[0]) &&
+	  (sa_in1->sin6_addr.s6_addr32[1] == 
+	   sa_in2->sin6_addr.s6_addr32[1]) &&
+	  (sa_in1->sin6_addr.s6_addr32[2] == 
+	   sa_in2->sin6_addr.s6_addr32[2]) &&
+	  (sa_in1->sin6_addr.s6_addr32[3] == 
+	   sa_in2->sin6_addr.s6_addr32[3]))
+	return TRUE;
     }
   else
     g_assert_not_reached();
 
-  return 0;
+  return FALSE;
 }
 
 
@@ -2615,7 +2694,7 @@ gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
 #ifndef GNET_WIN32  /*********** Unix code ***********/
 
 /**
- *  gnet_inetaddr_gethostname:
+ *  gnet_inetaddr_get_host_name:
  * 
  *  Gets the host's name.
  *
@@ -2623,7 +2702,7 @@ gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
  *
  **/
 gchar*
-gnet_inetaddr_gethostname (void)
+gnet_inetaddr_get_host_name (void)
 {
   gchar* name = NULL;
   struct utsname myname;
@@ -2653,7 +2732,7 @@ gnet_inetaddr_gethostname (void)
 /* (Windows doesn't have uname */
 
 gchar*
-gnet_inetaddr_gethostname (void)
+gnet_inetaddr_get_host_name (void)
 {
   gchar* name = NULL;
   int error = 0;
@@ -2673,7 +2752,7 @@ gnet_inetaddr_gethostname (void)
 
 
 /**
- *  gnet_inetaddr_gethostaddr:
+ *  gnet_inetaddr_get_host_addr:
  * 
  *  Get the host's address.
  *
@@ -2681,12 +2760,12 @@ gnet_inetaddr_gethostname (void)
  *
  **/
 GInetAddr* 
-gnet_inetaddr_gethostaddr (void)
+gnet_inetaddr_get_host_addr (void)
 {
   gchar* name;
   GInetAddr* ia = NULL;
 
-  name = gnet_inetaddr_gethostname();
+  name = gnet_inetaddr_get_host_name();
   if (name != NULL)
     {  
       ia = gnet_inetaddr_new(name, 0);
@@ -2746,33 +2825,33 @@ gnet_inetaddr_autodetect_internet_interface (void)
 
 /**
  *  gnet_inetaddr_get_interface_to:
- *  @addr: a #GInetAddr
+ *  @inetaddr: a #GInetAddr
  *
  *  Figures out which local interface would be used to send a packet
- *  to @addr.  This works on some systems, but not others.  We
+ *  to @inetaddr.  This works on some systems, but not others.  We
  *  recommend using gnet_inetaddr_autodetect_internet_interface() to
  *  find an Internet interface since it's more likely to work.
  *
  *  Returns: the address of an interface used to route packets to
- *  @addr; NULL if there is no such interface or the system does not
- *  support this check.
+ *  @inetaddr; NULL if there is no such interface or the system does
+ *  not support this check.
  *
  **/
 GInetAddr* 
-gnet_inetaddr_get_interface_to (const GInetAddr* addr)
+gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr)
 {
   int sockfd;
   struct sockaddr_storage myaddr;
   socklen_t len;
   GInetAddr* iface;
 
-  g_return_val_if_fail (addr, NULL);
+  g_return_val_if_fail (inetaddr, NULL);
 
-  sockfd = socket (GNET_INETADDR_FAMILY(addr), SOCK_DGRAM, 0);
+  sockfd = socket (GNET_INETADDR_FAMILY(inetaddr), SOCK_DGRAM, 0);
   if (sockfd == -1)
     return NULL;
 
-  if (connect (sockfd, &GNET_INETADDR_SA(addr), GNET_INETADDR_LEN(addr)) == -1)
+  if (connect (sockfd, &GNET_INETADDR_SA(inetaddr), GNET_INETADDR_LEN(inetaddr)) == -1)
     {
       GNET_CLOSE_SOCKET(sockfd);
       return NULL;
@@ -2798,7 +2877,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* addr)
  *  gnet_inetaddr_get_internet_interface
  *
  *  Find an Internet interface.  This just calls
- *  gnet_inetaddr_list_interfaces() and returns the first one that
+ *  gnet_inetinetaddr_list_interfaces() and returns the first one that
  *  passes gnet_inetaddr_is_internet().  This works well on some
  *  systems, but not so well on others.  We recommend using
  *  gnet_inetaddr_autodetect_internet_interface() to find an Internet

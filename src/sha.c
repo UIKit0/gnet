@@ -450,14 +450,14 @@ struct _GSHA
 GSHA*           
 gnet_sha_new (const gchar* buffer, guint length)
 {
-  GSHA* gsha;
+  GSHA* sha;
 
-  gsha = g_new0 (GSHA, 1);
-  SHAInit (&gsha->ctx);
-  SHAUpdate (&gsha->ctx, buffer, length);
-  SHAFinal ((gpointer) &gsha->digest, &gsha->ctx);
+  sha = g_new0 (GSHA, 1);
+  SHAInit (&sha->ctx);
+  SHAUpdate (&sha->ctx, buffer, length);
+  SHAFinal ((gpointer) &sha->digest, &sha->ctx);
 
-  return gsha;
+  return sha;
 }
 
 
@@ -475,13 +475,13 @@ gnet_sha_new (const gchar* buffer, guint length)
 GSHA*		
 gnet_sha_new_string (const gchar* str)
 {
-  GSHA* gsha;
+  GSHA* sha;
   guint i;
 
   g_return_val_if_fail (str, NULL);
   g_return_val_if_fail (strlen(str) == (GNET_SHA_HASH_LENGTH * 2), NULL);
 
-  gsha = g_new0 (GSHA, 1);
+  sha = g_new0 (GSHA, 1);
 
   for (i = 0; i < (GNET_SHA_HASH_LENGTH * 2); ++i)
     {
@@ -516,53 +516,53 @@ gnet_sha_new_string (const gchar* str)
 	}
 
       if (i % 2)
-	gsha->digest[i / 2] |= val;
+	sha->digest[i / 2] |= val;
       else
-	gsha->digest[i / 2] = val << 4;
+	sha->digest[i / 2] = val << 4;
     }
 
-  return gsha;
+  return sha;
 }
 
 
 
 /**
  *  gnet_sha_clone
- *  @gsha: a #GSHA
+ *  @sha: a #GSHA
  * 
  *  Copies a #GSHA.
  *
- *  Returns: a copy of @gsha.
+ *  Returns: a copy of @sha.
  *
  **/
 GSHA*           
-gnet_sha_clone (const GSHA* gsha)
+gnet_sha_clone (const GSHA* sha)
 {
-  GSHA* gsha2;
+  GSHA* sha2;
 
-  g_return_val_if_fail (gsha, NULL);
+  g_return_val_if_fail (sha, NULL);
 
-  gsha2      = g_new0 (GSHA, 1);
-  gsha2->ctx = gsha->ctx;
-  memcpy (gsha2->digest, gsha->digest, sizeof(gsha->digest));
+  sha2      = g_new0 (GSHA, 1);
+  sha2->ctx = sha->ctx;
+  memcpy (sha2->digest, sha->digest, sizeof(sha->digest));
 
-  return gsha2;
+  return sha2;
 }
 
 
 
 /** 
  *  gnet_sha_delete
- *  @gsha: a #GSHA
+ *  @sha: a #GSHA
  *
  *  Deletes a #GSHA.
  *
  **/
 void
-gnet_sha_delete (GSHA* gsha)
+gnet_sha_delete (GSHA* sha)
 {
-  if (gsha)
-    g_free (gsha);
+  if (sha)
+    g_free (sha);
 }
 
 
@@ -582,17 +582,17 @@ gnet_sha_delete (GSHA* gsha)
 GSHA*		
 gnet_sha_new_incremental (void)
 {
-  GSHA* gsha;
+  GSHA* sha;
 
-  gsha = g_new0 (GSHA, 1);
-  SHAInit (&gsha->ctx);
-  return gsha;
+  sha = g_new0 (GSHA, 1);
+  SHAInit (&sha->ctx);
+  return sha;
 }
 
 
 /**
  *  gnet_sha_update
- *  @gsha: a #GSHA
+ *  @sha: a #GSHA
  *  @buffer: buffer to add
  *  @length: length of @buffer
  *
@@ -602,28 +602,28 @@ gnet_sha_new_incremental (void)
  * 
  **/
 void
-gnet_sha_update (GSHA* gsha, const gchar* buffer, guint length)
+gnet_sha_update (GSHA* sha, const gchar* buffer, guint length)
 {
-  g_return_if_fail (gsha);
+  g_return_if_fail (sha);
 
-  SHAUpdate (&gsha->ctx, buffer, length);
+  SHAUpdate (&sha->ctx, buffer, length);
 }
 
 
 /**
  *  gnet_sha_final
- *  @gsha: a #GSHA
+ *  @sha: a #GSHA
  *
  *  Calcuates the final hash value of a #GSHA.  This should only be
  *  called on a #GSHA created by gnet_sha_new_incremental().
  *
  **/
 void
-gnet_sha_final (GSHA* gsha)
+gnet_sha_final (GSHA* sha)
 {
-  g_return_if_fail (gsha);
+  g_return_if_fail (sha);
 
-  SHAFinal ((gpointer) &gsha->digest, &gsha->ctx);
+  SHAFinal ((gpointer) &sha->digest, &sha->ctx);
 }
 
 
@@ -632,7 +632,7 @@ gnet_sha_final (GSHA* gsha)
 
 /**
  *  gnet_sha_get_digest
- *  @gsha: a #GSHA
+ *  @sha: a #GSHA
  *
  *  Gets the raw SHA digest.
  *
@@ -641,11 +641,11 @@ gnet_sha_final (GSHA* gsha)
  *
  **/
 gchar*        	
-gnet_sha_get_digest (const GSHA* gsha)
+gnet_sha_get_digest (const GSHA* sha)
 {
-  g_return_val_if_fail (gsha, NULL);
+  g_return_val_if_fail (sha, NULL);
   
-  return (gchar*) gsha->digest;
+  return (gchar*) sha->digest;
 }
 
 
@@ -656,7 +656,7 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
 
 /**
  *  gnet_sha_get_string
- *  @gsha: a #GSHA
+ *  @sha: a #GSHA
  *
  *  Get the digest represented a human-readable string.
  *
@@ -666,15 +666,15 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
  *
  **/
 gchar*          
-gnet_sha_get_string (const GSHA* gsha)
+gnet_sha_get_string (const GSHA* sha)
 {
   gchar* str;
 
-  g_return_val_if_fail (gsha, NULL);
+  g_return_val_if_fail (sha, NULL);
 
   str = g_new (gchar, GNET_SHA_HASH_LENGTH * 2 + 1);
 
-  gnet_sha_copy_string (gsha, str);
+  gnet_sha_copy_string (sha, str);
   str[GNET_SHA_HASH_LENGTH * 2] = '\0';
 
   return str;
@@ -685,7 +685,7 @@ gnet_sha_get_string (const GSHA* gsha)
 
 /**
  * gnet_sha_copy_string
- * @gsha: a #GSHA
+ * @sha: a #GSHA
  * @buffer: buffer at least 2 * %GNET_SHA_HASH_LENGTH bytes long
  *
  * Copies the digest, represented as a string, into @buffer.  The
@@ -693,17 +693,17 @@ gnet_sha_get_string (const GSHA* gsha)
  * 
  **/
 void
-gnet_sha_copy_string (const GSHA* gsha, gchar* buffer)
+gnet_sha_copy_string (const GSHA* sha, gchar* buffer)
 {
   guint i;
 
-  g_return_if_fail (gsha);
+  g_return_if_fail (sha);
   g_return_if_fail (buffer);
 
   for (i = 0; i < GNET_SHA_HASH_LENGTH; ++i)
     {
-      buffer[i * 2]       = bits2hex[(gsha->digest[i] & 0xF0) >> 4];
-      buffer[(i * 2) + 1] = bits2hex[(gsha->digest[i] & 0x0F)     ];
+      buffer[i * 2]       = bits2hex[(sha->digest[i] & 0xF0) >> 4];
+      buffer[(i * 2) + 1] = bits2hex[(sha->digest[i] & 0x0F)     ];
     }
 }
 
@@ -715,21 +715,21 @@ gnet_sha_copy_string (const GSHA* gsha, gchar* buffer)
  *
  *  Compares two #GSHA's for equality.
  *
- *  Returns: 1 if they are equal; 0 otherwise.
+ *  Returns: TRUE if they are equal; FALSE otherwise.
  *
  **/
-gint
+gboolean
 gnet_sha_equal (gconstpointer p1, gconstpointer p2)
 {
-  GSHA* gshaa = (GSHA*) p1;
-  GSHA* gshab = (GSHA*) p2;
+  GSHA* shaa = (GSHA*) p1;
+  GSHA* shab = (GSHA*) p2;
   guint i;
 
   for (i = 0; i < GNET_SHA_HASH_LENGTH; ++i)
-    if (gshaa->digest[i] != gshab->digest[i])
-      return 0;
+    if (shaa->digest[i] != shab->digest[i])
+      return FALSE;
 
-  return 1;
+  return TRUE;
 }
 
 
@@ -746,12 +746,12 @@ gnet_sha_equal (gconstpointer p1, gconstpointer p2)
 guint
 gnet_sha_hash (gconstpointer p)
 {
-  const GSHA* gsha = (const GSHA*) p;
+  const GSHA* sha = (const GSHA*) p;
   const guint* q;
 
-  g_return_val_if_fail (gsha, 0);
+  g_return_val_if_fail (sha, 0);
 
-  q = (const guint*) gsha->digest;
+  q = (const guint*) sha->digest;
 
   return (q[0] ^ q[1] ^ q[2] ^ q[3] ^ q[4]);
 }

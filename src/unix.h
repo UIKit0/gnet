@@ -38,10 +38,10 @@ typedef struct _GUnixSocket GUnixSocket;
 
 GUnixSocket* gnet_unix_socket_new (const gchar* path);
 
-void 	     gnet_unix_socket_delete (GUnixSocket* s);
+void 	     gnet_unix_socket_delete (GUnixSocket* socket);
 
-void 	     gnet_unix_socket_ref (GUnixSocket* s);
-void 	     gnet_unix_socket_unref (GUnixSocket* s);
+void 	     gnet_unix_socket_ref (GUnixSocket* socket);
+void 	     gnet_unix_socket_unref (GUnixSocket* socket);
 
 GIOChannel*  gnet_unix_socket_get_io_channel (GUnixSocket* socket);
 

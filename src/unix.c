@@ -65,51 +65,61 @@ gnet_unix_socket_new (const gchar* path)
 
 /**
  *  gnet_unix_socket_delete
- *  @s: a #GUnixSocket
+ *  @socket: a #GUnixSocket
  *
  *  Deletes a #GUnixSocket.
  *
  **/
 void
-gnet_unix_socket_delete (GUnixSocket *s)
+gnet_unix_socket_delete (GUnixSocket* socket)
 {
-  if (s != NULL)
-    gnet_unix_socket_unref(s);
+  if (socket != NULL)
+    gnet_unix_socket_unref (socket);
 }
 
 
 /**
  *  gnet_unix_socket_ref
- *  @s: a #GUnixSocket
+ *  @socket: a #GUnixSocket
  *
  *  Adds a reference to a #GUnixSocket.
  *
  **/
 void
-gnet_unix_socket_ref (GUnixSocket* s)
+gnet_unix_socket_ref (GUnixSocket* socket)
 {
-  g_return_if_fail (s != NULL);
-  ++s->ref_count;
+  g_return_if_fail (socket != NULL);
+
+  socket->ref_count++;
 }
+
 
 /**
  *  gnet_unix_socket_unref
- *  @s: a #GUnixSocket
+ *  @socket: a #GUnixSocket
  *
  *  Removes a reference from a #GUnixSocket.  A #GUnixSocket is
  *  deleted when the reference count reaches 0.
  *
  **/
 void
-gnet_unix_socket_unref (GUnixSocket* s)
+gnet_unix_socket_unref (GUnixSocket* socket)
 {
-  g_return_if_fail (s != NULL);
+  g_return_if_fail (socket != NULL);
 
-  --s->ref_count;
-  if (s->ref_count == 0) 
-    gnet_unix_socket_delete(s);
+  socket->ref_count--;
+  if (socket->ref_count == 0) 
+    {
+      GNET_CLOSE_SOCKET(socket->sockfd); /* Don't care if this fails. */
+      if (socket->iochannel)
+	g_io_channel_unref(socket->iochannel);
+      if (socket->server)
+	gnet_unix_socket_unlink(PATH(socket));
+      g_free(socket);
+    }
 }
-    
+ 
+   
 /**
  *  gnet_unix_socket_get_io_channel
  *  @socket: a #GUnixSocket

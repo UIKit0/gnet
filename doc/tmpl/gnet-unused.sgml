@@ -330,6 +330,14 @@ url
 @port: 
 @Returns: 
 
+<!-- ##### FUNCTION gnet_tcp_socket_get_inetaddr ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
 <!-- ##### FUNCTION gnet_tcp_socket_get_iochannel ##### -->
 <para>
 

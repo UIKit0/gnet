@@ -49,32 +49,34 @@ GMcastSocket* gnet_mcast_socket_new(void);
 GMcastSocket* gnet_mcast_socket_new_with_port (gint port);
 GMcastSocket* gnet_mcast_socket_new_full (const GInetAddr* iface, gint port);
 
-void          gnet_mcast_socket_delete (GMcastSocket* ms);
+void          gnet_mcast_socket_delete (GMcastSocket* socket);
 
-void 	      gnet_mcast_socket_ref (GMcastSocket* s);
-void 	      gnet_mcast_socket_unref (GMcastSocket* s);
+void 	      gnet_mcast_socket_ref (GMcastSocket* socket);
+void 	      gnet_mcast_socket_unref (GMcastSocket* socket);
 
 GIOChannel*   gnet_mcast_socket_get_io_channel (GMcastSocket* socket);
 
 
 /* ********** */
 
-gint 	 gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia);
-gint 	 gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia);
+gint 	 gnet_mcast_socket_join_group (GMcastSocket* socket, 
+				       const GInetAddr* inetaddr);
+gint 	 gnet_mcast_socket_leave_group (GMcastSocket* socket, 
+					const GInetAddr* inetaddr);
 
-gint 	 gnet_mcast_socket_get_ttl (const GMcastSocket* ms);
-gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl);
+gint 	 gnet_mcast_socket_get_ttl (const GMcastSocket* socket);
+gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl);
 
-gint 	 gnet_mcast_socket_is_loopback (const GMcastSocket* ms);
-gint 	 gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable);
+gint 	 gnet_mcast_socket_is_loopback (const GMcastSocket* socket);
+gint 	 gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable);
 
 /* ********** */
 
-gint     gnet_mcast_socket_send (GMcastSocket* ms, const gchar* buffer, 
+gint     gnet_mcast_socket_send (GMcastSocket* socket, const gchar* buffer, 
 				 guint length, const GInetAddr* dst);
-gint     gnet_mcast_socket_receive (GMcastSocket* ms, gchar* buffer, 
+gint     gnet_mcast_socket_receive (GMcastSocket* socket, gchar* buffer, 
 				    guint length, GInetAddr** src);
-gboolean gnet_mcast_socket_has_packet (const GMcastSocket* s);
+gboolean gnet_mcast_socket_has_packet (const GMcastSocket* socket);
 
 
 /**

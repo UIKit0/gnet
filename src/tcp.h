@@ -41,7 +41,61 @@ typedef struct _GTcpSocket GTcpSocket;
 
 
 /* **************************************** */
-/* Asyncronous stuff 	 */
+
+GTcpSocket* gnet_tcp_socket_connect (const gchar* hostname, gint port);
+GTcpSocket* gnet_tcp_socket_new (const GInetAddr* addr);
+GTcpSocket* gnet_tcp_socket_new_direct (const GInetAddr* addr);
+
+void 	    gnet_tcp_socket_delete (GTcpSocket* socket);
+
+void 	    gnet_tcp_socket_ref (GTcpSocket* socket);
+void 	    gnet_tcp_socket_unref (GTcpSocket* socket);
+
+
+GIOChannel* gnet_tcp_socket_get_io_channel (GTcpSocket* socket);
+GInetAddr*  gnet_tcp_socket_get_remote_inetaddr (const GTcpSocket* socket);
+GInetAddr*  gnet_tcp_socket_get_local_inetaddr (const GTcpSocket* socket);
+
+
+GTcpSocket* gnet_tcp_socket_server_new (void);
+GTcpSocket* gnet_tcp_socket_server_new_with_port (gint port);
+GTcpSocket* gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port);
+
+GTcpSocket* gnet_tcp_socket_server_accept (GTcpSocket* socket);
+GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
+
+gint        gnet_tcp_socket_get_port (const GTcpSocket* socket);
+
+
+/* ********** */
+
+/**
+ *  GNetTOS
+ *  @GNET_TOS_NONE: Unspecified
+ *  @GNET_TOS_LOWDELAY: Low delay
+ *  @GNET_TOS_THROUGHPUT: High throughput
+ *  @GNET_TOS_RELIABILITY: High reliability
+ *  @GNET_TOS_LOWCOST: Low cost
+ *
+ *  Type-of-service.
+ *
+ **/
+typedef enum
+{
+  GNET_TOS_NONE,
+  GNET_TOS_LOWDELAY,
+  GNET_TOS_THROUGHPUT,
+  GNET_TOS_RELIABILITY,
+  GNET_TOS_LOWCOST
+
+} GNetTOS;
+
+void 	    gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
+
+
+
+/* **************************************** */
+/* Asynchronous functions		    */
 
 
 /**
@@ -90,6 +144,15 @@ typedef void (*GTcpSocketConnectAsyncFunc)(GTcpSocket* socket,
 					   gpointer data);
 
 
+GTcpSocketConnectAsyncID
+gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
+			       GTcpSocketConnectAsyncFunc func, 
+			       gpointer data);
+void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
+
+/* ********** */
+
+
 /**
  *  GTcpSocketNewAsyncID:
  *  
@@ -115,25 +178,6 @@ typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket,
 				       gpointer data);
 
 
-
-
-/* ********** */
-
-
-GTcpSocket* gnet_tcp_socket_connect (const gchar* hostname, gint port);
-
-
-GTcpSocketConnectAsyncID
-gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
-			       GTcpSocketConnectAsyncFunc func, 
-			       gpointer data);
-void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
-
-
-
-GTcpSocket* gnet_tcp_socket_new (const GInetAddr* addr);
-
-
 GTcpSocketNewAsyncID 
 gnet_tcp_socket_new_async (const GInetAddr* addr, 
 			   GTcpSocketNewAsyncFunc func,
@@ -141,52 +185,13 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
 
 
-void gnet_tcp_socket_delete (GTcpSocket* s);
-
-void gnet_tcp_socket_ref (GTcpSocket* s);
-void gnet_tcp_socket_unref (GTcpSocket* s);
-
-
-/* ********** */
-
-GIOChannel* gnet_tcp_socket_get_io_channel (GTcpSocket* socket);
-GInetAddr*  gnet_tcp_socket_get_inetaddr (const GTcpSocket* socket);
-gint        gnet_tcp_socket_get_port (const GTcpSocket* socket);
+GTcpSocketNewAsyncID
+gnet_tcp_socket_new_async_direct (const GInetAddr* addr, 
+				  GTcpSocketNewAsyncFunc func,
+				  gpointer data);
 
 
 /* ********** */
-
-/**
- *  GNetTOS
- *  @GNET_TOS_NONE: Unspecified
- *  @GNET_TOS_LOWDELAY: Low delay
- *  @GNET_TOS_THROUGHPUT: High throughput
- *  @GNET_TOS_RELIABILITY: High reliability
- *  @GNET_TOS_LOWCOST: Low cost
- *
- *  Type-of-service.
- *
- **/
-typedef enum
-{
-  GNET_TOS_NONE,
-  GNET_TOS_LOWDELAY,
-  GNET_TOS_THROUGHPUT,
-  GNET_TOS_RELIABILITY,
-  GNET_TOS_LOWCOST
-
-} GNetTOS;
-
-void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
-
-
-/* ********** */
-
-GTcpSocket* gnet_tcp_socket_server_new (gint port);
-GTcpSocket* gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port);
-
-GTcpSocket* gnet_tcp_socket_server_accept (GTcpSocket* socket);
-GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
 
 
 /**
@@ -208,12 +213,6 @@ void gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
 					  gpointer user_data);
 void gnet_tcp_socket_server_accept_async_cancel (GTcpSocket* socket);
 
-/* ********** */
-
-GTcpSocket* gnet_tcp_socket_new_direct (const GInetAddr* addr);
-GTcpSocketNewAsyncID gnet_tcp_socket_new_async_direct (const GInetAddr* addr, 
-						       GTcpSocketNewAsyncFunc func,
-						       gpointer data);
 
 
 #ifdef __cplusplus

@@ -1,8 +1,23 @@
+Tue Feb  4 15:20:46 2003  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): Use INETADDR
+	macros.
+
+	* src/gnet-private.h (GNET_INETADDR_ADDRLEN): Added.
+	* src/inetaddr.c (gnet_inetaddr_get_length): "
+	* src/inetaddr.c (gnet_inetaddr_get_bytes): 
+	* src/inetaddr.c (gnet_inetaddr_set_bytes): 
+
+Tue Feb  4 14:37:05 2003  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.[ch] (gnet_tcp_socket_get_remote_inetaddr): Was
+	    gnet_tcp_socket_get_inetaddr().  Note if this is called on a
+	    server, the local address is created, which is not
+	    unreasonable.  This is an undocumented feature.
+
 Mon Feb  3 23:06:59 2003  David Helder  <dhelder@umich.edu>
 
 	* src/tcp.c (gnet_tcp_socket_get_local_inetaddr): Added.
-	   I'm tempted to change gnet_tcp_socket_get_inetaddr to
-	   gnet_tcp_socket_get_remote_inetaddr.
 
 	* src/*: param name clean-ups.
 	

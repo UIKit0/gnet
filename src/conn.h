@@ -84,25 +84,25 @@ struct _GConnEvent
  *  @iochannel: IO channel
  *  @socket: socket
  *  @inetaddr: address
- *  @ref_count: private
- *  @ref_count_internal: private
- *  @connect_id: private
- *  @new_id: private
- *  @write_queue: private
- *  @bytes_written: private
- *  @buffer: private
- *  @length: private
- *  @bytes_read: private
- *  @read_eof: private
- *  @read_queue: private
- *  @process_buffer_timeout: private
- *  @watch_readable: private
- *  @watch_writable: private
- *  @watch_flags: private
- *  @watch: private
- *  @timer: private
- *  @func: private
- *  @user_data: private
+ *  @ref_count: [private]
+ *  @ref_count_internal: [private]
+ *  @connect_id: [private]
+ *  @new_id: [private]
+ *  @write_queue: [private]
+ *  @bytes_written: [private]
+ *  @buffer: [private]
+ *  @length: [private]
+ *  @bytes_read: [private]
+ *  @read_eof: [private]
+ *  @read_queue: [private]
+ *  @process_buffer_timeout: [private]
+ *  @watch_readable: [private]
+ *  @watch_writable: [private]
+ *  @watch_flags: [private]
+ *  @watch: [private]
+ *  @timer: [private]
+ *  @func: [private]
+ *  @user_data: [private]
  *
  *  TCP Connection.  Some of the fields are public, but do not set
  *  these fields.

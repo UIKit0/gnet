@@ -23,6 +23,7 @@
 G_LOCK_DEFINE_STATIC (socks);
 static GInetAddr* socks_server = NULL;
 static gboolean   socks_enabled = FALSE;
+static gint	  socks_version = 0;
 
 
 /**
@@ -62,62 +63,56 @@ gnet_socks_set_enabled (gboolean enabled)
 /**
  *  gnet_socks_get_server
  *
- *  Gets the address of the SOCKS server.  This function checks the
- *  gnet_socks_set_server() value and, if not set, the SOCKS_SERVER
- *  environment variable.  The SOCKS_SERVER enviroment variable should
- *  be in the form HOSTNAME or HOSTNAME:PORT.
+ *  Gets the address of the SOCKS server (regardless of whether SOCKS
+ *  is enabled).  This function checks the gnet_socks_set_server()
+ *  value and, if not set, the SOCKS_SERVER environment variable.  The
+ *  SOCKS_SERVER enviroment variable should be in the form HOSTNAME or
+ *  HOSTNAME:PORT.
  *
- *  Returns: copy of the address or NULL if there is no server.
+ *  Returns: a copy of the address; NULL if there is no server.
  *
  **/
 GInetAddr*
 gnet_socks_get_server (void)
 {
   GInetAddr* rv = NULL;
+  const gchar* var;
 
-  /* Auto-detect socks server */
-  if (!socks_server)
+  G_LOCK (socks);
+
+  /* If no socks_server, check the environment variable. */
+  if (!socks_server && (var = g_getenv("SOCKS_SERVER")))
     {
-      const gchar* var;
-
-      /* Check SOCKS_SERVER env variable */
-      if ((var = g_getenv("SOCKS_SERVER"))) 
-	{
-	  gchar* hostname;
-	  gint port = GNET_SOCKS_PORT;
-	  int i;
-	  GInetAddr* addr;
+      gchar* hostname;
+      gint port = GNET_SOCKS_PORT;
+      int i;
 	  
-	  for (i = 0; var[i] && var[i] != ':'; ++i) 
-	    ;
-	  if (i == 0) 
-	    return NULL;
-	  hostname = g_strndup (var, i);
+      for (i = 0; var[i] && var[i] != ':'; ++i) 
+	;
+      if (i == 0) 
+	goto done;
 
-	  if (var[i])
+      hostname = g_strndup (var, i);
+
+      if (var[i] == ':')
+	{
+	  char* ep;
+	  port = (gint) strtoul(&var[i+1], &ep, 10);
+	  if (*ep != '\0')
 	    {
-	      char* ep;
-	      port = (gint) strtoul(&var[i+1], &ep, 10);
-	      if (*ep != '\0')
-		{
-		  g_free (hostname);
-		  return NULL;
-		}
+	      g_free (hostname);
+	      goto done;
 	    }
-
-	  addr = gnet_inetaddr_new (hostname, port);
-
-	  G_LOCK (socks);
-	  if (!socks_server)
-	    socks_server = addr;
-	  G_UNLOCK (socks);
 	}
+
+      socks_server = gnet_inetaddr_new (hostname, port);
     }
+ done:
 
   /* Return copy of socks server */
-  G_LOCK (socks);
   if (socks_server)
     rv = gnet_inetaddr_clone (socks_server);
+
   G_UNLOCK (socks);
 
   return rv;
@@ -126,21 +121,84 @@ gnet_socks_get_server (void)
 
 /**
  *  gnet_socks_set_server:
- *  @ia: SOCKS server address
+ *  @inetaddr: SOCKS server address
  *
  *  Sets the address of the SOCKS server.
  *
  **/
 void
-gnet_socks_set_server (const GInetAddr* ia)
+gnet_socks_set_server (const GInetAddr* inetaddr)
 {
-  g_return_if_fail (ia);
+  g_return_if_fail (inetaddr);
 
   G_LOCK (socks);
 
   if (socks_server)
     gnet_inetaddr_delete (socks_server);
-  socks_server = gnet_inetaddr_clone (ia);
+  socks_server = gnet_inetaddr_clone (inetaddr);
+
+  G_UNLOCK (socks);
+}
+
+
+/**
+ *  gnet_socks_get_version
+ *
+ *  Gets the SOCKS version GNet uses.  This function checks the
+ *  gnet_socks_set_version() value and, if not set, the SOCKS_VERSION
+ *  environment variable.
+ *
+ *  Returns: the SOCKS version.
+ *
+ **/
+gint
+gnet_socks_get_version (void)
+{
+  gint version;
+
+  G_LOCK (socks);
+
+  /* Use version set */
+  if (socks_version)
+    version = socks_version;
+  else
+    {
+      gchar* env;
+
+      /* Use environment variable */
+      env = g_getenv("SOCKS_VERSION");
+      version = 0;
+      if (env)
+	version = atoi(env);
+
+      /* Use the default if no environment variable or the environment
+	 variable is bad. */
+      if (version != 4 && version != 5)
+	version = GNET_SOCKS_VERSION;
+    }
+
+  G_UNLOCK (socks);
+
+  return version;
+}
+
+
+/**
+ *  gnet_socks_set_version
+ *  @version: SOCKS version
+ *
+ *  Sets the SOCKS version GNet uses.  GNet only supports versions 4
+ *  and 5.
+ *
+ **/
+void
+gnet_socks_set_version (gint version)
+{
+  g_return_if_fail (version == 4 || version == 5);
+
+  G_LOCK (socks);
+
+  socks_version = version;
 
   G_UNLOCK (socks);
 }

@@ -57,11 +57,36 @@ main(int argc, char** argv)
 
   /* Create the socket */
   socket = gnet_tcp_socket_new (addr);
+  gnet_inetaddr_delete (addr);
   if (!socket)
     {
       fprintf (stderr, "Error: Could not connect to %s:%d\n", hostname, port);
       exit (EXIT_FAILURE);
     }
+
+#if 0
+  {
+    gchar* cname;
+
+    /* Print local address */
+    addr = gnet_tcp_socket_get_local_inetaddr (socket);
+    g_assert (addr);
+    cname = gnet_inetaddr_get_canonical_name (addr);
+    g_assert (cname);
+    g_print ("Local address: %s:%d\n", cname, gnet_inetaddr_get_port(addr));
+    g_free (cname);
+    gnet_inetaddr_delete (addr);
+
+    /* Print remote address */
+    addr = gnet_tcp_socket_get_remote_inetaddr (socket);
+    g_assert (addr);
+    cname = gnet_inetaddr_get_canonical_name (addr);
+    g_assert (cname);
+    g_print ("Remote address: %s:%d\n", cname, gnet_inetaddr_get_port(addr));
+    g_free (cname);
+    gnet_inetaddr_delete (addr);
+  }
+#endif
 
   /* Get the IOChannel */
   iochannel = gnet_tcp_socket_get_io_channel (socket);
@@ -82,7 +107,6 @@ main(int argc, char** argv)
   if (error != G_IO_ERROR_NONE) 
     fprintf (stderr, "Error: IO error (%d)\n", error);
 
-  gnet_inetaddr_delete (addr);
   gnet_tcp_socket_delete (socket);
 
   return 0;

@@ -112,59 +112,59 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
 
 /**
  *  gnet_mcast_socket_delete:
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *
  *  Deletes a #GMcastSocket.
  *
  **/
 void
-gnet_mcast_socket_delete (GMcastSocket* ms)
+gnet_mcast_socket_delete (GMcastSocket* socket)
 {
-  if (ms != NULL)
-    gnet_mcast_socket_unref(ms);
+  if (socket != NULL)
+    gnet_mcast_socket_unref(socket);
 }
 
 
 
 /**
  *  gnet_mcast_socket_ref
- *  @s: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *
  *  Adds a reference to a #GMcastSocket.
  *
  **/
 void
-gnet_mcast_socket_ref (GMcastSocket* s)
+gnet_mcast_socket_ref (GMcastSocket* socket)
 {
-  g_return_if_fail (s != NULL);
+  g_return_if_fail (socket != NULL);
 
-  ++s->ref_count;
+  socket->ref_count++;
 }
 
 
 /**
  *  gnet_mcast_socket_unref
- *  @s: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *
  *  Removes a reference from a #GMcastSocket.  A #GMcastSocket is
  *  deleted when the reference count reaches 0.
  *
  **/
 void
-gnet_mcast_socket_unref (GMcastSocket* s)
+gnet_mcast_socket_unref (GMcastSocket* socket)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (socket != NULL);
 
-  --s->ref_count;
+  socket->ref_count--;
 
-  if (s->ref_count == 0)
+  if (socket->ref_count == 0)
     {
-      GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
+      GNET_CLOSE_SOCKET(socket->sockfd);/* Don't care if this fails... */
 
-      if (s->iochannel)
-	g_io_channel_unref(s->iochannel);
+      if (socket->iochannel)
+	g_io_channel_unref (socket->iochannel);
 
-      g_free(s);
+      g_free (socket);
     }
 }
 
@@ -200,8 +200,8 @@ gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
 
 /**
  *  gnet_mcast_socket_join_group
- *  @ms: a #GMcastSocket
- *  @ia: address of the group
+ *  @socket: a #GMcastSocket
+ *  @inetaddr: address of the group
  *
  *  Joins a multicast group.  Join only one group per socket.
  *
@@ -209,34 +209,35 @@ gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
  *
  **/
 gint
-gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
+gnet_mcast_socket_join_group (GMcastSocket* socket, 
+			      const GInetAddr* inetaddr)
 {
   gint rv = -1;
 
-  if (GNET_INETADDR_FAMILY(ia) == AF_INET)
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
     {
       struct ip_mreq mreq;
 
       /* Create the multicast request structure */
-      memcpy(&mreq.imr_multiaddr, GNET_INETADDR_ADDRP(ia), 
+      memcpy(&mreq.imr_multiaddr, GNET_INETADDR_ADDRP(inetaddr), 
 	     sizeof(mreq.imr_multiaddr));
       mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
 
       /* Join the group */
-      rv = setsockopt(ms->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+      rv = setsockopt(socket->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		      (void*) &mreq, sizeof(mreq));
     }
-  else if (GNET_INETADDR_FAMILY(ia) == AF_INET6)
+  else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       struct ipv6_mreq mreq;
 
       /* Create the multicast request structure */
-      memcpy(&mreq.ipv6mr_multiaddr, GNET_INETADDR_ADDRP(ia), 
+      memcpy(&mreq.ipv6mr_multiaddr, GNET_INETADDR_ADDRP(inetaddr), 
 	     sizeof(mreq.ipv6mr_multiaddr));
       mreq.ipv6mr_interface = 0;
 
       /* Join the group */
-      rv = setsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
+      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
 		      (void*) &mreq, sizeof(mreq));
     }
   else
@@ -248,8 +249,8 @@ gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
 
 /**
  *  gnet_mcast_socket_leave_group
- *  @ms: a #GMcastSocket
- *  @ia: address of the group
+ *  @socket: a #GMcastSocket
+ *  @inetaddr: address of the group
  *
  *  Leaves a mulitcast group.
  *
@@ -257,34 +258,35 @@ gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
  *
  **/
 gint
-gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
+gnet_mcast_socket_leave_group (GMcastSocket* socket, 
+			       const GInetAddr* inetaddr)
 {
   gint rv = -1;
 
-  if (GNET_INETADDR_FAMILY(ia) == AF_INET)
+  if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
     {
       struct ip_mreq mreq;
 
       /* Create the multicast request structure */
-      memcpy(&mreq.imr_multiaddr, GNET_INETADDR_ADDRP(ia), 
+      memcpy(&mreq.imr_multiaddr, GNET_INETADDR_ADDRP(inetaddr), 
 	     sizeof(mreq.imr_multiaddr));
       mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
 
       /* Join the group */
-      rv = setsockopt(ms->sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
+      rv = setsockopt(socket->sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 		      (void*) &mreq, sizeof(mreq));
     }
-  else if (GNET_INETADDR_FAMILY(ia) == AF_INET6)
+  else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
     {
       struct ipv6_mreq mreq;
 
       /* Create the multicast request structure */
-      memcpy(&mreq.ipv6mr_multiaddr, GNET_INETADDR_ADDRP(ia), 
+      memcpy(&mreq.ipv6mr_multiaddr, GNET_INETADDR_ADDRP(inetaddr), 
 	     sizeof(mreq.ipv6mr_multiaddr));
       mreq.ipv6mr_interface = 0;
 
       /* Join the group */
-      rv = setsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP,
+      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP,
 		      (void*) &mreq, sizeof(mreq));
     }
   else
@@ -297,7 +299,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
 
 /**
  *  gnet_mcast_socket_get_ttl
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *
  *  Gets the multicast time-to-live (TTL) of a #GMcastSocket.  All IP
  *  multicast packets have a TTL field.  This field is decremented by
@@ -351,7 +353,7 @@ gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
  *
  **/
 gint
-gnet_mcast_socket_get_ttl (const GMcastSocket* ms)
+gnet_mcast_socket_get_ttl (const GMcastSocket* socket)
 {
   guchar ttl;
   socklen_t ttl_size;
@@ -360,16 +362,16 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* ms)
   ttl_size = sizeof(ttl);
 
   /* Get the IPv4 TTL if the socket is bound to an IPv4 address */
-  if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET)
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET)
     {
-      rv = getsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
+      rv = getsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
 		      (void*) &ttl, &ttl_size);
     }
 
   /* Get the IPv6 TTL if the socket is bound to an IPv6 address */
-  else if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6)
+  else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
-      rv = getsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
+      rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
 		      (void*) &ttl, &ttl_size);
     }
   else
@@ -384,7 +386,7 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* ms)
 
 /**
  *  gnet_mcast_socket_set_ttl
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *  @ttl: value to set TTL to
  *
  *  Sets the time-to-live (TTL) default of a #GMcastSocket.  Set the TTL
@@ -395,7 +397,7 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* ms)
  *
  **/
 gint
-gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl)
+gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
 {
   guchar ttlb;
   int rv1, rv2;
@@ -408,23 +410,23 @@ gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl)
      0::0 IPv6 and IPv6 policy allows IPv4, set IP_TTL.  In the latter case,
      if we bind to 0::0 and the host is dual-stacked, then all IPv4
      interfaces will be bound to also. */
-  if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET ||
-      (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6 &&
-       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(ms->sa).sin6_addr) &&
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET ||
+      (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
+       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
     {
       ttlb = ttl;
-      rv1 = setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
+      rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
 		       (void*) &ttlb, sizeof(ttlb));
     }
 
 
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
-  if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6)
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       ttlb = ttl;
-      rv2 = setsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
+      rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
 		       (void*) &ttlb, sizeof(ttlb));
     }
 
@@ -438,7 +440,7 @@ gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl)
 
 /**
  *  gnet_mcast_socket_is_loopback
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *
  *  Checks if a #GMcastSocket has loopback enabled.  If loopback is
  *  enabled, all packets sent by the host will also be received by the
@@ -448,31 +450,31 @@ gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl)
  *
  **/
 gint
-gnet_mcast_socket_is_loopback (const GMcastSocket* ms)
+gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
 {
   socklen_t flag_size;
   int rv = -1;
   gint is_loopback = 0;
 
   /* Get IPv4 loopback if it's bound to a IPv4 address */
-  if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET)
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET)
     {
       guchar flag;
 
       flag_size = sizeof (flag);
-      rv = getsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, 
+      rv = getsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, 
 		      &flag, &flag_size);
       if (flag)
 	is_loopback = 1;
     }
 
   /* Otherwise, get IPv6 loopback */
-  else if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6)
+  else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       guint flag;
 
       flag_size = sizeof (flag);
-      rv = getsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, 
+      rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, 
 		      &flag, &flag_size);
       if (flag)
 	is_loopback = 1;
@@ -490,7 +492,7 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* ms)
 
 /**
  *  gnet_mcast_socket_set_loopback
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *  @enable: should loopback be enabled?
  *
  *  Enables (or disables) loopback on a #GMcastSocket.  Loopback is
@@ -500,7 +502,7 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* ms)
  *
  **/
 gint
-gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable)
+gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
 {
   int rv1, rv2;
   GIPv6Policy policy;
@@ -509,9 +511,9 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable)
   rv2 = -1;
 
   /* Set IPv4 loopback.  (As in set_ttl().) */
-  if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET ||
-      (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6 &&
-       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(ms->sa).sin6_addr) &&
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET ||
+      (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
+       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
     {
@@ -519,18 +521,18 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable)
 
       flag = (guchar) enable;
 
-      rv1 = setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP,
+      rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       &flag, sizeof(flag));
     }
 
   /* Set IPv6 loopback */
-  if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6)
+  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
     {
       guint flag;
 
       flag = (guint) enable;
 
-      rv2 = setsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+      rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       &flag, sizeof(flag));
     }
 
@@ -544,7 +546,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable)
 
 /**
  *  gnet_mcast_socket_send
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *  @buffer: buffer to send
  *  @length: length of buffer
  *  @dst: destination address
@@ -555,16 +557,16 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable)
  *
  **/
 gint 
-gnet_mcast_socket_send (GMcastSocket* ms, const gchar* buffer, guint length, 
+gnet_mcast_socket_send (GMcastSocket* socket, const gchar* buffer, guint length, 
 			const GInetAddr* dst)
 {
-  return gnet_udp_socket_send((GUdpSocket*) ms, buffer, length, dst);
+  return gnet_udp_socket_send((GUdpSocket*) socket, buffer, length, dst);
 }
 
 
 /**
  *  gnet_mcast_socket_receive
- *  @ms: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *  @buffer: buffer to write to
  *  @length: length of @buffer
  *  @src: pointer to source address (optional)
@@ -577,16 +579,16 @@ gnet_mcast_socket_send (GMcastSocket* ms, const gchar* buffer, guint length,
  *
  **/
 gint 
-gnet_mcast_socket_receive (GMcastSocket* ms, gchar* buffer, guint length,
+gnet_mcast_socket_receive (GMcastSocket* socket, gchar* buffer, guint length,
 			   GInetAddr** src)
 {
-  return gnet_udp_socket_receive((GUdpSocket*) ms, buffer, length, src);
+  return gnet_udp_socket_receive((GUdpSocket*) socket, buffer, length, src);
 }
 
 
 /**
  *  gnet_mcast_socket_has_packet:
- *  @s: a #GMcastSocket
+ *  @socket: a #GMcastSocket
  *
  *  Tests if a #GMcastSocket has a packet waiting to be received.
  *
@@ -594,8 +596,8 @@ gnet_mcast_socket_receive (GMcastSocket* ms, gchar* buffer, guint length,
  *
  **/
 gboolean
-gnet_mcast_socket_has_packet (const GMcastSocket* s)
+gnet_mcast_socket_has_packet (const GMcastSocket* socket)
 {
-  return gnet_udp_socket_has_packet((const GUdpSocket*) s);
+  return gnet_udp_socket_has_packet((const GUdpSocket*) socket);
 }
 
