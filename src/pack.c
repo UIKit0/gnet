@@ -392,8 +392,8 @@ gnet_vcalcsize (const gchar* format, va_list args)
 	case 'i':  { SIZE(int, int, gint32); 			break;  }
 	case 'I':  { SIZE(unsigned int, unsigned int, guint32); break;  }
 
-	case 'l':  { SIZE(long, int, gint32); 			break;  }
-	case 'L':  { SIZE(unsigned long, unsigned int, guint32); break;  }
+	case 'l':  { SIZE(long, long, gint32); 			break;  }
+	case 'L':  { SIZE(unsigned long, unsigned long, guint32); break;  }
 
 	case 'f':  { SIZE(float, double, float);		break;  }
 	case 'd':  { SIZE(double, double, double);		break;  }
@@ -560,8 +560,8 @@ gnet_vpack (const gchar* format, gchar* buffer, const gint length, va_list args)
 	case 'i':  { PACK2(int, int, gint32); 			break;  }
 	case 'I':  { PACK2(unsigned int, unsigned int, guint32); break;  }
 
-	case 'l':  { PACK2(long, int, gint32); 			break;  }
-	case 'L':  { PACK2(unsigned long, unsigned int, guint32); break;  }
+	case 'l':  { PACK2(long, long, gint32);			break;  }
+	case 'L':  { PACK2(unsigned long, unsigned long, guint32); break;  }
 
 	case 'f':  { PACK(float, double);			break;  }
 	case 'd':  { PACK(double, double);			break;  }

@@ -1,3 +1,24 @@
+Tue Jun  3 12:11:44 2003  David Helder  <dhelder@umich.edu>
+
+	* AUTHORS: Change my email address
+
+
+	* tests/unpack_test.c (main): Add 64 bit tests.
+	* tests/unpack_test.c (main): Use sizeof's for size.
+	* tests/unpack_test.c (main): Use lg*int where we were using
+	   ig*int.
+
+	* tests/pack_test.c (test_bytes): Skip the first half
+	   of 64-bit answers.  (We store the correct value as
+	   32 bits.)
+
+	* src/pack.c (gnet_vpack): Longs should get long off of stack, not
+	   int.
+	* src/pack.c (gnet_vcalcsize): " (not that it matters for this func.)
+
+	* tests/pack_test.c (main): long tests need buffer sizeof(long).
+	   (and use sizeof(unsigned int) for unsigned int tests.
+	
 Sat May 31 12:47:45.57 2003 Andrew Lanoix <alanoix@umich.edu>
 
 	* src/makefile.mingw: Update for 2.0

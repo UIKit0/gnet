@@ -7,6 +7,7 @@ Changes in Gnet
 2.0.4 (unreleased)
 -----
 * Minor memory leak fixed in internet addresses
+* Compile and regression test fixes for 64-bit systems
 
 2.0.3
 -----

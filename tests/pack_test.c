@@ -105,17 +105,17 @@ main(int argc, char** argv)
   TEST1 (10610, "040302f1", "i", sizeof(int), 0xf1020304);
   TEST1 (10620, "f4030201", "i", sizeof(int), 0x010203f4);
 
-  TEST1 (10700, "04030201", "I", sizeof(int), 0x01020304);
-  TEST1 (10710, "040302f1", "I", sizeof(int), 0xf1020304);
-  TEST1 (10720, "f4030201", "I", sizeof(int), 0x010203f4);
+  TEST1 (10700, "04030201", "I", sizeof(unsigned int), 0x01020304);
+  TEST1 (10710, "040302f1", "I", sizeof(unsigned int), 0xf1020304);
+  TEST1 (10720, "f4030201", "I", sizeof(unsigned int), 0x010203f4);
 
-  TEST1 (10800, "04030201", "l", sizeof(int), 0x01020304);
-  TEST1 (10810, "040302f1", "l", sizeof(int), 0xf1020304);
-  TEST1 (10820, "f4030201", "l", sizeof(int), 0x010203f4);
+  TEST1 (10800, "04030201", "l", sizeof(long), 0x01020304);
+  TEST1 (10810, "040302f1", "l", sizeof(long), 0xf1020304);
+  TEST1 (10820, "f4030201", "l", sizeof(long), 0x010203f4);
 
-  TEST1 (10900, "04030201", "L", sizeof(int), 0x01020304);
-  TEST1 (10910, "040302f1", "L", sizeof(int), 0xf1020304);
-  TEST1 (10920, "f4030201", "L", sizeof(int), 0x010203f4);
+  TEST1 (10900, "04030201", "L", sizeof(unsigned long), 0x01020304);
+  TEST1 (10910, "040302f1", "L", sizeof(unsigned long), 0xf1020304);
+  TEST1 (10920, "f4030201", "L", sizeof(unsigned long), 0x010203f4);
 
   if (sizeof(void*) == 4)
     {
@@ -142,17 +142,17 @@ main(int argc, char** argv)
   TEST1 (10610, "f1020304", "i", sizeof(int), 0xf1020304);
   TEST1 (10620, "010203f4", "i", sizeof(int), 0x010203f4);
 
-  TEST1 (10700, "01020304", "I", sizeof(int), 0x01020304);
-  TEST1 (10710, "f1020304", "I", sizeof(int), 0xf1020304);
-  TEST1 (10720, "010203f4", "I", sizeof(int), 0x010203f4);
+  TEST1 (10700, "01020304", "I", sizeof(unsigned int), 0x01020304);
+  TEST1 (10710, "f1020304", "I", sizeof(unsigned int), 0xf1020304);
+  TEST1 (10720, "010203f4", "I", sizeof(unsigned int), 0x010203f4);
 
-  TEST1 (10800, "01020304", "l", sizeof(int), 0x01020304);
-  TEST1 (10810, "f1020304", "l", sizeof(int), 0xf1020304);
-  TEST1 (10820, "010203f4", "l", sizeof(int), 0x010203f4);
+  TEST1 (10800, "01020304", "l", sizeof(long), 0x01020304);
+  TEST1 (10810, "f1020304", "l", sizeof(long), 0xf1020304);
+  TEST1 (10820, "010203f4", "l", sizeof(long), 0x010203f4);
 
-  TEST1 (10900, "01020304", "L", sizeof(int), 0x01020304);
-  TEST1 (10910, "f1020304", "L", sizeof(int), 0xf1020304);
-  TEST1 (10920, "010203f4", "L", sizeof(int), 0x010203f4);
+  TEST1 (10900, "01020304", "L", sizeof(unsigned long), 0x01020304);
+  TEST1 (10910, "f1020304", "L", sizeof(unsigned long), 0xf1020304);
+  TEST1 (10920, "010203f4", "L", sizeof(unsigned long), 0x010203f4);
 
   if (sizeof(void*) == 4)
     {
@@ -324,6 +324,13 @@ test_bytes (int test_num, char* s /* binary */, int len,
 	    char* answer /* ascii */)
 {
   int i;
+
+  /* skip first half of 64-bit answers */
+  if (len == 8 && (test_num >= 10800 && test_num < 11000))
+    {
+      s = &s[4];
+      len = 4;
+    }
 
   for (i = 0; i < len; ++i)
     {

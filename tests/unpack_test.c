@@ -121,11 +121,22 @@ main(int argc, char* argv[])
   TEST1 (10600, 0x04030201, "I", &buf[1], sizeof(iguint32), iguint32);
   TEST1 (10610, 0xf4f3f2f1, "I", &bufh[1], sizeof(iguint32), iguint32);
 
-  TEST1 (10700, 0x4030201, "l", &buf[1], sizeof(lgint32), igint32);
-  TEST1 (10710, 0xf4f3f2f1, "l", &bufh[1], sizeof(lgint32), igint32);
-
-  TEST1 (10800, 0x04030201, "L", &buf[1], sizeof(lguint32), iguint32);
-  TEST1 (10810, 0xf4f3f2f1, "L", &bufh[1], sizeof(lguint32), iguint32);
+#if 1 << 32  /* sizeof(long) > 32? */
+   {
+     TEST1 (10700, 0x0807060504030201, "l", &buf[1], sizeof(lgint32), lgint32);
+     TEST1 (10710, 0xf8f7f6f5f4f3f2f1, "l", &bufh[1], sizeof(lgint32), lgint32);                                                                                
+     TEST1 (10800, 0x0807060504030201, "L", &buf[1], sizeof(lguint32), lguint32);
+     TEST1 (10810, 0xf8f7f6f5f4f3f2f1, "L", &bufh[1], sizeof(lguint32), lguint32);
+   }
+#else
+   {
+     TEST1 (10700, 0x4030201, "l", &buf[1], sizeof(lgint32), lgint32);
+     TEST1 (10710, 0xf4f3f2f1, "l", &bufh[1], sizeof(lgint32), lgint32);
+                                                                                
+     TEST1 (10800, 0x04030201, "L", &buf[1], sizeof(lguint32), lguint32);
+     TEST1 (10810, 0xf4f3f2f1, "L", &bufh[1], sizeof(lguint32), lguint32);
+   }
+#endif
 
   if (sizeof(void*) == 4)
     {
@@ -139,23 +150,36 @@ main(int argc, char* argv[])
 
 #else					/* NATIVE BIG ENDIAN */
 
-  TEST1 (10300, 0x0102, "h", &buf[1], 2, igint16);
-  TEST1 (10310, 0xfffff1f2, "h", &bufh[1], 2, igint16);
+  TEST1 (10300, 0x0102, "h", &buf[1], sizeof(igint16), igint16);
+  TEST1 (10310, 0xfffff1f2, "h", &bufh[1], sizeof(igint16), igint16);
 
-  TEST1 (10400, 0x0102, "H", &buf[1], 2, iguint16);
-  TEST1 (10410, 0xf1f2, "H", &bufh[1], 2, iguint16);
+  TEST1 (10400, 0x0102, "H", &buf[1], sizeof(iguint16), iguint16);
+  TEST1 (10410, 0xf1f2, "H", &bufh[1], sizeof(iguint16), iguint16);
 
-  TEST1 (10500, 0x01020304, "i", &buf[1], 4, igint32);
-  TEST1 (10510, 0xf1f2f3f4, "i", &bufh[1], 4, igint32);
+  TEST1 (10500, 0x01020304, "i", &buf[1], sizeof(igint32), igint32);
+  TEST1 (10510, 0xf1f2f3f4, "i", &bufh[1], sizeof(igint32), igint32);
 
-  TEST1 (10600, 0x01020304, "I", &buf[1], 4, iguint32);
-  TEST1 (10610, 0xf1f2f3f4, "I", &bufh[1], 4, iguint32);
+  TEST1 (10600, 0x01020304, "I", &buf[1], sizeof(iguint32), iguint32);
+  TEST1 (10610, 0xf1f2f3f4, "I", &bufh[1], sizeof(iguint32), iguint32);
 
-  TEST1 (10700, 0x01020304, "l", &buf[1], 4, igint32);
-  TEST1 (10710, 0xf1f2f3f4, "l", &bufh[1], 4, igint32);
+#if 1 << 32  /* sizeof(long) > 32? */
+    {
+      TEST1 (10700, 0x0102030405060708, "l", &buf[1], sizeof(lgint32), lgint32);
+      TEST1 (10710, 0xf1f2f3f4f5f6f7f8, "l", &bufh[1], sizeof(lgint32), lgint32);
+                                                                                
+      TEST1 (10800, 0x0102030405060708, "L", &buf[1], sizeof(lguint32), lguint32);
+      TEST1 (10810, 0xf1f2f3f4f5f6f7f8, "L", &bufh[1], sizeof(lguint32), lguint32);
+    } 
+#else
+    {
 
-  TEST1 (10800, 0x01020304, "L", &buf[1], 4, iguint32);
-  TEST1 (10810, 0xf1f2f3f4, "L", &bufh[1], 4, iguint32);
+      TEST1 (10700, 0x01020304, "l", &buf[1], sizeof(lgint32), lgint32);
+      TEST1 (10710, 0xf1f2f3f4, "l", &bufh[1], sizeof(lgint32), lgint32);
+
+      TEST1 (10800, 0x01020304, "L", &buf[1], sizeof(lguint32), lguint32);
+      TEST1 (10810, 0xf1f2f3f4, "L", &bufh[1], sizeof(lguint32), lguint32);
+    }
+#endif
 
   if (sizeof(void*) == 4)
     {
