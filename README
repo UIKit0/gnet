@@ -114,26 +114,31 @@ changes to it, but it's not our fault if it breaks your computer.
 Applications that use GNet
 ==========================
 
-Jungle Monkey	 	
-  distributed file sharing program
-  http://www.junglemonkey.net
+eDonkey2000 GTK frontend
+  eDonkey2000 (DFS) frontend
+  http://ed2k-gtk-gui.sourceforge.net
 
 Gabber			
   messaging/chat program
   http://gabber.sourceforge.net
 
-Ximian Gnome Installer and Red Carpet
-  software package management
-  http://www.ximian.com
-
-PreViking
-  telephony middleware
-  http://www.bellworldwide.net/previking/
+Gnome Chinese Checkers
+  board game
+  http://gchch.sourceforge.net/
 
 GnomeICU
   Gnome ICU client
   http://gnomeicu.sourceforge.net
 
-Gnome Chinese Checkers
-  board game
-  http://gchch.sourceforge.net/
+Jungle Monkey	 	
+  distributed file sharing program
+  http://www.junglemonkey.net
+
+PreViking
+  telephony middleware
+  http://www.bellworldwide.net/previking/
+
+Ximian Gnome Installer and Red Carpet
+  software package management
+  http://www.ximian.com
+

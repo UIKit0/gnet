@@ -1,3 +1,15 @@
+Mon Oct  7 11:51:22 2002  David Helder  <dhelder@umich.edu>
+
+	* 1.1.7 "re-release"
+	
+	* configure.ac (GNET_BINARY_AGE): Set binary age to 7.  Oops.
+
+	* README: Added eDonkey2000 GTK frontend
+
+Mon Sep 30 16:41:55 2002  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Include "-Werror" in CFLAGS.
+
 Mon Sep 30 13:18:47 2002  David Helder  <dhelder@umich.edu>
 
 	* src/gnet-private.c (gnet_private_iochannel_new): 

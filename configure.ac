@@ -32,7 +32,7 @@ GNET_MAJOR_VERSION=1
 GNET_MINOR_VERSION=1
 GNET_MICRO_VERSION=7
 GNET_INTERFACE_AGE=0
-GNET_BINARY_AGE=6
+GNET_BINARY_AGE=7
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
 
 AC_SUBST(GNET_MAJOR_VERSION)
@@ -66,10 +66,8 @@ AC_ARG_ENABLE(glib2,
 	      AC_HELP_STRING([--enable-glib2],
 			     [prefer glib 2.0 over glib 1.2]))
 
-
 ####################
 # Debug
-
 AC_ARG_ENABLE(debug, [  --enable-debug=[no/minimum/yes] turn on debugging (default=minimum],,enable_debug=minimum)
 
 AC_MSG_CHECKING([debug level])
@@ -153,13 +151,16 @@ AC_SUBST(GLIB_LIBS)
 AC_SUBST(GTHREAD_CFLAGS)
 AC_SUBST(GTHREAD_LIBS)
 
+
 ###############################
 # Check for headers
 AC_HEADER_STDC
 AC_CHECK_HEADERS([sys/sockio.h sys/param.h])
 
+
 ###############################
 # Check for types
+
 
 ###############################
 # Check for structures
@@ -168,6 +169,7 @@ AC_CHECK_MEMBER([struct sockaddr.sa_len],
 		  [Define if struct sockaddr has sa_len field]),,
 		[#include <sys/types.h>
 		 #include <sys/socket.h>])
+
 
 ###############################
 # Compiler characteristics
@@ -180,7 +182,7 @@ if test "x$GCC" = "xyes"; then
 			;;
 		*)
 			CFLAGS="$CFLAGS -Wall -Wstrict-prototypes \
-			-Wmissing-prototypes -Wmissing-declarations"
+			-Wmissing-prototypes -Wmissing-declarations -Werror"
 			;;
 	esac
 	if test "x$enable_ansi" = "xyes"; then
@@ -200,8 +202,10 @@ if test "x$GCC" = "xyes"; then
 		esac
 	fi
 fi
+
 # Use reentract functions, and compile expiramental stuff
 CFLAGS="$CFLAGS -D_REENTRANT -DGNET_EXPERIMENTAL"
+
 
 ###############################
 # Check for library functions
