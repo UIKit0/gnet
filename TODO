@@ -7,55 +7,7 @@ you can help.
 
 
 Features
-- Add more error types
-
 - Write a manpage for gnet-config (start with the one for glib).
-
-- Clean up GIOChannel usage.  
-
-    Seeking on a socket should raise an error.  Reading/writing to a
-    UDP socket should raise an error.  Etc.
-
-    We'd also like to support UDP/Mcast better.  We use a channel for
-    a UDP socket, though it's not really a channel.  One solution
-    would be to add a GIOMessageSource which supports descrete
-    messages and has all the functions GIOChannel has.  Another
-    solution is to add a send_msg and recv_msg function to GIOChannel
-    (or replace the vtable in GIOChannel with one that also includes
-    these functions).
-
-- Differentiate between creating and connecting.  
-
-    So you'd have:
-
-    tcp_socket_new(void)            (this just calls socket())
-    tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
-
-    The advantage is that we could set options and also allow the user
-    to bind to a specific address if the user is on a multi-homed
-    system.
-
-- Add lightweight intraprocess communication stuff via IOChannel.  I'd
-    like a shared buffer and a message queue.  These should be simple
-    to do.
-
-- Maybe add gnet_inetaddr_canonical_new, which creates a GInetAddr
-    from a canonical name.
-
-- Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
-
-- Better support for multihomed systems (I'm not sure what's needed)
-
-- Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel).  sendfile is
-    available on Linux and Windows, but I'm sure the semantics are
-    different (that's why having this function would be handy).
-
-- Consider adding gnet_io_channel_{readv/writev}.  Stevens says this
-    isn't Posix (yet?) - check how available it is.  We can always
-    fake it if we don't have it.
-
-- Support IPv6.  Someone with an IPv6 system needs to do this and test
-    it.  I don't want to just use IPv6 structures and claim it's IPv6.
 
 - Include more protocols
 
@@ -81,13 +33,23 @@ Features
     interface design.  Moreover, we would be guaranteed at least one
     user.
 
+- Support IPv6.  
+
+    Someone with an IPv6 system needs to do this and test it.  I don't
+    want to just use IPv6 structures and claim it's IPv6.
+
 - Bindings for other languages
 
     The GTK doc folks are working on a new standard for describing
     interfaces.  Use this when it's done.
 
-- It would be nice to support out-of-band data, but I have no idea how
-    it would affect the GLib event loop.
+- Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel).  sendfile is
+    available on Linux and Windows, but I'm sure the semantics are
+    different (that's why having this function would be handy).
+
+- Consider adding gnet_io_channel_{readv/writev}.  Stevens says this
+    isn't Posix (yet?) - check how available it is.  We can always
+    fake it if we don't have it.
 
 
 
@@ -108,7 +70,6 @@ Internal Improvements
 
 
 Other
-- Port, port, port!
 
 - More documentation and examples
 
@@ -121,6 +82,48 @@ Other
 
 
 
-Never: (things that will probably never become part of GNet)
+Undecided (things discussed, but not decided on)
+
+- Add more error types
+
+- Fix gnet_udp_socket_get_MTU on Solaris (If there's a demand for it)
+
+- Clean up GIOChannel usage.  
+
+    Seeking on a socket should raise an error.  Reading/writing to a
+    UDP socket should raise an error.  Etc.
+
+    We'd also like to support UDP/Mcast better.  We use a channel for
+    a UDP socket, though it's not really a channel.  One solution
+    would be to add a GIOMessageSource which supports descrete
+    messages and has all the functions GIOChannel has.  Another
+    solution is to add a send_msg and recv_msg function to GIOChannel
+    (or replace the vtable in GIOChannel with one that also includes
+    these functions).
+
+- Differentiate between creating and connecting.  
+
+    So you'd have:
+
+    tcp_socket_new(void)            (this just calls socket())
+    tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
+
+    The advantage is that we could set options and also allow the user
+    to bind to a specific address if the user is on a multi-homed
+    system.  
+
+    Or, add tcp_socket_new_bind() and have tcp_socket_new call it.
+    You shouldn't have to bind a connecting socket, so this may not be
+    needed.  (Well, sometimes you do for UDP.)
+
+- Support out-of-band data.  How useful is this?  How portable is
+    this?
+
+- Add lightweight intraprocess communication stuff via IOChannel.  I'd
+    like a shared buffer and a message queue.  These should be simple
+    to do.  (GLib 1.4 might have some of this)
+
+
+Never (things that will probably never become part of GNet)
 
 - Raw or low-level IP (use libpcap, libnet)
