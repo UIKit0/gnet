@@ -83,7 +83,10 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
   /* Create sockfd and address */
   sockfd = gnet_private_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
   if (sockfd < 0)
-    return NULL;
+    {
+      g_warning ("socket() failed");
+      return NULL;
+    }
 
   /* Set socket option to share the UDP port */
   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, 

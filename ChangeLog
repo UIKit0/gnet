@@ -1,6 +1,24 @@
+Sun Aug 10 21:14:20 2003  David Helder  <dhelder@umich.edu>
+
+	* src/uri.c (field_escape): Mask top 4 bytes before
+	   shifting.  Fixes escaping high Latin-1 bug reported
+	   by Emmanuel Saracco.
+	* tests/uri_test.c (escape_tests): Added test case for
+	   this.
+
+	* tests/Makefile.am (CLEANFILES): Delete diff files.
+	
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): Add
+	   GNET_CLOSE_SOCKET()'s before returns if there's an error.  Warn
+	   if fcntl() fails. Thanks Hans Petter Jansson!
+	
+	* src/*.c: Call g_warning() when syscalls that ought not fail,
+	   fail: socket(), fcntl(), getsockopt().  (There are probably
+	   many that I missed.)
+
 Wed Jul 30 20:24:54 2003  Andrew Lanoix <alanoix@umich.edu>
 
-	*src/gnet-private.c (gnet_MainCallBack): Make PeekMessage()
+	* src/gnet-private.c (gnet_MainCallBack): Make PeekMessage()
 	    condition of while loop. 
             Found by Hans Petter Jansson <hpj@ximian.com>.
 

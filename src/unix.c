@@ -48,10 +48,12 @@ gnet_unix_socket_new (const gchar* path)
   s->ref_count = 1;
   s->server = FALSE;
   s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (s->sockfd < 0) {
-    g_free(s);
-    return NULL;
-  }
+  if (s->sockfd < 0) 
+    {
+      g_warning ("socket() failed");
+      g_free(s);
+      return NULL;
+    }
   memcpy(sa_un->sun_path, path, strlen(path));
   sa_un->sun_family = AF_UNIX;
   if (connect(s->sockfd, (struct sockaddr*) &s->sa, sizeof(s->sa)) != 0) {
@@ -203,14 +205,24 @@ gnet_unix_socket_server_new (const gchar *path)
   
   s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (s->sockfd < 0)
-    goto error;
+    {
+      g_warning ("socket() failed");
+      goto error;
+    }
 
   flags = fcntl(s->sockfd, F_GETFL, 0);
   if (flags == -1)
-    goto error;
+    {
+      g_warning ("fcntl() failed");
+      goto error;
+    }
+
   /* Make the socket non-blocking */
   if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-    goto error;
+    {
+      g_warning ("fcntl() failed");
+      goto error;
+    }
 
   if (bind(s->sockfd, (struct sockaddr*) &s->sa, sizeof(s->sa)) != 0)
     goto error;

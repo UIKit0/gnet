@@ -4,6 +4,12 @@ GNet NEWS
 
 Changes in Gnet
 
+2.0.5
+-----
+* Desciptor leak fixed in TCP sockets (thanks Hans Petter Jansson!)
+* Bug fix for URIs with high Latin-1 characters (thanks Emmanuel Saracco!)
+
+
 2.0.4
 -----
 * Minor memory leak fixed in internet addresses

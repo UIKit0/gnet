@@ -308,7 +308,10 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
   /* Create socket */
   sockfd = socket (GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd < 0)
-    return NULL;
+    {
+      g_warning ("socket() failed");
+      return NULL;
+    }
 
   /* Create GTcpSocket */
   s = g_new0 (GTcpSocket, 1);
@@ -404,15 +407,26 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   /* Create socket */
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd < 0)
-    return NULL;
+    {
+      g_warning ("socket() failed");
+      return NULL;
+    }
 
   /* Get the flags (should all be 0?) */
   flags = fcntl(sockfd, F_GETFL, 0);
-  if (flags == -1)
-    return NULL;
+  if (flags == -1) 
+    {
+      g_warning ("fcntl() failed");
+      GNET_CLOSE_SOCKET(sockfd);    
+      return NULL;
+    }
 
   if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-    return NULL;
+    {
+      g_warning ("fcntl() failed");
+      GNET_CLOSE_SOCKET(sockfd);    
+      return NULL;
+    }
 
   /* Create our structure */
   s = g_new0(GTcpSocket, 1);
@@ -425,6 +439,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
     {
       if (errno != EINPROGRESS)
 	{
+	  GNET_CLOSE_SOCKET(sockfd);    
 	  g_free(s);
 	  return NULL;
 	}
@@ -475,7 +490,10 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 
   /* Get the error option */
   if (getsockopt(state->socket->sockfd, SOL_SOCKET, SO_ERROR, (void*) &error, &len) < 0)
-    goto error;
+    {
+      g_warning ("getsockopt() failed");
+      goto error;
+    }
 
   /* Check if there is an error */
   if (error)
@@ -483,7 +501,10 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 
   /* Reset the flags */
   if (fcntl(state->socket->sockfd, F_SETFL, state->flags) != 0)
-    goto error;
+    {
+      g_warning ("fcntl() failed");
+      goto error;
+    }
 
   /* Success */
   (*state->func)(state->socket, state->data);
@@ -541,7 +562,10 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   /* Create socket */
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
   if (sockfd == INVALID_SOCKET)
+    {
+      g_warning ("socket() failed");
       return NULL;
+    }
 	
   /* Create our structure */
   s = g_new0(GTcpSocket, 1);
@@ -932,11 +956,17 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
     /* Get the flags (should all be 0?) */
     flags = fcntl(sockfd, F_GETFL, 0);
     if (flags == -1)
-      goto error;
+      {
+	g_warning ("fcntl() failed");
+	goto error;
+      }
     
     /* Make the socket non-blocking */
     if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-      goto error;
+      {
+	g_warning ("fcntl() failed");
+	goto error;
+      }
   }
 #endif
 
@@ -1172,7 +1202,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   /* make sure the socket is in non-blocking mode */
 
   arg = 1;
-  if(ioctlsocket(socket->sockfd, FIONBIO, &arg))
+  if (ioctlsocket(socket->sockfd, FIONBIO, &arg))
     return NULL;
 
   n = sizeof(sa);

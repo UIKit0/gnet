@@ -148,21 +148,23 @@ struct EscapeTest
 
 struct EscapeTest escape_tests[] = 
 {
-  { "http://userinfo@www.example.com:80/path?query#fragment", 
+  { "http://userinfo@www.example.com:80/path?query#fragment",
     "http://userinfo@www.example.com:80/path?query#fragment" , NULL},
-  { "http://userinfo@www.example.com:80/~path?query#fragment", 
+  { "http://userinfo@www.example.com:80/~path?query#fragment",
     "http://userinfo@www.example.com:80/~path?query#fragment" , NULL},
-  { "http://%5euser%5einfo%5e@www.example.com:80/~%5epa%5eth%5e?%5equ%5eery%5e#%5efra%5egment%5e", 
+  { "http://%5euser%5einfo%5e@www.example.com:80/~%5epa%5eth%5e?%5equ%5eery%5e#%5efra%5egment%5e",
     "http://^user^info^@www.example.com:80/~^pa^th^?^qu^ery^#^fra^gment^" , NULL},
-  { "http://%5e%5e%5euser%5e%5e%5einfo%5e%5e%5e@www.example.com:80/~%5e%5e%5epa%5e%5e%5eth%5e%5e%5e?%5e%5e%5equ%5e%5e%5eery%5e%5e%5e#%5e%5e%5efra%5e%5e%5egment%5e%5e%5e", 
+  { "http://%5e%5e%5euser%5e%5e%5einfo%5e%5e%5e@www.example.com:80/~%5e%5e%5epa%5e%5e%5eth%5e%5e%5e?%5e%5e%5equ%5e%5e%5eery%5e%5e%5e#%5e%5e%5efra%5e%5e%5egment%5e%5e%5e",
     "http://^^^user^^^info^^^@www.example.com:80/~^^^pa^^^th^^^?^^^qu^^^ery^^^#^^^fra^^^gment^^^" , NULL},
-  { "http://user%40info@www.example.com:80/path?query#fragment", 
+  { "http://user%40info@www.example.com:80/path?query#fragment",
     "http://user@info@www.example.com:80/path?query#fragment" , NULL},
-  { "http://user%40info@www.example.com:80/path?query#fragment", 
+  { "http://user%40info@www.example.com:80/path?query#fragment",
     "http://user@info@www.example.com:80/path?query#fragment" , NULL},
 
   { "http://www.example.com/pa%th", "http://www.example.com/pa%th",
     "http://www.example.com/pa%25th"},
+  { "http://www.example.com/%e9%e9.html",
+    "http://www.example.com/\xe9\xe9.html", NULL },
   { NULL, NULL , NULL}
 };
 
@@ -250,7 +252,6 @@ main (int argc, char* argv[])
       gnet_uri_unescape (uri);
       unescape = gnet_uri_get_string (uri);
       TEST (i, "gnet_uri_unescape", unescape != NULL);
-/*        g_print ("unescape = %s\n", unescape); */
 
       TEST (i, "unescape is correct", 
 	    !strcmp(escape_tests[i].unescaped, unescape));
@@ -259,7 +260,6 @@ main (int argc, char* argv[])
       gnet_uri_escape (uri);
       escape = gnet_uri_get_string (uri);
       TEST (i, "gnet_uri_escape", escape != NULL);
-/*        g_print ("escape = %s\n", escape); */
 
       if (escape_tests[i].escaped2)
 	TEST (i, "escape is correct", !strcmp(escape_tests[i].escaped2, escape));

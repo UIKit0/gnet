@@ -2990,7 +2990,10 @@ gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr)
 
   sockfd = socket (GNET_INETADDR_FAMILY(inetaddr), SOCK_DGRAM, 0);
   if (sockfd == -1)
-    return NULL;
+    {
+      g_warning ("socket() failed");
+      return NULL;
+    }
 
   if (connect (sockfd, &GNET_INETADDR_SA(inetaddr), GNET_INETADDR_LEN(inetaddr)) == -1)
     {

@@ -504,10 +504,10 @@ field_escape (gchar* str, guchar mask)
 	{
 	  dst[j] = '%';
 
-	  if ((str[i] >> 4) < 10)
-	    dst[j+1] = (str[i] >> 4) + '0';
+	  if (((str[i] & 0xf0) >> 4) < 10)
+	    dst[j+1] = ((str[i] & 0xf0) >> 4) + '0';
 	  else
-	    dst[j+1] = (str[i] >> 4) + 'a' - 10;
+	    dst[j+1] = ((str[i] & 0xf0) >> 4) + 'a' - 10;
 
 	  if ((str[i] & 0x0f) < 10)
 	    dst[j+2] = (str[i] & 0x0f) + '0';

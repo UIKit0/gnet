@@ -4,7 +4,7 @@
 
 TESTS = base64_test hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test $(NETWORK_TESTS)
 EXTRA_PROGRAMS = base64_test hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test
-CLEANFILES = $(EXTRA_PROGRAMS) .client*out .server*out
+CLEANFILES = $(EXTRA_PROGRAMS) .client*out .server*out .client*diff .server*diff
 
 INCLUDES = -I$(top_srcdir)/src $(GLIB_CFLAGS)
 LDADD = $(GLIB_LIBS) $(GTHREAD_LIBS) $(top_builddir)/src/libgnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).la
