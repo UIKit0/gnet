@@ -7,27 +7,28 @@ UDP socket
 <!-- ##### SECTION Long_Description ##### -->
 <para>
 This module provides support for UDP sockets.  UDP is an internet
-protocol that transfers packets by best-effort.  Packets may be lost
-or arrive out-of-order.  Use TCP if your protocol requires data
-transfered reliably and in-order -- most do.
+protocol that transfers packets by best-effort delivery.  Packets may
+be lost or arrive out-of-order.  Use TCP if your protocol requires
+data transfered reliably and in-order -- most do.
 </para>
 
 <para>
-A UDP socket is represented by a #GUDPSocket object.  Call
-gnet_udp_socket_new(), gnet_udp_socket_new_with_port(), or
-gnet_udp_socket_new_full() to create a #GUDPSocket.  None of these
-functions block.
+A UDP socket is represented by a #GUdpSocket structure.  To create a
+#GUdpSocket, call gnet_udp_socket_new(),
+gnet_udp_socket_new_with_port(), or gnet_udp_socket_new_full().
 </para>
 
 <para>
-Packets can be sent by calling gnet_udp_socket_send() and received by
-calling gnet_udp_socket_receive().  gnet_udp_socket_receive() will
-block until there is a packet available to receive.  To determine
-whether a packet is available immediately, call
-gnet_udp_socket_has_packet().  A better method is to get the
-#GIOChannel and add a watch.  The callback will be called when a
+To send a packet, call gnet_udp_socket_send().  To receive a packet,
+call gnet_udp_socket_receive().  gnet_udp_socket_send() will block if
+the OS cannot buffer the packet immediately.
+gnet_udp_socket_receive() will block until there is a packet available
+to receive.  Call gnet_udp_socket_has_packet() to determine whether a
+packet is available immediately.  A more elegant method is to get the
+#GIOChannel and add a read watch.  A callback will be called when a
 packet is available.  Note that a UDP socket's #GIOChannel is not a
-normal #GIOChannel -- it cannot be written to or read from directly.
+normal #GIOChannel -- it should not be written to or read from
+directly.
 </para>
 
 <para>
@@ -106,10 +107,12 @@ applications.
 </para>
 
 @s: 
-@data: 
+@buffer: 
 @length: 
 @dst: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@data: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_receive ##### -->
@@ -118,10 +121,12 @@ applications.
 </para>
 
 @s: 
-@data: 
+@buffer: 
 @length: 
 @src: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@data: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_has_packet ##### -->
@@ -157,7 +162,9 @@ applications.
 </para>
 
 @us: 
-@val: 
+@ttl: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@val: 
 
 

@@ -1,3 +1,16 @@
+Mon Feb  3 17:56:55 2003  David Helder  <dhelder@umich.edu>
+
+	* *: More doc work.
+	
+	* src/mcast.c (gnet_mcast_socket_new_full): Disable loopback by
+	   default.
+
+	* src/unix.c (gnet_unix_socket_connect): Removed.  Same
+	   as gnet_unix_socket_new.
+
+	* src/inetaddr.c: Remove gnet_inetaddr_new_any().  Not needed with
+	   new API for server sockets.
+
 Mon Feb  3 12:55:49 2003  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Bump version to 1.3.1 (unreleased)

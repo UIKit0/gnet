@@ -33,8 +33,8 @@ extern "C" {
 /**
  *  GTcpSocket
  *
- *  GTcpSocket is a TCP socket.  TCP transfers data reliably and in
- *  order.
+ *  A #GTcpSocket structure represents a TCP socket.  The
+ *  implementation is hidden.
  *
  **/
 typedef struct _GTcpSocket GTcpSocket;
@@ -120,29 +120,26 @@ typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket,
 /* ********** */
 
 
-/* Quick and easy blocking constructor */
 GTcpSocket* gnet_tcp_socket_connect (const gchar* hostname, gint port);
 
-/* Quick and easy asynchronous constructor */
+
 GTcpSocketConnectAsyncID
 gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
 			       GTcpSocketConnectAsyncFunc func, 
 			       gpointer data);
-
-/* Cancel quick and easy asynchronous constructor */
 void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
 
-/* Blocking constructor */
+
+
 GTcpSocket* gnet_tcp_socket_new (const GInetAddr* addr);
 
-/* Asynchronous constructor */
+
 GTcpSocketNewAsyncID 
 gnet_tcp_socket_new_async (const GInetAddr* addr, 
 			   GTcpSocketNewAsyncFunc func,
 			   gpointer data);
-
-/* Cancel asynchronous constructor */
 void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
+
 
 void gnet_tcp_socket_delete (GTcpSocket* s);
 

@@ -214,7 +214,6 @@ GInetAddr* gnet_inetaddr_gethostaddr (void);
 
 /* ********** */
 
-GInetAddr* gnet_inetaddr_new_any (void);
 GInetAddr* gnet_inetaddr_autodetect_internet_interface (void);
 GInetAddr* gnet_inetaddr_get_interface_to (const GInetAddr* addr);
 GInetAddr* gnet_inetaddr_get_internet_interface (void);

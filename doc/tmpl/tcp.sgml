@@ -11,9 +11,9 @@ This module provides support for TCP sockets.
 </para>
 
 <para>
-Call gnet_tcp_socket_new() to create a new TCP
-socket and connect to a host.  This function will block.  The
-asynchronous version is gnet_tcp_socket_new_async().
+To create a #GTcpSocket and connect to a host, call
+gnet_tcp_socket_new().  This function will block.  The asynchronous
+version is gnet_tcp_socket_new_async().
 </para>
 
 <para>
@@ -25,10 +25,10 @@ g_io_add_watch() (a GLib function).
 <para>
 To create a TCP server, call gnet_tcp_socket_server_new().  The socket
 will be bound to all interfaces.  To bind to a specific interface,
-call gnet_tcp_socket_server_new_interface().  To accept a connect,
-call gnet_tcp_socket_server_accept().  This function returns a
-#GTcpSocket representing the client connection.  This function can
-block.  To prevent blocking, call either
+call gnet_tcp_socket_server_new_interface().  To accept a new
+connection, call gnet_tcp_socket_server_accept().  This function
+returns a #GTcpSocket representing the client connection.  This
+function can block.  To prevent blocking, call either
 gnet_tcp_socket_server_accept_nonblock() or
 gnet_tcp_socket_server_accept_async().  The former returns NULL
 immediately if there is no new connection.  The latter calls a

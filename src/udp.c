@@ -23,12 +23,12 @@
 
 
 /**
- *  gnet_udp_socket_new:
+ *  gnet_udp_socket_new
  *  
- *  Create and open a new UDP socket bound to all interfaces and an
- *  arbitrary port.
+ *  Creates a #GUdpSocket bound to all interfaces and an arbitrary
+ *  port.
  *
- *  Returns: a new #GUdpSocket, or NULL if there was a failure.
+ *  Returns: a new #GUdpSocket; NULL on error.
  *
  **/
 GUdpSocket* 
@@ -40,12 +40,12 @@ gnet_udp_socket_new (void)
 
 /**
  *  gnet_udp_socket_new_with_port:
- *  @port: Port to use (0 for an arbitrary port)
+ *  @port: port to bind to (0 for an arbitrary port)
  * 
- *  Create a #GUdpSocket bound to all interfaces and port @port.  If
+ *  Creates a #GUdpSocket bound to all interfaces and port @port.  If
  *  @port is 0, an arbitrary port will be used.
  *
- *  Returns: a new #GUdpSocket, or NULL if there was a failure.
+ *  Returns: a new #GUdpSocket; NULL on error.
  *
  **/
 GUdpSocket* 
@@ -56,15 +56,15 @@ gnet_udp_socket_new_with_port (gint port)
 
 
 /**
- *  gnet_udp_socket_new_full:
- *  @iface: Interface to bind to (NULL for all interfaces)
- *  @port: Port to bind to (0 for an arbitrary port)
+ *  gnet_udp_socket_new_full
+ *  @iface: interface to bind to (NULL for all interfaces)
+ *  @port: port to bind to (0 for an arbitrary port)
  * 
- *  Create and open a new #GUdpSocket bound to interface @iface and
- *  port @port.  If @iface is NULL, all interfaces will be used.  If
- *  @port is 0, an arbitrary port will be used.
+ *  Creates a #GUdpSocket bound to interface @iface and port @port.
+ *  If @iface is NULL, all interfaces will be used.  If @port is 0, an
+ *  arbitrary port will be used.
  *
- *  Returns: a new #GUdpSocket, or NULL if there was a failure.
+ *  Returns: a new #GUdpSocket; NULL on error.
  *
  **/
 GUdpSocket* 
@@ -109,9 +109,9 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 
 /**
  *  gnet_udp_socket_delete:
- *  @s: #GUdpSocket to delete.
+ *  @s: a #GUdpSocket
  *
- *  Close and delete a UDP socket.
+ *  Deletes a #GUdpSocket.
  *
  **/
 void
@@ -127,7 +127,7 @@ gnet_udp_socket_delete (GUdpSocket* s)
  *  gnet_udp_socket_ref
  *  @s: #GUdpSocket to reference
  *
- *  Increment the reference counter of the #GUdpSocket.
+ *  Adds a reference to a #GUdpSocket.
  *
  **/
 void
@@ -140,45 +140,11 @@ gnet_udp_socket_ref (GUdpSocket* s)
 
 
 /**
- *  gnet_udp_socket_get_io_channel:
- *  @socket: #GUdpSocket to get #GIOChannel from.
- *
- *  Get a #GIOChannel from the #GUdpSocket.  
- *
- *  THIS IS NOT A NORMAL GIOCHANNEL - DO NOT READ FROM OR WRITE TO IT.
- *
- *  Use the channel with g_io_add_watch() to do asynchronous IO (so if
- *  you do not want to do asynchronous IO, you do not need the
- *  channel).  If you can read from the channel, use
- *  gnet_udp_socket_receive() to read a packet.  If you can write to
- *  the channel, use gnet_udp_socket_send() to send a packet.
- *
- *  There is one channel for every socket.  If the channel is refed
- *  then it must be unrefed eventually.  Do not close the channel --
- *  this is done when the socket is deleted.
- *
- *  Returns: A #GIOChannel; NULL on failure.
- *
- **/
-GIOChannel* 
-gnet_udp_socket_get_io_channel (GUdpSocket* socket)
-{
-  g_return_val_if_fail (socket != NULL, NULL);
-
-  if (socket->iochannel == NULL)
-    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
-  
-  return socket->iochannel;
-}
-
-
-
-/**
  *  gnet_udp_socket_unref
- *  @s: #GUdpSocket to unreference
+ *  @s: a #GUdpSocket
  *
- *  Remove a reference from the #GUdpSocket.  When reference count
- *  reaches 0, the socket is deleted.
+ *  Removes a reference from a #GUdpScoket.  A #GUdpSocket is deleted
+ *  when the reference count reaches 0.
  *
  **/
 void
@@ -202,53 +168,88 @@ gnet_udp_socket_unref (GUdpSocket* s)
 
 
 /**
- *  gnet_udp_socket_send:
- *  @s: #GUdpSocket to use to send.
- *  @data: Data to send
- *  @length: Length of data
- *  @dst: Destination address
+ *  gnet_udp_socket_get_io_channel
+ *  @socket: a #GUdpSocket
  *
- *  Send data to a host using the #GUdpSocket.
+ *  Gets the #GIOChannel of a #GUdpSocket.
  *
- *  Returns: 0 if successful.
+ *  Use the channel with g_io_add_watch() to check if the socket is
+ *  readable or writable.  If the channel is readable, call
+ *  gnet_udp_socket_receive() to receive a packet.  If the channel is
+ *  writable, call gnet_udp_socket_send() to send a packet.  This is
+ *  not a normal giochannel - do not read from or write to it.
+ *
+ *  Every #GUdpSocket has one and only one #GIOChannel.  If you ref
+ *  the channel, then you must unref it eventually.  Do not close the
+ *  channel.  The channel is closed by GNet when the socket is
+ *  deleted.
+ *
+ *  Returns: a #GIOChannel.
+ *
+ **/
+GIOChannel* 
+gnet_udp_socket_get_io_channel (GUdpSocket* socket)
+{
+  g_return_val_if_fail (socket != NULL, NULL);
+
+  if (socket->iochannel == NULL)
+    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
+  
+  return socket->iochannel;
+}
+
+
+
+/**
+ *  gnet_udp_socket_send
+ *  @s: a #GUdpSocket
+ *  @buffer: buffer to send
+ *  @length: length of @buffer
+ *  @dst: destination address
+ *
+ *  Sends data to a host using a #GUdpSocket.
+ *
+ *  Returns: 0 if successful; something else on error.
  *
  **/
 gint 
-gnet_udp_socket_send (GUdpSocket* s, const gint8* data, guint length, const GInetAddr* dst)
+gnet_udp_socket_send (GUdpSocket* s, const gchar* buffer, guint length, 
+		      const GInetAddr* dst)
 {
   gint bytes_sent;
 
   g_return_val_if_fail (s,   -1);
   g_return_val_if_fail (dst, -1);
 
-  bytes_sent = sendto(s->sockfd, 
-		      (void*) data, length, 0, 
-		      &GNET_SOCKADDR_SA(dst->sa), GNET_SOCKADDR_LEN(dst->sa));
-/*    if (bytes_sent == -1) */
-/*      g_warning ("sendto failed: %s\n", g_strerror(errno)); */
+  bytes_sent = sendto (s->sockfd, 
+		       (void*) buffer, length, 0, 
+		       &GNET_SOCKADDR_SA(dst->sa), 
+		       GNET_SOCKADDR_LEN(dst->sa));
 
-  /* Return 0 if ok */
-  return (bytes_sent != (signed) length);  
+  if (bytes_sent != length)
+    return -1;
+
+  return 0;
 }
 
 
 
 /**
- *  gnet_udp_socket_receive:
- *  @s: #GUdpSocket to use to receive.
- *  @data: the buffer to write to
- *  @length: length of @data
- *  @src: pointer source address
+ *  gnet_udp_socket_receive
+ *  @s: a #GUdpSocket
+ *  @buffer: buffer to write to
+ *  @length: length of @buffer
+ *  @src: pointer to source address (optional)
  *
- *  Receive data using the UDP socket.  The source address is created
- *  and the pointer is stored in @src.  @src is caller-owned.  @src
- *  may be NULL if the source address isn't needed.
+ *  Receives data using a #GUdpSocket.  If @src is set, the source
+ *  address is stored in the location @src points to.  The address is
+ *  caller owned.
  *
- *  Returns: the number of bytes received, -1 if unsuccessful.
+ *  Returns: the number of bytes received, -1 on error.
  *
  **/
 gint 
-gnet_udp_socket_receive (GUdpSocket* s, gint8* data, guint length,
+gnet_udp_socket_receive (GUdpSocket* s, gchar* buffer, guint length,
 			 GInetAddr** src)
 {
   gint bytes_received;
@@ -256,10 +257,10 @@ gnet_udp_socket_receive (GUdpSocket* s, gint8* data, guint length,
   gint sa_len = sizeof(struct sockaddr_storage);
 
   g_return_val_if_fail (s,    -1);
-  g_return_val_if_fail (data, -1);
+  g_return_val_if_fail (buffer, -1);
 
   bytes_received = recvfrom (s->sockfd, 
-			     (void*) data, length, 
+			     (void*) buffer, length, 
 			     0, (struct sockaddr*) &sa, &sa_len);
 
   if (bytes_received == -1)
@@ -280,12 +281,10 @@ gnet_udp_socket_receive (GUdpSocket* s, gint8* data, guint length,
 
 
 /**
- *  gnet_udp_socket_has_packet:
- *  @s: #GUdpSocket to check
+ *  gnet_udp_socket_has_packet
+ *  @s: a #GUdpSocket
  *
- *  Test if the socket has a receive packet.  It's strongly
- *  recommended that you use a #GIOChannel with a read watch instead
- *  of this function.
+ *  Tests if a #GUdpSocket has a packet waiting to be received.
  *
  *  Returns: TRUE if there is packet waiting, FALSE otherwise.
  *
@@ -352,12 +351,14 @@ gnet_udp_socket_has_packet (const GUdpSocket* s)
 
 
 /**
- *  gnet_udp_socket_get_ttl:
- *  @us: #GUdpSocket to get TTL from.
+ *  gnet_udp_socket_get_ttl
+ *  @us: a #GUdpSocket
  *
- *  Get the TTL of the UDP socket.  TTL is the Time To Live - the
- *  number of hops outgoing packets will travel.  This is useful for
- *  resource discovery; for most programs, you don't need to use it.
+ *  Gets the time-to-live (TTL) default of a #GUdpSocket.  All UDP
+ *  packets have a TTL field.  This field is decremented by a router
+ *  before it forwards the packet.  If the TTL reaches zero, the
+ *  packet is discarded.  The default value is sufficient for most
+ *  applications.
  *
  *  Returns: the TTL (an integer between 0 and 255), -1 if the kernel
  *  default is being used, or an integer less than -1 on error.
@@ -398,20 +399,20 @@ gnet_udp_socket_get_ttl (const GUdpSocket* us)
 
 
 /**
- *  gnet_udp_socket_set_ttl:
- *  @us: GUdpSocket to set TTL.
- *  @val: Value to set TTL to.
+ *  gnet_udp_socket_set_ttl
+ *  @us: a #GUdpSocket
+ *  @ttl: value to set TTL to
  *
- *  Set the TTL of the UDP socket.  Set the TTL to -1 to use the
- *  kernel default.
+ *  Sets the time-to-live (TTL) default of a #GUdpSocket.  Set the TTL
+ *  to -1 to use the kernel default.  The default value is sufficient
+ *  for most applications.
  *
  *  Returns: 0 if successful.
  *
  **/
 gint
-gnet_udp_socket_set_ttl (GUdpSocket* us, gint val)
+gnet_udp_socket_set_ttl (GUdpSocket* us, gint ttl)
 {
-  int ttl;
   int rv1, rv2;
   GIPv6Policy policy;
 
@@ -428,7 +429,6 @@ gnet_udp_socket_set_ttl (GUdpSocket* us, gint val)
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
     {
-      ttl = val;
       rv1 = setsockopt(us->sockfd, IPPROTO_IP, IP_TTL, 
 		       (void*) &ttl, sizeof(ttl));
     }
@@ -437,7 +437,6 @@ gnet_udp_socket_set_ttl (GUdpSocket* us, gint val)
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
   if (GNET_SOCKADDR_FAMILY(us->sa) == AF_INET6)
     {
-      ttl = val;
       rv2 = setsockopt(us->sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, 
 		       (void*) &ttl, sizeof(ttl));
     }

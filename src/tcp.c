@@ -23,19 +23,16 @@
 #include "tcp.h"
 
 /**
- *  gnet_tcp_socket_connect:
- *  @hostname: Name of host to connect to.
- *  @port: Port to connect to.
+ *  gnet_tcp_socket_connect
+ *  @hostname: host name
+ *  @port: port
  *
- *  A quick and easy #GTcpSocket constructor.  This connects to the
- *  specified address and port.  This function does block
- *  (gnet_tcp_socket_connect_async() does not).  Use this function
- *  when you're a client connecting to a server and you don't mind
- *  blocking and don't want to mess with #GInetAddr's.  You can get
- *  the InetAddr of the socket by calling
+ *  Creates a #GTcpSocket and connects to @hostname:@port.  This
+ *  function blocks (while gnet_tcp_socket_connect_async() does not).
+ *  To get the #GInetAddr of the #GTcpSocket, call
  *  gnet_tcp_socket_get_inetaddr().
  *
- *  Returns: A new #GTcpSocket, or NULL if there was a failure.
+ *  Returns: a new #GTcpSocket; NULL on error.
  **/
 GTcpSocket*
 gnet_tcp_socket_connect (const gchar* hostname, gint port)
@@ -67,22 +64,20 @@ gnet_tcp_socket_connect (const gchar* hostname, gint port)
 
 
 /**
- *  gnet_tcp_socket_connect_async:
- *  @hostname: Name of host to connect to
- *  @port: Port to connect to
- *  @func: Callback function
- *  @data: User data passed when callback function is called.
+ *  gnet_tcp_socket_connect_async
+ *  @hostname: host name
+ *  @port: port
+ *  @func: callback function
+ *  @data: data to pass to @func on callback
  *
- *  A quick and easy asynchronous #GTcpSocket constructor.  This
- *  connects to the specified address and port and then calls the
- *  callback with the data.  Use this function when you're a client
- *  connecting to a server and you don't want to block or mess with
- *  #GInetAddr's.  It will call the callback if there is a failure.
- *  It will never call the callback before the function returns.
+ *  Asynchronously creates a #GTcpSocket and connects to
+ *  @hostname:@port.  The callback is called when the connection is
+ *  made or an error occurs.  The callback will not be called during
+ *  the call to this function.
  *
- *  Returns: ID of the connection which can be used with
- *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
- *  failure.
+ *  Returns: the ID of the connection; NULL on failure.  The ID can be
+ *  used with gnet_tcp_socket_connect_async_cancel() to cancel the
+ *  connection.
  *
  **/
 GTcpSocketConnectAsyncID
@@ -227,10 +222,10 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, gpointer data)
 
 
 /**
- *  gnet_tcp_socket_connect_async_cancel:
- *  @id: ID of the connection.
+ *  gnet_tcp_socket_connect_async_cancel
+ *  @id: ID of the connection
  *
- *  Cancel an asynchronous connection that was started with
+ *  Cancels an asynchronous connection that was started with
  *  gnet_tcp_socket_connect_async().
  * 
  */
@@ -272,14 +267,13 @@ gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id)
 
 
 /**
- *  gnet_tcp_socket_new:
- *  @addr: Address to connect to.
+ *  gnet_tcp_socket_new
+ *  @addr: address
  *
- *  Connect to a specified address.  Use this sort of socket when
- *  you're a client connecting to a server.  This function will block
- *  to connect.  SOCKS is used if SOCKS is enabled.
+ *  Creates a #GTcpSocket and connects to @addr.  This function
+ *  blocks.  SOCKS is used if SOCKS is enabled.
  *
- *  Returns a new #GTcpSocket, or NULL if there was a failure.
+ *  Returns: a new #GTcpSocket; NULL on error.
  *
  **/
 GTcpSocket* 
@@ -299,13 +293,13 @@ gnet_tcp_socket_new (const GInetAddr* addr)
 
 /**
  *  gnet_tcp_socket_new_direct:
- *  @addr: Address to connect to.
+ *  @addr: address
  *
- *  Connect directly to a specified address and do not use SOCKS even
- *  if SOCKS is enabled.  Most users should use gnet_tcp_socket_new().
- *  This is used internally to implement SOCKS.
+ *  Creates a #GTcpSocket and connects to @addr without using SOCKS.
+ *  This function blocks.  Most users should use
+ *  gnet_tcp_socket_new().
  *
- *  Returns a new #GTcpSocket, or NULL if there was a failure.
+ *  Returns: a new #GTcpSocket; NULL on error.
  *
  **/
 GTcpSocket* 
@@ -346,22 +340,21 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
 
 
 /**
- *  gnet_tcp_socket_new_async:
- *  @addr: Address to connect to.
- *  @func: Callback function.
- *  @data: User data passed when callback function is called.
+ *  gnet_tcp_socket_new_async
+ *  @addr: address
+ *  @func: callback function
+ *  @data: data to pass to @func on callback
  *
- *  Connect to a specifed address asynchronously.  The callback is
- *  called once the connection is made or an error occurs while
- *  connecting.  The callback will not be called during the call to
- *  gnet_tcp_socket_new_async().
+ *  Asynchronously creates a #GTcpSocket and connects to @addr.  The
+ *  callback is called once the connection is made or an error occurs.
+ *  The callback will not be called during the call to this function.
  *
  *  SOCKS is used if SOCKS is enabled.  The SOCKS negotiation will
  *  block.
  *
- *  Returns: ID of the connection which can be used with
- *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
- *  failure.
+ *  Returns: the ID of the connection; NULL on failure.  The ID can be
+ *  used with gnet_tcp_socket_connect_async_cancel() to cancel the
+ *  connection.
  *
  **/
 GTcpSocketNewAsyncID
@@ -385,17 +378,18 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 
 
 /**
- *  gnet_tcp_socket_new_async_direct:
- *  @addr: Address to connect to.
- *  @func: Callback function
- *  @data: Data to pass to call back
+ *  gnet_tcp_socket_new_async_direct
+ *  @addr: address
+ *  @func: callback function
+ *  @data: data to pass to @func on callback
  *
- *  Connect directly to a specified address asynchronously and do not
- *  use SOCKS even if SOCKS is enabled.  Most users should use
- *  gnet_tcp_socket_new_async().  This is used internally to implement
- *  SOCKS.
+ *  Asynchronously creates a #GTcpSocket and connects to @addr without
+ *  using SOCKS.  Most users should use gnet_tcp_socket_new_async()
+ *  instead.  The callback is called once the connection is made or an
+ *  error occurs.  The callback will not be called during the call to
+ *  this function.
  *
- *  Returns a new #GTcpSocket, or NULL if there was a failure.
+ *  Returns: a new #GTcpSocket; NULL on error.
  *
  **/
 GTcpSocketNewAsyncID
@@ -511,10 +505,10 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 
 
 /**
- *  gnet_tcp_socket_new_async_cancel:
- *  @id: ID of the connection.
+ *  gnet_tcp_socket_new_async_cancel
+ *  @id: ID of the connection
  *
- *  Cancel an asynchronous connection that was started with
+ *  Cancels an asynchronous #GTcpSocket creation that was started with
  *  gnet_tcp_socket_new_async().
  *
  **/
@@ -642,14 +636,14 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
 
 
 /**
- *  gnet_tcp_socket_delete:
- *  @s: TcpSocket to delete.
+ *  gnet_tcp_socket_delete
+ *  @s: a #GTcpSocket
  *
- *  Close and delete a #GTcpSocket.
+ *  Deletes a #GTcpSocket.
  *
  **/
 void
-gnet_tcp_socket_delete(GTcpSocket* s)
+gnet_tcp_socket_delete (GTcpSocket* s)
 {
   if (s != NULL)
     gnet_tcp_socket_unref(s);
@@ -659,13 +653,13 @@ gnet_tcp_socket_delete(GTcpSocket* s)
 
 /**
  *  gnet_tcp_socket_ref
- *  @s: #GTcpSocket to reference
+ *  @s: a #GTcpSocket
  *
- *  Increment the reference counter of the GTcpSocket.
+ *  Adds a reference to a #GTcpSocket.
  *
  **/
 void
-gnet_tcp_socket_ref(GTcpSocket* s)
+gnet_tcp_socket_ref (GTcpSocket* s)
 {
   g_return_if_fail(s != NULL);
 
@@ -675,14 +669,14 @@ gnet_tcp_socket_ref(GTcpSocket* s)
 
 /**
  *  gnet_tcp_socket_unref
- *  @s: #GTcpSocket to unreference
+ *  @s: a #GTcpSocket to unreference
  *
- *  Remove a reference from the #GTcpSocket.  When reference count
- *  reaches 0, the socket is deleted.
+ *  Removes a reference from a #GTcpSocket.  A #GTcpSocket is deleted
+ *  when the reference count reaches 0.
  *
  **/
 void
-gnet_tcp_socket_unref(GTcpSocket* s)
+gnet_tcp_socket_unref (GTcpSocket* s)
 {
   g_return_if_fail(s != NULL);
 
@@ -705,23 +699,26 @@ gnet_tcp_socket_unref(GTcpSocket* s)
 
 
 /**
- *  gnet_tcp_socket_get_io_channel:
- *  @socket: GTcpSocket to get GIOChannel from.
+ *  gnet_tcp_socket_get_io_channel
+ *  @socket: a #GTcpSocket
  *
- *  Get the #GIOChannel for the #GTcpSocket.
+ *  Gets the #GIOChannel of a #GTcpSocket.
  *
  *  For a client socket, the #GIOChannel represents the data stream.
  *  Use it like you would any other #GIOChannel.
  *
- *  For a server socket however, the #GIOChannel represents incoming
- *  connections.  If you can read from it, there's a connection
- *  waiting.
+ *  For a server socket however, the #GIOChannel represents the
+ *  listening socket.  When it's readable, there's a connection
+ *  waiting to be accepted.  However, using
+ *  gnet_tcp_socket_server_accept_async() is more elegant than
+ *  watching the #GIOChannel.
  *
- *  There is one channel for every socket.  If the channel is refed
- *  then it must be unrefed eventually.  Do not close the channel --
- *  this is done when the socket is deleted.
+ *  Every #GTcpSocket has one and only one #GIOChannel.  If you ref
+ *  the channel, then you must unref it eventually.  Do not close the
+ *  channel.  The channel is closed by GNet when the socket is
+ *  deleted.
  *
- *  Returns: A #GIOChannel; NULL on failure.
+ *  Returns: a #GIOChannel.
  *
  **/
 GIOChannel* 
@@ -737,17 +734,16 @@ gnet_tcp_socket_get_io_channel (GTcpSocket* socket)
 
 
 /**
- *  gnet_tcp_socket_get_inetaddr:
- *  @socket: #GTcpSocket to get address of.
+ *  gnet_tcp_socket_get_inetaddr
+ *  @socket: a #GTcpSocket
  *
- *  Get the address of the socket.  If the socket is client socket,
- *  the address is the address of the remote host it is connected to.
- *  If the socket is a server socket, the address is the address of
- *  the local host.  (Though you should use
- *  gnet_inetaddr_gethostaddr() to get the #GInetAddr of the local
- *  host.)
+ *  Gets the address of a #GTcpSocket.  If the socket is client
+ *  socket, the address is that of the host it is connected to.  If
+ *  the socket is a server socket, the address is that of the local
+ *  host.  Note if the server socket is bound to all interfaces, the
+ *  address will be 0.0.0.0 (in IPv4) or 0::0 (in IPv6).
  *
- *  Returns: #GInetAddr of socket; NULL on failure.
+ *  Returns: a #GInetAddr.
  *
  **/
 GInetAddr* 
@@ -766,12 +762,12 @@ gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket)
 
 
 /**
- *  gnet_tcp_socket_get_port:
- *  @socket: GTcpSocket to get the port number of.
+ *  gnet_tcp_socket_get_port
+ *  @socket: a #GTcpSocket
  *
- *  Get the port number the socket is bound to.
+ *  Gets the port a #GTcpSocket is bound to.
  *
- *  Returns: Port number of the socket.
+ *  Returns: the port number.
  *
  **/
 gint
@@ -786,13 +782,14 @@ gnet_tcp_socket_get_port(const GTcpSocket* socket)
 /* **************************************** */
 
 /**
- *  gnet_tcp_socket_set_tos:
- *  @socket: GTcpSocket to set the type-of-service of
- *  @tos: Type of service (in tcp.h)
+ *  gnet_tcp_socket_set_tos
+ *  @socket: a #GTcpSocket
+ *  @tos: type of service
  *
- *  Set the type-of-service of the socket.  Usually, routers don't
- *  honor this.  Some systems don't support this function.  If the
- *  operating system does not support it, the function does nothing.
+ *  Sets the type-of-service (TOS) of the socket.  TOS theoretically
+ *  controls the connection's quality of service, but most routers
+ *  ignore it.  Some systems don't even support this function.  The
+ *  function does nothing if the operating system does not support it.
  *
  **/
 void
@@ -841,14 +838,14 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
 
 
 /**
- *  gnet_tcp_socket_server_new:
- *  @port: Port to use (0 for an arbitrary port)
+ *  gnet_tcp_socket_server_new
+ *  @port: port to bind to (0 for an arbitrary port)
  *
- *  Create and open a new #GTcpSocket bound to all interfaces and port
- *  @port.  If @port is 0, an arbitrary port will be used.  SOCKS is
- *  used if SOCKS is enabled.
+ *  Creates a new #GTcpSocket bound to all interfaces and port @port.
+ *  If @port is 0, an arbitrary port will be used.  SOCKS is used if
+ *  SOCKS is enabled.
  *
- *  Returns: a new #GTcpSocket, or NULL if there was a failure.
+ *  Returns: a new #GTcpSocket; NULL on error.
  *
  **/
 GTcpSocket* 
@@ -858,20 +855,17 @@ gnet_tcp_socket_server_new (gint port)
 }
 
 
-/* FIX: Don't pass the port */
 /**
- *  gnet_tcp_socket_server_new_interface:
+ *  gnet_tcp_socket_server_new_interface
  *  @iface: Interface to bind to (NULL for all interfaces)
  *  @port: Port to bind to (0 for an arbitrary port)
  *
- *  Create and open a new #GTcpSocket bound to interface @iface and
- *  port @port.  Use this sort of socket when creating a server socket
- *  and there is a specific address the server must be bound to.  If
- *  @iface is NULL, all interfaces will be used.  If @port is 0, an
- *  arbitrary port will be used.  SOCKS is used if SOCKS is enabled
- *  and the interface is NULL.
+ *  Creates and new #GTcpSocket bound to interface @iface and port
+ *  @port.  If @iface is NULL, the socket is bound to all interfaces.
+ *  If @port is 0, the socket is bound to an arbitrary port.  SOCKS is
+ *  used if SOCKS is enabled and the interface is NULL.
  *
- *  Returns: a new #GTcpSocket, or NULL if there was a failure.
+ *  Returns: a new #GTcpSocket; NULL on error.
  *
  **/
 GTcpSocket* 
@@ -948,17 +942,16 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface, gint port)
 
 
 /**
- *  gnet_tcp_socket_server_accept:
- *  @socket: #GTcpSocket to accept connections from.
+ *  gnet_tcp_socket_server_accept
+ *  @socket: a #GTcpSocket
  *
- *  Accept a connection from the socket.  The socket must have been
- *  created using gnet_tcp_socket_server_new().  This function will
- *  block (use gnet_tcp_socket_server_accept_nonblock() if you don't
- *  want to block).  If the socket's #GIOChannel is readable, it DOES
- *  NOT mean that this function will not block.
+ *  Accepts a connection from a #GTcpSocket.  The socket must have
+ *  been created using gnet_tcp_socket_server_new() (or equivalent).
+ *  Even if the socket's #GIOChannel is readable, the function may
+ *  still block.
  *
- *  Returns: a new #GTcpSocket if there is another connect, or NULL if
- *  there's an error.
+ *  Returns: a new #GTcpSocket representing a new connection; NULL on
+ *  error.
  *
  **/
 GTcpSocket* 
@@ -1016,17 +1009,19 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
 
 
 /**
- *  gnet_tcp_socket_server_accept_nonblock:
- *  @socket: GTcpSocket to accept connections from.
+ *  gnet_tcp_socket_server_accept_nonblock
+ *  @socket: a #GTcpSocket
  *
- *  Accept a connection from the socket without blocking.  The socket
- *  must have been created using gnet_tcp_socket_server_new().  This
- *  function is best used with the socket's #GIOChannel.  If the
- *  channel is readable, then you PROBABLY have a connection.  It is
- *  possible for the connection to close by the time you call this, so
- *  it may return NULL even if the channel was readable.
+ *  Accepts a connection from a #GTcpSocket without blocking.  The
+ *  socket must have been created using gnet_tcp_socket_server_new()
+ *  (or equivalent).
  *
- *  Returns a new GTcpSocket if there is another connect, or NULL
+ *  Note that if the socket's #GIOChannel is readable, then there is
+ *  PROBABLY a new connection.  It is possible for the connection
+ *  to close by the time this function is called, so it may return
+ *  NULL.
+ *
+ *  Returns: a new #GTcpSocket representing a new connection; NULL
  *  otherwise.
  *
  **/
@@ -1175,12 +1170,14 @@ static gboolean tcp_socket_server_accept_async_cb (GIOChannel* iochannel,
 
 /**
  *  gnet_tcp_socket_server_accept_async:
- *  @socket: #GTcpSocket to accept connections from.
- *  @accept_func: Callback function.
- *  @user_data: User data passed when callback function is called.
+ *  @socket: a #GTcpSocket
+ *  @accept_func: callback function.
+ *  @user_data: data to pass to @func on callback
  *
- *  Accept a connection from the socket asynchronously.  The callback
- *  is called when a client has connection or the socket has an error.
+ *  Asynchronously accepts a connection from a #GTcpSocket.  The
+ *  callback is called when a new client has connected or an error
+ *  occurs.  The socket must have been created using
+ *  gnet_tcp_socket_server_new() (or equivalent).
  *
  **/
 void
@@ -1257,11 +1254,11 @@ tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition
 
 
 /**
- *  gnet_tcp_socket_server_accept_async_cancel:
- *  @socket: #GTcpSocket accepting connections asynchronously.
+ *  gnet_tcp_socket_server_accept_async_cancel
+ *  @socket: a #GTcpSocket
  *
- *  Stops accepting connections asynchronously from the socket.  This
- *  does not close the socket.
+ *  Stops asynchronously accepting connections for a #GTcpSocket.  The
+ *  socket is not closed.
  *
  **/
 void

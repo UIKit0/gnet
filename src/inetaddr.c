@@ -338,7 +338,7 @@ ialist_free (GList* ialist)
    the same pattern as gethostbyname_r, so we don't have special
    checks for it in configure.in.
 
-   Returns: the hostname, NULL if there was an error.
+   Returns: the hostname; NULL on error.
 */
 
 gchar*
@@ -554,7 +554,7 @@ inet_aton (const char *cp, struct in_addr *inp)
  *  address in the list is returned.  Use gnet_inetaddr_new_list() to
  *  get the complete list.
  *
- *  Returns: a new #GInetAddr, or NULL if there was a failure.
+ *  Returns: a new #GInetAddr; NULL on error.
  *
  **/
 GInetAddr* 
@@ -586,7 +586,7 @@ gnet_inetaddr_new (const gchar* hostname, gint port)
  *  Creates a GList of #GInetAddr's from a host name and port.  This
  *  function makes a DNS lookup on the host name so it may block.
  *
- *  Returns: a GList of #GInetAddr's, or NULL if there was a failure.
+ *  Returns: a GList of #GInetAddr's; NULL on error.
  *
  **/
 GList*
@@ -652,8 +652,8 @@ inetaddr_new_async_cb (GList* ialist, gpointer data);
  *
  *  See gnet_inetaddr_new_list_async() for implementation notes.
  *
- *  Returns: the ID of the lookup; NULL on failure.  The ID can be
- *  used with gnet_inetaddr_new_async_cancel() to cancel the lookup.
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be used
+ *  with gnet_inetaddr_new_async_cancel() to cancel the lookup.
  *
  **/
 GInetAddrNewAsyncID 
@@ -1556,7 +1556,7 @@ gnet_inetaddr_unref (GInetAddr* ia)
  *  reverse DNS lookup on the address so it may block.  The canonical
  *  name is returned if the address has no host name.
  *
- *  Returns: the host name for the @ia, or NULL if there was an error.
+ *  Returns: the host name for the @ia; NULL on error.
  *
  **/
 gchar* 
@@ -2108,7 +2108,7 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
  *  is a dotted decimal name (e.g., 141.213.8.59).  An IPv6 canonical
  *  name is a semicoloned hexidecimal name (e.g., 23:de:ad:be:ef).
  *
- *  Returns: the canonical name; NULL if there was an error.
+ *  Returns: the canonical name; NULL on error.
  *
  **/
 gchar* 
@@ -2619,7 +2619,7 @@ gnet_inetaddr_noport_equal(gconstpointer p1, gconstpointer p2)
  * 
  *  Gets the host's name.
  *
- *  Returns: the name of the host; NULL if there was an error.
+ *  Returns: the name of the host; NULL on error.
  *
  **/
 gchar*
@@ -2677,7 +2677,7 @@ gnet_inetaddr_gethostname (void)
  * 
  *  Get the host's address.
  *
- *  Returns: the address of the host; NULL if there was an error.
+ *  Returns: the address of the host; NULL on error.
  *
  **/
 GInetAddr* 
@@ -2700,36 +2700,6 @@ gnet_inetaddr_gethostaddr (void)
 /* **************************************** */
 
 
-
-
-/**
- *  gnet_inetaddr_new_any
- *
- *  Creates a #GInetAddr with the address INADDR_ANY and port 0.  This
- *  is useful for creating default addresses for binding.  The
- *  address's name will be "&lt;INADDR_ANY&gt;".
- *
- *  Returns: INADDR_ANY #GInetAddr.
- *
- **/
-GInetAddr* 
-gnet_inetaddr_new_any (void)
-{
-  GInetAddr* ia;
-  struct sockaddr_in* sa_in;
-
-  ia = g_new0 (GInetAddr, 1);
-  ia->ref_count = 1;
-  sa_in = (struct sockaddr_in*) &ia->sa;  		/* FIX */
-  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-  sa_in->sin_port = 0;
-  ia->name = g_strdup ("0.0.0.0");
-
-  return ia;
-}
-
-
-
 /**
  *  gnet_inetaddr_autodetect_internet_interface
  *
@@ -2739,7 +2709,7 @@ gnet_inetaddr_new_any (void)
  *  always work correctly, especially if the host is behind a NAT.
  *
  *  Returns: an address of an internet interface; NULL if it couldn't
- *  find one or there was an error.
+ *  find one or on error.
  *
  **/
 GInetAddr* 

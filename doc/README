@@ -34,7 +34,12 @@ Style notes
       * "buffer" instead of "buf"
       * "length" instead of "len"
 
-    Exceptions: "src" and "dst" are ok.
+    Exceptions: 
+      * "src" and "dst" are ok.  
+      * Use "iface" instead of "interface".  "interface" is a reserved
+	  word for some compilers.
+
+    (We break these rules a lot.)
 
 
 * Return values
@@ -62,3 +67,9 @@ Style notes
  x_ref:  Adds a reference to a #X.
  x_unref: Removes a reference from a #X.  A #X is deleted when
  	the reference count reaches 0.
+
+
+
+TODO:
+
+  failure vs. error - is there a difference?

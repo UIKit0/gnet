@@ -7,50 +7,47 @@ Please email gnet-dev@gnetlibrary.org with your comments.
 
 API
 
-- some function use the port in the inetaddr, some don't.  make this
-consistent (double check server)
-
+Conn:
 - callback asserts in conn
-
-- base URI support?
-
 - set gconn callbacks in gserver
-
-- set mcast loopback by default
-
-- add tcp_socket_getlocaladdr().  (better name!)
-
-- remove unix_connect - same as unix_new
-
-- get/set_socks_version
-
-- socks_get_server should return server even if not enabled.
-
-- add ref counts to other objects?
-
 - Check FIX stuff in conn.  I think it's ok.
 
+InetAddr
 - s/gethostaddr/get_host_addr
+- reconsider autodetect_internet_interface vs. get_internet_interface
 
-- equal functions should return boolean.  It returns int in GLib 1,
-  and boolean in GLib 2.  gboolean is an gint.
+Server:
+- add ref count to GServer
 
-  Add compare functions too?  GLib 2.0 adds a CompareFunc, which
-  returns -1, 0, or 1 based on order.
+TCP:
+- add gnet_tcp_socket_getlocaladdr().  (better name!)
+- socket_server_new() -> socket_server_new, new_with_port(), new_full()?
+    (to be consistent with UDP/Mcast?)
+
+SOCKS:
+- get/set_socks_version
+- socks_get_server should return server even if not enabled.
+
+Everything:
+
+- equal functions should return boolean.  They return gint in GLib 1,
+  and gboolean in GLib 2.  gboolean is an gint anyway.
+
+  (Add compare functions too?  GLib 2.0 adds a CompareFunc, which
+   returns -1, 0, or 1 based on order.)
 
 - double check ref counting
 
 - ia vs. inetaddr as an parameter
 
-- remove inetaddr_new_any
+URI:
+- base URI support?
 
-- reconsider autodetect_internet_interface vs. get_internet_interface
+Base64:
+- Unit test case
 
-
-Docs and examples
+Docs and examples:
 - Add server example that uses pthreads or gthreads.
-
-
 
 
 ========================================

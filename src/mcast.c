@@ -22,12 +22,12 @@
 
 
 /**
- *  gnet_mcast_socket_new:
+ *  gnet_mcast_socket_new
  *  
- *  Create a new multicast socket bound to all interfaces using an
- *  arbitrary port.
+ *  Creates a #GMcastSocket bound to all interfaces and an arbitrary
+ *  port.
  *
- *  Returns: a new #GMcastSocket, or NULL if there was a failure. 
+ *  Returns: a new #GMcastSocket; NULL on error.
  *
  **/
 GMcastSocket*
@@ -39,14 +39,15 @@ gnet_mcast_socket_new (void)
 
 
 /**
- *  gnet_mcast_socket_new_with_port:
- *  @port: Port for the #GMcastSocket.
+ *  gnet_mcast_socket_new_with_port
+ *  @port: port to bind to
  *
- *  Create a #GMcastSocket bound to all interfaces and port @port.  If
- *  @port is 0, an arbitrary port will be used.  If you know the port
- *  of the group you will join, use this constructor.
+ *  Creates a #GMcastSocket bound to all interfaces and port @port.
+ *  If @port is 0, an arbitrary port will be used.  Use this
+ *  constructor if you know the port of the group you will join.  Most
+ *  applications will use this constructor.
  *
- *  Returns: a new #GMcastSocket, or NULL if there was a failure.  
+ *  Returns: a new #GMcastSocket; NULL on error.
  *
  **/
 GMcastSocket* 
@@ -58,16 +59,17 @@ gnet_mcast_socket_new_with_port (gint port)
 
 
 /**
- *  gnet_mcast_socket_new_full:
- *  @iface: Interface to bind to (NULL for all interfaces)
- *  @port: Port to bind to (0 for an arbitrary port)
+ *  gnet_mcast_socket_new_full
+ *  @iface: interface to bind to (NULL for all interfaces)
+ *  @port: port to bind to (0 for an arbitrary port)
  *
- *  Create and open a new #GMcastSocket bound to interface @iface and
- *  port @port.  If @iface is NULL, all interfaces will be used.  If
- *  @port is 0, an arbitrary port will be used.  To receive packets
- *  from this group, call gnet_mcast_socket_join_group() next.
+ *  Creates a #GMcastSocket bound to interface @iface and port @port.
+ *  If @iface is NULL, all interfaces will be used.  If @port is 0, an
+ *  arbitrary port will be used.  To receive packets from this group,
+ *  call gnet_mcast_socket_join_group() next.  Loopback is disabled by
+ *  default.
  *
- *  Returns: a new #GMcastSocket, or NULL if there was a failure.
+ *  Returns: a new #GMcastSocket; NULL on error.
  *
  **/
 GMcastSocket* 
@@ -101,6 +103,8 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
   memcpy (&ms->sa, &sa, sizeof(ms->sa));
   ms->ref_count = 1;
 
+  gnet_mcast_socket_set_loopback (ms, FALSE);
+
   return ms;
 }
 
@@ -108,9 +112,9 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
 
 /**
  *  gnet_mcast_socket_delete:
- *  @ms: #GMcastSocket to delete.
+ *  @ms: a #GMcastSocket
  *
- *  Close and delete a multicast socket.
+ *  Deletes a #GMcastSocket.
  *
  **/
 void
@@ -124,9 +128,9 @@ gnet_mcast_socket_delete (GMcastSocket* ms)
 
 /**
  *  gnet_mcast_socket_ref
- *  @s: #GMcastSocket to reference
+ *  @s: a #GMcastSocket
  *
- *  Increment the reference counter of the #GMcastSocket.
+ *  Adds a reference to a #GMcastSocket.
  *
  **/
 void
@@ -139,40 +143,11 @@ gnet_mcast_socket_ref (GMcastSocket* s)
 
 
 /**
- *  gnet_mcast_socket_get_io_channel:
- *  @socket: #GUdpSocket to get #GIOChannel from.
- *
- *  Get a #GIOChannel from the #GUdpSocket.  
- *
- *  THIS IS NOT A NORMAL GIOCHANNEL - DO NOT READ FROM OR WRITE TO IT.
- *
- *  Use the IO channel with g_io_add_watch() to do asynchronous IO (so
- *  if you do not want to do asynchronous IO, you do not need the
- *  channel).  If you can read from the channel, use
- *  gnet_udp_socket_receive() to read a packet.  If you can write to
- *  the channel, use gnet_mcast_socket_send() to send a packet.
- *
- *  There is one channel for every socket.  If the channel is refed
- *  then it must be unrefed eventually.  Do not close the channel --
- *  this is done when the socket is deleted.
- *
- *  Returns: A #GIOChannel; NULL on failure.
- *
- **/
-GIOChannel*   
-gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
-{
-  return gnet_udp_socket_get_io_channel((GUdpSocket*) socket);
-}
-
-
-
-/**
  *  gnet_mcast_socket_unref
- *  @s: #GMcastSocket to unreference
+ *  @s: a #GMcastSocket
  *
- *  Remove a reference from the #GMcastSocket.  The socket is deleted
- *  when reference count reaches 0.
+ *  Removes a reference from a #GMcastSocket.  A #GMcastSocket is
+ *  deleted when the reference count reaches 0.
  *
  **/
 void
@@ -196,12 +171,39 @@ gnet_mcast_socket_unref (GMcastSocket* s)
 
 
 /**
- *  gnet_mcast_socket_join_group:
- *  @ms: #GMcastSocket to use.
- *  @ia: Address of the group.
+ *  gnet_mcast_socket_get_io_channel:
+ *  @socket: a #GMcastSocket
  *
- *  Join a multicast group using the multicast socket.  You should
- *  only join one group per socket.
+ *  Gets the #GIOChannel of a #GMcastSocket.
+ *
+ *  Use the channel with g_io_add_watch() to check if the socket is
+ *  readable or writable.  If the channel is readable, call
+ *  gnet_mcast_socket_receive() to receive a packet.  If the channel
+ *  is writable, call gnet_mcast_socket_send() to send a packet.  This
+ *  is not a normal giochannel - do not read from or write to it.
+ *
+ *  Every #GMcastSocket has one and only one #GIOChannel.  If you ref
+ *  the channel, then you must unref it eventually.  Do not close the
+ *  channel.  The channel is closed by GNet when the socket is
+ *  deleted.
+ *
+ *  Returns: a #GIOChannel.
+ *
+ **/
+GIOChannel*   
+gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
+{
+  return gnet_udp_socket_get_io_channel((GUdpSocket*) socket);
+}
+
+
+
+/**
+ *  gnet_mcast_socket_join_group
+ *  @ms: a #GMcastSocket
+ *  @ia: address of the group
+ *
+ *  Joins a multicast group.  Join only one group per socket.
  *
  *  Returns: 0 on success.
  *
@@ -245,11 +247,11 @@ gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
 
 
 /**
- *  gnet_mcast_socket_leave_group:
- *  @ms: #GMcastSocket to use.
- *  @ia: Address of the group to leave.
+ *  gnet_mcast_socket_leave_group
+ *  @ms: a #GMcastSocket
+ *  @ia: address of the group
  *
- *  Leave the mulitcast group.
+ *  Leaves a mulitcast group.
  *
  *  Returns: 0 on success.
  *
@@ -293,27 +295,26 @@ gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
 
 
 
-
 /**
- *  gnet_mcast_socket_get_ttl:
- *  @ms: GMcastSocket to get TTL from.
+ *  gnet_mcast_socket_get_ttl
+ *  @ms: a #GMcastSocket
  *
- *  Get the TTL for outgoing multicast packets.  TTL is the Time To
- *  Live - the maximum number of hops outgoing multicast packets can
- *  travel.  The default TTL is usually 1, which mean outgoing packets
- *  will only travel as far as the local subnet.
+ *  Gets the multicast time-to-live (TTL) of a #GMcastSocket.  All IP
+ *  multicast packets have a TTL field.  This field is decremented by
+ *  a router before it forwards the packet.  If the TTL reaches zero,
+ *  the packet is discarded.  The default value is sufficient for most
+ *  applications.
  *
- *  Here's a handy table.  Note that the "meaning" really doesn't mean
- *  anything.  The multicast people basically just gave them these
- *  names because it seemed like a good idea at the time.
+ *  The table below shows the scope for a given TTL.  The scope is
+ *  only an estimate.
  *
  *  <table>
- *    <title>TTL and "meaning"</title>
+ *    <title>TTL and scope</title>
  *    <tgroup cols=2 align=left>
  *    <thead>
  *      <row>
  *        <entry>TTL</entry>
- *        <entry>meaning</entry>
+ *        <entry>Scope</entry>
  *      </row>
  *    </thead>
  *    <tbody>
@@ -382,19 +383,21 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* ms)
 
 
 /**
- *  gnet_mcast_socket_set_ttl:
- *  @ms: GMcatSocket to set multicast TTL.
- *  @val: Value to set multicast TTL to.
+ *  gnet_mcast_socket_set_ttl
+ *  @ms: a #GMcastSocket
+ *  @ttl: value to set TTL to
  *
- *  Set the TTL for outgoing multicast packets.
+ *  Sets the time-to-live (TTL) default of a #GMcastSocket.  Set the TTL
+ *  to -1 to use the kernel default.  The default value is sufficient
+ *  for most applications.
  *
- *  Returns 0 if successful.  
+ *  Returns: 0 if successful.  
  *
  **/
 gint
-gnet_mcast_socket_set_ttl (GMcastSocket* ms, int val)
+gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl)
 {
-  guchar ttl;
+  guchar ttlb;
   int rv1, rv2;
   GIPv6Policy policy;
 
@@ -411,18 +414,18 @@ gnet_mcast_socket_set_ttl (GMcastSocket* ms, int val)
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4)))
     {
-      ttl = val;
+      ttlb = ttl;
       rv1 = setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
-		       (void*) &ttl, sizeof(ttl));
+		       (void*) &ttlb, sizeof(ttlb));
     }
 
 
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
   if (GNET_SOCKADDR_FAMILY(ms->sa) == AF_INET6)
     {
-      ttl = val;
+      ttlb = ttl;
       rv2 = setsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
-		       (void*) &ttl, sizeof(ttl));
+		       (void*) &ttlb, sizeof(ttlb));
     }
 
   if (rv1 == -1 && rv2 == -1)
@@ -434,69 +437,12 @@ gnet_mcast_socket_set_ttl (GMcastSocket* ms, int val)
 
 
 /**
- *  gnet_mcast_socket_send:
- *  @ms: #GMcastSocket to use to send.
- *  @data: Data to send
- *  @length: Length of data
- *  @dst: Destination address
+ *  gnet_mcast_socket_is_loopback
+ *  @ms: a #GMcastSocket
  *
- *  Send data to a host using the #GMcastSocket.
- *
- *  Returns: 0 if successful.
- *
- **/
-gint 
-gnet_mcast_socket_send (GMcastSocket* ms, const gint8* data, guint length, const GInetAddr* dst)
-{
-  return gnet_udp_socket_send((GUdpSocket*) ms, data, length, dst);
-}
-
-
-/**
- *  gnet_mcast_socket_receive:
- *  @ms: #GMcastSocket to use to receive.
- *  @data: the buffer to write to
- *  @length: length of @data
- *  @src: pointer source address
- *
- *  Receive data using the multicast socket.  The source address is
- *  created and the pointer is stored in @src.  @src is caller-owned.
- *  @src may be NULL if the source address isn't needed.
- *
- *  Returns: the number of bytes received, -1 if unsuccessful.
- *
- **/
-gint 
-gnet_mcast_socket_receive (GMcastSocket* ms, gint8* data, guint length,
-			   GInetAddr** src)
-{
-  return gnet_udp_socket_receive((GUdpSocket*) ms, data, length, src);
-}
-
-
-/**
- *  gnet_mcast_socket_has_packet:
- *  @s: #GMcastSocket to check
- *
- *  Test if the socket has a receive packet.  
- *
- *  Returns: TRUE if there is packet waiting, FALSE otherwise.
- *
- **/
-gboolean
-gnet_mcast_socket_has_packet (const GMcastSocket* s)
-{
-  return gnet_udp_socket_has_packet((const GUdpSocket*) s);
-}
-
-
-/**
- *  gnet_mcast_socket_is_loopback:
- *  @ms: #GMcastSocket to check.
- *
- *  Check if the multicast socket has loopback enabled.  If loopback
- *  is enabled, you receive all the packets you send.  Most people
- *  don't want this.
+ *  Checks if a #GMcastSocket has loopback enabled.  If loopback is
+ *  enabled, all packets sent by the host will also be received by the
+ *  host.  Loopback is disabled by default.
  *
  *  Returns: 0 if loopback is disabled, 1 if enabled, and -1 on error.
  *
@@ -543,21 +489,18 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* ms)
 
 
 /**
- *  gnet_mcast_socket_set_loopback:
- *  @ms: #GMcastSocket to use.
- *  @b: Value to set it to (0 or 1)
+ *  gnet_mcast_socket_set_loopback
+ *  @ms: a #GMcastSocket
+ *  @enable: should loopback be enabled?
  *
- *  Turn the loopback on or off.  If loopback is on, when the process
- *  sends a packet, it will automatically be looped back to the host.
- *  If it is off, not only will this the process not receive datagrams
- *  it sends, other processes on the host will not receive its
- *  packets.
+ *  Enables (or disables) loopback on a #GMcastSocket.  Loopback is
+ *  disabled by default.
  *
  *  Returns: 0 if successful.
  *
  **/
 gint
-gnet_mcast_socket_set_loopback (GMcastSocket* ms, int b)
+gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable)
 {
   int rv1, rv2;
   GIPv6Policy policy;
@@ -574,7 +517,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, int b)
     {
       guchar flag;
 
-      flag = (guchar) b;
+      flag = (guchar) enable;
 
       rv1 = setsockopt(ms->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       &flag, sizeof(flag));
@@ -585,7 +528,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, int b)
     {
       guint flag;
 
-      flag = (guint) b;
+      flag = (guint) enable;
 
       rv2 = setsockopt(ms->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       &flag, sizeof(flag));
@@ -596,3 +539,63 @@ gnet_mcast_socket_set_loopback (GMcastSocket* ms, int b)
 
   return 0;
 }
+
+
+
+/**
+ *  gnet_mcast_socket_send
+ *  @ms: a #GMcastSocket
+ *  @buffer: buffer to send
+ *  @length: length of buffer
+ *  @dst: destination address
+ *
+ *  Sends data to a host using a #GMcastSocket.
+ *
+ *  Returns: 0 if successful.
+ *
+ **/
+gint 
+gnet_mcast_socket_send (GMcastSocket* ms, const gchar* buffer, guint length, 
+			const GInetAddr* dst)
+{
+  return gnet_udp_socket_send((GUdpSocket*) ms, buffer, length, dst);
+}
+
+
+/**
+ *  gnet_mcast_socket_receive
+ *  @ms: a #GMcastSocket
+ *  @buffer: buffer to write to
+ *  @length: length of @buffer
+ *  @src: pointer to source address (optional)
+ *
+ *  Receives data using a #GMcastSocket.  If @src is set, the source
+ *  address is stored in the location @src points to.  The address is
+ *  caller owned.
+ *
+ *  Returns: the number of bytes received, -1 if unsuccessful.
+ *
+ **/
+gint 
+gnet_mcast_socket_receive (GMcastSocket* ms, gchar* buffer, guint length,
+			   GInetAddr** src)
+{
+  return gnet_udp_socket_receive((GUdpSocket*) ms, buffer, length, src);
+}
+
+
+/**
+ *  gnet_mcast_socket_has_packet:
+ *  @s: a #GMcastSocket
+ *
+ *  Tests if a #GMcastSocket has a packet waiting to be received.
+ *
+ *  Returns: TRUE if there is packet waiting, FALSE otherwise.
+ *
+ **/
+gboolean
+gnet_mcast_socket_has_packet (const GMcastSocket* s)
+{
+  return gnet_udp_socket_has_packet((const GUdpSocket*) s);
+}
+

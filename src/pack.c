@@ -259,7 +259,7 @@ flipmemcpy(char* dst, char* src, guint n)
  *  Python's than Perl's.  Note that in GNet, a repeat of 0 does not
  *  align the data (as in Python).
  *
- *  Returns: number of bytes packed; -1 if error.
+ *  Returns: number of bytes packed; -1 on error.
  *
  **/
 gint
@@ -286,7 +286,7 @@ gnet_pack (const gchar* format, gchar* buffer, const guint length, ...)
  *  is allocated by the function and is caller owned.  See gnet_pack()
  *  for more information.
  *
- *  Returns: bytes packed; -1 if error.
+ *  Returns: bytes packed; -1 on error.
  *
  **/
 gint
@@ -356,7 +356,7 @@ gnet_calcsize (const gchar* format, ...)
  *  Var arg interface to gnet_calcsize().  See gnet_calcsize() for
  *  additional information.
  *
- *  Returns: number of bytes required to pack; -1 if error.
+ *  Returns: number of bytes required to pack; -1 on error.
  *
  **/
 gint
@@ -511,7 +511,7 @@ gnet_vcalcsize (const gchar* format, va_list args)
  *  Var arg interface to gnet_pack().  See gnet_pack() for more
  *  information.
  *
- *  Returns: bytes packed; -1 if error.
+ *  Returns: bytes packed; -1 on error.
  *
  **/
 gint
@@ -828,7 +828,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint length, va_list args
  *  string and the string follows.  The unpacked string will be a
  *  normal, NULL-terminated string.  REPEAT is repeat.
  *
- *  Returns: number of bytes unpacked; -1 if error.  The bytes are
+ *  Returns: number of bytes unpacked; -1 on error.  The bytes are
  *  unpacked to the variables pointed to by the @Varargs.
  * 
  **/
@@ -856,7 +856,7 @@ gnet_unpack (const gchar* format, gchar* buffer, guint length, ...)
  *  Var arg interface to gnet_unpack().  See gnet_unpack() for more
  *  information.
  *
- *  Returns: number of bytes packed; -1 if error.
+ *  Returns: number of bytes packed; -1 on error.
  *
  **/
 gint 

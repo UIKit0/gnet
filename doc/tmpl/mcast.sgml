@@ -13,17 +13,17 @@ built on UDP.
 </para>
 
 <para>
-Create a #GMcastSocket by calling gnet_mcast_socket_new(),
+An IP Multicast socket is represented by a #GMcastSocket stucture.  To
+create a #GMcastSocket, call gnet_mcast_socket_new(),
 gnet_mcast_socket_new_with_port(), or gnet_mcast_socket_new_full().
 Then call gnet_mcast_socket_join_group() to join a multicast group.
-The #GMcastSocket object is essentially a #GUdpSocket.  It can be
-safely cast to a #GUdpSocket and the functions in the UDP module can
-be used.
+To leave the group, call gnet_mcast_socket_leave_group().
 </para>
 
 <para>
-Use gnet_mcast_socket_set_loopback() to set whether packets sent
-should also be received.  By default.... FIX
+Use gnet_mcast_socket_set_loopback() to set whether packets sent by
+the host will also be received by the host.  Applications typically
+disable loopback.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
@@ -136,8 +136,10 @@ should also be received.  By default.... FIX
 </para>
 
 @ms: 
-@val: 
+@ttl: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@val: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_send ##### -->
@@ -146,10 +148,12 @@ should also be received.  By default.... FIX
 </para>
 
 @ms: 
-@data: 
+@buffer: 
 @length: 
 @dst: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@data: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_receive ##### -->
@@ -158,10 +162,12 @@ should also be received.  By default.... FIX
 </para>
 
 @ms: 
-@data: 
+@buffer: 
 @length: 
 @src: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@data: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_has_packet ##### -->
@@ -188,8 +194,10 @@ should also be received.  By default.... FIX
 </para>
 
 @ms: 
-@b: 
+@enable: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@b: 
 
 
 <!-- ##### MACRO gnet_mcast_socket_to_udp_socket ##### -->

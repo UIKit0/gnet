@@ -10,7 +10,7 @@ The Unix module provides support for Unix sockets.  Unix sockets are
 used to communicate between processes.  Unix sockets are for Unix
 operating systems only and are not supported in Windows.  GNet's Unix
 sockets are stream-based (like TCP), not datagram-based (like UDP).
-Unix socket addresses are file names, like "/tmp/myunixsocket".
+Unix socket addresses are file names, like "/tmp/my_unix_socket".
 </para>
 
 <para>
@@ -33,15 +33,6 @@ See the documentation on TCP sockets for more information.
 <para>
 
 </para>
-
-
-<!-- ##### FUNCTION gnet_unix_socket_connect ##### -->
-<para>
-
-</para>
-
-@path: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gnet_unix_socket_new ##### -->

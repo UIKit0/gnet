@@ -24,37 +24,20 @@
 #define PATH(S) (((struct sockaddr_un *) (&(S)->sa))->sun_path)
 gboolean gnet_unix_socket_unlink (const gchar *path);
 
+
 /**
- *  gnet_unix_socket_connect:
- *  @path: Path to socket to connect to
+ *  gnet_unix_socket_new
+ *  @path: path
  *
- *  A quick and easy #GUnixSocket constructor.  This connects to the
- *  specified path.  This function does block.  Use this function when
- *  you are a client connecting to a server and you don't mind
- *  blocking.
+ *  Creates a #GUnixSocket and connects to @path.  This function will
+ *  block to connect.  Use this constructor to create a #GUnixSocket
+ *  for a client.
  *
- *  Returns: A new #GUnixSocket, or NULL if there was a failure.  
+ *  Returns: a new #GUnixSocket; NULL on failure.
  *
  **/
-GUnixSocket *
-gnet_unix_socket_connect(const gchar *path)
-{
-  return gnet_unix_socket_new(path);
-}
-	
-/**
- *  gnet_unix_socket_new:
- *  @path: Path to connect to.
- *
- *  Connect to a specified address.  Use this sort of socket when
- *  you're a client connecting to a server.  This function will block
- *  to connect.
- *
- *  Returns: A new #GUnixSocket, or NULL if there was a failure.
- *
- **/
-GUnixSocket *
-gnet_unix_socket_new (const gchar *path)
+GUnixSocket*
+gnet_unix_socket_new (const gchar* path)
 {
   GUnixSocket *s = g_new0(GUnixSocket, 1);
   struct sockaddr_un *sa_un;
@@ -79,52 +62,48 @@ gnet_unix_socket_new (const gchar *path)
 }
 
 
+
 /**
- *  gnet_unix_socket_delete:
- *  @s: UnixSocket to delete.
+ *  gnet_unix_socket_delete
+ *  @s: a #GUnixSocket
  *
- *  Close and delete a #GUnixSocket, regardless of reference count.
+ *  Deletes a #GUnixSocket.
  *
  **/
 void
-gnet_unix_socket_delete(GUnixSocket *s)
+gnet_unix_socket_delete (GUnixSocket *s)
 {
-  g_return_if_fail(s != NULL);
-  
-  GNET_CLOSE_SOCKET(s->sockfd); /* Don't care if this fails. */
-  if (s->iochannel)
-    g_io_channel_unref(s->iochannel);
-  if (s->server)
-    gnet_unix_socket_unlink(PATH(s));
-  g_free(s);
+  if (s != NULL)
+    gnet_unix_socket_unref(s);
 }
+
 
 /**
  *  gnet_unix_socket_ref
- *  @s: GUnixSocket to reference
+ *  @s: a #GUnixSocket
  *
- *  Increment the reference counter of a #GUnixSocket.
+ *  Adds a reference to a #GUnixSocket.
  *
  **/
 void
-gnet_unix_socket_ref(GUnixSocket *s)
+gnet_unix_socket_ref (GUnixSocket* s)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (s != NULL);
   ++s->ref_count;
 }
 
 /**
  *  gnet_unix_socket_unref
- *  @s: GUnixSocket to unreference
+ *  @s: a #GUnixSocket
  *
- *  Remove a reference from the #GUnixSocket.  When the reference count
- *  reaches 0, the socket is deleted.  
+ *  Removes a reference from a #GUnixSocket.  A #GUnixSocket is
+ *  deleted when the reference count reaches 0.
  *
  **/
 void
-gnet_unix_socket_unref(GUnixSocket *s)
+gnet_unix_socket_unref (GUnixSocket* s)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (s != NULL);
 
   --s->ref_count;
   if (s->ref_count == 0) 
@@ -133,26 +112,27 @@ gnet_unix_socket_unref(GUnixSocket *s)
     
 /**
  *  gnet_unix_socket_get_io_channel
- *  @socket: GUnixSocket to get GIOChannel from.
+ *  @socket: a #GUnixSocket
  *
- *  Get the #GIOChannel for the #GUnixSocket.
+ *  Gets the #GIOChannel of a #GUnixSocket.
  *
  *  For a client socket, the #GIOChannel represents the data stream.
  *  Use it like you would any other #GIOChannel.
  *
- *  For a server socket, however, the #GIOChannel represents incoming
- *  connections.  If you can read from it, there's a connection
+ *  For a server socket, however, the #GIOChannel represents the
+ *  listening socket.  When it's readable, there's a connection
  *  waiting to be accepted.
  *
- *  There is one channel for every socket.  If the channel is refed
- *  then it must be unrefed eventually.  Do not close the channel --
- *  this is done when the socket is deleted.
+ *  Every #GUnixSocket has one and only one #GIOChannel.  If you ref
+ *  the channel, then you must unref it eventually.  Do not close the
+ *  channel.  The channel is closed by GNet when the socket is
+ *  deleted.
  *
- *  Returns: A #GIOChannel; NULL on failure.  
+ *  Returns: a #GIOChannel.
  *
  **/
 GIOChannel*
-gnet_unix_socket_get_io_channel(GUnixSocket *socket)
+gnet_unix_socket_get_io_channel (GUnixSocket* socket)
 {
   g_return_val_if_fail(socket != NULL, NULL);
 
@@ -164,30 +144,31 @@ gnet_unix_socket_get_io_channel(GUnixSocket *socket)
 
 
 /**
- *  gnet_unix_socket_get_path:
- *  @socket: GUnixSocket to get the path of.
+ *  gnet_unix_socket_get_path
+ *  @socket: a #GUnixSocket
  *
- *  Get the path of the socket.
+ *  Gets the path of a #GUnixSocket.
  *
- *  Returns: Caller-owned path; NULL on failure.
+ *  Returns: the path.
  *
  **/
 gchar*
 gnet_unix_socket_get_path(const GUnixSocket* socket)
 {
   g_return_val_if_fail(socket != NULL, NULL);
+
   return g_strdup (PATH(socket));
 }
 
 
 /**
- *  gnet_unix_socket_server_new:
- *  @path: Path for the socket.
+ *  gnet_unix_socket_server_new
+ *  @path: path
  *
- *  Create and open a new #GUnixSocket with the specified path.  Use
- *  this sort of socket when you are a server.
+ *  Creates a #GUnixSocket bound to @path.  Use this constructor to
+ *  create a #GUnixSocket for a server.
  *
- *  Returns: a new #GUnixSocket, or NULL if there was a failure.  
+ *  Returns: a new #GUnixSocket; NULL on error.
  *
  **/
 GUnixSocket*
@@ -242,17 +223,16 @@ gnet_unix_socket_server_new (const gchar *path)
 
 
 /**
- *  gnet_unix_socket_server_accept:
- *  @socket: GUnixSocket to accept connections from
+ *  gnet_unix_socket_server_accept
+ *  @socket: a #GUnixSocket
  *
- *  Accept connections from the socket.  The socket must have been
- *  created using gnet_unix_socket_server_new(). This function will
- *  block (use gnet_unix_socket_server_accept_nonblock() if you don't
- *  want to block).  If the socket's #GIOChannel is readable, it DOES
- *  NOT mean that this function will block.
+ *  Accepts a connection from a #GUnixSocket.  The socket must have
+ *  been created using gnet_unix_socket_server_new(). This function
+ *  will block.  Even if the socket's #GIOChannel is readable, the
+ *  function may still block.
  *
- *  Returns: a new #GUnixSocket if there is another connect, or NULL if
- *  there's an error.  
+ *  Returns: a new #GUnixSocket representing a new connection; NULL on
+ *  error.
  *
  **/
 GUnixSocket*
@@ -295,18 +275,19 @@ gnet_unix_socket_server_accept (const GUnixSocket *socket)
 
 
 /**
- *  gnet_unix_socket_server_accept_nonblock:
- *  @socket: GUnixSocket to accept connections from.
+ *  gnet_unix_socket_server_accept_nonblock
+ *  @socket: a #GUnixSocket
  *
- *  Accept a connection from the socket without blocking.  The socket
- *  must have been created using gnet_unix_socket_server_new().  This
- *  function is best used with the socket's #GIOChannel.  If the channel
- *  is readable, then you PROBABLY have a connection.  It is possible
- *  for the connection to close by the time you call this, so it may
- *  return NULL even if the channel was readable.
+ *  Accepts a connection from a #GUnixSocket without blocking.  The
+ *  socket must have been created using gnet_unix_socket_server_new().
  *
- *  Returns: a new #GUnixSocket if there was another connect, or NULL
- *  otherwise. 
+ *  Note that if the socket's #GIOChannel is readable, then there is
+ *  PROBABLY a new connection.  It is possible for the connection
+ *  to close by the time this function is called, so it may return
+ *  NULL.
+ *
+ *  Returns: a new #GUnixSocket representing a new connection; NULL
+ *  otherwise.
  *
  **/
 GUnixSocket*
@@ -350,37 +331,36 @@ gnet_unix_socket_server_accept_nonblock (const GUnixSocket *socket)
 
 
 /**
- *  gnet_unix_socket_unlink:
- *  @path: Path to socket to unlink.
+ *  gnet_unix_socket_unlink
+ *  @path: path
  *
- *  Verifies that the file at the end of the path is a socket, and then
- *  unlinks it.
+ *  Unlink a Unix socket named @path.
  *
  *  Returns: TRUE on success, FALSE on failure.
  **/
 gboolean
 gnet_unix_socket_unlink(const gchar *path)
 {
-	struct stat stbuf;
-	int r;
+  struct stat stbuf;
+  int r;
 
-	g_return_val_if_fail(path != NULL, FALSE);
-	r = stat(path, &stbuf);
-	if (r == 0) {
-		if (S_ISSOCK(stbuf.st_mode)) {
-			if (unlink(path) == 0) {
-				return TRUE;
-			} else {
+  g_return_val_if_fail(path != NULL, FALSE);
+  r = stat(path, &stbuf);
+  if (r == 0) {
+    if (S_ISSOCK(stbuf.st_mode)) {
+      if (unlink(path) == 0) {
+	return TRUE;
+      } else {
 				/* Can't unlink */
-				return FALSE;
-			}
-		} else {
-			/* path is not a socket */
-			return FALSE;
-		}
-	} else if (errno == ENOENT) {
-		/* File doesn't exist, so we're okay */
-		return TRUE;
-	}
 	return FALSE;
+      }
+    } else {
+      /* path is not a socket */
+      return FALSE;
+    }
+  } else if (errno == ENOENT) {
+    /* File doesn't exist, so we're okay */
+    return TRUE;
+  }
+  return FALSE;
 }

@@ -436,14 +436,6 @@ be used to automatically configure peer-to-peer applications.
 @Returns: 
 
 
-<!-- ##### FUNCTION gnet_inetaddr_new_any ##### -->
-<para>
-
-</para>
-
-@Returns: 
-
-
 <!-- ##### FUNCTION gnet_inetaddr_autodetect_internet_interface ##### -->
 <para>
 

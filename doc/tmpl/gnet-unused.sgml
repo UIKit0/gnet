@@ -205,6 +205,13 @@ url
 @conn: 
 @enable: 
 
+<!-- ##### FUNCTION gnet_inetaddr_new_any ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
 <!-- ##### FUNCTION gnet_io_channel_read_async ##### -->
 <para>
 
@@ -382,6 +389,14 @@ url
 
 @us: 
 @val: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_unix_socket_connect ##### -->
+<para>
+
+</para>
+
+@path: 
 @Returns: 
 
 <!-- ##### FUNCTION gnet_unix_socket_get_iochannel ##### -->

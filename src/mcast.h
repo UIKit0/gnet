@@ -33,8 +33,10 @@ extern "C" {
 /**
  *  GMcastSocket
  *
- *  All fields in GMcastSocket are private and should be accessed only
- *  by using the functions below.
+ *  A #GMcastSocket structure represents a IP Multicast socket.  The
+ *  implementation is hidden.  A #GMcastSocket is child of
+ *  #GUdpSocket.  Use gnet_mcast_socket_to_udp_socket() to safely cast
+ *  a #GMcastSocket to a #GUdpSocket.
  *
  **/
 typedef struct _GMcastSocket GMcastSocket;
@@ -61,29 +63,26 @@ gint 	 gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia);
 gint 	 gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia);
 
 gint 	 gnet_mcast_socket_get_ttl (const GMcastSocket* ms);
-gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint val);
+gint 	 gnet_mcast_socket_set_ttl (GMcastSocket* ms, gint ttl);
 
-gint     gnet_mcast_socket_send (GMcastSocket* ms, const gint8* data, 
+gint 	 gnet_mcast_socket_is_loopback (const GMcastSocket* ms);
+gint 	 gnet_mcast_socket_set_loopback (GMcastSocket* ms, gboolean enable);
+
+/* ********** */
+
+gint     gnet_mcast_socket_send (GMcastSocket* ms, const gchar* buffer, 
 				 guint length, const GInetAddr* dst);
-gint     gnet_mcast_socket_receive (GMcastSocket* ms, gint8* data, 
+gint     gnet_mcast_socket_receive (GMcastSocket* ms, gchar* buffer, 
 				    guint length, GInetAddr** src);
 gboolean gnet_mcast_socket_has_packet (const GMcastSocket* s);
 
 
-/* ********** */
-
-gint 	 gnet_mcast_socket_is_loopback (const GMcastSocket* ms);
-gint 	 gnet_mcast_socket_set_loopback (GMcastSocket* ms, gint b);
-
-/* ********** */
-
-
 /**
- *  gnet_mcast_socket_to_udp_socket:
- *  @MS: A GMcastSocket
+ *  gnet_mcast_socket_to_udp_socket
+ *  @MS: a #GMcastSocket
  *
- *  Convert a multicast socket to a UDP socket (since a multicast
- *  socket is just a UDP socket with some special features).
+ *  Converts a #GMcastSocket to a #GUdpSocket.  A #GMcastSocket is
+ *  child of #GUdpSocket.
  *
  **/
 #define gnet_mcast_socket_to_udp_socket(MS) ((GUdpSocket*) (MS))
