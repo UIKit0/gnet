@@ -806,6 +806,7 @@ gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port)
  *  interface.  Use this sort of socket when your are a server and
  *  have a specific address the server must be bound to.  If the
  *  interface address's port number is 0, the OS will choose the port.
+ *  If iface is NULL, the OS will choose the address and port.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -818,8 +819,6 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
   const int on = 1;
   socklen_t socklen;
 
-  g_return_val_if_fail (iface, NULL);
-
   /* Create socket */
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
@@ -830,8 +829,16 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
   /* Set up address and port for connection */
   sa_in = (struct sockaddr_in*) &s->sa;
   sa_in->sin_family = AF_INET;
-  sa_in->sin_addr.s_addr = GNET_SOCKADDR_IN(iface->sa).sin_addr.s_addr;
-  sa_in->sin_port = GNET_SOCKADDR_IN(iface->sa).sin_port;
+  if (iface)
+    {
+      sa_in->sin_addr.s_addr = GNET_SOCKADDR_IN(iface->sa).sin_addr.s_addr;
+      sa_in->sin_port = GNET_SOCKADDR_IN(iface->sa).sin_port;
+    }
+  else
+    {
+      sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+      sa_in->sin_port = 0;
+    }
 
   /* The socket is set to non-blocking mode later in the Windows
      version.*/

@@ -21,8 +21,6 @@
 #include <string.h>
 
 
-static gint vcalcsize (const gchar* format, va_list args);
-
 static int strlenn(char* str, int n);
 static void flipmemcpy(char* dst, char* src, int n);
 
@@ -273,7 +271,7 @@ gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
 
   /* Get size */
   va_start (args, buffer);
-  size = vcalcsize (format, args);
+  size = gnet_vcalcsize (format, args);
   va_end (args);
   g_return_val_if_fail (size >= 0, -1);
   if (size == 0)
@@ -295,8 +293,22 @@ gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
 
 /* **************************************** */
 
-static gint
-vcalcsize (const gchar* format, va_list args)
+gint
+gnet_calcsize (const gchar* format, ...)
+{
+  va_list args;
+  gint size;
+
+  va_start (args, format);
+  size = gnet_vcalcsize (format, args);
+  va_end (args);
+
+  return size;
+}
+
+
+gint
+gnet_vcalcsize (const gchar* format, va_list args)
 {
   guint n = 0;
   gchar* p = (gchar*) format;

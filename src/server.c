@@ -44,7 +44,7 @@ gnet_server_new (const GInetAddr* iface, gboolean force_port,
   if (!server->socket && force_port)
     goto error;
 
-  if (!server->socket)
+  if (!server->socket && iface)
     {
       GInetAddr iface_cpy;
 
