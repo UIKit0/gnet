@@ -1,3 +1,7 @@
+Sun Aug 24 20:52:52 2003  Andrew Lanoix <alanoix@umich.edu>
+
+	* examples/echoserver-partyline: Added
+
 2003-08-22  Tor Lillqvist  <tml@iki.fi>
 
 	* acinclude.m4: New file. Dummy definition of AM_PATH_GLIB to fool
