@@ -1,3 +1,7 @@
+Mon Sep 30 13:18:11 2002  David Helder  <dhelder@umich.edu>
+
+	* NEWS, *: Release 1.1.6
+
 Thu Sep 26 20:10:23 2002  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Add --enable-threadsafe-gethostbyname option.

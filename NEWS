@@ -5,9 +5,9 @@ GNet NEWS
 Changes in Gnet
 
 
-1.1.6 ("Square meal" release (UNRELEASE))
+1.1.6 ("Square meal" release)
 -----
-* IOChannels are non-buffering, non-encoded by default
+* IOChannels are non-buffering, non-encoded by default (for GLib 2.0)
 * examples are now build by default
 * gnet_inetaddr_list_interfaces() bug fix
 * FreeBSD compile fix (affected gnet_inetaddr_list_interfaces())
