@@ -2078,7 +2078,7 @@ gnet_inetaddr_hash (gconstpointer p)
 {
   const GInetAddr* ia;
   guint32 port;
-  guint32 addr;
+  guint32 addr = 0;
 
   g_assert(p != NULL);
 

@@ -1,3 +1,8 @@
+Thu Nov  7 14:25:08 2002  Jonathan Blandford  <jrb@redhat.com>
+
+	* src/inetaddr.c (gnet_inetaddr_hash): initialize addr to keep
+	-Werror compiling.
+
 Mon Nov  4 12:24:20 2002  David Helder  <dhelder@umich.edu>
 
 	* *: More IPv6 hacking.  Added USAGI project's getifaddr()
