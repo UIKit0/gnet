@@ -1,3 +1,9 @@
+Tue May  6 12:27:07 2003  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_gethostbyname): Fix memory leak?
+	    Call freeaddrinfo on res if res it set, regardless of
+	    there being an error.  I'm not sure if this fixes anything.
+	
 Tue May  6 11:44:33 2003  David Helder  <dhelder@umich.edu>
 
 	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): 

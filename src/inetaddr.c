@@ -139,7 +139,7 @@ gnet_gethostbyname(const char* hostname)
 #ifdef HAVE_GETADDRINFO
   {
     struct addrinfo hints;
-    struct addrinfo* res;
+    struct addrinfo* res = NULL;
     int rv;
     GIPv6Policy policy;
 
@@ -201,9 +201,10 @@ gnet_gethostbyname(const char* hostname)
 	    list = g_list_concat (ipv4_list, ipv6_list);
 	    /* list will be reversed below */
 	  }
-
-	freeaddrinfo (res);
       }
+
+    if (res)
+      freeaddrinfo (res);
 
 #   ifdef HAVE_GETADDRINFO_GLIB_MUTEX
       G_UNLOCK (dnslock);
