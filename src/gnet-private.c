@@ -116,7 +116,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
  *
  **/
 GIOChannel* 
-gnet_private_io_channel_new (int sockfd) 
+gnet_private_io_channel_new (SOCKET sockfd) 
 {
   GIOChannel* iochannel;
 

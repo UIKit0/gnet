@@ -1,3 +1,11 @@
+Sun Dec 28 2003 Andrew Lanoix <alanoix@umich.edu>
+
+	*src/tcp.c: typecasting cleanup
+	*src/conn.c: " + include string.h for g_memmove/memmove
+	*src/gnet-private.c: Make sockfd of type SOCKET
+	*src/gnet-private.h: " + delete _SocketWatchAsyncState struct
+	*src/upd.c" "
+
 Sat Dec 27 2003 Andrew Lanoix <alanoix@umich.edu>
 
 	*src/tcp.c(gnet_tcp_socket_server_new_full): Set socket

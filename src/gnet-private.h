@@ -221,7 +221,7 @@ extern "C" {
 
 struct _GUdpSocket
 {
-  gint sockfd;
+  SOCKET sockfd;
   guint ref_count;
   GIOChannel* iochannel;
   struct sockaddr_storage sa;
@@ -229,7 +229,7 @@ struct _GUdpSocket
 
 struct _GMcastSocket
 {
-  gint sockfd;
+  SOCKET sockfd;
   guint ref_count;
   GIOChannel* iochannel;
   struct sockaddr_storage sa;
@@ -237,7 +237,7 @@ struct _GMcastSocket
 
 struct _GTcpSocket
 {
-  gint sockfd;
+  SOCKET sockfd;
   guint ref_count;
   GIOChannel* iochannel;
   struct sockaddr_storage sa;
@@ -381,23 +381,6 @@ typedef struct _GTcpSocketAsyncState
   gint 			 errorcode;
 #endif
 } GTcpSocketAsyncState;
-
-#ifdef GNET_WIN32
-/*
-Used for:
--gnet_inetaddr_new_async
--gnet_inetaddr_get_name_async
-*/
-typedef struct _SocketWatchAsyncState 
-{
-	GIOChannel *channel;
-	gint fd;
-	long winevent;
-	gint eventcode;
-  gint errorcode;
-	GSList* callbacklist;
-} SocketWatchAsyncState;
-#endif
 
 void gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data);
 
@@ -667,7 +650,7 @@ PFN_GETADAPTERSADDRESSES pfn_getaddaptersaddresses;
 
 /* Private/Experimental functions */
 
-GIOChannel* gnet_private_io_channel_new (int sockfd);
+GIOChannel* gnet_private_io_channel_new (SOCKET sockfd);
 
 SOCKET gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
 

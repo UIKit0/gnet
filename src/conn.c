@@ -1,5 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
+ * Copyright (C) 2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -22,6 +23,7 @@
 
 #include <stdio.h>
 #include <memory.h> /* required for windows */
+#include <string.h> /* needed for g_memmove/memmove */
 
 
 #define IS_CONNECTED(C)  ((C)->socket != NULL)
@@ -922,7 +924,7 @@ bytes_processable (GConn* conn)
       /* Read line */
     case -1:		
       {
-	gint i;
+	guint i;
 
 	/* Look for \n, \r, or \r\n */
 	for (i = 0; i < conn->bytes_read; ++i)
@@ -990,7 +992,7 @@ process_read_buffer (GConn* conn)
       /* Read line */
     case -1:		
       {
-	gint i;
+	guint i;
 
 	/* Look for \n, \r, or \r\n */
 	for (i = 0; i < conn->bytes_read; ++i)

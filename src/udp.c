@@ -1,6 +1,6 @@
 /* GNet - Networking library
- * Copyright (C) 2000, 2002-3  David Helder
- * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2000-2003  David Helder
+ * Copyright (C) 2000-2003  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -70,7 +70,7 @@ gnet_udp_socket_new_with_port (gint port)
 GUdpSocket* 
 gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 {
-  int 			  sockfd;
+  SOCKET 			  sockfd;
   struct sockaddr_storage sa;
   GUdpSocket* 		  s;
   const int 		  on = 1;

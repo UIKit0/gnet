@@ -299,8 +299,8 @@ gnet_tcp_socket_new (const GInetAddr* addr)
 GTcpSocket* 
 gnet_tcp_socket_new_direct (const GInetAddr* addr)
 {
-  int 			sockfd;
-  GTcpSocket* 		s;
+  SOCKET		sockfd;
+  GTcpSocket* 	s;
   int			rv;
 
   g_return_val_if_fail (addr != NULL, NULL);
@@ -550,7 +550,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 				  GTcpSocketNewAsyncFunc func,
 				  gpointer data)
 {
-  gint sockfd;
+  SOCKET sockfd;
   gint status;
   GTcpSocket* s;
   GTcpSocketAsyncState* state;
@@ -932,8 +932,11 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
   struct sockaddr_storage sa;
   GTcpSocket* s;
   socklen_t socklen;
-  gint flags;
   const int on = 1;
+#ifndef GNET_WIN32
+  gint flags;
+#endif
+
 
   /* Use SOCKS if enabled */
   if (!iface && gnet_socks_get_enabled())
@@ -1162,7 +1165,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   FD_ZERO(&fdset);
   FD_SET((unsigned)socket->sockfd, &fdset);
 
-  if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
+  if (select((int)socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
       return NULL;
 
   /* Don't force the socket into blocking mode */
@@ -1202,7 +1205,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   FD_ZERO(&fdset);
   FD_SET((unsigned)socket->sockfd, &fdset);
 
-  if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
+  if (select((int)socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
       return NULL;
 
   /* make sure the socket is in non-blocking mode */
