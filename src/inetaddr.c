@@ -279,7 +279,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
     len = 1024;
     buf = g_new(gchar, len);
 
-    while ((res = gethostbyname_r (addr, lenght, type, &result, buf, len, &herr)) == ERANGE)
+    while ((res = gethostbyaddr_r (addr, lenght, type, &result, buf, len, &herr)) == ERANGE)
       {
 	len *= 2;
 	buf = g_renew (gchar, buf, len);
@@ -292,6 +292,19 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
 
   done:
     g_free(buf);
+  }
+
+#else
+#ifdef HAVE_GETHOSTBYNAME_R_HPUX
+  {
+    struct hostent result;
+    struct hostent_data buf;
+    int res;
+
+    res = gethostbyaddr_r (addr, length, type, &result, &buf);
+
+    if (res == 0)
+      rv = g_strdup (result.h_name);
   }
 
 #else 
@@ -313,6 +326,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }
+#endif
 #endif
 #endif
 #endif

@@ -1,3 +1,9 @@
+2000-01-30  Soren Sandmann Pedersen  <sandmann@nerva.daimi.au.dk>
+
+	* src/inetaddr.c: Use HP-UX' gethostbyaddr_r.  Fixed typo
+	    in Solaris code (this was a bug - we were calling
+	    gethostbyname_r, not gethostbyaddr_r) [DAH].
+	
 Sat Jan 29 16:55:41 2000  David A Helder  <dhelder@umich.edu>
 
 	* AUTHORS: Added Soeren Sandmann to AUTHORS
