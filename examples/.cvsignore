@@ -15,3 +15,4 @@ echoserver-udp
 echoclient-udp
 echoclient-unix
 echoserver-unix
+hash

@@ -10,3 +10,4 @@ hostinfo
 echoclient-socks
 url_test
 urlparse
+uri_test
