@@ -1,3 +1,8 @@
+Mon Nov  4 12:24:20 2002  David Helder  <dhelder@umich.edu>
+
+	* *: More IPv6 hacking.  Added USAGI project's getifaddr()
+	   implementation for Linux.
+
 Wed Oct 23 13:52:18 2002  David Helder  <dhelder@umich.edu>
 
 	* configure.ac: Add --disable-pthreads flag.  Patch from Ian

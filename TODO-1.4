@@ -44,7 +44,7 @@ New features
     (gnet_ipv6_{get/set}_enabled).  It would be enabled by
     default.  Let me know if you want this.
     
-    BINARY INCOMPATIBLE: Will use IPv6 in situations where IPv4
+    BINARY INCOMPATIBLE: GNet will use IPv6 in situations where IPv4
     was used before. (?)
 
     TODO:
@@ -54,6 +54,13 @@ New features
 	- fix gnet_inetaddr_is_*()
 	- check storage format for in6_addr
 	- fix everything marked FIX
+	- some versions of getaddrinfo() are not threadsafe.
+		handle in configure.ac (e.g. FreeBSD, OpenBSD)
+	- remove "nicename" functionality.  this doesn't always
+		work. e.g., h_name of www.microsoft.com is 
+		www.microsoft.akadns.net.  Intent was to get 
+		canonical name for short names, like
+		speak.eecs.umich.edu for speak.
 
 - New Inetaddr functions:
 

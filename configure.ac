@@ -308,5 +308,6 @@ AC_CONFIG_FILES([
 	gnetconfig.h
 	gnet.spec
 	gnet.pc],
+	[], # Do nothing
 	[cp -f gnet.pc gnet-1.3.pc ])
 AC_OUTPUT

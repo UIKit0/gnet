@@ -82,6 +82,30 @@ gnet_gethostbyname(const char* hostname, struct sockaddr_storage* sa, gchar** ni
 #endif
 
 
+  /* HAVE_GETADDRINFO */
+ {
+   struct addrinfo hints;
+   struct addrinfo* res;
+   int rv;
+
+   memset (&hints, 0, sizeof(hints));
+   hints.ai_socktype = SOCK_STREAM;
+   /*    hints.ai_family = AF_INET; */	/* FIX */
+
+   rv = getaddrinfo(hostname, NULL, &hints, &res);
+   if (rv != 0)
+     {
+      fprintf (stderr, "getaddrinfo error: %s\n", gai_strerror(rv));
+
+
+     return FALSE;
+     }
+     
+   memcpy (sa, res->ai_addr, res->ai_addrlen);
+   return TRUE;
+ }
+
+
 #ifdef HAVE_GETHOSTBYNAME_THREADSAFE
   {
     struct hostent* he;
@@ -456,8 +480,8 @@ inet_aton(const char *cp, struct in_addr *inp)
 
 /**
  *  gnet_inetaddr_new:
- *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal name
- *    (eg, 141.213.8.59).  You can delete the after the function is called.
+ *  @name: a nice name (eg, mofo.eecs.umich.edu) or a dotted decimal
+ *  name (eg, 141.213.8.59).
  *  @port: port number (0 if the port doesn't matter)
  * 
  *  Create an internet address from a name and port.  This function
@@ -472,11 +496,15 @@ gnet_inetaddr_new (const gchar* name, gint port)
   struct sockaddr_storage sa;
   GInetAddr* ia = NULL;
 
-  g_return_val_if_fail(name != NULL, NULL);
+  g_return_val_if_fail (name != NULL, NULL);
 
   /* Try to get the host by name (ie, DNS) */
   if (!gnet_gethostbyname(name, &sa, NULL))
+    {
+      fprintf (stderr, "gnet_inetaddr_new failure!!!\n");
+
     return NULL;
+    }
 
   ia = g_new0(GInetAddr, 1);
   ia->name = g_strdup(name);
@@ -1726,6 +1754,8 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* ia)
   
   g_return_val_if_fail (ia != NULL, NULL);
 
+  fprintf (stderr, "fam = %d\n", GNET_INETADDR_FAMILY(ia));
+
   if (inet_ntop(GNET_INETADDR_FAMILY(ia), 
 		GNET_INETADDR_ADDRP(ia),
 		buffer, sizeof(buffer)) == NULL)
@@ -2529,6 +2559,11 @@ gnet_inetaddr_list_interfaces (void)
   struct ifconf ifc;
   struct ifreq* ifr;
 
+  /* FIX: Use getifaddrs().  The technique below does not work with
+     IPv6 addresses (sockaddr is too small).  Glibc 2.3 will have
+     getifaddrs.  *BSD already has it.  We could write (or borrow) our
+     own getifaddrs(). */
+
   /* Create a dummy socket */
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (sockfd == -1) return NULL;
@@ -2584,7 +2619,8 @@ gnet_inetaddr_list_interfaces (void)
       ifr = (struct ifreq*) ptr;
 
       /* Ignore non-AF_INET */
-      if (ifr->ifr_addr.sa_family != AF_INET)
+      if (ifr->ifr_addr.sa_family != AF_INET &&
+	  ifr->ifr_addr.sa_family != AF_INET6 )
 	continue;
 
       /* FIX: Skip colons in name?  Can happen if aliases, maybe. */

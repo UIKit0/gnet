@@ -45,5 +45,7 @@ gnet_init (void)
     g_thread_init (NULL);
 #endif
 #endif /* G_THREADS_ENABLED */
-}
 
+  /* Set sensible IPv6 policy */	/* FIX */
+
+}
