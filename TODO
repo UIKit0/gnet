@@ -50,7 +50,7 @@ Features
     The GTK doc folks are working on a new standard for describing
     interfaces.  Use this when it's done.
 
-- Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel).  sendfile is
+- Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel*).  sendfile is
     available on Linux and Windows, but I'm sure the semantics are
     different (that's why having this function would be handy).
 
