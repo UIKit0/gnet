@@ -94,9 +94,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %{prefix}/include/gnet
 %{prefix}/lib/*a
+%{prefix}/lib/gnet
 %{prefix}/lib/lib*.so
 
 %changelog
+* Thu Oct 26 2000 Benjamin Kahn <xkahn@helixcode.com>
+- Added missing file in lib/gnet
+
 * Mon Feb 28 2000 David Helder <dhelder@umich.edu>
 - Updated for version 1.0
 
