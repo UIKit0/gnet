@@ -22,8 +22,6 @@
 #include "socks-private.h"
 #include "tcp.h"
 
-
-
 /**
  *  gnet_tcp_socket_connect:
  *  @hostname: Name of host to connect to
@@ -91,9 +89,9 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
   state->func = func;
   state->data = data;
 
-  id = gnet_inetaddr_new_async(hostname, port,  
-			       gnet_tcp_socket_connect_inetaddr_cb, 
-			       state);
+  id = gnet_inetaddr_new_async (hostname, port,  
+				gnet_tcp_socket_connect_inetaddr_cb, 
+				state);
 
   /* Note that gnet_inetaddr_new_async can fail immediately and call
      our callback which will delete the state.  The users callback
@@ -136,9 +134,9 @@ gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr,
 
 
 void 
-gnet_tcp_socket_connect_tcp_cb(GTcpSocket* socket, 
-			       GTcpSocketConnectAsyncStatus status, 
-			       gpointer data)
+gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, 
+				GTcpSocketConnectAsyncStatus status, 
+				gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
@@ -180,6 +178,8 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
 }
 
 
+/* **************************************** */
+
 
 /**
  *  gnet_tcp_socket_new:
@@ -187,7 +187,7 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
  *
  *  Connect to a specified address.  Use this sort of socket when
  *  you're a client connecting to a server.  This function will block
- *  to connect.
+ *  to connect.  SOCKS is used if SOCKS is enabled.
  *
  *  Returns a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -195,54 +195,68 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
 GTcpSocket* 
 gnet_tcp_socket_new (const GInetAddr* addr)
 {
-  GInetAddr* 		ss_addr = NULL;
-  const GInetAddr* 	addr2   = NULL;
-  GTcpSocket* 		s = g_new0(GTcpSocket, 1);
+  g_return_val_if_fail (addr != NULL, NULL);
+
+  /* Use SOCKS if enabled */
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_new (addr);
+
+  /* Otherwise, connect directly to the address */
+  return gnet_tcp_socket_new_direct (addr);
+}
+
+
+
+/**
+ *  gnet_tcp_socket_new_direct:
+ *  @addr: Address to connect to.
+ *
+ *  Connect directly to a specified address and do not use SOCKS even
+ *  if SOCKS is enabled.  Most users should use gnet_tcp_socket_new().
+ *  This is used internally to implement SOCKS.
+ *
+ *  Returns a new #GTcpSocket, or NULL if there was a failure.
+ *
+ **/
+GTcpSocket* 
+gnet_tcp_socket_new_direct (const GInetAddr* addr)
+{
+  int 			sockfd;
+  GTcpSocket* 		s;
   struct sockaddr_in* 	sa_in;
+  int			rv;
 
   g_return_val_if_fail (addr != NULL, NULL);
 
-  /* If there's a SOCKS server, actually connect to that */
-  ss_addr = gnet_socks_get_server ();
-  if (ss_addr)
-    {
-      addr2 = addr;
-      addr  = ss_addr;
-    }
-
   /* Create socket */
+  sockfd = socket (AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0)
+    return NULL;
+
+  /* Create GTcpSocket */
+  s = g_new0 (GTcpSocket, 1);
+  s->sockfd = sockfd;
   s->ref_count = 1;
-  s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (s->sockfd < 0)
-    goto error;
 
   /* Set up address and port for connection */
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
   sa_in = (struct sockaddr_in*) &s->sa;
   sa_in->sin_family = AF_INET;
 
-  if (connect(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
-    goto error;
-
-  /* Negotiate SOCKS connection */
-  if (ss_addr)
+  /* Connect */
+  rv = connect(sockfd, &s->sa, sizeof(s->sa));
+  if (rv != 0)
     {
-      if (gnet_private_negotiate_socks_server (s, addr2) < 0)
-	goto error;
-      gnet_inetaddr_delete (ss_addr);
+      close (sockfd);
+      g_free (s);
+      return NULL;
     }
 
   return s;
-
- error:
-  if (ss_addr) 
-    gnet_inetaddr_delete (ss_addr);
-  g_free (s);
-  return NULL;
 }
 
 
-#ifndef GNET_WIN32  /*********** Unix code ***********/
+/* **************************************** */
 
 
 /**
@@ -254,7 +268,8 @@ gnet_tcp_socket_new (const GInetAddr* addr)
  *  Connect to a specifed address asynchronously.  When the connection
  *  is complete or there is an error, it will call the callback.  It
  *  may call the callback before the function returns.  It will call
- *  the callback if there is a failure.
+ *  the callback if there is a failure.  SOCKS is used if SOCKS is
+ *  enabled.  The SOCKS negotiation will block.
  *
  *  Returns: ID of the connection which can be used with
  *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
@@ -266,11 +281,43 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 			   GTcpSocketNewAsyncFunc func,
 			   gpointer data)
 {
+  g_return_val_if_fail (addr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  /* Use SOCKS if enabled */
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_new_async (addr, func, data);
+
+  /* Otherwise, connect directly to the address */
+  return gnet_tcp_socket_new_async_direct (addr, func, data);
+
+
+}
+
+
+#ifndef GNET_WIN32  /*********** Unix code ***********/
+
+
+/**
+ *  gnet_tcp_socket_new_direct:
+ *  @addr: Address to connect to.
+ *
+ *  Connect directly to a specified address asynchronously and do not
+ *  use SOCKS even if SOCKS is enabled.  Most users should use
+ *  gnet_tcp_socket_new_async().  This is used internally to implement
+ *  SOCKS.
+ *
+ *  Returns a new #GTcpSocket, or NULL if there was a failure.
+ *
+ **/
+GTcpSocketNewAsyncID
+gnet_tcp_socket_new_async_direct (const GInetAddr* addr, 
+				  GTcpSocketNewAsyncFunc func,
+				  gpointer data)
+{
   gint 			sockfd;
   gint 			flags;
   GTcpSocket* 		s;
-  GInetAddr* 		socks_addr = NULL;
-  const GInetAddr* 	socks_addr_save   = NULL;
   struct sockaddr	sa;
   struct sockaddr_in* 	sa_in;
   GTcpSocketAsyncState* state;
@@ -305,15 +352,6 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
   s->ref_count = 1;
   s->sockfd = sockfd;
 
-  /* If there's a SOCKS server, switch addresses so we connect to
-     that. */
-  socks_addr = gnet_socks_get_server ();
-  if (socks_addr)
-    {
-      socks_addr_save = addr;
-      addr = socks_addr;
-    }
-
   /* Set up address and port for connection */
   memcpy(&sa, &addr->sa, sizeof(sa));
   sa_in = (struct sockaddr_in*) &sa;
@@ -326,14 +364,9 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 	{
 	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
 	  g_free(s);
-	  if (socks_addr) gnet_inetaddr_delete (socks_addr);
 	  return NULL;
 	}
     }
-
-  /* Swap the SOCK server back */
-  if (socks_addr_save)
-    addr = socks_addr_save;
 
   /* Save address */ 
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
@@ -351,7 +384,6 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
   state->func = func;
   state->data = data;
   state->flags = flags;
-  state->socks_addr = socks_addr;
   state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
 					GNET_ANY_IO_CONDITION,
 					gnet_tcp_socket_new_async_cb, 
@@ -390,22 +422,8 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   if (fcntl(state->socket->sockfd, F_SETFL, state->flags) != 0)
     goto error;
 
-  /* Negotiate with SOCKS? */
-  if (state->socks_addr)
-    {
-      GInetAddr* addr;
-      int rv;
-
-      addr = gnet_private_inetaddr_sockaddr_new(state->socket->sa);
-      rv = gnet_private_negotiate_socks_server (state->socket, addr);
-      gnet_inetaddr_delete (addr);
-      if (rv < 0)
-	goto error;
-    }
-
   /* Success */
   (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
-  gnet_inetaddr_delete (state->socks_addr);
   g_free(state);
   return FALSE;
 
@@ -413,7 +431,6 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
  error:
   (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
   gnet_tcp_socket_delete (state->socket);
-  gnet_inetaddr_delete (state->socks_addr);
   g_free(state);
 
   return FALSE;
@@ -429,13 +446,12 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
  *
  **/
 void
-gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
+gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
 {
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
 
   g_source_remove(state->connect_watch);
   gnet_tcp_socket_delete(state->socket);
-  gnet_inetaddr_delete (state->socks_addr);
   g_free (state);
 }
 
@@ -443,15 +459,13 @@ gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id)
 
 
 GTcpSocketNewAsyncID
-gnet_tcp_socket_new_async(const GInetAddr* addr,
-			  GTcpSocketNewAsyncFunc func,
-			  gpointer data)
+gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
+				  GTcpSocketNewAsyncFunc func,
+				  gpointer data)
 {
   gint sockfd;
   gint status;
   GTcpSocket* s;
-  GInetAddr* socks_addr = NULL;
-  const GInetAddr* socks_addr_save = NULL;
   struct sockaddr sa;
   struct sockaddr_in* sa_in;
   GTcpSocketAsyncState* state;
@@ -473,15 +487,6 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   s->ref_count = 1;
   s->sockfd = sockfd;
 
-  /* If there's a SOCKS server, switch addresses so we connect to
-     that. */
-  socks_addr = gnet_socks_get_server ();
-  if (socks_addr)
-    {
-      socks_addr_save = addr;
-      addr = socks_addr;
-    }
-
   /* Set up address and port for connection */
   memcpy(&sa, &addr->sa, sizeof(sa));
   sa_in = (struct sockaddr_in*) &sa;
@@ -498,15 +503,10 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
       if (status != WSAEWOULDBLOCK)
 	{
 	  (func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, data);
-	  if (socks_addr) gnet_inetaddr_delete (socks_addr);
 	  g_free(s);
 	  return NULL;
 	}
     }
-
-  /* Swap the SOCK server back */
-  if (socks_addr_save)
-    addr = socks_addr_save;
 
   /* Save address */ 
   memcpy(&s->sa, &addr->sa, sizeof(s->sa));
@@ -519,7 +519,6 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   state->func = func;
   state->data = data;
   state->socket->sockfd = sockfd;
-  state->socks_addr = socks_addr;
 
   state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
 					G_IO_IN | G_IO_ERR,
@@ -548,27 +547,13 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   if (condition & G_IO_ERR)
     goto error;
 
-  if (state->socks_addr)
-    {
-      GInetAddr* addr;
-      int rv;
-
-      addr = gnet_private_inetaddr_sockaddr_new (state->socket->sa);
-      rv = gnet_private_negotiate_socks_server (state->socket, addr);
-      gnet_inetaddr_delete (addr);
-      if (rv < 0)
-	goto error;
-    }
-
   (*state->func)(state->socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, state->data);
-  gnet_inetaddr_delete (state->socks_addr);
   g_free (state);
   return FALSE;
 
  error:
   (*state->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, state->data);
   gnet_tcp_socket_delete (state->socket);
-  gnet_inetaddr_delete (state->socks_addr);
   g_free (state);
   return FALSE;
 }
@@ -581,7 +566,6 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
 	
   g_source_remove(state->connect_watch);
   gnet_tcp_socket_delete(state->socket);
-  gnet_inetaddr_delete (state->socks_addr);
   g_free (state);
 }
 
@@ -677,7 +661,7 @@ gnet_tcp_socket_get_iochannel(GTcpSocket* socket)
 
   if (socket->iochannel == NULL)
     socket->iochannel = GNET_SOCKET_IOCHANNEL_NEW(socket->sockfd);
-  
+   
   g_io_channel_ref (socket->iochannel);
 
   return socket->iochannel;
@@ -790,7 +774,7 @@ gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos)
  *  Create and open a new #GTcpSocket with the specified port number.
  *  Use this sort of socket when you are a server and you know what
  *  the port number should be (or pass 0 if you don't care what the
- *  port is).
+ *  port is).  SOCKS is used if SOCKS is enabled.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -800,6 +784,10 @@ gnet_tcp_socket_server_new (gint port)
 {
   GInetAddr iface;
   struct sockaddr_in* sa_in;
+  
+  /* Use SOCKS if enabled */
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_new (port);
 
   /* Set up address and port (any address, any port) */
   memset (&iface, 0, sizeof(iface));
@@ -820,7 +808,8 @@ gnet_tcp_socket_server_new (gint port)
  *  interface.  Use this sort of socket when your are a server and
  *  have a specific address the server must be bound to.  If the
  *  interface address's port number is 0, the OS will choose the port.
- *  If iface is NULL, the OS will choose the address and port.
+ *  If iface is NULL, the OS will choose the address and port.  SOCKS
+ *  is used if SOCKS is enabled and the interface is NULL.
  *
  *  Returns: a new #GTcpSocket, or NULL if there was a failure.
  *
@@ -831,6 +820,10 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
   GTcpSocket* s;
   struct sockaddr_in* sa_in;
   socklen_t socklen;
+
+  /* Use SOCKS if enabled */
+  if (!iface && gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_new (0);
 
   /* Create socket */
   s = g_new0(GTcpSocket, 1);
@@ -868,7 +861,7 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
     flags = fcntl(s->sockfd, F_GETFL, 0);
     if (flags == -1)
       goto error;
-
+    
     /* Make the socket non-blocking */
     if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
       goto error;
@@ -878,18 +871,18 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
   /* Bind */
   if (bind(s->sockfd, &s->sa, sizeof(s->sa)) != 0)
     goto error;
-
+  
   /* Get the socket name - don't care if it fails */
   socklen = sizeof(s->sa);
   if (getsockname(s->sockfd, &s->sa, &socklen) != 0)
     goto error;
-
+  
   /* Listen */
   if (listen(s->sockfd, 10) != 0)
     goto error;
-
+  
   return s;
-
+  
  error:
   if (s)    		g_free(s);
   return NULL;
@@ -916,7 +909,7 @@ gnet_tcp_socket_server_new_interface (const GInetAddr* iface)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_accept (const GTcpSocket* socket)
+gnet_tcp_socket_server_accept (GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -926,8 +919,11 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
 
   g_return_val_if_fail (socket != NULL, NULL);
 
- try_again:
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_accept(socket);
 
+ try_again:
+  
   FD_ZERO(&fdset);
   FD_SET(socket->sockfd, &fdset);
 
@@ -935,12 +931,12 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
     {
       if (errno == EINTR)
 	goto try_again;
-
+      
       return NULL;
     }
 
   n = sizeof(s->sa);
-
+  
   if ((sockfd = accept(socket->sockfd, &sa, &n)) == -1)
     {
       if (errno == EWOULDBLOCK || 
@@ -982,7 +978,7 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
+gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -992,6 +988,9 @@ gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
   struct timeval tv = {0, 0};
 
   g_return_val_if_fail (socket != NULL, NULL);
+
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_accept(socket);
 
  try_again:
 
@@ -1029,7 +1028,7 @@ gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
 
 
 GTcpSocket*
-gnet_tcp_socket_server_accept (const GTcpSocket* socket)
+gnet_tcp_socket_server_accept (GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -1038,6 +1037,8 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
 
   g_return_val_if_fail (socket != NULL, NULL);
 
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_accept(socket);
 	
   FD_ZERO(&fdset);
   FD_SET((unsigned)socket->sockfd, &fdset);
@@ -1065,8 +1066,9 @@ gnet_tcp_socket_server_accept (const GTcpSocket* socket)
   return s;
 }
 
+
 GTcpSocket*
-gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
+gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -1076,6 +1078,10 @@ gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
   u_long arg;
 
   g_return_val_if_fail (socket != NULL, NULL);
+
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_accept(socket);
+
   FD_ZERO(&fdset);
   FD_SET((unsigned)socket->sockfd, &fdset);
 
@@ -1107,3 +1113,94 @@ gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
 
 
 #endif		/*********** End Windows code ***********/
+
+
+
+static gboolean tcp_socket_server_accept_async_cb (GIOChannel* iochannel, 
+						   GIOCondition condition, 
+						   gpointer data);
+
+void
+gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
+				     GTcpSocketAcceptFunc accept_func,
+				     gpointer user_data)
+{
+  GIOChannel* iochannel;
+
+  g_return_val_if_fail (socket, NULL);
+  g_return_val_if_fail (accept_func, NULL);
+  g_return_val_if_fail (!socket->accept_func, NULL);
+
+  if (gnet_socks_get_enabled())
+    return gnet_private_socks_tcp_socket_server_accept_async (socket, accept_func, user_data);
+
+  /* Save callback */
+  socket->accept_func = accept_func;
+  socket->accept_data = accept_func;
+
+  /* Add read watch */
+  iochannel = gnet_tcp_socket_get_iochannel (socket);
+  socket->accept_watch = g_io_add_watch(iochannel, 
+					G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
+					tcp_socket_server_accept_async_cb, socket);
+  g_io_channel_unref (iochannel);
+}
+
+
+
+static gboolean
+tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition, 
+				   gpointer data)
+{
+  GTcpSocket* server = (GTcpSocket*) data;
+  g_assert (server != NULL);
+
+  if (condition & G_IO_IN)
+    {
+      GTcpSocket* client;
+      gboolean destroy = FALSE;
+
+      client = gnet_tcp_socket_server_accept_nonblock (server);
+      if (!client) 
+	return TRUE;
+
+      /* Do upcall, protected by a ref */
+      gnet_tcp_socket_ref (server);
+      (server->accept_func)(server, client, server->accept_data);
+      if (server->ref_count == 1)
+	destroy = TRUE;
+      gnet_tcp_socket_unref (server);
+      if (destroy || !server->accept_watch)
+	return FALSE;
+    }
+  else
+    {
+      gnet_tcp_socket_ref (server);
+      (server->accept_func)(server, NULL, server->accept_data);
+      server->accept_watch = 0;
+      server->accept_func = NULL;
+      server->accept_data = NULL;
+      gnet_tcp_socket_unref (server);
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+
+void
+gnet_tcp_socket_server_accept_async_cancel (GTcpSocket* socket)
+{
+  g_return_if_fail (socket);
+
+  if (!socket->accept_watch)
+    return;
+
+  socket->accept_func = NULL;
+  socket->accept_data = NULL;
+
+  g_source_remove (socket->accept_watch);
+  socket->accept_watch = 0;
+}
+
+

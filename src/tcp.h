@@ -191,8 +191,35 @@ void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
 GTcpSocket* gnet_tcp_socket_server_new (gint port);
 GTcpSocket* gnet_tcp_socket_server_new_interface (const GInetAddr* iface);
 
-GTcpSocket* gnet_tcp_socket_server_accept (const GTcpSocket* socket);
-GTcpSocket* gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket);
+GTcpSocket* gnet_tcp_socket_server_accept (GTcpSocket* socket);
+GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
+
+
+/**
+ *   GTcpSocketAcceptFunc:
+ *   @server_socket: Server socket
+ *   @client_socket: Client socket
+ *   @data: User data
+ *   
+ *   Callback for gnet_tcp_socket_server_accept_async().  The socket
+ *   failed if client_socket is NULL.
+ *
+ **/
+typedef void (*GTcpSocketAcceptFunc)(GTcpSocket* server_socket, 
+				     GTcpSocket* client_socket,
+				     gpointer data);
+
+void gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
+					  GTcpSocketAcceptFunc accept_func,
+					  gpointer user_data);
+void gnet_tcp_socket_server_accept_async_cancel (GTcpSocket* socket);
+
+/* ********** */
+
+GTcpSocket* gnet_tcp_socket_new_direct (const GInetAddr* addr);
+GTcpSocketNewAsyncID gnet_tcp_socket_new_async_direct (const GInetAddr* addr, 
+						       GTcpSocketNewAsyncFunc func,
+						       gpointer data);
 
 
 #ifdef __cplusplus

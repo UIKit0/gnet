@@ -23,11 +23,11 @@
 #include "gnet-private.h"
 
 struct socks4_h {
-	guint8 vn;
-	guint8 cd;
+	guint8  vn;
+	guint8  cd;
 	guint16 dport;
 	guint32 dip;
-	guint8 userid;
+	guint8  userid;
 };
 
 struct socks5_h {
@@ -41,8 +41,16 @@ struct socks5_h {
 
 #define GNET_DEFAULT_SOCKS_VERSION 5
 
-int gnet_private_negotiate_socks_server(GTcpSocket*, const GInetAddr*);
-int gnet_private_negotiate_socks4(GIOChannel*, const GInetAddr*);
-int gnet_private_negotiate_socks5(GIOChannel*, const GInetAddr*);
+GTcpSocket* gnet_private_socks_tcp_socket_new (const GInetAddr* addr);
 
+GTcpSocketNewAsyncID
+gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr, 
+					 GTcpSocketNewAsyncFunc func,
+					 gpointer data);
+
+GTcpSocket* gnet_private_socks_tcp_socket_server_new (gint port);
+GTcpSocket* gnet_private_socks_tcp_socket_server_accept (GTcpSocket* s);
+void gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* s, 
+							GTcpSocketAcceptFunc accept_func, 
+							gpointer user_data);
 #endif /* _GNET_SOCKS_PRIVATE_H */

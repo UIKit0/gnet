@@ -30,7 +30,7 @@ static gboolean   socks_enabled = FALSE;
  *
  *  Determine whether GNet SOCKS support is enabled.
  *
- *  Returns: TRUE is SOCKS is enabled.
+ *  Returns: TRUE if SOCKS is enabled.
  *
  **/
 gboolean
@@ -72,7 +72,7 @@ gnet_socks_set_enabled (gboolean enabled)
  *
  **/
 GInetAddr*
-gnet_socks_get_server(void)
+gnet_socks_get_server (void)
 {
   GInetAddr* rv = NULL;
 
@@ -92,7 +92,7 @@ gnet_socks_get_server(void)
 	  gint port = GNET_SOCKS_PORT;
 	  int i;
 	  GInetAddr* addr;
-
+	  
 	  for (i = 0; var[i] && var[i] != ':'; ++i) ;
 	  if (i == 0) return NULL;
 	  hostname = g_strndup (var, i);
@@ -147,5 +147,3 @@ gnet_socks_set_server (const GInetAddr* ia)
 
   G_UNLOCK (socks);
 }
-
-

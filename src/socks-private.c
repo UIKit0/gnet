@@ -22,23 +22,155 @@
 #include "socks-private.h"
 
 
-int
-gnet_private_negotiate_socks_server (GTcpSocket *s, const GInetAddr *dst)
+static int socks_get_version (void);
+
+/* **************************************** */
+
+static int
+socks_get_version (void)
+{
+  char* verc;
+
+  if ((verc = g_getenv("SOCKS_VERSION"))) 
+    return atoi(verc);
+
+  return GNET_DEFAULT_SOCKS_VERSION;
+}
+
+
+/* **************************************** */
+
+
+static int socks_negotiate_connect (GTcpSocket *s, const GInetAddr *dst);
+static int socks4_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst);
+static int socks5_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst);
+
+
+GTcpSocket* 
+gnet_private_socks_tcp_socket_new (const GInetAddr* addr)
+{
+  GInetAddr* 		ss_addr = NULL;
+  GTcpSocket* 		s;
+  int			rv;
+
+  g_return_val_if_fail (addr != NULL, NULL);
+
+  /* Get SOCKS server */
+  ss_addr = gnet_socks_get_server();
+  if (!ss_addr)
+    return NULL;
+  
+  /* Connect to SOCKS server */
+  s = gnet_tcp_socket_new_direct (ss_addr);
+  if (!s)
+    {
+      gnet_inetaddr_delete (ss_addr);
+      return NULL;
+    }
+
+  /* Negotiate connection */
+  rv = socks_negotiate_connect (s, addr);
+  if (rv < 0)
+    {
+      gnet_tcp_socket_delete (s);
+      gnet_inetaddr_delete (ss_addr);
+      return NULL;
+    }
+
+  return s;
+}
+
+
+
+/* **************************************** */
+
+struct async_data
+{
+  GInetAddr* addr;
+  GTcpSocketNewAsyncFunc func;
+  gpointer data;
+};
+
+static void async_cb (GTcpSocket* socket, GTcpSocketNewAsyncStatus status, gpointer data);
+
+
+GTcpSocketNewAsyncID
+gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr, 
+					 GTcpSocketNewAsyncFunc func,
+					 gpointer data)
+{
+  GTcpSocket* 		s;
+  GInetAddr* 		ss_addr = NULL;
+  struct async_data*	ad;
+
+  g_return_val_if_fail(addr != NULL, NULL);
+  g_return_val_if_fail(func != NULL, NULL);
+
+  /* Get SOCKS server */
+  ss_addr = gnet_socks_get_server();
+  if (!ss_addr)
+    return NULL;
+
+  /* Create data */
+  ad = g_new0(struct async_data, 1);
+  ad->addr = gnet_inetaddr_clone(addr);
+  ad->func = func;
+  ad->data = data;
+
+  /* Connect to SOCKS server */
+  s = gnet_tcp_socket_new_async_direct (ss_addr, async_cb, ad);
+  if (!s)
+    {
+      gnet_inetaddr_delete (ss_addr);
+      return NULL;
+    }
+
+  return s;
+}
+
+
+
+static void
+async_cb (GTcpSocket* socket, GTcpSocketNewAsyncStatus status, gpointer data)
+{
+  struct async_data* ad = (struct async_data*) data;
+  
+  if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
+    {
+      int rv;
+
+      rv = socks_negotiate_connect (socket, ad->addr);
+      if (rv < 0)
+	goto error;
+
+      (ad->func)(socket, GTCP_SOCKET_NEW_ASYNC_STATUS_OK, ad->data);
+      gnet_inetaddr_delete (ad->addr);
+      g_free (ad);
+      return;
+    }
+
+ error:
+  (ad->func)(NULL, GTCP_SOCKET_NEW_ASYNC_STATUS_ERROR, ad->data);
+  gnet_inetaddr_delete (ad->addr);
+  g_free (ad);
+}
+
+
+
+/* **************************************** */
+
+static int
+socks_negotiate_connect (GTcpSocket *s, const GInetAddr *dst)
 {
   GIOChannel *ioc;
   int ver, ret;
-  char *verc;
-
-  if ((verc = g_getenv("SOCKS_VERSION"))) 
-    ver = atoi(verc);
-  else
-    ver = GNET_DEFAULT_SOCKS_VERSION;
 
   ioc = gnet_tcp_socket_get_iochannel(s);
+  ver = socks_get_version();
   if (ver == 5)
-    ret = gnet_private_negotiate_socks5 (ioc, dst);
+    ret = socks5_negotiate_connect (ioc, dst);
   else if (ver == 4)
-    ret = gnet_private_negotiate_socks4 (ioc, dst);
+    ret = socks4_negotiate_connect (ioc, dst);
   else
     ret = -1;
   g_io_channel_unref(ioc);
@@ -47,8 +179,35 @@ gnet_private_negotiate_socks_server (GTcpSocket *s, const GInetAddr *dst)
 }
 
 
-int
-gnet_private_negotiate_socks5 (GIOChannel *ioc, const GInetAddr *dst)
+static int
+socks4_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst)
+{
+  struct socks4_h s4h;
+  struct sockaddr_in *sa_in;
+  int len;
+
+  sa_in = (struct sockaddr_in*)&dst->sa;
+
+  s4h.vn = 4;
+  s4h.cd = 1;
+  s4h.dport = (short)sa_in->sin_port;
+  s4h.dip = (long)sa_in->sin_addr.s_addr;
+  s4h.userid = 0;
+
+  if (gnet_io_channel_writen(ioc, &s4h, 9, &len) != G_IO_ERROR_NONE)
+    return -1;
+  if (gnet_io_channel_readn(ioc, &s4h, 8, &len) != G_IO_ERROR_NONE)
+    return -1;
+
+  if ((s4h.cd != 90) || (s4h.vn != 0))
+    return -1;
+
+  return 0;
+}
+
+
+static int
+socks5_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst)
 {
   unsigned char s5r[3];
   struct socks5_h s5h;
@@ -69,11 +228,11 @@ gnet_private_negotiate_socks5 (GIOChannel *ioc, const GInetAddr *dst)
   sa_in = (struct sockaddr_in*)&dst->sa;
 
   /* fill in SOCKS5 request */
-  s5h.vn    = 5;
-  s5h.cd    = 1;
-  s5h.rsv   = 0;
-  s5h.atyp  = 1;
-  s5h.dip   = (long)sa_in->sin_addr.s_addr; 
+  s5h.vn = 5;
+  s5h.cd = 1;
+  s5h.rsv = 0;
+  s5h.atyp = 1;
+  s5h.dip = (long)sa_in->sin_addr.s_addr; 
   s5h.dport = (short)sa_in->sin_port;
 
   if (gnet_io_channel_writen(ioc, (gchar*)&s5h, 10, &len) != G_IO_ERROR_NONE)
@@ -87,28 +246,224 @@ gnet_private_negotiate_socks5 (GIOChannel *ioc, const GInetAddr *dst)
 }
 
 
-int
-gnet_private_negotiate_socks4 (GIOChannel *ioc, const GInetAddr *dst)
+/* **************************************** */
+
+static int socks5_negotiate_bind (GTcpSocket* socket, int port);
+
+static gboolean socks_tcp_socket_server_accept_async_cb (GIOChannel* iochannel, 
+							 GIOCondition condition, 
+							 gpointer data);
+
+
+GTcpSocket*
+gnet_private_socks_tcp_socket_server_new (gint port)
 {
-  struct socks4_h s4h;
-  struct sockaddr_in *sa_in;
+  GInetAddr* 		ss_addr = NULL;
+  GTcpSocket* 		s;
+  int			rv;
+
+  /* We only support SOCKS 5 */
+  if (socks_get_version () != 5)
+    return NULL;
+
+  /* Get SOCKS server */
+  ss_addr = gnet_socks_get_server();
+  if (!ss_addr)
+    return NULL;
+
+  /* Connect to SOCKS server */
+  s = gnet_tcp_socket_new_direct (ss_addr);
+  gnet_inetaddr_delete (ss_addr);
+  if (!s)
+    return NULL;
+
+  /* Negotiate connection */
+  rv = socks5_negotiate_bind (s, port);
+  if (rv < 0)
+    {
+      gnet_tcp_socket_delete (s);
+      return NULL;
+    }
+
+  return s;
+}
+
+
+static int
+socks5_negotiate_bind (GTcpSocket* socket, int port)
+{
+  GIOChannel *ioc;
+  unsigned char s5r[3];
+  struct socks5_h s5h;
+/*    struct sockaddr_in *sa_in; */
   int len;
 
-  sa_in = (struct sockaddr_in*) &dst->sa;
+  ioc = gnet_tcp_socket_get_iochannel(socket);
 
-  s4h.vn     = 4;
-  s4h.cd     = 1;
-  s4h.dport  = (short) sa_in->sin_port;
-  s4h.dip    = (long) sa_in->sin_addr.s_addr;
-  s4h.userid = 0;
+  s5r[0] = 5;
+  s5r[1] = 1;	/* no authentication */
+  s5r[2] = 0;	
 
-  if (gnet_io_channel_writen(ioc, &s4h, 9, &len) != G_IO_ERROR_NONE)
-    return -1;
-  if (gnet_io_channel_readn(ioc, &s4h, 8, &len) != G_IO_ERROR_NONE)
-    return -1;
+  if (gnet_io_channel_writen(ioc, s5r, 3, &len) != G_IO_ERROR_NONE)
+    goto error;
+  if (gnet_io_channel_readn(ioc, s5r, 2, &len) != G_IO_ERROR_NONE)
+    goto error;
+  if ((s5r[0] != 5) || (s5r[1] != 0))
+    goto error;
+	
+  /* FIX  sa_in = (struct sockaddr_in*)&bnd->sa;*/
+  
+  /* fill in SOCKS5 request */
+  s5h.vn = 5;
+  s5h.cd = 2;  /* bind */
+  s5h.rsv = 0;
+  s5h.atyp = 1;
+  s5h.dip = 0; /* FIX: INADDR_ANY? */
+  s5h.dport = g_htons(port);	/* FIX: IS THIS RIGHT? */
 
-  if ((s4h.cd != 90) || (s4h.vn != 0))
-    return -1;
+  if (gnet_io_channel_writen(ioc, (gchar*)&s5h, 10, &len) != G_IO_ERROR_NONE)
+    goto error;
+  /* this reply simply confirms */
+  if (gnet_io_channel_readn(ioc, (gchar*)&s5h, 10, &len) != G_IO_ERROR_NONE)
+    goto error;
+  /* make sure we have a connection */
+  if (s5h.cd != 0)
+    goto error;
 
   return 0;
+
+ error:
+  g_io_channel_unref(ioc);
+  return -1;
+}
+
+
+
+GTcpSocket*
+gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
+{
+  struct socks5_h s5h;	/* FIX: Server does not reply with a socks5_h, does it? */
+  int len;
+  GIOChannel* iochannel;
+  GIOError error;
+  GTcpSocket* s;
+  GTcpSocket* new_socket;
+
+  g_return_val_if_fail (socket, NULL);
+
+
+  /* this reply reveals the connecting hosts ip and port */
+  iochannel = gnet_tcp_socket_get_iochannel(socket);
+  error = gnet_io_channel_readn(iochannel, (gchar*) &s5h, 10, &len);
+  g_io_channel_unref (iochannel);
+  if (error != G_IO_ERROR_NONE)
+    return NULL;
+
+  /* The client socket is the server socket */
+  s = g_new0(GTcpSocket, 1);
+  s->sockfd = socket->sockfd;
+  /* FIX: Set s->sa from the server response */
+  s->ref_count = 1;
+
+  /* Create a new server socket (we just use the sockfd) */
+  new_socket = gnet_private_socks_tcp_socket_server_new (0 /* FIX */);
+  if (new_socket == NULL)
+    {
+      g_free (s);
+      return NULL;
+    }
+  
+  /* Copy the fd over and delete the new socket */
+  socket->sockfd = new_socket->sockfd;
+  g_free (new_socket);
+
+  /* Hand over IOChannel */
+  if (socket->accept_watch)
+    {
+      g_source_remove (socket->accept_watch);
+      socket->accept_watch = 0;
+    }
+  s->iochannel = socket->iochannel;
+  socket->iochannel = NULL;
+
+  /* Reset the async watch if necessary */
+  if (socket->accept_func)
+    {
+      GIOChannel* iochannel;
+
+      /* This will recreate the IOChannel */
+      iochannel = gnet_tcp_socket_get_iochannel (socket);
+
+      /* Set the watch on the new IO channel */
+      socket->accept_watch = g_io_add_watch(iochannel, 
+					    G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
+					    socks_tcp_socket_server_accept_async_cb, socket);
+      g_io_channel_unref (iochannel);
+    }
+
+  return s;
+}
+
+
+void
+gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* socket, 
+						   GTcpSocketAcceptFunc accept_func, 
+						   gpointer user_data)
+{
+  GIOChannel* iochannel;
+
+  g_return_val_if_fail (socket, NULL);
+  g_return_val_if_fail (accept_func, NULL);
+  g_return_val_if_fail (!socket->accept_func, NULL);
+
+  /* Save callback */
+  socket->accept_func = accept_func;
+  socket->accept_data = accept_func;
+
+  /* Add read watch */
+  iochannel = gnet_tcp_socket_get_iochannel (socket);
+  socket->accept_watch = g_io_add_watch(iochannel, 
+					G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL, 
+					socks_tcp_socket_server_accept_async_cb, socket);
+  g_io_channel_unref (iochannel);
+}
+
+
+
+static gboolean
+socks_tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition, 
+					 gpointer data)
+{
+  GTcpSocket* server = (GTcpSocket*) data;
+
+  g_assert (server);
+
+  if (condition & G_IO_IN)
+    {
+      GTcpSocket* client;
+
+      client = gnet_private_socks_tcp_socket_server_accept (server);
+      if (!client) 
+	return TRUE;
+
+      (server->accept_func)(server, client, server->accept_data);
+
+      return FALSE;
+    }
+  else /* error */
+    {
+      gnet_tcp_socket_ref (server);
+
+      (server->accept_func)(server, NULL, server->accept_data);
+
+      server->accept_watch = 0;
+      server->accept_func = NULL;
+      server->accept_data = NULL;
+
+      gnet_tcp_socket_unref (server);
+
+      return FALSE;
+    }
+
+  return FALSE;
 }

@@ -1,3 +1,22 @@
+Wed Jan 30 20:22:33 2002  David Helder  <dhelder@umich.edu>
+
+	* src/sha.c (gnet_sha_new_string): Fixed warning
+	* src/md5.c (gnet_md5_new_string): "
+
+	* src/tcp.c (gnet_tcp_socket_server_accept_async): Added.  We
+	    need this to simplify SOCKS code.  Setting a read watch
+	    on a socket is now DEPRICATED.  Use this instead.
+
+	* src/tcp.c (gnet_tcp_socket_server_accept): No longer const.
+
+	* src/tcp.c, socks.c: Move most SOCKS logic to socks.c.
+	   Add _direct versions in tcp and _socks in socks-private
+	   for SOCKSified functions.
+
+	* src/pack.c (gnet_calcsize): Not _ALL_ arguments should be
+	   passed, not just the dynamic arguments.  (Otherwise,
+	   pack_strdup wouldn't work.)
+
 Sun Dec 22 20:36:57 2001  Ross Golder  <ross@golder.org>
 
 	* gnet-config.in (lib_gnet): Fixed breakage if GLIB_LIBS contains spaces

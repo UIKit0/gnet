@@ -486,7 +486,7 @@ gnet_sha_new_string (const gchar* str)
 
   for (i = 0; i < (GNET_SHA_HASH_LENGTH * 2); ++i)
     {
-      guint val;
+      guint val = 0;
 
       switch (str[i])
 	{

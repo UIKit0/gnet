@@ -296,13 +296,10 @@ gnet_pack_strdup (const gchar* format, gchar** buffer, ...)
 /**
  *  gnet_calcsize:
  *  @format: Pack format
- *  @Varargs: Dynamic variables
+ *  @Varargs: Variables
  *
  *  Calculate the size of the buffer needed to pack the given format.
- *  Only strings and bytes types (with associated parameters) should
- *  be passed as arguments.  Specifically: 's', 'S', 'r', 'R', and 'p'
- *  types.  For example, for 'i', the integer SHOULD NOT be passed.
- *  For 'R', the raw bytes and the length should be passed.
+ *  All arguments should be passed.
  *
  *  Returns: number of bytes required to pack; -1 if error.
  *  

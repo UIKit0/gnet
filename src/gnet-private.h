@@ -129,6 +129,10 @@ struct _GTcpSocket
   struct sockaddr sa;		/* Why not an InetAddr? */
   guint ref_count;
   GIOChannel* iochannel;
+
+  GTcpSocketAcceptFunc accept_func;
+  gpointer accept_data;
+  guint	accept_watch;
 };
 
 struct _GUnixSocket
@@ -223,7 +227,6 @@ typedef struct _GTcpSocketAsyncState
   gpointer data;
   gint flags;
   guint connect_watch;
-  GInetAddr* socks_addr;
 #ifdef GNET_WIN32
   gint errorcode;
 #endif
