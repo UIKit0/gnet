@@ -1087,7 +1087,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
     }
 
   n = sizeof(sa);
-  if ((sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n)) == -1)
+  if ((sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n)) == INVALID_SOCKET)
     {
       /* If we get an error, return.  We don't want to try again as we
          do in gnet_tcp_socket_server_accept() - it might cause a
@@ -1115,6 +1115,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   struct sockaddr_storage sa;
   fd_set fdset;
   GTcpSocket* s;
+  socklen_t n;
 
   g_return_val_if_fail (socket != NULL, NULL);
 
@@ -1125,19 +1126,16 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   FD_SET((unsigned)socket->sockfd, &fdset);
 
   if (select(socket->sockfd + 1, &fdset, NULL, NULL, NULL) == -1)
-    {
       return NULL;
-    }
 
   /* Don't force the socket into blocking mode */
 
-  sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, NULL);
+  n = sizeof(sa);
+  sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n);
   /* if it fails, looping isn't going to help */
 
   if (sockfd == INVALID_SOCKET)
-    {
       return NULL;
-    }
 
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
@@ -1157,6 +1155,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   fd_set fdset;
   GTcpSocket* s;
   u_long arg;
+  socklen_t n;
 
   g_return_val_if_fail (socket != NULL, NULL);
 
@@ -1176,7 +1175,8 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   if(ioctlsocket(socket->sockfd, FIONBIO, &arg))
     return NULL;
 
-  sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, NULL);
+  n = sizeof(sa);
+  sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n);
   /* if it fails, looping isn't going to help */
 
   if (sockfd == INVALID_SOCKET)

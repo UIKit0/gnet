@@ -1,3 +1,11 @@
+Wed Jun 11 20:29:44.29    Andrew Lanoix <alanoix@umich.edu>
+
+	*src/tcp.c (gnet_tcp_socket_server_accept): Pass size of
+		sockaddr_storage to accept() to get address of incoming
+		conections on win32. Found by Hans Petter Jansson <hpj@ximian.com>
+	*src/tcp.c (gnet_tcp_socket_server_accept_nonblock): "
+	*src/tcp.c: Fix typecasting to satisfy Visual Studio
+		
 Sat Jun  6 17:07:19.73    Andrew Lanoix <alanoix@umich.edu>
 
 	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): 
