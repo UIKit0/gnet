@@ -1,3 +1,10 @@
+Sun Dec  8 21:34:16 2002  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c: New inetaddr_new_list{_async} functions.
+	    I patched up the Windows code the best I could, but
+	    it probably doesn't compile.
+	* tests/dnstest.c: Updated to test list functions.
+	
 Fri Dec  6 15:57:39 2002  David Helder  <dhelder@umich.edu>
 
 	* *: More IPv6 hacking.  DNS and IPv6 should work.  

@@ -194,30 +194,34 @@ struct _GInetAddr
 /* **************************************** */
 /* Async functions			*/
 
-gboolean gnet_inetaddr_new_async_cb (GIOChannel* iochannel, 
-				     GIOCondition condition, 
-				     gpointer data);
+gboolean gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel, 
+					  GIOCondition condition, 
+					  gpointer data);
 
-typedef struct _GInetAddrAsyncState 
+
+typedef struct _GInetAddrNewListState 
 {
-  GInetAddr* 	ia;
+  GList*	ias;
   gint		port;
-  GInetAddrNewAsyncFunc func;
+  GInetAddrNewListAsyncFunc func;
   gpointer 	data;
+
 #ifndef GNET_WIN32		/* UNIX */
 #ifdef HAVE_LIBPTHREAD		/* UNIX pthread	*/
   pthread_mutex_t mutex;
   gboolean	is_cancelled;
   gboolean	lookup_failed;
   guint 	source;
+
 #else			       	/* UNIX process	*/
   int 		fd;
   pid_t 	pid;
   GIOChannel* 	iochannel;
   guint 	watch;
-  guchar 	buffer[17];
   int 		len;
   gboolean 	in_callback;
+  guchar 	buffer[256];
+
 #endif
 #else				/* Windows */
   int 		WSAhandle;
@@ -226,7 +230,18 @@ typedef struct _GInetAddrAsyncState
   gboolean 	in_callback;
 #endif
 
-} GInetAddrAsyncState;
+} GInetAddrNewListState;
+
+
+
+typedef struct _GInetAddrNewState 
+{
+  GInetAddrNewListAsyncID	list_id;
+  GInetAddrNewAsyncFunc 	func;
+  gpointer 			data;
+  gboolean			in_callback;
+
+} GInetAddrNewState;
 
 
 

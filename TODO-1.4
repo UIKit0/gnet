@@ -6,9 +6,6 @@ Please email gnet-dev@gnetlibrary.org with your comments.
 
 API cleanup
 
-- TCP new async's callback may be called in the create function.
-    Maybe fix this to be consistent with InetAddr.
-
 - Move udp_mcast_ttl to mcast?
 
    Check: what's the difference between IP_TTL and IP_MULTICAST_TTL
@@ -53,32 +50,15 @@ New features
     TODO:
 	- how should binding work?
 	- fix mcast join
-	- set sa_len?
 	- fix gnet_inetaddr_is_*()
 	- check storage format for in6_addr
 	- fix everything marked FIX
-	- some versions of getaddrinfo() are not threadsafe.
-		handle in configure.ac (e.g. FreeBSD, OpenBSD)
-	- remove "nicename" functionality.  this doesn't always
-		work. e.g., h_name of www.microsoft.com is 
-		www.microsoft.akadns.net.  Intent was to get 
-		canonical name for short names, like
-		speak.eecs.umich.edu for speak.
-
 
    - inetaddr_equal - can a ipv4 address equal an ipv6 address?
 
 
 - New Inetaddr functions:
 
-    GList* 
-    gnet_inetaddr_new_list(const gchar* name, gint port);
-    (and new_list_async())
-    
-    gethostbyname()/getaddrinfo() returns a list of addresses.
-    This API exposes this.  gnet_inetaddr_new() returns the first
-    address in the list (as before).
-    
     ISSUE: getaddrinfo() returns IPv6 addresses before IPv4
     addresses.  If gnet_inetaddr_new() uses
     gnet_inetaddr_new_list(), this may break compatibility.
@@ -100,8 +80,27 @@ New features
     BINARY INCOMPATIBLE: Will use IPv6 in situations where IPv4
     was used before.
 
+    references:
+    Basic Socket Interface Extensions for IPv6	
+	ftp://ftp.isi.edu/in-notes/rfc2553.txt
+
+
+    Do inetaddr async funcs need an error status?  Isn't NULL enough?
+
 
 Possible changes
+
+- Derive TcpSocket/UdpSocket from IOChannel
+
+    There's a one-to-one correspondence between the two.  A socket is
+    a type of IO channel.  It may be easier for new users to learn and
+    use the library if we do this.  It does add a layer of indirection
+    which could hurt performance.
+
+    MOSTLY-COMPATIBLE: socket_get_iochannel would be needed.
+
+    Likewise, derive server and conn from TcpSocket
+
 
 - Differentiate between creating and connecting.  
 
@@ -123,29 +122,17 @@ Possible changes
     SOURCE-CODE INCOMPATIBLE: Easy to update.
 
 
-- Use GString instead of gchar* where appropriate.  
-
-    I don't know about this, but it could be done if there's demand
-    for it.
-
-    SOURCE-CODE INCOMPATIBLE: Difficult to update.
-
-
-- Derive TcpSocket/UdpSocket from IOChannel
-
-    There's a one-to-one correspondence between the two.  A socket is
-    a type of IO channel.  It may be easier for new users to learn and
-    use the library if we do this.  It does add a layer of indirection
-    which could hurt performance.
-
-    MOSTLY-COMPATIBLE: socket_get_iochannel would be needed.
-
-    Likewise, derive server and conn from TcpSocket
-
-
 
 ========================================
 DONE
+
+- New functions: gnet_inetaddr_new_list() and
+    gnet_inetaddr_new_list_async().  These return GLists of
+    GInetAddr's.  A domain name can map to serveral addresses.
+    This new API exposes this.
+
+- TCP new async's callback may be called in the create function.
+    Maybe fix this to be consistent with InetAddr.
 
 - URI parsing:
 

@@ -78,7 +78,6 @@ gnet_io_channel_writen (GIOChannel    *channel,
 }
 
 
-
 /**
  * gnet_io_channel_readn:
  * @channel: the channel to read from

@@ -29,15 +29,20 @@
 gchar* host;
 gboolean do_reverse = FALSE;
 gboolean do_async = FALSE;
+gboolean do_single = FALSE;
 
 int    verbose = 1;
 gint   num_runs = 1;
 gint   runs_done = 0;
 
-void lookup_block(int run);
+void lookup_block_single (int run);
+void lookup_block_list (int run);
 
 void lookup_async_forward(int run);
 void inetaddr_cb(GInetAddr* inetaddr, GInetAddrAsyncStatus status, gpointer data);
+
+void lookup_async_forward_list (int run);
+void list_cb(GList* ialist, GInetAddrAsyncStatus status, gpointer data);
 
 void lookup_async_reverse(int run);
 void reverse_inetaddr_cb(gchar* name, GInetAddrAsyncStatus status, 
@@ -67,7 +72,7 @@ main(int argc, char** argv)
   gnet_init ();
 
   /* Parse arguments */
-  while ((c = getopt(argc, argv, "arn:")) != -1) 
+  while ((c = getopt(argc, argv, "arsn:")) != -1) 
     {
       switch (c) 
 	{
@@ -76,6 +81,9 @@ main(int argc, char** argv)
 	  break;
 	case 'r':
 	  do_reverse = TRUE;
+	  break;
+	case 's':
+	  do_single = TRUE;
 	  break;
 	case 'n':
 	  num_runs = atoi(optarg);
@@ -98,7 +106,12 @@ main(int argc, char** argv)
 
       g_print ("Using blocking DNS\n");
       for (i = 0; i < num_runs; ++i)
-	lookup_block(i);
+	{
+	  if (do_single)
+	    lookup_block_single(i);
+	  else
+	    lookup_block_list(i);
+	}
     }
   else
     {
@@ -112,7 +125,12 @@ main(int argc, char** argv)
       for (i = 0; i < num_runs; ++i)
 	{
 	  if (!do_reverse)
-	    lookup_async_forward(i);
+	    {
+	      if (do_single)
+		lookup_async_forward(i);
+	      else
+		lookup_async_forward_list(i);
+	    }
 	  else
 	    lookup_async_reverse(i);
 	}
@@ -125,7 +143,7 @@ main(int argc, char** argv)
 
 
 void
-lookup_block (int run)
+lookup_block_single (int run)
 {
   GInetAddr* ia;
   gchar* name;
@@ -136,6 +154,7 @@ lookup_block (int run)
       g_print ("DNS lookup for %s failed\n", host);
       exit (EXIT_FAILURE);
     }
+
   g_assert (gnet_inetaddr_get_port(ia) == PORT);
 
   if (do_reverse)
@@ -151,6 +170,46 @@ lookup_block (int run)
   g_free (name);
 
   gnet_inetaddr_delete (ia);
+}
+
+
+void
+lookup_block_list (int run)
+{
+  GList* ialist;
+  GList* i;
+  gchar* name;
+
+  ialist = gnet_inetaddr_new_list(host, PORT);
+  if (ialist == NULL)
+    {
+      g_print ("DNS lookup for %s failed\n", host);
+      exit (EXIT_FAILURE);
+    }
+
+  for (i = ialist; i != NULL; i = i->next)
+    {
+      GInetAddr* ia;
+
+      ia = (GInetAddr*) i->data;
+
+      g_assert (gnet_inetaddr_get_port(ia) == PORT);
+
+      if (do_reverse)
+	name = gnet_inetaddr_get_name(ia);
+      else
+	name = gnet_inetaddr_get_canonical_name(ia);
+
+      g_assert (name != NULL);
+
+      if (verbose)
+	g_print ("%d: %s -> %s\n", run, host, name);
+
+      g_free (name);
+      gnet_inetaddr_delete (ia);
+    }
+
+  g_list_free (ialist);
 }
 
 
@@ -197,6 +256,56 @@ inetaddr_cb(GInetAddr* ia, GInetAddrAsyncStatus status, gpointer data)
     exit(EXIT_SUCCESS);
 }
 
+/* ******************** */
+
+void
+lookup_async_forward_list (int run)
+{
+  gnet_inetaddr_new_list_async(host, PORT, list_cb, GINT_TO_POINTER(run));
+}
+
+
+void
+list_cb(GList* ialist, GInetAddrAsyncStatus status, gpointer data)
+{
+  int run = GPOINTER_TO_INT(data);
+
+  if (status == GINETADDR_ASYNC_STATUS_OK)
+    {
+      GList* i;
+
+      for (i = ialist; i != NULL; i = i->next)
+	{
+	  GInetAddr* ia;
+	  gchar* cname;
+
+	  ia = (GInetAddr*) i->data;
+
+	  g_assert (gnet_inetaddr_get_port(ia) == PORT);
+
+	  cname = gnet_inetaddr_get_canonical_name(ia);
+	  g_assert (cname);
+
+	  if (verbose)
+	    g_print ("%d: %s -> %s\n", run, host, cname);
+
+	  g_free (cname);
+	  gnet_inetaddr_delete (ia);
+	}
+    }
+
+  else if (verbose)
+    g_print("%d: DNS lookup failed\n", run);
+
+  runs_done++;
+
+  if (runs_done == num_runs)
+    exit(EXIT_SUCCESS);
+}
+
+
+
+/* ******************** */
 
 void
 lookup_async_reverse (int run)
@@ -262,9 +371,10 @@ reverse_inetaddr_cb (gchar* name, GInetAddrAsyncStatus status,
 void
 usage(void)
 {
-  g_print ("dnstest -a -r -n <num runs> <host>\n");
+  g_print ("dnstest -a -r -s -n <num runs> <host>\n");
   g_print ("  -a                asynchronous\n");
   g_print ("  -r                reverse lookup\n");
+  g_print ("  -s                single forward lookup\n");
   g_print ("  -n <num runs>     number of lookups\n");
 
   exit (EXIT_FAILURE);

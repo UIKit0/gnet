@@ -50,11 +50,10 @@ typedef struct _GInetAddr GInetAddr;
 /**
  *   GInetAddrAsyncStatus:
  * 
- *   Status of a asynchronous lookup (from gnet_inetaddr_new_async()
- *   or gnet_inetaddr_get_name_async()), passed by
- *   GInetAddrNewAsyncFunc or GInetAddrGetNameAsyncFunc.  More errors
- *   may be added in the future, so it's best to compare against
- *   %GINETADDR_ASYNC_STATUS_OK.
+ *   Status of a asynchronous lookup (from a
+ *   gnet_inetaddr_SOMETHING_async() function), passed by
+ *   GInetAddrSOMETHINGFunc.  More errors may be added in the future,
+ *   so it's best to compare against %GINETADDR_ASYNC_STATUS_OK.
  *
  **/
 typedef enum {
@@ -67,7 +66,7 @@ typedef enum {
 /**
  *   GInetAddrNewAsyncID:
  * 
- *   ID of an asynchronous InetAddr creation started with
+ *   ID of an asynchronous GInetAddr creation/lookup started with
  *   gnet_inetaddr_new_async().  The creation can be canceled by
  *   calling gnet_inetaddr_new_async_cancel() with the ID.
  *
@@ -92,17 +91,60 @@ typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr,
 
 
 
+/**
+ *   GInetAddrNewListAsyncID:
+ * 
+ *   ID of an asynchronous GInetAddr list creation/lookup started with
+ *   gnet_inetaddr_new_list_async().  The creation can be canceled by
+ *   calling gnet_inetaddr_new_list_async_cancel() with the ID.
+ *
+ **/
+typedef gpointer GInetAddrNewListAsyncID;
+
+
+
+/**
+ *   GInetAddrNewListAsyncFunc:
+ *   @list: List of GInetAddr's (callee owned)
+ *   @status: Status of the lookup
+ *   @data: User data
+ *   
+ *   Callback for gnet_inetaddr_new_list_async().  Callee owns the
+ *   list of GInetAddr's; the callee should delete the addresses and
+ *   the list when it is done with them.
+ *
+ **/
+typedef void (*GInetAddrNewListAsyncFunc)(GList* ialist, 
+					  GInetAddrAsyncStatus status, 
+					  gpointer data);
+
+
+
+
 /* ********** */
 
 GInetAddr* gnet_inetaddr_new (const gchar* name, gint port);
 
-GInetAddrNewAsyncID 
-gnet_inetaddr_new_async (const gchar* name, gint port, 
-			 GInetAddrNewAsyncFunc func, gpointer data);
 
+GInetAddrNewAsyncID 
+           gnet_inetaddr_new_async (const gchar* name, gint port, 
+				    GInetAddrNewAsyncFunc func, 
+				    gpointer data);
 void       gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id);
 
+
+GList*     gnet_inetaddr_new_list (const gchar* name, gint port);
+
+
+GInetAddrNewListAsyncID 
+           gnet_inetaddr_new_list_async (const gchar* name, gint port, 
+					 GInetAddrNewListAsyncFunc func, 
+					 gpointer data);
+void       gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID async_id);
+
+
 GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
+
 
 GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
 
