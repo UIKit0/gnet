@@ -66,6 +66,14 @@
 
 @packet: 
 
+<!-- ##### FUNCTION mcast_socket_port_new ##### -->
+<para>
+
+</para>
+
+@port: 
+@Returns: 
+
 <!-- ##### FUNCTION udp_socket_new ##### -->
 <para>
 
@@ -73,12 +81,13 @@
 
 @Returns: 
 
-<!-- ##### FUNCTION mcast_socket_port_new ##### -->
+<!-- ##### FUNCTION mcast_socket_join_group ##### -->
 <para>
 
 </para>
 
-@port: 
+@ms: 
+@ia: 
 @Returns: 
 
 <!-- ##### USER_FUNCTION GTcpSocketNonblockFunc ##### -->
@@ -89,15 +98,6 @@
 @socket: 
 @status: 
 @data: 
-
-<!-- ##### FUNCTION mcast_socket_join_group ##### -->
-<para>
-
-</para>
-
-@ms: 
-@ia: 
-@Returns: 
 
 <!-- ##### ENUM GTcpSocketAsyncStatus ##### -->
 <para>
@@ -254,6 +254,12 @@ Interfaces for internal use
 @b: 
 @Returns: 
 
+<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
+<para>
+
+</para>
+
+
 <!-- ##### FUNCTION inetaddr_sockaddr_new ##### -->
 <para>
 
@@ -261,12 +267,6 @@ Interfaces for internal use
 
 @sa: 
 @Returns: 
-
-<!-- ##### ENUM GTcpSocketConnectStatus ##### -->
-<para>
-
-</para>
-
 
 <!-- ##### FUNCTION inetaddr_equal ##### -->
 <para>
@@ -568,20 +568,20 @@ Internal interfaces
 @us: 
 @Returns: 
 
-<!-- ##### FUNCTION udp_socket_port_new ##### -->
-<para>
-
-</para>
-
-@port: 
-@Returns: 
-
 <!-- ##### FUNCTION udp_socket_has_packet ##### -->
 <para>
 
 </para>
 
 @s: 
+@Returns: 
+
+<!-- ##### FUNCTION udp_socket_port_new ##### -->
+<para>
+
+</para>
+
+@port: 
 @Returns: 
 
 <!-- ##### FUNCTION inetaddr_clone ##### -->

@@ -1,9 +1,14 @@
+Tue May 22 09:59:57 2001  David Helder  <dhelder@umich.edu>
+
+	* src/pack.[hc]: Made int types unsigned where
+	   possible.
+
 Mon May 21 22:22:01 2001  Andrew Lanoix <alanoix@umich.edu>
 
-	*udp.c: gnet_udp_socket_new_interface() use 
+	* udp.c: gnet_udp_socket_new_interface() use 
 	GNET_CLOSE_SOCKET instead of close()
 
-	*conn.h: #include<memory.h>
+	* conn.h: #include<memory.h>
 
 Sun May 20 22:32:19 2001  David Helder  <dhelder@umich.edu>
 
