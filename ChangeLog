@@ -1,3 +1,24 @@
+Tue Jan 21 14:02:43 2003  David Helder  <dhelder@umich.edu>
+
+	* src/uri.c (gnet_uri_new): Fix reading IPv6 name.  Convert
+	   isspace to locale-independent macro.  (Thanks Eric!)
+
+	* src/server.[hc]: The server func no longer has a status
+	   argument.  If the conn is NULL, it's an error.  Otherwise,
+	   it's good.
+
+	* src/server.c (server_accept_cb): Call gnet_conn_new_socket() to
+	   create conn.
+
+	* src/iochannel.[hc]: Remove experimental functions.  These
+	   were complex and bug-prone.  Most the functionality is
+	   now in conn.
+
+	* src/conn.[hc]: Reworked entire API.
+
+	* src/uri.[hc]: Added escape/unescape code.  Contributed by
+	   Eric Williams (ericjw@umich.edu).
+
 Thu Jan  9 18:15:16 2003  David Helder  <dhelder@umich.edu>
 
 	* tests/client_server_test.pl: Remove IPC::Open2.

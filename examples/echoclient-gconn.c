@@ -27,8 +27,7 @@
 static gboolean ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition, 
 			      gpointer data);
 
-static gboolean ob_conn_func (GConn* conn, GConnStatus status, 
-			      gchar* buffer, gint length, gpointer user_data);
+static void ob_conn_func (GConn* conn, GConnEvent* event, gpointer user_data);
 
 
 static int lines_pending = 0;
@@ -63,7 +62,8 @@ main(int argc, char** argv)
   g_assert (conn);
 
   /* Connect */
-  gnet_conn_connect (conn, 90000);
+  gnet_conn_connect (conn);
+  gnet_conn_timeout (conn, 30000);  /* 30 second timeout */
 
   /* Read from stdin */
   in = g_io_channel_unix_new (fileno(stdin));
@@ -123,8 +123,7 @@ ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
       /* Otherwise, we read something */
       else
 	{
-	  gnet_conn_write (conn, g_memdup(buffer, bytes_read), 
-			   bytes_read, 0);
+	  gnet_conn_write (conn, buffer, bytes_read);
 	  lines_pending++;
 	}
     }
@@ -138,58 +137,59 @@ ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
 
 
 /* Handle GConn events */
-static gboolean
-ob_conn_func (GConn* conn, GConnStatus status, 
-	      gchar* buffer, gint length, gpointer user_data)
+static void
+ob_conn_func (GConn* conn, GConnEvent* event, gpointer user_data)
 {
-  switch (status)
+  switch (event->type)
     {
-
-    case GNET_CONN_STATUS_CONNECT:
+    case GNET_CONN_CONNECT:
       {
-	gnet_conn_readline (conn, NULL, 1024, 60000);
+	gnet_conn_timeout (conn, 0);
+	gnet_conn_readline (conn);
 	break;
       }
 
-    case GNET_CONN_STATUS_READ:
+    case GNET_CONN_READ:
       {
-	gint i;
+	/* Write line out */
+	event->buffer[event->length - 1] = '\n';
+	fwrite (event->buffer, event->length, 1, stdout);
 
-	fwrite (buffer, length, 1, stdout);
-
-	for (i = 0; i < length; ++i)
-	  if (buffer[i] == '\n')
-	    lines_pending--;
-
+	/* Check if done */
+	lines_pending--;
 	if (lines_pending == 0 && read_eof)
 	  exit (EXIT_SUCCESS);
 
-	return TRUE;
+	/* Read another line */
+	gnet_conn_readline (conn);
+
 	break;
       }
 
-    case GNET_CONN_STATUS_WRITE:
+    case GNET_CONN_WRITE:
       {
-	g_free (buffer);
+	; /* do nothing */
 	break;
       }
 
-    case GNET_CONN_STATUS_CLOSE:
+    case GNET_CONN_CLOSE:
       {
-	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	gnet_conn_delete (conn);
 	exit (EXIT_SUCCESS);
+	break;
       }
 
-    case GNET_CONN_STATUS_TIMEOUT:
+    case GNET_CONN_TIMEOUT:
       {
-	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	gnet_conn_delete (conn);
 	fprintf (stderr, "Connection timeout\n");
 	exit (EXIT_FAILURE);
+	break;
       }
 
-    case GNET_CONN_STATUS_ERROR:
+    case GNET_CONN_ERROR:
       {
-	gnet_conn_delete (conn, TRUE /* delete write buffers */);
+	gnet_conn_delete (conn);
 	fprintf (stderr, "Connection failure\n");
 	exit (EXIT_FAILURE);
 	break;
@@ -198,6 +198,4 @@ ob_conn_func (GConn* conn, GConnStatus status,
     default:
       g_assert_not_reached ();
     }
-
-  return FALSE;	/* rv only matters for a read */
 }

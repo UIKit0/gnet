@@ -25,11 +25,9 @@
 
 #include <signal.h>
 
-static void ob_server_func (GServer* server, GServerStatus status, 
-			    GConn* conn, gpointer user_data);
-static gboolean ob_client_func (GConn* conn, GConnStatus status, 
-				gchar* buffer, gint length, 
-				gpointer user_data);
+static void ob_server_func (GServer* server, GConn* conn, gpointer user_data);
+static void ob_client_func (GConn* conn, GConnEvent* event, 
+			    gpointer user_data);
 static void ob_sig_int (int signum);
 
 static GServer* ob_server = NULL;
@@ -75,64 +73,54 @@ main(int argc, char** argv)
 
 
 static void
-ob_server_func (GServer* server, GServerStatus status, 
-		struct _GConn* conn, gpointer user_data)
+ob_server_func (GServer* server, GConn* conn, gpointer user_data)
 {
-  switch (status)
+  if (conn)
     {
-    case GNET_SERVER_STATUS_CONNECT:
-      {
-	conn->func = ob_client_func;
-	gnet_conn_readline (conn, NULL, 1024, 30000);
-	break;
-      }
-
-    case GNET_SERVER_STATUS_ERROR:
-      {
-	gnet_server_delete (server);
-	exit (EXIT_FAILURE);
-	break;
-      }
+      gnet_conn_set_callback (conn, ob_client_func, NULL);
+      gnet_conn_readline (conn);
+    }
+  else	/* Error */
+    {
+      gnet_server_delete (server);
+      exit (EXIT_FAILURE);
     }
 }
 
 
-static gboolean
-ob_client_func (GConn* conn, GConnStatus status, 
-		gchar* buffer, gint length, gpointer user_data)
+static void
+ob_client_func (GConn* conn, GConnEvent* event, gpointer user_data)
 {
-  switch (status)
+  switch (event->type)
     {
-    case GNET_CONN_STATUS_READ:
+    case GNET_CONN_READ:
       {
-	gchar* buffer_copy;
+	event->buffer[event->length-1] = '\n';
+	gnet_conn_write (conn, event->buffer, event->length);
 
-	buffer_copy = g_memdup (buffer, length);
+/*  	fwrite (event->buffer, event->length, 1, stdout); */
 
-	gnet_conn_write (conn, buffer_copy, length, 0);
+	gnet_conn_readline (conn);
 	break;
       }
 
-    case GNET_CONN_STATUS_WRITE:
+    case GNET_CONN_WRITE:
       {
-	g_free (buffer);
+	; /* Do nothing */
 	break;
       }
 
-    case GNET_CONN_STATUS_CLOSE:
-    case GNET_CONN_STATUS_TIMEOUT:
-    case GNET_CONN_STATUS_ERROR:
+    case GNET_CONN_CLOSE:
+    case GNET_CONN_TIMEOUT:
+    case GNET_CONN_ERROR:
       {
-	gnet_conn_delete (conn, TRUE);
+	gnet_conn_delete (conn);
 	break;
       }
 
     default:
       g_assert_not_reached ();
     }
-
-  return TRUE;	/* TRUE means read more if status was read, otherwise
-                   its ignored */
 }
 
 

@@ -9,13 +9,6 @@ you can help.
 Features
 --------
 
-- Move udp_mcast_ttl to mcast?
-
-- Support IPv6.  
-
-    Someone with an IPv6 system needs to do this and test it.  I don't
-    want to just use IPv6 structures and claim it's IPv6 compliant.
-
 - Include more protocols
 
     The goal here is to add basic implementations of popular file
@@ -45,7 +38,7 @@ Features
     The GTK doc folks are working on a new standard for describing
     interfaces.  Use this when it's done.
 
-- Add gnet_tcp_socket_sendfile(TcpSocket*, GIOChannel*).  sendfile is
+- Add gnet_tcp_socket_sendfile(GTcpSocket*, GIOChannel*).  sendfile is
     available on Linux and Windows, but I'm sure the semantics are
     different (that's why having this function would be handy).
 
@@ -64,9 +57,6 @@ Internal Improvements
 - gnet_inetaddr_new will give you localhost if you give it an hostname
     of "" in Linux.  Is this true on all systems?  If not, we should
     do a return-on-fail when we get an empty string.
-
-- Use getnameinfo when available (for IPv6?)
-
 
 
 Other
@@ -95,28 +85,7 @@ Undecided (things discussed, but not decided on)
     (or replace the vtable in GIOChannel with one that also includes
     these functions).
 
-- Differentiate between creating and connecting.  
-
-    So you'd have:
-
-    tcp_socket_new(void)            (this just calls socket())
-    tcp_socket_connect(InetAddr*)   (this calls bind(), connect())
-
-    The advantage is that we could set options and also allow the user
-    to bind to a specific address if the user is on a multi-homed
-    system.  
-
-    Or, add tcp_socket_new_bind() and have tcp_socket_new call it.
-    You shouldn't have to bind a connecting socket, so this may not be
-    needed.  (Well, sometimes you do for UDP.)
-
-    GConn does this to an extent, so it may not be necessary.
-
 - Support out-of-band data.  How useful is this?  How portable?
-
-- Add lightweight intraprocess communication stuff via IOChannel.  I'd
-    like a shared buffer and a message queue.  These should be simple
-    to do.  (GLib 2.0 might have some of this?)
 
 
 Never (things that will probably never become part of GNet)

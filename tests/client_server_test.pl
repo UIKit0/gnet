@@ -6,7 +6,7 @@
 #   to run a specific test.
 
 my $bin_dir = '../examples';
-my $port = 5678;
+my $port = 8174;
 my $debug = 0;
 my $testfile = 'testfile';
 
@@ -24,6 +24,10 @@ if ($#ARGV == 2)
 {
     test ($ARGV[0], $ARGV[1], $ARGV[2]);
     exit 0;
+}
+elsif ($#ARGV != -1)
+{
+    usage();
 }
 
 test ("echoserver", 	    "echoclient", 1);
@@ -86,7 +90,10 @@ exit 0;
 
 sub usage
 {
-    print STDERR ("Usage: $0 [OPTIONS]\n");
+    print STDERR ("Usage: $0\n");
+    print STDERR ("          - Runs all tests\n");
+    print STDERR ("       $0 <server> <client> <num runs>\n");
+    print STDERR ("          - Runs a specific test\n");
     exit 1;
 }
 

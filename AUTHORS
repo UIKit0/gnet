@@ -4,6 +4,10 @@ GNet AUTHORS
 
 GNet authors and other contributors
 
+Lead Developer
+--------------
+David Helder 	   <dhelder@umich.edu>
+
 Authors
 -------
 David Helder 	   <dhelder@umich.edu>		 Original version, Deb's
@@ -15,6 +19,7 @@ Eric Cronin	   <ecronin@umich.edu>		 MacOSX port
 David Bolcsfoldi   <david.bolcsfoldi@telia.com>	 URL improvements
 Marius Eriksen	   <marius@umich.edu>		 SOCKS support
 Mark Ferlatte      <ferlatte@cryptio.net>	 Unix sockets
+Eric Williams	   <ericjw@umich.edu>		 URL escape code
 
 Credits
 -------

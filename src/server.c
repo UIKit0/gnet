@@ -33,11 +33,11 @@ static void server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpo
  *  @func: Callback to call when a connection is accepted
  *  @user_data: Data to pass to callback.
  *
- *  Create a new #GServer object representing a server.  The interface
- *  is specified as in gnet_tcp_socket_server_new_interface().
- *  Usually, @iface is NULL and the port is set to a specific port.
- *  The callback is called whenever a new connection arrives or if the
- *  socket fails.
+ *  Create a new #GServer object representing a server.  Normally,
+ *  @iface is NULL to bind to all interfaces and @port is a specific
+ *  number.  The callback is called whenever a new connection arrives
+ *  or if there is a server error.  The callback is not called again
+ *  after a server error.
  *
  *  Returns: A new #GServer.
  *
@@ -86,7 +86,6 @@ gnet_server_delete (GServer* server)
       if (server->socket)	 gnet_tcp_socket_delete (server->socket);
       if (server->iface)     	 gnet_inetaddr_delete (server->iface);
 
-      memset (server, 0, sizeof(*server));
       g_free (server);
     }
 }
@@ -102,29 +101,16 @@ server_accept_cb (GTcpSocket* server_socket, GTcpSocket* client, gpointer data)
 
   if (client)
     {
-      GIOChannel* iochannel = NULL;
       GConn* conn; 
 
-      /* Get the iochannel */
-      iochannel = gnet_tcp_socket_get_io_channel (client);
-      g_return_if_fail (iochannel);
+      conn = gnet_conn_new_socket (client, NULL, NULL);
 
-      /* Create a Connection */
-      conn = g_new0 (GConn, 1);
-      conn->socket = client;
-      conn->iochannel = iochannel;
-      conn->inetaddr = gnet_tcp_socket_get_inetaddr (client);
-      conn->hostname = gnet_inetaddr_get_canonical_name (conn->inetaddr);
-      conn->port = gnet_inetaddr_get_port (conn->inetaddr);
-
-      (server->func)(server, GNET_SERVER_STATUS_CONNECT, 
-		     conn, server->user_data);
+      (server->func)(server, conn, server->user_data);
     }
   else
     {
       gnet_tcp_socket_server_accept_async_cancel (server_socket);
-      (server->func)(server, GNET_SERVER_STATUS_ERROR, 
-		     NULL, server->user_data);
+      (server->func)(server, NULL, server->user_data);
     }
 }
 

@@ -1,5 +1,5 @@
 /* GNet - Networking library
- * Copyright (C) 2000-2001  David Helder, David Bolcsfoldi
+ * Copyright (C) 2000-2003  David Helder, David Bolcsfoldi, Eric Williams
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -19,6 +19,90 @@
 
 #include "gnet-private.h"
 #include "uri.h"
+
+static void   field_unescape (gchar *str);
+static gchar* field_escape (gchar* str, guchar mask);
+
+#define USERINFO_ESCAPE_MASK	0x01
+#define PATH_ESCAPE_MASK	0x02
+#define QUERY_ESCAPE_MASK	0x04
+#define FRAGMENT_ESCAPE_MASK	0x08
+
+static guchar neednt_escape_table[] = 
+{
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x0f, 0x00, 0x00, 0x0f, 0x00, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0e, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x00, 0x0f, 0x00, 0x0c, 
+	0x0e, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x00, 0x0f, 0x00, 0x00, 0x0f, 
+	0x00, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 0x0f, 
+	0x0f, 0x0f, 0x0f, 0x00, 0x00, 0x00, 0x0f, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+
+/*
+Perl code to generate above table:
+
+#!/usr/bin/perl
+
+$ok = "abcdefghijklmnopqrstuvwxyz" . 
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" .
+      "0123456789" .
+      "-_.!~*'()";
+$userinfo_ok = ';:&=+\$,';
+$path_ok     = ':\@&=+\$,;/';
+$query_ok    = ';/?:\@&=+\$,';
+$fragment_ok = ';/?:\@&=+\$,';
+
+for ($i = 0; $i < 32; $i++)
+{
+    print "  ";
+    for ($j = 0; $j < 8; $j++)
+    {
+	$num = 0;
+	$letter = chr(($i * 8) + $j);
+
+	$num |= 0b0001  if (index($userinfo_ok, $letter) != -1);
+	$num |= 0b0010  if (index($path_ok,     $letter) != -1);
+	$num |= 0b0100  if (index($query_ok,    $letter) != -1);
+	$num |= 0b1000  if (index($fragment_ok, $letter) != -1);
+	$num |= 0b1111  if (index($ok,          $letter) != -1);
+
+	printf "0x%02x, ", $num;
+    }
+    print "\n";
+}
+*/
+
+
+/* our own ISSPACE.  ANSI isspace is local dependent */
+#define ISSPACE(C) (((C) >= 9 && (C) <= 13) || (C) == ' ')
+
 
 
 /**
@@ -43,7 +127,7 @@ gnet_uri_new (const gchar* uri)
 
   /* Skip initial whitespace */
   p = uri;
-  while (*p && isspace((int)*p))
+  while (*p && ISSPACE((int)*p))
     ++p;
   if (!*p)	/* Error if it's just a string of space */
     return NULL;
@@ -67,26 +151,14 @@ gnet_uri_new (const gchar* uri)
     {
       p += 2;
 
-      /* Look for username and password */
+      /* Userinfo */
       temp = p;
       while (*p && *p != '@' && *p != '/' ) /* Look for @ or / */
 	++p;
-      if (*p == '@') /* Found user and possibly password */
+      if (*p == '@') /* Found userinfo */
 	{
-	  const gchar* hoststart;
-
-	  hoststart = p + 1;
-	  p = temp;
-          
-	  /* Password */
-	  while (*p != 0 && *p != ':' && *p != '@')
-	    ++p;
-	  if (*p == ':') /* Has password */
-	    guri->password = g_strndup(p + 1, hoststart - p - 2);
-
-	  /* User */
-	  guri->user = g_strndup(temp, p - temp);
-	  p = hoststart;
+	  guri->userinfo = g_strndup (temp, p - temp);
+	  ++p;
 	}
       else
 	p = temp;
@@ -99,10 +171,11 @@ gnet_uri_new (const gchar* uri)
 	  p++;  /* Skip [ */
 	  temp = p;
 	  while (*p && *p != ']') ++p;
-	  if ((p - temp) == 0) 
+	  if ((p - temp) == 0)
 	    goto error;
 	  guri->hostname = g_strndup (temp, p - temp);
-	  p++;	/* Skip ] */
+	  if (*p)
+	    p++;	/* Skip ] (if there) */
 	}
       else
 	{
@@ -185,8 +258,7 @@ gnet_uri_new_fields (const gchar* scheme, const gchar* hostname,
 /**
  *  gnet_uri_new_fields_all:
  *  @scheme: scheme
- *  @user: user
- *  @password: password
+ *  @userinfo: userinfo
  *  @hostname: hostname
  *  @port: port
  *  @path: path
@@ -200,17 +272,16 @@ gnet_uri_new_fields (const gchar* scheme, const gchar* hostname,
  *
  **/
 GURI*
-gnet_uri_new_fields_all (const gchar* scheme, const gchar* user, 
-			 const gchar* password, const gchar* hostname, 
-			 const gint port, const gchar* path, 
+gnet_uri_new_fields_all (const gchar* scheme, const gchar* userinfo, 
+			 const gchar* hostname, const gint port, 
+			 const gchar* path, 
 			 const gchar* query, const gchar* fragment)
 {
   GURI* uri = NULL;
 
   uri = g_new0 (GURI, 1);
   if (scheme)		uri->scheme   = g_strdup (scheme);
-  if (user)		uri->user     = g_strdup (user);
-  if (password)		uri->password = g_strdup (password);
+  if (userinfo)		uri->userinfo = g_strdup (userinfo);
   if (hostname)		uri->hostname = g_strdup (hostname);
   uri->port = port;
   if (path)		uri->path     = g_strdup (path);
@@ -239,8 +310,7 @@ gnet_uri_clone (const GURI* uri)
 
   uri2 = g_new0 (GURI, 1);
   uri2->scheme   = g_strdup (uri->scheme);
-  uri2->user     = g_strdup (uri->user);
-  uri2->password = g_strdup (uri->password);
+  uri2->userinfo = g_strdup (uri->userinfo);
   uri2->hostname = g_strdup (uri->hostname);
   uri2->port     = uri->port;
   uri2->path 	 = g_strdup (uri->path);
@@ -264,8 +334,7 @@ gnet_uri_delete (GURI* uri)
   if (uri)
     {
       g_free (uri->scheme);
-      g_free (uri->user);
-      g_free (uri->password);
+      g_free (uri->userinfo);
       g_free (uri->hostname);
       g_free (uri->path);
       g_free (uri->query);
@@ -293,8 +362,7 @@ gnet_uri_hash (gconstpointer p)
   g_return_val_if_fail (uri, 0);
 
   if (uri->scheme)	h =  g_str_hash (uri->scheme);
-  if (uri->user)	h ^= g_str_hash (uri->user);
-  if (uri->password)	h ^= g_str_hash (uri->password);
+  if (uri->userinfo)	h ^= g_str_hash (uri->userinfo);
   if (uri->hostname)	h ^= g_str_hash (uri->hostname);
   h ^= uri->port;
   if (uri->path)	h ^= g_str_hash (uri->path);
@@ -328,8 +396,7 @@ gnet_uri_equal (gconstpointer p1, gconstpointer p2)
 
   if (uri1->port == uri2->port &&
       !SAFESTRCMP(uri1->scheme, uri2->scheme) &&
-      !SAFESTRCMP(uri1->user, uri2->user) &&
-      !SAFESTRCMP(uri1->password, uri2->password) &&
+      !SAFESTRCMP(uri1->userinfo, uri2->userinfo) &&
       !SAFESTRCMP(uri1->hostname, uri2->hostname) &&
       !SAFESTRCMP(uri1->path, uri2->path) &&
       !SAFESTRCMP(uri1->query, uri2->query) &&
@@ -365,50 +432,26 @@ gnet_uri_set_scheme (GURI* uri, const gchar* scheme)
 
 
 /**
- *  gnet_uri_set_user:
+ *  gnet_uri_set_userinfo:
  *  @uri: uri
- *  @user: user
+ *  @userinfo: userinfo
  *
- *  Set the user in the URI.
+ *  Set the userinfo in the URI.
  *
  **/
 void
-gnet_uri_set_user (GURI* uri, const gchar* user)
+gnet_uri_set_userinfo (GURI* uri, const gchar* userinfo)
 {
   g_return_if_fail (uri);
 
-  if (uri->user)
+  if (uri->userinfo)
     {
-      g_free (uri->user);
-      uri->user = NULL;
+      g_free (uri->userinfo);
+      uri->userinfo = NULL;
     }
 
-  if (user)
-    uri->user = g_strdup (user);
-}
-
-
-/**
- *  gnet_uri_set_password:
- *  @uri: uri
- *  @password: password
- *
- *  Set the password in the URI.
- *
- **/
-void
-gnet_uri_set_password (GURI* uri, const gchar* password)
-{
-  g_return_if_fail (uri);
-
-  if (uri->password)
-    {
-      g_free (uri->password);
-      uri->password = NULL;
-    }
-
-  if (password)
-    uri->password = g_strdup (password);
+  if (userinfo)
+    uri->userinfo = g_strdup (userinfo);
 }
 
 
@@ -524,6 +567,149 @@ gnet_uri_set_fragment (GURI* uri, const gchar* fragment)
 }
 
 
+void
+gnet_uri_escape (GURI* uri)
+{
+  g_return_if_fail (uri);
+  
+  uri->userinfo = field_escape (uri->userinfo, USERINFO_ESCAPE_MASK);
+  uri->path     = field_escape (uri->path,     PATH_ESCAPE_MASK);
+  uri->query    = field_escape (uri->query,    QUERY_ESCAPE_MASK);
+  uri->fragment = field_escape (uri->fragment, FRAGMENT_ESCAPE_MASK);
+}
+
+void
+gnet_uri_unescape (GURI* uri)
+{
+  g_return_if_fail (uri);
+
+  if (uri->userinfo)
+    field_unescape (uri->userinfo);
+  if (uri->path)
+    field_unescape (uri->path);
+  if (uri->query)
+    field_unescape (uri->query);
+  if (uri->fragment)
+    field_unescape (uri->fragment);
+}
+
+
+static gchar*
+field_escape (gchar* str, guchar mask)
+{
+  gint len;
+  gint i;
+  gboolean must_escape = FALSE;
+  gchar* dst;
+  gint j;
+
+  if (str == NULL)
+    return NULL;
+
+  /* Roughly calculate buffer size */
+  len = 0;
+  for (i = 0; str[i]; i++)
+    {
+      if (neednt_escape_table[(guint) str[i]] & mask)
+	len++;
+      else
+	{
+	  len += 3;
+	  must_escape = TRUE;
+	}
+    }
+
+  /* Don't escape if unnecessary */
+  if (must_escape == FALSE)
+    return str;
+	
+  /* Allocate buffer */
+  dst = (gchar*) g_malloc(len + 1);
+
+  /* Copy */
+  for (i = j = 0; str[i]; i++, j++)
+    {
+      /* Unescaped character */
+      if (neednt_escape_table[(guint) str[i]] & mask)
+	{
+	  dst[j] = str[i];
+	}
+
+      /* Escaped character */
+      else
+	{
+	  dst[j] = '%';
+
+	  if ((str[i] >> 4) < 10)
+	    dst[j+1] = (str[i] >> 4) + '0';
+	  else
+	    dst[j+1] = (str[i] >> 4) + 'a' - 10;
+
+	  if ((str[i] & 0x0f) < 10)
+	    dst[j+2] = (str[i] & 0x0f) + '0';
+	  else
+	    dst[j+2] = (str[i] & 0x0f) + 'a' - 10;
+
+	  j += 2;  /* and j is incremented in loop too */
+	}
+    }
+  dst[j] = '\0';
+
+  g_free (str);
+  return dst;
+}
+
+
+
+static void
+field_unescape (gchar* s)
+{
+  gchar* src;
+  gchar* dst;
+
+  for (src = dst = s; *src; ++src, ++dst)
+    {
+      if (src[0] == '%' && src[1] != '\0' && src[2] != '\0')
+	{
+	  gint high, low;
+
+	  if ('a' <= src[1] && src[1] <= 'f')
+	    high = src[1] - 'a' + 10;
+	  else if ('A' <= src[1] && src[1] <= 'F')
+	    high = src[1] - 'A' + 10;
+	  else if ('0' <= src[1] && src[1] <= '9')
+	    high = src[1] - '0';
+	  else  /* malformed */
+	    goto regular_copy;
+
+	  if ('a' <= src[2] && src[2] <= 'f')
+	    low = src[2] - 'a' + 10;
+	  else if ('A' <= src[2] && src[2] <= 'F')
+	    low = src[2] - 'A' + 10;
+	  else if ('0' <= src[2] && src[2] <= '9')
+	    low = src[2] - '0';
+	  else  /* malformed */
+	    goto regular_copy;
+
+	  *dst = (char)((high << 4) + low);
+	  src += 2;
+	}
+      else
+	{
+	regular_copy:
+	  *dst = *src;
+	}
+    }
+
+  *dst = '\0';
+}
+
+
+
+
+
+
+
 /**
  *  gnet_uri_get_nice_string:
  *  @uri: URI
@@ -547,16 +733,12 @@ gnet_uri_get_nice_string (const GURI* uri)
   if (uri->scheme)
     g_string_sprintfa (buffer, "%s:", uri->scheme);
 
-  if (uri->user || uri->password || uri->hostname || uri->port)
+  if (uri->userinfo || uri->hostname || uri->port)
     g_string_append (buffer, "//");
 
-  if (uri->user)
+  if (uri->userinfo)
     {
-      buffer = g_string_append (buffer, uri->user);
-
-      if (uri->password)
-	g_string_sprintfa (buffer, ":%s", uri->password);
-
+      buffer = g_string_append (buffer, uri->userinfo);
       buffer = g_string_append_c (buffer, '@');
     }
 
@@ -575,7 +757,7 @@ gnet_uri_get_nice_string (const GURI* uri)
   if (uri->path)
     {
       if (*uri->path == '/' ||
-	  !(uri->user || uri->password || uri->hostname || uri->port))
+	  !(uri->userinfo || uri->hostname || uri->port))
 	g_string_append (buffer, uri->path);
       else
 	g_string_sprintfa (buffer, "/%s", uri->path);

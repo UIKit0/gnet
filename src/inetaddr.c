@@ -1480,7 +1480,7 @@ void
 gnet_inetaddr_delete (GInetAddr* ia)
 {
   if (ia != NULL)
-    gnet_inetaddr_unref(ia);
+    gnet_inetaddr_unref (ia);
 }
 
 

@@ -21,13 +21,6 @@
 #ifndef _GNET_SERVER_H
 #define _GNET_SERVER_H
 
-/* 
-   This module is experimental, buggy, and unstable.  Use at your own
-   risk.  To use this module, define GNET_EXPERIMENTAL before
-   including gnet.h.
-*/
-#ifdef GNET_EXPERIMENTAL 
-
 #include <glib.h>
 #include "gnetconfig.h"
 #include "tcp.h"
@@ -44,35 +37,18 @@ typedef struct _GServer GServer;
 
 
 /**
- *   GServerStatus:
- * 
- *   Status of #GServer, passed by #GServerFunc.
- *
- **/
-typedef enum
-{
-  GNET_SERVER_STATUS_CONNECT,
-  GNET_SERVER_STATUS_ERROR
-
-} GServerStatus;
-
-
-/**
  *   GServerFunc:
  *   @server: Server
- *   @status: Server status
  *   @conn: New connection (or NULL if error)
  *   @user_data: User data specified in gnet_server_new()
  *   
- *   Callback for gnet_server_new().  When a new client connects the
- *   function is called with status CONNECT and conn is the new
- *   connection.  The conn is owned by the callee.  If an error
- *   occurs, the function is called with status ERROR and conn is
- *   NULL.
+ *   Callback for gnet_server_new().  When a client connects, this
+ *   callback is called with a new connection.  If the server fails,
+ *   this callback is called with @conn set to NULL.  The callback is
+ *   not called again.
  *
  **/
 typedef void (*GServerFunc)(GServer* server,
-			    GServerStatus status, 
 			    GConn* conn,
 			    gpointer user_data);
 
@@ -100,7 +76,5 @@ void      gnet_server_delete (GServer* server);
 #ifdef __cplusplus
 }
 #endif				/* __cplusplus */
-
-#endif /* GNET_EXPERIMENTAL */
 
 #endif /* _GNET_SERVER_H */
