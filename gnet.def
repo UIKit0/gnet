@@ -202,3 +202,17 @@ EXPORTS
 	gnet_uri_set_fragment; 
 	gnet_uri_hash; 
 	gnet_uri_equal;
+	;
+	gnet_conn_http_new;
+	gnet_conn_http_set_uri;
+	gnet_conn_http_set_header;
+	gnet_conn_http_set_max_redirects;
+	gnet_conn_http_set_timeout;
+	gnet_conn_http_set_user_agent;
+	gnet_conn_http_set_method;
+	gnet_conn_http_run_async;
+	gnet_conn_http_run;
+	gnet_conn_http_steal_buffer;
+	gnet_conn_http_cancel;
+	gnet_conn_http_delete;
+	gnet_http_get;

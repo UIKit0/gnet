@@ -1,3 +1,17 @@
+2005-02-19  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* RELEASE:
+	  Added some notes on which win32 files need to be changed
+	  when new source files and/or new symbols are added.
+	  
+	* NEWS:
+	* configure.ac:
+	  Set to 2.0.7
+	  
+	* gnet.def:
+	  Make sure the new gnet_conn_http_* and gnet_http_get symbols
+	  are exported in the win32 DLLs.
+
 === release 2.0.6 ===
 
 2005-02-17  Tim-Philipp Müller  <tim at centricular dot net>

@@ -4,6 +4,13 @@ GNet NEWS
 
 Changes in Gnet
 
+2.0.7 (current CVS)
+-----
+* Misc bug fixes:
+   - Make sure new GConnHttp symbols are
+     exported on win32 as well.
+(Unreleased)
+
 2.0.6
 -----
 * New experimental HTTP Conn module (Tim Muller)

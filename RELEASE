@@ -1,0 +1,11 @@
+
+Adding new source files:
+ - add to GNET.DSP
+ - add to src/Makefile.am
+ - add to src/makefile.mingw
+
+Adding new API:
+ - add to gnet.def
+ - make sure GNET_INTERFACE_AGE in
+   configure.ac is set to 0
+
