@@ -54,7 +54,7 @@ inet_pton(int af, const char* src, void* dst)
 }
 
 static const char* 
-inet_ntop(int af, const void *src, char *dst, size_t size)
+inet_ntop(int af, const void* src, char* dst, size_t size)
 {
   struct in_addr addr = *(struct in_addr*) src;
   char* buf;
@@ -1592,7 +1592,7 @@ gnet_inetaddr_unref (GInetAddr* inetaddr)
 {
   g_return_if_fail(inetaddr != NULL);
 
-  inetaddr->ref_count++;
+  inetaddr->ref_count--;
 
   if (inetaddr->ref_count == 0)
     {

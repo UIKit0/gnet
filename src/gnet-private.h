@@ -103,6 +103,7 @@ struct sockaddr_storage {
 #include <ws2tcpip.h>
 
 #define socklen_t gint32
+#define in_addr_t guint32
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
 

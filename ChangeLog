@@ -1,3 +1,10 @@
+Tue May 13 23:54:59 2003  David Helder  <dhelder@umich.edu>
+
+	* src/gnet-private.h (in_addr_t): define for win32. (guint32)
+
+	* src/inetaddr.c (gnet_inetaddr_unref): ref_count--, not
+	   ++ (thanks Pierre-Emmanuel Gros).  :-\
+
 Tue May 13 22:31:19 2003  David Helder  <dhelder@umich.edu>
 
 	* NEWS: 2.0.3
