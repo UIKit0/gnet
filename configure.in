@@ -292,7 +292,16 @@ fi
 
 # ########################################
 
-echo "*** Please ignore any warnings about missing files here"
+debian_output=""
+if test -d debian ; then
+  debian_output="debian/rules debian/control"
+fi
+
+rpm_output=""
+if test -f gnet.spec.in ; then
+  rpm_output="gnet.spec"
+fi
+
 AC_OUTPUT([
 	gnet-config 
 	Makefile 
@@ -301,9 +310,7 @@ AC_OUTPUT([
 	tests/Makefile 
 	doc/Makefile 
 	doc/gnet-config.1
-	debian/rules
-	debian/control
 	gnetconfig.h
-	gnet.spec ],
-    [chmod +x gnet-config debian/rules
-])
+	$debian_output
+	$rpm_output ],
+    [chmod -f +x gnet-config debian/rules])

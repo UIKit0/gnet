@@ -1,3 +1,11 @@
+Wed Oct 24 17:35:51 2001  David Helder  <dhelder@umich.edu>
+
+	* configure.in: Check if debian or RPM files are 
+	   there before AC_OUTPUT.  This causes an autoconf
+	   warning, but not a configure warning.
+	* Makefile.am: Removed .spec and debian from dist.  If
+	   you really need it, I can put it back.
+
 Wed Oct 24 10:02:43 2001  Ross Golder  <ross@golder.org>
 
 	* src/pack.h: Commented out argument to #endif.
