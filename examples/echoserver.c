@@ -146,10 +146,10 @@ static gboolean async_client_iofunc (GIOChannel* client,
 static void
 clientstate_delete (ClientState* state)
 {
-  gnet_tcp_socket_delete (state->socket);
   if (state->out_watch)
     g_source_remove (state->out_watch);
   g_io_channel_unref (state->iochannel);
+  gnet_tcp_socket_delete (state->socket);
   g_free(state);
 }
 
@@ -176,8 +176,6 @@ async_echoserver(gint port)
 
   /* Start the main loop */
   g_main_run(main_loop);
-
-
 }
 
 
@@ -197,7 +195,7 @@ async_server_iofunc (GIOChannel* iochannel, GIOCondition condition,
       ClientState* client_state = NULL;
 
       client = gnet_tcp_socket_server_accept(server);
-      g_assert(client != NULL);
+      g_assert (client != NULL);
 
       client_iochannel = gnet_tcp_socket_get_iochannel(client);
       g_assert (client_iochannel != NULL);
@@ -206,10 +204,9 @@ async_server_iofunc (GIOChannel* iochannel, GIOCondition condition,
       client_state->socket = client;
       client_state->iochannel = client_iochannel;
 
-      g_io_add_watch(client_iochannel, 
-		     G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
-		     async_client_iofunc, client_state);
-	
+      g_io_add_watch (client_iochannel, 
+		      G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,
+		      async_client_iofunc, client_state);
     }
   else
     {
@@ -336,7 +333,6 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	 client_state->out_watch = 0;
 	 return FALSE;
        }
-
    }
 
   return TRUE;

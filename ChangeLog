@@ -1,3 +1,7 @@
+Mon Oct 30 20:34:29 2000  David Helder  <dhelder@umich.edu>
+
+	* examples/echoserver.c (async_echoserver): Code cleanups
+
 Sun Oct 29 22:44:22 2000  David Helder  <dhelder@umich.edu>
 
 	* examples/echo*.c: s/--nonblocking/--async/ since it's
