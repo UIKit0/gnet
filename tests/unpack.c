@@ -291,13 +291,13 @@ main(int argc, char* argv[])
 
   /* ********** */
 
-  voidp = (void*) 0xaaaaaaaa;
-  gnet_unpack ("<P", &buf[1], sizeof(void*), &voidp);
+  voidp = (void*) 0x04030201;
+  gnet_unpack ("<v", &buf[1], sizeof(void*), &voidp);
   printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: 4030201\n");
 
-  voidp = (void*) 0xaaaaaaaa;
-  gnet_unpack ("<P", &bufh[1], sizeof(void*), &voidp);
+  voidp = (void*) 0xf4f3f2f1;
+  gnet_unpack ("<v", &bufh[1], sizeof(void*), &voidp);
   printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: f4f3f2f1\n");
 
@@ -411,13 +411,13 @@ main(int argc, char* argv[])
 
   /* ********** */
 
-  voidp = (void*) 0xaaaaaaaa;
-  gnet_unpack (">P", &buf[1], sizeof(void*), &voidp);
+  voidp = (void*) 0x01020304;
+  gnet_unpack (">v", &buf[1], sizeof(void*), &voidp);
   printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: 1020304\n");
 
-  voidp = (void*) 0xaaaaaaaa;
-  gnet_unpack (">P", &bufh[1], sizeof(void*), &voidp);
+  voidp = (void*) 0xf1f2f3f4;
+  gnet_unpack (">v", &bufh[1], sizeof(void*), &voidp);
   printf ("\noutput:    %x\n", (unsigned int) voidp);
   printf ("should be: f1f2f3f4\n");
 
