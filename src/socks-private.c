@@ -412,9 +412,9 @@ gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* socket,
 {
   GIOChannel* iochannel;
 
-  g_return_val_if_fail (socket, NULL);
-  g_return_val_if_fail (accept_func, NULL);
-  g_return_val_if_fail (!socket->accept_func, NULL);
+  g_return_if_fail (socket);
+  g_return_if_fail (accept_func);
+  g_return_if_fail (!socket->accept_func);
 
   /* Save callback */
   socket->accept_func = accept_func;

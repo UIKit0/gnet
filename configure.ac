@@ -15,6 +15,7 @@ AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 # Activate maintainer mode
 AM_MAINTAINER_MODE
 
+
 ###############################
 # Package info
 AC_REVISION([$Revision$])
@@ -33,6 +34,7 @@ GNET_MICRO_VERSION=1
 GNET_INTERFACE_AGE=0
 GNET_BINARY_AGE=1
 GNET_VERSION=$GNET_MAJOR_VERSION.$GNET_MINOR_VERSION.$GNET_MICRO_VERSION
+
 AC_SUBST(GNET_MAJOR_VERSION)
 AC_SUBST(GNET_MINOR_VERSION)
 AC_SUBST(GNET_MICRO_VERSION)
@@ -56,29 +58,38 @@ AC_DEFINE_UNQUOTED(GNET_MICRO_VERSION, $GNET_MICRO_VERSION)
 AC_DEFINE_UNQUOTED(GNET_INTERFACE_AGE, $GNET_INTERFACE_AGE)
 AC_DEFINE_UNQUOTED(GNET_BINARY_AGE, $GNET_BINARY_AGE)
 
-###############################
-# Setup debugging flags
-#
-# This isn't actually used anywhere!
-# Figure out debugging default, prior to $ac_help setup
-# if test `expr $GNET_MINOR_VERSION \% 2` = 1; then
-#	debug_default=yes
-# else
-#	debug_default=no
-# fi
 
-# Declare --enable-* args and collect ac_help strings
-AC_ARG_ENABLE(debug,
-	      AC_HELP_STRING([--enable-debug],
-			     [turn on debugging]),
-	      [test "$cflags_set" = set || CFLAGS="$CFLAGS -g"
-	       GNET_DEBUG_FLAGS="-DG_ENABLE_DEBUG"],
-	      [GNET_DEBUG_FLAGS="-DG_DISABLE_ASSERT -DG_DISABLE_CHECKS"])
-AC_SUBST(GNET_DEBUG_FLAGS)
+####################
+# Glib2
 
 AC_ARG_ENABLE(glib2,
 	      AC_HELP_STRING([--enable-glib2],
 			     [prefer glib 2.0 over glib 1.2]))
+
+
+####################
+# Debug
+
+AC_ARG_ENABLE(debug, [  --enable-debug=[no/minimum/yes] turn on debugging (default=minimum],,enable_debug=minimum)
+
+AC_MSG_CHECKING([debug level])
+if test "x$enable_debug" = "xyes"; then
+  if test x$cflags_set != xset ; then
+      case " $CFLAGS " in
+      *[[\ \	]]-g[[\ \	]]*) ;;
+      *) CFLAGS="$CFLAGS -g" ;;
+      esac
+  fi
+	
+  GNET_DEBUG_FLAGS="-DG_ENABLE_DEBUG"
+else
+  if test "x$enable_debug" = "xno"; then
+    GNET_DEBUG_FLAGS="-DG_DISABLE_ASSERT -DG_DISABLE_CHECKS"
+  fi
+fi
+AC_SUBST(GNET_DEBUG_FLAGS)
+AC_MSG_RESULT($enable_debug)
+
 
 ###############################
 # Check for programs
