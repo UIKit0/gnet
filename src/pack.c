@@ -21,8 +21,8 @@
 #include <string.h>
 
 
-static int strlenn(char* str, int n);
-static void flipmemcpy(char* dst, char* src, int n);
+static guint strlenn(char* str, guint n);
+static void flipmemcpy(char* dst, char* src, guint n);
 
 
 #define MEMCPY(D,S,N)				\
@@ -71,8 +71,8 @@ static void flipmemcpy(char* dst, char* src, int n);
   } while(0)
 
 
-static int
-strlenn(char* str, int n)
+static guint
+strlenn(char* str, guint n)
 {
   int len = 0;
 
@@ -83,7 +83,7 @@ strlenn(char* str, int n)
 
 
 static void 
-flipmemcpy(char* dst, char* src, int n)
+flipmemcpy(char* dst, char* src, guint n)
 {
   int nn = n;
 
@@ -492,7 +492,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 {
   guint n = 0;
   gchar* p = (gchar*) format;
-  gint mult = 0;
+  guint mult = 0;
   gint sizemode = 0;	/* 1 = little, 2 = big */
 
   g_return_val_if_fail (format, -1);
@@ -545,10 +545,10 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	  { 
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		char* s; 
-		int slen;
+		gchar* s; 
+		guint slen;
 
-		s = va_arg (args, char*);
+		s = va_arg (args, gchar*);
 		g_return_val_if_fail (s, -1);
 
 		slen = strlen(s);
@@ -565,14 +565,14 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 
 	case 'S':
 	  {
-	    char* s;
+	    gchar* s;
 
-	    s = va_arg (args, char*);
+	    s = va_arg (args, gchar*);
 	    g_return_val_if_fail (p, -1);
 
 	    if (!mult)
 	      {
-		int slen;
+		guint slen;
 
 		slen = strlen(s);
 		g_return_val_if_fail (n + slen <= len, -1);
@@ -583,7 +583,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	      }
 	    else
 	      {
-		int i;
+		guint i;
 
 		g_return_val_if_fail (n + mult <= len, -1);
 
@@ -603,11 +603,11 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	  { 
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		char* s; 
-		int ln;
+		gchar* s; 
+		guint ln;
 
-		s = va_arg (args, char*);
-		ln = va_arg (args, int);
+		s = va_arg (args, gchar*);
+		ln = va_arg (args, guint);
 
 		g_return_val_if_fail (s, -1);
 		g_return_val_if_fail (n + ln <= len, -1);
@@ -623,9 +623,9 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 
 	case 'R':  
 	  { 
-	    char* s; 
+	    gchar* s; 
 
-	    s = va_arg (args, char*);
+	    s = va_arg (args, gchar*);
 	    g_return_val_if_fail (s, -1);
 
 	    g_return_val_if_fail (mult, -1);
@@ -642,8 +642,8 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
 	  { 
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		char* s;
-		int slen;
+		gchar* s;
+		guint slen;
 
 		s = va_arg (args, char*);
 		g_return_val_if_fail (s, -1);
@@ -794,7 +794,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const guint len, va_list args)
  * 
  **/
 gint 
-gnet_unpack (const gchar* format, gchar* buffer, gint len, ...)
+gnet_unpack (const gchar* format, gchar* buffer, guint len, ...)
 {
   va_list args;
   gint rv;
@@ -821,11 +821,11 @@ gnet_unpack (const gchar* format, gchar* buffer, gint len, ...)
  *
  **/
 gint 
-gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
+gnet_vunpack (const gchar* format, gchar* buffer, guint len, va_list args)
 {
   guint n = 0;
   gchar* p = (gchar*) format;
-  gint mult = 0;
+  guint mult = 0;
   gint sizemode = 0;	/* 1 = little, 2 = big */
 
   g_return_val_if_fail (format, -1);
@@ -876,10 +876,10 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 	  { 
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		char** sp; 
-		int slen;
+		gchar** sp; 
+		guint slen;
 
-		sp = va_arg (args, char**);
+		sp = va_arg (args, gchar**);
 		g_return_val_if_fail (sp, -1);
 
 		slen = strlenn(buffer, len - n);
@@ -898,12 +898,12 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 
 	case 'S':
 	  { 
-	    char** sp; 
-	    int slen;
+	    gchar** sp; 
+	    guint slen;
 
 	    g_return_val_if_fail (mult, -1);
 
-	    sp = va_arg (args, char**);
+	    sp = va_arg (args, gchar**);
 	    g_return_val_if_fail (sp, -1);
 
 	    slen = MIN(mult, strlenn(buffer, len - n));
@@ -922,11 +922,11 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 	  { 
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		char** sp; 
-		int ln;
+		gchar** sp; 
+		guint ln;
 
-		sp = va_arg (args, char**);
-		ln = va_arg (args, int);
+		sp = va_arg (args, gchar**);
+		ln = va_arg (args, guint);
 
 		g_return_val_if_fail (sp, -1);
 		g_return_val_if_fail (n + ln <= len, FALSE);
@@ -942,9 +942,9 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 
 	case 'R':  
 	  { 
-	    char** sp; 
+	    gchar** sp; 
 
-	    sp = va_arg (args, char**);
+	    sp = va_arg (args, gchar**);
 	    g_return_val_if_fail (sp, -1);
 
 	    g_return_val_if_fail (mult, -1);
@@ -962,10 +962,10 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 	  { 
 	    for (mult=(mult?mult:1); mult; --mult)
 	      {
-		char** sp;
-		int slen;
+		gchar** sp;
+		guint slen;
 
-		sp = va_arg (args, char**);
+		sp = va_arg (args, gchar**);
 		g_return_val_if_fail (sp, -1);
 		g_return_val_if_fail (n + 1 <= len, FALSE);
 
@@ -973,7 +973,7 @@ gnet_vunpack (const gchar* format, gchar* buffer, gint len, va_list args)
 		++n;
 		g_return_val_if_fail (n + slen <= len, FALSE);
 
-		*sp = g_new(char, slen + 1);
+		*sp = g_new(gchar, slen + 1);
 		memcpy (*sp, buffer, slen); 
 		(*sp)[slen] = 0;
 		buffer += slen;
