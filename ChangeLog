@@ -1,3 +1,14 @@
+Fri Feb 23 7:44:14 2001  Andrew Lanoix  <alanoix@umich.edu>
+
+	*src/server.c added #include<memory.h>
+
+	*src/sha.c Don't #include<unistd.h> on Windows
+
+	*src/tcp gnet_tcp_socket_new_async on Windows, needed to add
+	    G_IO_ERR to g_io_add_watch() call.
+
+	*README.win32 Clarify mingw/gcc/cygwin problem.
+
 Sat Feb 17 16:17:49 2001  David Helder  <dhelder@umich.edu>
 
 	* tests/Makefile.am: Now compile tests by default

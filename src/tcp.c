@@ -438,7 +438,7 @@ gnet_tcp_socket_new_async(const GInetAddr* addr,
   state->socket->sockfd = sockfd;
 
 	state->connect_watch = g_io_add_watch(GNET_SOCKET_IOCHANNEL_NEW(s->sockfd),
-					G_IO_IN,
+					G_IO_IN | G_IO_ERR,
 					gnet_tcp_socket_new_async_cb, 
 					state);
 

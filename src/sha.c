@@ -45,8 +45,11 @@ effort (for example the reengineering of a great many Capstone chips).
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 
+#include "config.h" /* needed to define GNET_WIN32 */
+#ifndef GNET_WIN32
+#include <unistd.h>
+#endif
 
 /* The SHA block size and message digest sizes, in bytes */
 

@@ -31,8 +31,8 @@ gnet_inetaddr_gethostname() can't handle hostnames over 256 chars.
 gnet_private_inetaddr_list_interfaces() does not support more than 10
 interfaces.
 
-Compiling GNet on windows with mingw is not supported.  
-
+Compiling GNet on windows with gcc/mingw (with or without cygwin) is 
+not supported. This is because GNet requires winsock2. 
 
 How to link your project to the Gnet DLL
 ----------------------------------------
