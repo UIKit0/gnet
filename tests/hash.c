@@ -48,10 +48,8 @@ main (int argc, char* argv[])
   GSHA* sha;
   GSHA* shab;
 
-  GMainLoop* main_loop;
 
   /* ******************** */
-
 
   if (argc != 2)
     g_error ("Usage: hashcheck <filename>\n");
@@ -71,9 +69,13 @@ main (int argc, char* argv[])
     {
       buffer = mmap (NULL, length, PROT_READ, MAP_PRIVATE, fileno(file), 0);
       g_assert (buffer != NULL && ((int) buffer != -1));
+      
+      buffer = g_malloc (length);
+      g_assert (fread (buffer, length, 1, file) == 1);
     }
   else
     buffer = NULL;
+  fclose (file);
 
   /* **************************************** */
 
@@ -124,14 +126,9 @@ main (int argc, char* argv[])
   /* **************************************** */
 
   if (buffer)
-    munmap(buffer, length);
-
-  fclose (file);
+    g_free (buffer);
 
   /* **************************************** */
-
-  main_loop = g_main_new (FALSE);
-  g_main_run (main_loop);
 
   exit (EXIT_SUCCESS);
 
