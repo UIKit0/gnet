@@ -1,3 +1,7 @@
+Sun Dec 22 20:36:57 2001  Ross Golder  <ross@golder.org>
+
+	* gnet-config.in (lib_gnet): Fixed breakage if GLIB_LIBS contains spaces
+
 Sun Dec 15 23:12:30 2001  Ross Golder  <rossg@golder.org>
 
 	* configure.ac: Added gnet-config.1 to AC_OUTPUT
