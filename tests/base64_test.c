@@ -89,7 +89,18 @@ main (int argc, char* argv[])
   g_print("act='%s' len=%i\n",buf2,len2);
 #endif
   g_free(buf2);
-  
+  /* to test for bug reported on mailing list around 24 Oct 2004 */
+  len2=0; 
+  buf2=gnet_base64_encode("A\x84\0",3,&len2,TRUE);
+  TEST("base64 encode/length/strict",len2==strlen("QYQA")+1);
+  TEST("base64 encode/buffer/strict",buf2 && !strcmp(buf2,"QYQA"));
+  len1=0;    
+  buf1=gnet_base64_decode(buf2,len2,&len1);
+  TEST("base64 decode/length",len1==3);
+  TEST("base64 decode/buffer",buf1 && !strncmp(buf1,"A\x84\0",3));
+  g_free(buf1);
+  g_free(buf2);
+
   if (failed)
     exit (1);
 

@@ -6,8 +6,12 @@ Changes in Gnet
 
 2.0.6 (Unreleased)
 -----
-* New experimental HTTP Conn module (Tim Müller)
-* Misc bug fixes (pthread detection
+* New experimental HTTP Conn module (Tim Muller)
+* Misc bug fixes:
+   - pthread detection
+   - escaping of high Latin-1 characters
+   - base64 encoding
+   - doc fixes (gnet_base64_encode)
 (Unreleased)
 
 2.0.5

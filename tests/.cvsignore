@@ -11,3 +11,4 @@ unpack_test
 base64_test
 .client*
 .server*
+conn_http_test

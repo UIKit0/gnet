@@ -1,5 +1,23 @@
 2005-02-01  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/base64.c: (gnet_base64_encode):
+	* tests/.cvsignore:
+	* tests/base64_test.c: (main):
+	  Fix base64 encoding bug reported on mailing list
+	  (24 Oct 2004) and add test case for it.
+	  Also fix gnet_base64_encode() documentation (the 
+	  length of the buffer returned DOES include the
+	  terminating 0).
+	  
+	* NEWS:
+	  Update
+	  
+	* tests/.cvsignore:
+	  Add conn_http_test binary to list of non-CVS files
+	  to ignore
+
+2005-02-01  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* tests/conn_http_test.c: (test_post):
 	  Make ConnHttp test compile on GLib versions < 2.4
 	  which don't have g_markup_printf_escaped()

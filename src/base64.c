@@ -62,7 +62,7 @@ static guchar gnet_Base64_rank[256] = {
  *  gnet_base64_encode
  *  @src: source buffer
  *  @srclen: length of the source buffer
- *  @dstlenp: length of the buffer returned (excluding \0)
+ *  @dstlenp: length of the buffer returned (including the terminating \0)
  *  @strict: insert new lines as required by RFC 2045
  *
  *  Convert a buffer from binary to base64 representation.  Set
@@ -77,8 +77,8 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
 {
   gchar* dst;
   gint dstpos;
-  gchar input[3];
-  gchar output[4];
+  guchar input[3];
+  guchar output[4];
   gint ocnt;
   gint i;
 
