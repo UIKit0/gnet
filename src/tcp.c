@@ -66,8 +66,8 @@ gnet_tcp_socket_connect (const gchar* hostname, gint port)
  *  connects to the specified address and port and then calls the
  *  callback with the data.  Use this function when you're a client
  *  connecting to a server and you don't want to block or mess with
- *  #GInetAddr's.  It may call the callback before the function
- *  returns.  It will call the callback if there is a failure.
+ *  #GInetAddr's.  It will call the callback if there is a failure.
+ *  It will never call the callback before the function returns.
  *
  *  Returns: ID of the connection which can be used with
  *  gnet_tcp_socket_connect_async_cancel() to cancel it; NULL on
@@ -80,7 +80,6 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
 			       gpointer data)
 {
   GTcpSocketConnectState* state;
-  gpointer id;
 
   g_return_val_if_fail(hostname != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
@@ -89,18 +88,18 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
   state->func = func;
   state->data = data;
 
-  id = gnet_inetaddr_new_async (hostname, port,  
-				gnet_tcp_socket_connect_inetaddr_cb, 
-				state);
+  state->inetaddr_id = 
+    gnet_inetaddr_new_async (hostname, port,  
+			     gnet_tcp_socket_connect_inetaddr_cb, 
+			     state);
 
-  /* Note that gnet_inetaddr_new_async can fail immediately and call
-     our callback which will delete the state.  The users callback
-     would be called in the process. */
-
-  if (id == NULL)
-    return NULL;
-
-  state->inetaddr_id = id;
+  /* On failure, gnet_inetaddr_new_async() returns NULL.  It will not
+     call the callback before it returns. */
+  if (state->inetaddr_id == NULL)
+    {
+      g_free (state);
+      return NULL;
+    }
 
   return state;
 }
@@ -116,17 +115,24 @@ gnet_tcp_socket_connect_inetaddr_cb (GInetAddr* inetaddr,
 
   if (status == GINETADDR_ASYNC_STATUS_OK)
     {
-      state->ia = inetaddr;
+      gpointer tcp_id;
+
+      state->ia = gnet_inetaddr_clone (inetaddr);
 
       state->inetaddr_id = NULL;
-      state->tcp_id = gnet_tcp_socket_new_async(inetaddr, 
-						gnet_tcp_socket_connect_tcp_cb, 
-						state);
-      /* Note that this call may delete the state. */
+
+      tcp_id = gnet_tcp_socket_new_async (inetaddr, 
+					  gnet_tcp_socket_connect_tcp_cb, 
+					  state);
+      /* gnet_tcp_socket_new_async() may call the callback before it
+	 returns.  state may have been deleted. */
+      if (tcp_id)
+	state->tcp_id = tcp_id;
     }
   else
     {
-      (*state->func)(NULL, NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR, 
+      (*state->func)(NULL, NULL, 
+		     GTCP_SOCKET_CONNECT_ASYNC_STATUS_INETADDR_ERROR, 
 		     state->data);
       g_free(state);
     }
@@ -141,11 +147,18 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket,
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
 
   if (status == GTCP_SOCKET_NEW_ASYNC_STATUS_OK)
-    (*state->func)(socket, state->ia, GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK, state->data);
+    {
+      (*state->func)(socket, state->ia, 
+		     GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK, state->data);
+    }
   else
-    (*state->func)(NULL, NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR, state->data);
+    {
+      (*state->func)(NULL, NULL, 
+		     GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR, state->data);
+      gnet_inetaddr_delete (state->ia);
+    }
 
-  g_free(state);
+  g_free (state);
 }
 
 
@@ -158,7 +171,7 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket,
  * 
  */
 void
-gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
+gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) id;
 
@@ -170,9 +183,11 @@ gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id)
     }
   else if (state->tcp_id)
     {
-      gnet_inetaddr_delete(state->ia);
-      gnet_tcp_socket_new_async_cancel(state->tcp_id);
+      gnet_inetaddr_delete (state->ia);
+      gnet_tcp_socket_new_async_cancel (state->tcp_id);
     }
+  else
+    g_assert_not_reached();
 
   g_free (state);
 }
@@ -1149,7 +1164,10 @@ gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
   g_return_if_fail (!socket->accept_func);
 
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_accept_async (socket, accept_func, user_data);
+    {
+      gnet_private_socks_tcp_socket_server_accept_async (socket, accept_func, user_data);
+      return;
+    }
 
   /* Save callback */
   socket->accept_func = accept_func;

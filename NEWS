@@ -4,6 +4,13 @@ GNet NEWS
 
 Changes in Gnet
 
+
+1.1.3 ("Fishmeal" UNRELEASED)
+-----
+* gnet_tcp_socket_connect() bug fixes
+* HP compile fix
+
+
 1.1.2 ("Cornmeal 2" release)
 -----
 * gnet_inetaddr_get_name_async has pthread implementation

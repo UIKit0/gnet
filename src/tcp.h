@@ -74,8 +74,8 @@ typedef enum {
 
 /**
  *   GTcpSocketConnectAsyncFunc:
- *   @socket: TcpSocket that was connecting
- *   @ia: InetAddr of the TcpSocket
+ *   @socket: TcpSocket that was connecting (callee owned)
+ *   @ia: InetAddr of the TcpSocket (callee owned)
  *   @status: Status of the connection
  *   @data: User data
  *   

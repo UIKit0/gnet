@@ -1,3 +1,34 @@
+Mon Apr 15 14:05:21 2002  David Helder  <dhelder@umich.edu>
+
+	* src/inetaddr.c (gnet_inetaddr_get_name_async): Handle
+	    EAGAIN error from pthread_create().
+	* src/inetaddr.c (gnet_inetaddr_new_async): "
+
+	* configure.ac: Upped version to 1.1.3 (unreleased)
+	* NEWS: "
+
+	* src/tcp.c (gnet_tcp_socket_server_accept_async): Don't return
+	    something in void function.
+
+	* src/tcp.h: Noted data passed to GTcpSocketConnectAsyncFunc is
+	   callee owned.
+
+	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): Copy the
+	   inetaddr passed - it's caller owned, not callee owned (RTFM)!
+
+	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): Do not put
+	   tcp_id in state immediately.  If it failed, state will be
+	   deleted just before we dereference it, which could cause
+	   a seg fault.
+
+	* src/tcp.c (gnet_tcp_socket_connect_tcp_cb): Delete inetaddr on
+	   failure.
+
+	* src/tcp.c (gnet_tcp_socket_connect_async): Update docs: The
+	   callback will never be called before the function returns.
+	   Also, simplified logic since the same semantics are now true
+	   for gnet_inetaddr_new_async().
+
 2002-02-27  Bastien Nocera  <hadess@hadess.net>
 
 	* gnet.pc.in: add $(libdir)/gnet/include to the .pc

@@ -509,15 +509,23 @@ gnet_inetaddr_new_async (const gchar* name, gint port,
   {
     pthread_t pthread;
     void** args;
+    int rv;
 
     args = g_new (void*, 2);
     args[0] = (void*) g_strdup(name);
     args[1] = g_new (int, 1);
     *(int*) args[1] = pipes[1];
 
-    if (pthread_create (&pthread, NULL/*&pthread_attr*/, gethostbyname_async_child, args))
+  create_again:
+    rv = pthread_create (&pthread, NULL/*&pthread_attr*/, gethostbyname_async_child, args);
+    if (rv == EAGAIN)
       {
-	g_warning ("Pthread_create error\n");
+	sleep(0);	/* Yield the processor */
+	goto create_again;
+      }
+    else if (rv)
+      {
+	g_warning ("Pthread_create error: %s (%d)\n", g_strerror(rv), rv);
 	return NULL;
       }
 
@@ -1072,15 +1080,23 @@ gnet_inetaddr_get_name_async (GInetAddr* ia,
   {
     pthread_t pthread;
     void** args;
+    int rv;
 
     args = g_new (void*, 2);
     args[0] = (void*) gnet_inetaddr_clone(ia);
     args[1] = g_new (int, 1);
     *(int*) args[1] = pipes[1];
 
-    if (pthread_create (&pthread, NULL/*&pthread_attr*/, gethostbyaddr_async_child, args))
+  create_again:
+    rv = pthread_create (&pthread, NULL/*&pthread_attr*/, gethostbyaddr_async_child, args);
+    if (rv == EAGAIN)
       {
-	g_warning ("Pthread_create error\n");
+	sleep(0);	/* Yield the processor */
+	goto create_again;
+      }
+    else if (rv)
+      {
+	g_warning ("Pthread_create error: %s (%d)\n", g_strerror(rv), rv);
 	return NULL;
       }
 
