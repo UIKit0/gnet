@@ -77,7 +77,7 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 
   /* Create sockfd and address */
   sockfd = gnet_private_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
-  if (sockfd < 0)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");
       return NULL;

@@ -51,7 +51,7 @@ gnet_unix_socket_new (const gchar* path)
   s->ref_count = 1;
   s->server = FALSE;
   s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (s->sockfd < 0) 
+  if (!GNET_IS_SOCKET_VALID(s->sockfd))
     {
       g_warning ("socket() failed");
       g_free(s);
@@ -207,7 +207,7 @@ gnet_unix_socket_server_new (const gchar *path)
     goto error;
   
   s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (s->sockfd < 0)
+  if (!GNET_IS_SOCKET_VALID(s->sockfd))
     {
       g_warning ("socket() failed");
       goto error;

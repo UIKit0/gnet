@@ -99,6 +99,7 @@ struct sockaddr_storage {
 /* Use gnet_private_io_channel_new() to create iochannels */
 #define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
 
+#define GNET_IS_SOCKET_VALID(S) ((S) >= 0)
 
 #else	/*********** Windows specific ***********/
 
@@ -109,6 +110,8 @@ struct sockaddr_storage {
 
 #define socklen_t gint32
 #define in_addr_t guint32
+
+#define GNET_IS_SOCKET_VALID(S) ((S) != INVALID_SOCKET)
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
 

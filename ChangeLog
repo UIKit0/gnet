@@ -1,3 +1,11 @@
+Wed May 19 21:38:38 2004  David Helder  <dhelder@gizmolabs.org>
+
+	* src/gnet-private.h: Add Win32 and Unix macros for
+	    GNET_IS_SOCKET_VALID.  0 is an invalid socket in 
+	    Windows.  -1 is invalid in Unix (I check for < 0
+	    to be safe).  Suggested by K. Haley.
+	* src/*.c: Use GNET_IS_SOCKET_VALID
+
 Wed May 19 21:20:37 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* {tests,examples}/Makefile.am (noinst_PROGRAMS): 

@@ -3252,7 +3252,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr)
   g_return_val_if_fail (inetaddr, NULL);
 
   sockfd = socket (GNET_INETADDR_FAMILY(inetaddr), SOCK_DGRAM, 0);
-  if (sockfd == -1)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");
       return NULL;
@@ -3521,7 +3521,8 @@ gnet_inetaddr_list_interfaces (void)
 
   /* Create a dummy socket */
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sockfd == -1) return NULL;
+  if (!GNET_IS_SOCKET_VALID(sockfd))
+    return NULL;
 
   len = 8 * sizeof(struct ifreq);
   lastlen = 0;

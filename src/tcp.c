@@ -307,7 +307,7 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
 
   /* Create socket */
   sockfd = socket (GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
-  if (sockfd < 0)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");
       return NULL;
@@ -406,7 +406,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   /* Create socket */
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
-  if (sockfd < 0)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");
       return NULL;
@@ -561,7 +561,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 
   /* Create socket */
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
-  if (sockfd == INVALID_SOCKET)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");
       return NULL;
@@ -944,7 +944,7 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
 
   /* Create sockfd and address */
   sockfd = gnet_private_create_listen_socket (SOCK_STREAM, iface, port, &sa);
-  if (sockfd < 0)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
     return NULL;
   
   /* Set REUSEADDR so we can reuse the port */
@@ -1174,7 +1174,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   sockfd = accept(socket->sockfd, (struct sockaddr*) &sa, &n);
   /* if it fails, looping isn't going to help */
 
-  if (sockfd == INVALID_SOCKET)
+  if (!GNET_IS_SOCKET_VALID(sockfd))
       return NULL;
 
   s = g_new0(GTcpSocket, 1);
