@@ -665,7 +665,7 @@ gnet_inetaddr_new_async (const gchar* hostname, gint port,
 
   state = g_new0(GInetAddrNewState, 1);
 
-  list_id = gnet_inetaddr_new_list_async (hostname, port, inetaddr_new_async_cb, NULL);
+  list_id = gnet_inetaddr_new_list_async (hostname, port, inetaddr_new_async_cb, state);
   if (list_id == NULL)
     {
       g_free (state);
@@ -693,7 +693,7 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id)
 {
   GInetAddrNewState* state = (GInetAddrNewState*) async_id;
 
-  g_assert (state);
+  g_return_if_fail (state);
 
   if (state->in_callback)
     return;
@@ -708,13 +708,13 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 {
   GInetAddrNewState* state = (GInetAddrNewState*) data;
 
+  g_return_if_fail (state);
+
   state->in_callback = TRUE;
 
-  if (!ialist)
+  if (ialist)
     {
       GInetAddr* ia;
-
-      g_assert (ialist);
 
       ia = (GInetAddr*) ialist->data;	      /* Get address */
       g_assert (ia);
@@ -843,12 +843,12 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   create_again:
     rv = pthread_create (&pthread, &attr, 
 			 inetaddr_new_list_async_pthread, args);
-    if (rv == EAGAIN)
+    if (rv == EAGAIN)	/* Try again */
       {
 	sleep(0);	/* Yield the processor */
 	goto create_again;
       }
-    else if (rv)
+    else if (rv)	/* Error */
       {
 	g_warning ("pthread_create error: %s (%d)\n", g_strerror(rv), rv);
 	pthread_mutex_unlock (&state->mutex);
@@ -1064,11 +1064,15 @@ inetaddr_new_list_async_pthread_dispatch (gpointer data)
 
   pthread_mutex_lock (&state->mutex);
 
+  state->in_callback = TRUE;
+
   /* Upcall */
   if (!state->lookup_failed)
     (*state->func)(state->ias, state->data);
   else
     (*state->func)(NULL, state->data);
+
+  state->in_callback = FALSE;
 
   /* Delete state */
   g_source_remove (state->source);
@@ -1094,6 +1098,9 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
   GInetAddrNewListState* state = (GInetAddrNewListState*) id;
 
   g_return_if_fail (state);
+
+  if (state->in_callback)
+    return;
 
   /* We don't use in_callback because we'd have to get the mutex to
      access it and if we're in the callback we'd already have the
@@ -1574,7 +1581,7 @@ gnet_inetaddr_get_name (/* const */ GInetAddr* inetaddr)
 	inetaddr->name = gnet_inetaddr_get_canonical_name(inetaddr);
     }
 
-  g_assert (inetaddr->name != NULL);
+  g_return_val_if_fail (inetaddr->name, NULL);
   return g_strdup(inetaddr->name);
 }
 

@@ -90,7 +90,7 @@ AC_ARG_ENABLE(network_tests,
 	      ,
               [enable_network_tests=no])
 if test "x${enable_network_tests}" = "xyes"; then
-   NETWORK_TESTS="client_server_test.pl"
+   NETWORK_TESTS="client_server_test.pl dns_test.pl"
    AC_SUBST(NETWORK_TESTS)
 fi
 AC_MSG_RESULT($enable_network_tests)

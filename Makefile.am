@@ -24,7 +24,8 @@ EXTRA_DIST= 					\
 	src/socks-private.h 			\
 	src/usagi_ifaddrs.h  			\
 	tests/makefile.mingw			\
-	tests/client_server_test.pl
+	tests/client_server_test.pl		\
+	tests/dns_test.pl
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet.m4

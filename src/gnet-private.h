@@ -218,6 +218,7 @@ typedef struct _GInetAddrNewListState
   gpointer 	data;
 
 #ifndef GNET_WIN32		/* UNIX */
+  gboolean 	in_callback;
 #ifdef HAVE_LIBPTHREAD		/* UNIX pthread	*/
   pthread_mutex_t mutex;
   gboolean	is_cancelled;
@@ -230,7 +231,6 @@ typedef struct _GInetAddrNewListState
   GIOChannel* 	iochannel;
   guint 	watch;
   int 		len;
-  gboolean 	in_callback;
   guchar 	buffer[256];
 
 #endif
