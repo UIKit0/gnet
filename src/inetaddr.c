@@ -1,5 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
+ * Copyright (C) 2000  Andrew Lanoix
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
