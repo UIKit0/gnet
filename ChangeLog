@@ -1,3 +1,7 @@
+Mon Apr 21 18:22:07 2003  David Helder  <dhelder@umich.edu>
+
+	* configure.ac: Update version for 2.0.1
+
 Thu Apr 17 17:52:20 2003  David Helder  <dhelder@umich.edu>
 
 	* tests/inetaddr_test.c (main): More IPv6 fixes.
