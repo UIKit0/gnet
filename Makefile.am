@@ -42,7 +42,7 @@ $(pkgconfig_DATA): config.status
 configincludedir = $(pkglibdir)-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION)/include
 configinclude_DATA = gnetconfig.h
 
-WEBPATH=/n/misc/home/www/gnetlibrary.org/html
+WEBPATH=/home/web/gnetlibrary.org/data
 
 DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING
 
