@@ -105,38 +105,46 @@ AC_CHECK_LIB([socket], [main])
 AC_CHECK_LIB([nsl], [main])
 AC_CHECK_LIB([resolv], [main])
 
-# Wacky pthread madness
-pthread_libs=""
-AC_CHECK_LIB([pthread],
-	     [pthread_create],
-	     [pthread_libs="-lpthread"])
-AC_CHECK_LIB([c_r],
-	     [pthread_create],
-	     [pthread_libs="-lc_r"])
-if test "$pthread_libs"; then
-	AC_DEFINE(HAVE_LIBPTHREAD, 1,
-		  [Define if pthreads library is available])
-	LIBS="$pthread_libs $LIBS"
+# Check for pthreads
+AC_ARG_ENABLE(pthreads,
+             AC_HELP_STRING([--disable-pthreads],
+                            [ignore pthreads library if present]),
+             , # we don't need to do anything here
+             enable_pthreads=yes)
+
+if test "x${enable_pthreads}" = "xyes"; then
+  pthread_libs=""
+  AC_CHECK_LIB([pthread],
+          [pthread_create],
+          [pthread_libs="-lpthread"])
+  AC_CHECK_LIB([c_r],
+          [pthread_create],
+          [pthread_libs="-lc_r"])
+  if test "$pthread_libs"; then
+          AC_DEFINE(HAVE_LIBPTHREAD, 1,
+                  [Define if pthreads library is available])
+          LIBS="$pthread_libs $LIBS"
+  fi
 fi
 AC_SUBST(pthread_libs)
 
 if test "x${enable_glib2}" != "xyes"; then
-	AM_PATH_GLIB([1.2.10],
-		     GTHREAD_CFLAGS=" ",
-		     [enable_glib2=yes],
-		     [gthread])
+  AM_PATH_GLIB([1.2.10],
+		GTHREAD_CFLAGS=" ",
+		[enable_glib2=yes],
+		[gthread])
 fi
 
 if test "x${PKGCONFIG}" = "xyes" -a "x${enable_glib2}" = "xyes"; then
-	# Check for 2.0, then 1.2
-	PKG_CHECK_MODULES(GLIB,
-			  [glib-2.0],
-			  ,
-			  [PKG_CHECK_MODULES(GLIB, glib)])
-	PKG_CHECK_MODULES(GTHREAD,
-			  [gthread-2.0],
-			  ,
-			  [PKG_CHECK_MODULES(GTHREAD, gthread)])
+  # Check for 2.0, then 1.2
+  PKG_CHECK_MODULES(GLIB,
+		  [glib-2.0],
+		  ,
+		  [PKG_CHECK_MODULES(GLIB, glib)])
+  PKG_CHECK_MODULES(GTHREAD,
+		  [gthread-2.0],
+		  ,
+		  [PKG_CHECK_MODULES(GTHREAD, gthread)])
 fi
 
 
