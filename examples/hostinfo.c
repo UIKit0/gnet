@@ -16,22 +16,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
-
-  WARNING: THIS FILE HAS NOT BEEN TEST UNDER *NIX 
-
- */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+
 #ifdef G_OS_WIN32
-	#include <gnet.h>
-	#include <gnet-private.h>
+#  include <gnet.h>
+#  include <gnet-private.h>
 #else
-	#include <gnet/gnet.h>
+#  include <gnet/gnet.h>
 #endif
 
 int
