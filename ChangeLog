@@ -1,3 +1,7 @@
+Tue Feb 15 17:01:39 2000  David A Helder  <dhelder@umich.edu>
+
+	* debian/changelog: Removed middle initial.
+
 Tue Feb 15 10:13:59 2000  David A Helder  <dhelder@umich.edu>
 
 	* doc/*: Updates for new stuff
