@@ -670,8 +670,12 @@ gnet_tcp_socket_server_accept(GTcpSocket* socket)
 
   if ((sockfd = accept(socket->sockfd, &sa, &n)) == -1)
     {
-      if (errno == EWOULDBLOCK || errno == ECONNABORTED ||
-	  errno == EPROTO || errno == EINTR)
+      if (errno == EWOULDBLOCK || 
+	  errno == ECONNABORTED ||
+#ifdef EPROTO		/* OpenBSD does not have EPROTO */
+	  errno == EPROTO || 
+#endif
+	  errno == EINTR)
 	goto try_again;
 
       return NULL;
@@ -729,18 +733,16 @@ gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket)
       return NULL;
     }
 
-  n = sizeof(s->sa);
-
+  n = sizeof(sa);
   if ((sockfd = accept(socket->sockfd, &sa, &n)) == -1)
     {
-      /* WE DON'T WANT TO DO THIS */
-/*      if (errno == EWOULDBLOCK || errno == ECONNABORTED || */
-/*  	  errno == EPROTO || errno == EINTR) */
-/*  	goto try_again; */
+      /* If we get an error, return.  We don't want to try again as we
+         do in gnet_tcp_socket_server_accept() - it might cause a
+         block. */
 
       return NULL;
     }
-
+  
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = sockfd;

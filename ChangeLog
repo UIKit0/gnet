@@ -1,3 +1,12 @@
+Fri Mar 17 20:07:15 2000  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock): 
+	   Clean-up
+
+	* src/tcp.c (gnet_tcp_socket_server_accept): Check errno
+	   against EPROTO only if EPROTO is defined.  (It isn't
+	   on OpenBSD.  Fix by Niels.)
+
 Sun Mar  5 14:22:11 2000  David Helder  <dhelder@umich.edu>
 
 	* auto*: Release version 1.0.1
