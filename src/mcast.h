@@ -44,33 +44,33 @@ typedef struct _GMcastSocket GMcastSocket;
 
 GMcastSocket* gnet_mcast_socket_new(void);
 
-GMcastSocket* gnet_mcast_socket_port_new(gint port);
+GMcastSocket* gnet_mcast_socket_port_new (gint port);
 
-GMcastSocket* gnet_mcast_socket_inetaddr_new(GInetAddr* ia);
+GMcastSocket* gnet_mcast_socket_inetaddr_new (const GInetAddr* ia);
 
-void gnet_mcast_socket_delete(GMcastSocket* ms);
+void gnet_mcast_socket_delete (GMcastSocket* ms);
 
-void gnet_mcast_socket_ref(GMcastSocket* s);
+void gnet_mcast_socket_ref (GMcastSocket* s);
 
-void gnet_mcast_socket_unref(GMcastSocket* s);
-
-/* ********** */
-
-gint gnet_mcast_socket_join_group(GMcastSocket* ms, GInetAddr* ia);
-
-gint gnet_mcast_socket_leave_group (GMcastSocket* ms, GInetAddr* ia);
-
-gint gnet_mcast_socket_send(const GMcastSocket* ms, const GUdpPacket* packet);
-
-gint gnet_mcast_socket_receive(const GMcastSocket* ms, GUdpPacket* packet);
-
-gboolean gnet_mcast_socket_has_packet(const GMcastSocket* s);
+void gnet_mcast_socket_unref (GMcastSocket* s);
 
 /* ********** */
 
-gint gnet_mcast_socket_is_loopback(GMcastSocket* ms);
+gint gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia);
 
-gint gnet_mcast_socket_set_loopback(GMcastSocket* ms, gint b);
+gint gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia);
+
+gint gnet_mcast_socket_send (GMcastSocket* ms, const GUdpPacket* packet);
+
+gint gnet_mcast_socket_receive (GMcastSocket* ms, GUdpPacket* packet);
+
+gboolean gnet_mcast_socket_has_packet (const GMcastSocket* s);
+
+/* ********** */
+
+gint gnet_mcast_socket_is_loopback (const GMcastSocket* ms);
+
+gint gnet_mcast_socket_set_loopback (GMcastSocket* ms, gint b);
 
 /* ********** */
 

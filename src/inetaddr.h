@@ -124,15 +124,15 @@ typedef void (*GInetAddrGetNameAsyncFunc)(GInetAddr* inetaddr,
 
 /* ********** */
 
-GInetAddr* gnet_inetaddr_new (const gchar* name, const gint port);
+GInetAddr* gnet_inetaddr_new (const gchar* name, gint port);
 
 GInetAddrNewAsyncID 
-gnet_inetaddr_new_async (const gchar* name, const gint port, 
+gnet_inetaddr_new_async (const gchar* name, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data);
 
 void gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
 
-GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, const gint port);
+GInetAddr* gnet_inetaddr_new_nonblock (const gchar* name, gint port);
 
 GInetAddr* gnet_inetaddr_clone (const GInetAddr* ia);
 

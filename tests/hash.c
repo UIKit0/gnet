@@ -27,13 +27,12 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#include <gnet/gnet.h>
+#include <gnet.h>
 
 
-static void sha_cb (GSHA* sha, gpointer user_data);
 
-
-int main (int argc, char* argv[])
+int
+main (int argc, char* argv[])
 {
   gchar* filename;
   FILE* file;
@@ -48,8 +47,6 @@ int main (int argc, char* argv[])
 
   GSHA* sha;
   GSHA* shab;
-
-  GSHAAsyncID* id;
 
   GMainLoop* main_loop;
 
@@ -133,41 +130,10 @@ int main (int argc, char* argv[])
 
   /* **************************************** */
 
-  id = gnet_sha_new_file_async (filename, sha_cb, (gpointer) 0xdeadbeef);
-  gnet_sha_new_file_async_cancel (id);
-
-  id = gnet_sha_new_file_async (filename, sha_cb, (gpointer) 0xdeadbeef);
-
-  /* **************************************** */
-
   main_loop = g_main_new (FALSE);
   g_main_run (main_loop);
 
   exit (EXIT_SUCCESS);
 
   return 0;
-}
-
-
-static void
-sha_cb (GSHA* sha, gpointer user_data)
-{
-  g_assert (user_data == (gpointer) 0xdeadbeef);
-
-  if (sha)
-    {
-      gchar* str;
-
-      str = gnet_sha_get_string (sha);
-      g_assert (str);
-
-      g_print ("SHA async: %s\n", str);
-
-      g_free (str);
-      gnet_sha_delete (sha);
-    }
-  else
-    g_print ("SHA async ERROR\n");
-
-  exit (EXIT_SUCCESS);
 }

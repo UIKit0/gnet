@@ -1,3 +1,13 @@
+Sat Feb 17 16:17:49 2001  David Helder  <dhelder@umich.edu>
+
+	* tests/Makefile.am: Now compile tests by default
+
+	* src/*: Added/removed const's
+	
+	* src/md5.c (gnet_md5_copy_string): Added
+	* src/{md5,sha}.c: Added gnet_{sha,md5}_{new_incremental, update,
+	    final} for "incremental" hashes
+	
 Wed Feb 14 20:57:07 2001  David Helder  <dhelder@umich.edu>
 
 	* src/pack.c: Implemented pack_strdup.  Removed calcsize - not

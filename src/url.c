@@ -167,7 +167,7 @@ gnet_url_equal (const gpointer p1, const gpointer p2)
 
 
 void
-gnet_url_set_protocol (GURL* url, gchar* protocol)
+gnet_url_set_protocol (GURL* url, const gchar* protocol)
 {
   g_return_if_fail (url);
 
@@ -183,7 +183,7 @@ gnet_url_set_protocol (GURL* url, gchar* protocol)
 
 
 void
-gnet_url_set_hostname (GURL* url, gchar* hostname)
+gnet_url_set_hostname (GURL* url, const gchar* hostname)
 {
   g_return_if_fail (url);
 
@@ -206,7 +206,7 @@ gnet_url_set_port (GURL* url, gint port)
 
 
 void
-gnet_url_set_resource (GURL* url, gchar* resource)
+gnet_url_set_resource (GURL* url, const gchar* resource)
 {
   g_return_if_fail (url);
 
@@ -227,7 +227,7 @@ gnet_url_set_resource (GURL* url, gchar* resource)
 
 
 gchar*
-gnet_url_get_nice_string (GURL* url)
+gnet_url_get_nice_string (const GURL* url)
 {
   gchar* rv = NULL;
   gchar* resource = NULL;

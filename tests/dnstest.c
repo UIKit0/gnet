@@ -20,7 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <gnet/gnet.h>
+
+#include <gnet.h>
 
 
 #define DO_REVERSE 0

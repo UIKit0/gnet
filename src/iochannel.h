@@ -153,7 +153,7 @@ gnet_io_channel_read_async (GIOChannel* iochannel,
 			    GNetIOChannelReadAsyncFunc func, 	      
 			    gpointer user_data);
 
-void gnet_io_channel_read_async_cancel(GNetIOChannelReadAsyncID id);
+void gnet_io_channel_read_async_cancel (GNetIOChannelReadAsyncID id);
 
 gint gnet_io_channel_readany_check_func (gchar* buffer, guint length, 
 					gpointer data);

@@ -20,6 +20,8 @@
 #include <glib.h>
 #include <stdio.h>
 
+#include <gnet.h>
+
 void print_bytes(char* s, int len);
 
 

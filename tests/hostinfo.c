@@ -21,12 +21,7 @@
 #include <string.h>
 #include <glib.h>
 
-/* Win32
 #include <gnet.h>
-#include <gnet-private.h>
-*/
-
-#include <gnet/gnet.h>
 
 
 int

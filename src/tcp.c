@@ -40,7 +40,7 @@
  *
  **/
 GTcpSocket*
-gnet_tcp_socket_connect(gchar* hostname, gint port)
+gnet_tcp_socket_connect (const gchar* hostname, gint port)
 {
   GInetAddr* ia;
   GTcpSocket* socket;
@@ -76,9 +76,9 @@ gnet_tcp_socket_connect(gchar* hostname, gint port)
  *
  **/
 GTcpSocketConnectAsyncID
-gnet_tcp_socket_connect_async(gchar* hostname, gint port, 
-			      GTcpSocketConnectAsyncFunc func, 
-			      gpointer data)
+gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
+			       GTcpSocketConnectAsyncFunc func, 
+			       gpointer data)
 {
   GTcpSocketConnectState* state;
   gpointer id;
@@ -723,7 +723,7 @@ gnet_tcp_socket_server_new(const gint port)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_new2 (GInetAddr* iface, const gint port)
+gnet_tcp_socket_server_new2 (const GInetAddr* iface, const gint port)
 {
   GTcpSocket* s;
   struct sockaddr_in* sa_in;
@@ -809,7 +809,7 @@ gnet_tcp_socket_server_new2 (GInetAddr* iface, const gint port)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_accept(GTcpSocket* socket)
+gnet_tcp_socket_server_accept (const GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -875,7 +875,7 @@ gnet_tcp_socket_server_accept(GTcpSocket* socket)
  *
  **/
 GTcpSocket* 
-gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket)
+gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -922,7 +922,7 @@ gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket)
 
 
 GTcpSocket*
-gnet_tcp_socket_server_accept(GTcpSocket* socket)
+gnet_tcp_socket_server_accept (const GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;
@@ -960,7 +960,7 @@ gnet_tcp_socket_server_accept(GTcpSocket* socket)
 }
 
 GTcpSocket*
-gnet_tcp_socket_server_accept_nonblock(GTcpSocket* socket)
+gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket)
 {
   gint sockfd;
   struct sockaddr sa;

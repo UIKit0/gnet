@@ -53,7 +53,7 @@ static gboolean conn_timeout_cb (gpointer data);
 
 
 GConn*
-gnet_conn_new (gchar* hostname, gint port, GConnFunc func, gpointer user_data)
+gnet_conn_new (const gchar* hostname, gint port, GConnFunc func, gpointer user_data)
 {
   GConn* conn;
 
@@ -72,7 +72,7 @@ gnet_conn_new (gchar* hostname, gint port, GConnFunc func, gpointer user_data)
 
 
 GConn*   
-gnet_conn_new_inetaddr (GInetAddr* inetaddr, 
+gnet_conn_new_inetaddr (const GInetAddr* inetaddr, 
 			GConnFunc func, gpointer user_data)
 {
   GConn* conn;
@@ -272,7 +272,7 @@ gnet_conn_disconnect (GConn* conn, gboolean delete_buffers)
 
 
 gboolean
-gnet_conn_is_connected (GConn* conn)
+gnet_conn_is_connected (const GConn* conn)
 {
   g_return_val_if_fail (conn, FALSE);
 

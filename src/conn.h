@@ -85,9 +85,9 @@ struct _GConn
 
 /* ********** */
 
-GConn*     gnet_conn_new (gchar* hostname, gint port, 
+GConn*     gnet_conn_new (const gchar* hostname, gint port, 
 			  GConnFunc func, gpointer user_data);
-GConn*     gnet_conn_new_inetaddr (GInetAddr* inetaddr, 
+GConn*     gnet_conn_new_inetaddr (const GInetAddr* inetaddr, 
 				   GConnFunc func, gpointer user_data);
 void 	   gnet_conn_delete (GConn* conn, gboolean delete_buffers);
 	      
@@ -100,7 +100,7 @@ void	   gnet_conn_unref (GConn* conn, gboolean delete_buffers);
 void	   gnet_conn_connect (GConn* conn, guint timeout);
 void	   gnet_conn_disconnect (GConn* conn, gboolean delete_buffers);
 	      
-gboolean   gnet_conn_is_connected (GConn* conn);
+gboolean   gnet_conn_is_connected (const GConn* conn);
 	      
 
 /* ********** */

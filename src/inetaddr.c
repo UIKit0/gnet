@@ -369,7 +369,7 @@ gnet_gethostbyaddr(const char* addr, size_t length, int type)
  *
  **/
 GInetAddr* 
-gnet_inetaddr_new (const gchar* name, const gint port)
+gnet_inetaddr_new (const gchar* name, gint port)
 {
   struct sockaddr_in* sa_in;
   struct in_addr inaddr;
@@ -449,7 +449,7 @@ gnet_inetaddr_new (const gchar* name, const gint port)
  *
  **/
 GInetAddrNewAsyncID
-gnet_inetaddr_new_async (const gchar* name, const gint port, 
+gnet_inetaddr_new_async (const gchar* name, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data)
 {
   pid_t pid = -1;
@@ -796,7 +796,7 @@ gnet_inetaddr_new_async_cancel(GInetAddrNewAsyncID id)
  *
  **/
 GInetAddr* 
-gnet_inetaddr_new_nonblock (const gchar* name, const gint port)
+gnet_inetaddr_new_nonblock (const gchar* name, gint port)
 {
   struct sockaddr_in* sa_in;
   struct in_addr inaddr;

@@ -135,43 +135,43 @@ typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket,
 
 
 /* Quick and easy blocking constructor */
-GTcpSocket* gnet_tcp_socket_connect(gchar* hostname, gint port);
+GTcpSocket* gnet_tcp_socket_connect (const gchar* hostname, gint port);
 
 /* Quick and easy asynchronous constructor */
 GTcpSocketConnectAsyncID
-gnet_tcp_socket_connect_async(gchar* hostname, gint port, 
-			      GTcpSocketConnectAsyncFunc func, 
-			      gpointer data);
+gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
+			       GTcpSocketConnectAsyncFunc func, 
+			       gpointer data);
 
 /* Cancel quick and easy asynchronous constructor */
-void gnet_tcp_socket_connect_async_cancel(GTcpSocketConnectAsyncID id);
+void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
 
 /* Blocking constructor */
-GTcpSocket* gnet_tcp_socket_new(const GInetAddr* addr);
+GTcpSocket* gnet_tcp_socket_new (const GInetAddr* addr);
 
 /* Asynchronous constructor */
 GTcpSocketNewAsyncID 
-gnet_tcp_socket_new_async(const GInetAddr* addr, 
-			  GTcpSocketNewAsyncFunc func,
-			  gpointer data);
+gnet_tcp_socket_new_async (const GInetAddr* addr, 
+			   GTcpSocketNewAsyncFunc func,
+			   gpointer data);
 
 /* Cancel asynchronous constructor */
-void gnet_tcp_socket_new_async_cancel(GTcpSocketNewAsyncID id);
+void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
 
-void gnet_tcp_socket_delete(GTcpSocket* s);
+void gnet_tcp_socket_delete (GTcpSocket* s);
 
-void gnet_tcp_socket_ref(GTcpSocket* s);
+void gnet_tcp_socket_ref (GTcpSocket* s);
 
-void gnet_tcp_socket_unref(GTcpSocket* s);
+void gnet_tcp_socket_unref (GTcpSocket* s);
 
 
 /* ********** */
 
-GIOChannel* gnet_tcp_socket_get_iochannel(GTcpSocket* socket);
+GIOChannel* gnet_tcp_socket_get_iochannel (GTcpSocket* socket);
 
-GInetAddr* gnet_tcp_socket_get_inetaddr(const GTcpSocket* socket);
+GInetAddr* gnet_tcp_socket_get_inetaddr (const GTcpSocket* socket);
 
-gint gnet_tcp_socket_get_port(const GTcpSocket* socket);
+gint gnet_tcp_socket_get_port (const GTcpSocket* socket);
 
 
 /* ********** */
@@ -191,46 +191,14 @@ void gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
 
 /* ********** */
 
-GTcpSocket* gnet_tcp_socket_server_new (const gint port);
+GTcpSocket* gnet_tcp_socket_server_new (gint port);
 
-GTcpSocket* gnet_tcp_socket_server_new2 (GInetAddr* iface, const gint port);
+GTcpSocket* gnet_tcp_socket_server_new2 (const GInetAddr* iface, gint port);
 
-GTcpSocket* gnet_tcp_socket_server_accept (GTcpSocket* socket);
+GTcpSocket* gnet_tcp_socket_server_accept (const GTcpSocket* socket);
 
-GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
+GTcpSocket* gnet_tcp_socket_server_accept_nonblock (const GTcpSocket* socket);
 
-
-
-/* **************************************** */
-/* TO IMPLEMENT?:			    */
-
-
-/**
-
-   Get the inet address the socket is connected to.  UNIMPLEMENTED
-p
-*/
-/* InetAddr* tcp_socket_get_local_inetaddr(const TcpSocket* socket); */
-
-
-/**
-
-   Test if the socket has data to read.  Returns TRUE if there is
-   data, FALSE otherwise.  UNIMPLEMENTED
-
-*/
-/*  gboolean tcp_socket_has_data(const tcp_socket* s); */
-
-/**
-
-   Create and open a new TCP socket with any port.  Use this sort of
-   socket when you are a server and the port number doesn't matter.
-   Returns a new TcpSocket, or NULL if there was a failure.  Use this
-
-   UNIMPLEMENTED
-
-*/
-/*  TcpSocket* tcp_socket_server_any_new(void); */
 
 #ifdef __cplusplus
 }

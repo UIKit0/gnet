@@ -434,6 +434,16 @@ struct _GSHA
 };
 
 
+/**
+ *  gnet_sha_new:
+ *  @buffer: Buffer to hash
+ *  @length: Length of that buffer
+ * 
+ *  Create an SHA hash of the buffer.
+ *
+ *  Returns: a new #GSHA.
+ *
+ **/
 GSHA*           
 gnet_sha_new (const guint8* buffer, guint length)
 {
@@ -449,8 +459,19 @@ gnet_sha_new (const guint8* buffer, guint length)
 
 
 
+/**
+ *  gnet_sha_new:
+ *  @buffer: Buffer to hash
+ *  @length: Length of that buffer
+ * 
+ *  Create an SHA hash from a hexidecimal string.  The string must be
+ *  of length greater than or equal to %GNET_SHA_HASH_LENGTH * 2.
+ *
+ *  Returns: a new #GSHA.
+ *
+ **/
 GSHA*		
-gnet_sha_new_string (gchar* str)
+gnet_sha_new_string (const gchar* str)
 {
   GSHA* gsha;
   guint i;
@@ -502,6 +523,13 @@ gnet_sha_new_string (gchar* str)
 }
 
 
+/** 
+ *  gnet_sha_delete:
+ *  @ia: #GSHA to delete
+ *
+ *  Delete a #GSHA.
+ *
+ **/
 void
 gnet_sha_delete (GSHA* gsha)
 {
@@ -510,201 +538,79 @@ gnet_sha_delete (GSHA* gsha)
 }
 
 
-/* **************************************** */
 
 
-typedef struct _GSHAAsyncState
+
+/**
+ *  gnet_sha_new_incremental:
+ *
+ *  Create a SHA hash in incremental mode.  After creating the #GSHA, call
+ *  gnet_sha_update() and gnet_sha_final().
+ *
+ *  Returns: new GSHA
+ *
+ **/
+GSHA*		
+gnet_sha_new_incremental (void)
 {
-  gboolean 	waiting;
+  GSHA* gsha;
 
-  gchar* 	pathname;
-  int 		fd;
-  GIOChannel* 	iochannel;
-  guint 	watch;
-
-  GSHA* 	sha;
-
-  GSHAAsyncFunc func;
-  gpointer 	user_data;
-
-} GSHAAsyncState;
-
-#define 	MAX_ASYNC_SHA			8
-static guint 	num_async_sha =			0;
-static GList*	waiting_async_sha = 		NULL;
-static GList*	waiting_async_sha_last = 	NULL;
-
-
-static gboolean dispatch_sha (GSHAAsyncState* state);
-static gboolean sha_cb (GIOChannel* iochannel, 
-			GIOCondition condition, gpointer data);
-
-
-GSHAAsyncID*
-gnet_sha_new_file_async (gchar* pathname, GSHAAsyncFunc func,
-			 gpointer user_data)
-{
-  GSHAAsyncState* state;
-
-  g_return_val_if_fail (pathname, NULL);
-  g_return_val_if_fail (func, NULL);
-
-  state = g_new0 (GSHAAsyncState, 1);
-  state->pathname = g_strdup (pathname);
-  state->sha = g_new0 (GSHA, 1);
-  SHAInit (&state->sha->ctx);
-  state->func = func;
-  state->user_data = user_data;
-
-  /* Dispatch now if no one is waiting, otherwise queue */
-  if (!num_async_sha)
-    {
-      if (dispatch_sha (state))
-	state = NULL;
-    }
-  else
-    {
-      state->waiting = TRUE;
-      waiting_async_sha = g_list_prepend (waiting_async_sha, state);
-      if (waiting_async_sha_last == NULL)
-	waiting_async_sha_last = waiting_async_sha;
-    }
-
-  return (GSHAAsyncID) state;
+  gsha = g_new0 (GSHA, 1);
+  SHAInit (&gsha->ctx);
+  return gsha;
 }
 
 
-/* Return FALSE if ok, TRUE otherwise */
-static gboolean
-dispatch_sha (GSHAAsyncState* state)
-{
-  g_return_val_if_fail (state, TRUE);
-  g_return_val_if_fail (!state->fd, TRUE);
-  g_return_val_if_fail (state->pathname, TRUE);
-
-  state->waiting = FALSE;
-  ++num_async_sha;
-
-  /* Fail if file does not exist */
-  state->fd = open (state->pathname, O_RDONLY | O_NONBLOCK);
-  if (state->fd == -1)
-    {
-      (state->func)(NULL, state->user_data);
-      gnet_sha_new_file_async_cancel ((GSHAAsyncID) state);
-      return TRUE;
-    }
-
-  state->iochannel = g_io_channel_unix_new (state->fd);
-  state->watch = g_io_add_watch_full (state->iochannel, 
-				      G_PRIORITY_LOW,
-				      G_IO_IN | G_IO_ERR | G_IO_HUP | G_IO_NVAL,  
-				      sha_cb, state, NULL);
-
-  return FALSE;
-}
-
-
-static gboolean 
-sha_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
-{
-  GSHAAsyncState* state =  (GSHAAsyncState*) data;
-  gchar buffer [4096];
-
-  g_return_val_if_fail (state, FALSE);
-
-  if (condition == G_IO_IN)
-    {
-      GIOError error;
-      guint bytes_read;
-
-      error = g_io_channel_read (iochannel, buffer, sizeof(buffer), &bytes_read);
-      if (error == G_IO_ERROR_AGAIN)
-	return TRUE;
-      if (error != G_IO_ERROR_NONE)
-	goto error;
-
-      if (bytes_read)
-	{
-	  SHAUpdate (&state->sha->ctx, buffer, bytes_read);
-	  return TRUE;
-	}
-      else
-	{
-	  SHAFinal ((gpointer) &state->sha->digest, &state->sha->ctx);
-
-	  (state->func)(state->sha, state->user_data);
-
-	  state->sha = NULL;
-	  gnet_sha_new_file_async_cancel ((GSHAAsyncID) state);
-
-	  return FALSE;
-	}
-    }
-  else
-    {
-    error:
-      (state->func)(NULL, state->user_data);
-      gnet_sha_new_file_async_cancel ((GSHAAsyncID) state);
-    }
-
-  return FALSE;
-}
-
-
-/* Cancel or delete a SHA async state.  This is used internally to
-   delete states. */
+/**
+ *  gnet_sha_update:
+ *  @gsha: #GSHA to update
+ *  @buffer: Buffer to add
+ *  @length: Length of that buffer
+ *
+ *  Update the hash with buffer.  This may be called several times on
+ *  an incremental hash before being finalized.
+ * 
+ **/
 void
-gnet_sha_new_file_async_cancel (GSHAAsyncID* id)
+gnet_sha_update (GSHA* gsha, const guchar* buffer, guint length)
 {
-  GSHAAsyncState* state = (GSHAAsyncState*) id;
+  g_return_if_fail (gsha);
 
-  g_return_if_fail (id);
-
-  g_free (state->pathname);
-  gnet_sha_delete (state->sha);
-
-  if (state->fd)
-    close (state->fd);
-  if (state->iochannel)
-    g_io_channel_unref (state->iochannel);
-  if (state->watch)
-    g_source_remove (state->watch);
-
-  if (state->waiting)
-    {
-      g_return_if_fail (waiting_async_sha);
-      g_return_if_fail (waiting_async_sha_last);
-
-      if (waiting_async_sha_last->data == state)
-	waiting_async_sha_last = waiting_async_sha_last->prev;
-
-      waiting_async_sha = g_list_remove (waiting_async_sha, state);
-    }
-  else
-    {
-      --num_async_sha;
-      if (waiting_async_sha_last && num_async_sha < MAX_ASYNC_SHA)
-	{
-	  GList* last;
-	  GSHAAsyncState* next_state;
-
-	  last = waiting_async_sha_last;
-	  next_state = (GSHAAsyncState*) last->data;
-
-	  waiting_async_sha_last = waiting_async_sha_last->prev;
-	  waiting_async_sha = g_list_remove_link (waiting_async_sha, last);
-
-	  dispatch_sha (next_state);
-	}
-    }
-
-  g_free (state);
+  SHAUpdate (&gsha->ctx, buffer, length);
 }
+
+
+/**
+ *  gnet_sha_final:
+ *  @gsha: #GSHA to finalize
+ *
+ *  Calcuate the final hash value.  This is called on a #GSHA created
+ *  using gnet_sha_new_incremental() and updated using gnet_sha_update()
+ *  possibly several times.  
+ *
+ **/
+void
+gnet_sha_final (GSHA* gsha)
+{
+  g_return_if_fail (gsha);
+
+  SHAFinal ((gpointer) &gsha->digest, &gsha->ctx);
+}
+
 
 
 /* **************************************** */
 
-
+/**
+ *  gnet_sha_equal:
+ *  @p1: Pointer to first #GSHA.
+ *  @p2: Pointer to second #GSHA.
+ *
+ *  Compare two #GSHA's.  
+ *
+ *  Returns: 1 if they are the same; 0 otherwise.
+ *
+ **/
 gint
 gnet_sha_equal (const gpointer p1, const gpointer p2)
 {
@@ -720,8 +626,18 @@ gnet_sha_equal (const gpointer p1, const gpointer p2)
 }
 
 
+/**
+ *  gnet_sha_hash
+ *  @gsha: GSHA to get hash value of
+ *
+ *  Hash the GSHA hash value.  This is not the actual SHA hash, but a
+ *  hash of this hash.
+ *
+ *  Returns: hash value.
+ *
+ **/
 guint
-gnet_sha_hash (GSHA* gsha)
+gnet_sha_hash (const GSHA* gsha)
 {
   guint* p;
 
@@ -733,8 +649,19 @@ gnet_sha_hash (GSHA* gsha)
 }
 
 
-guchar*        	
-gnet_sha_get_digest (GSHA* gsha)
+/**
+ *  gnet_sha_get_digest:
+ *  @gsha: #GSHA to get hash digest from
+ *
+ *  Get the SHA hash digest.  
+ *
+ *  Returns: buffer containing the SHA hash digest.  The buffer is
+ *  GNET_SHA_HASH_LENGTH bytes long.  The #GSHA owns the buffer - do
+ *  not free it.
+ *
+ **/
+guint8*        	
+gnet_sha_get_digest (const GSHA* gsha)
 {
   g_return_val_if_fail (gsha, NULL);
   
@@ -747,8 +674,19 @@ static gchar bits2hex[16] = { '0', '1', '2', '3',
 			      '8', '9', 'a', 'b',
 			      'c', 'd', 'e', 'f' };
 
+/**
+ *  gnet_sha_get_string:
+ *  @gsha: #GSHA to get hash from
+ *
+ *  Get a hash string.  
+ *
+ *  Returns: Hexadecimal string representing the hash.  The string is
+ *  of length 2 * %GNET_SHA_HASH_LENGTH and null terminated.  The
+ *  caller must free the string.
+ *
+ **/
 gchar*          
-gnet_sha_get_string (GSHA* gsha)
+gnet_sha_get_string (const GSHA* gsha)
 {
   gchar* str;
 
@@ -764,8 +702,17 @@ gnet_sha_get_string (GSHA* gsha)
 
 
 
+
+/**
+ * gnet_sha_copy_string:
+ * @gsha: #GSHA to get hash from
+ * @buffer: Buffer of length of at least 2 * %GNET_SHA_HASH_LENGTH
+ *
+ * Copy the hash string into the buffer.
+ * 
+ **/
 void
-gnet_sha_copy_string (GSHA* gsha, guchar* buffer)
+gnet_sha_copy_string (const GSHA* gsha, guchar* buffer)
 {
   guint i;
 
@@ -778,3 +725,4 @@ gnet_sha_copy_string (GSHA* gsha, guchar* buffer)
       buffer[(i * 2) + 1] = bits2hex[(gsha->digest[i] & 0x0F)     ];
     }
 }
+

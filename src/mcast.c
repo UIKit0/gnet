@@ -92,7 +92,7 @@ gnet_mcast_socket_port_new(gint port)
  *
  **/
 GMcastSocket* 
-gnet_mcast_socket_inetaddr_new(GInetAddr* ia)
+gnet_mcast_socket_inetaddr_new (const GInetAddr* ia)
 {
   GMcastSocket* ms;
   const int on = 1;
@@ -194,7 +194,7 @@ gnet_mcast_socket_unref(GMcastSocket* s)
  *
  **/
 gint
-gnet_mcast_socket_join_group(GMcastSocket* ms, GInetAddr* ia)
+gnet_mcast_socket_join_group (GMcastSocket* ms, const GInetAddr* ia)
 {
   struct ip_mreq mreq;
 
@@ -221,7 +221,7 @@ gnet_mcast_socket_join_group(GMcastSocket* ms, GInetAddr* ia)
  *
  **/
 gint
-gnet_mcast_socket_leave_group(GMcastSocket* ms, GInetAddr* ia)
+gnet_mcast_socket_leave_group (GMcastSocket* ms, const GInetAddr* ia)
 {
   struct ip_mreq mreq;
 
@@ -248,9 +248,9 @@ gnet_mcast_socket_leave_group(GMcastSocket* ms, GInetAddr* ia)
  *
  **/
 gint 
-gnet_mcast_socket_send(const GMcastSocket* ms, const GUdpPacket* packet)
+gnet_mcast_socket_send (GMcastSocket* ms, const GUdpPacket* packet)
 {
-  return gnet_udp_socket_send((const GUdpSocket*) ms, packet);
+  return gnet_udp_socket_send((GUdpSocket*) ms, packet);
 }
 
 
@@ -265,9 +265,9 @@ gnet_mcast_socket_send(const GMcastSocket* ms, const GUdpPacket* packet)
  *
  **/
 gint 
-gnet_mcast_socket_receive(const GMcastSocket* ms, GUdpPacket* packet)
+gnet_mcast_socket_receive (GMcastSocket* ms, GUdpPacket* packet)
 {
-  return gnet_udp_socket_receive((const GUdpSocket*) ms, packet);
+  return gnet_udp_socket_receive((GUdpSocket*) ms, packet);
 }
 
 
@@ -281,7 +281,7 @@ gnet_mcast_socket_receive(const GMcastSocket* ms, GUdpPacket* packet)
  *
  **/
 gboolean
-gnet_mcast_socket_has_packet(const GMcastSocket* s)
+gnet_mcast_socket_has_packet (const GMcastSocket* s)
 {
   return gnet_udp_socket_has_packet((const GUdpSocket*) s);
 }
@@ -299,7 +299,7 @@ gnet_mcast_socket_has_packet(const GMcastSocket* s)
  *
  **/
 gint
-gnet_mcast_socket_is_loopback(GMcastSocket* ms)
+gnet_mcast_socket_is_loopback (const GMcastSocket* ms)
 {
   guchar flag;
   socklen_t flagSize;
@@ -331,7 +331,7 @@ gnet_mcast_socket_is_loopback(GMcastSocket* ms)
  *
  **/
 gint
-gnet_mcast_socket_set_loopback(GMcastSocket* ms, int b)
+gnet_mcast_socket_set_loopback (GMcastSocket* ms, int b)
 {
   guchar flag;
 

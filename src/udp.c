@@ -31,7 +31,7 @@
  *
  **/
 GUdpSocket* 
-gnet_udp_socket_new(void)
+gnet_udp_socket_new (void)
 {
   return gnet_udp_socket_port_new(0);
 }
@@ -47,7 +47,7 @@ gnet_udp_socket_new(void)
  *
  **/
 GUdpSocket* 
-gnet_udp_socket_port_new(const gint port)
+gnet_udp_socket_port_new (gint port)
 {
   GUdpSocket* s = g_new0(GUdpSocket, 1);
   struct sockaddr_in* sa_in;
@@ -144,7 +144,7 @@ gnet_udp_socket_unref(GUdpSocket* s)
  *
  **/
 gint 
-gnet_udp_socket_send(const GUdpSocket* s, const GUdpPacket* packet)
+gnet_udp_socket_send (GUdpSocket* s, const GUdpPacket* packet)
 {
   gint bytes_sent;
   struct sockaddr to_sa;
@@ -170,7 +170,7 @@ gnet_udp_socket_send(const GUdpSocket* s, const GUdpPacket* packet)
  *
  **/
 gint 
-gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet)
+gnet_udp_socket_receive (GUdpSocket* s, GUdpPacket* packet)
 {
   gint bytes_received;
   struct sockaddr from_sa;
@@ -204,7 +204,7 @@ gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet)
  *
  **/
 gboolean
-gnet_udp_socket_has_packet(const GUdpSocket* s)
+gnet_udp_socket_has_packet (const GUdpSocket* s)
 {
   struct pollfd pfd;
 
@@ -315,7 +315,7 @@ gnet_udp_socket_get_iochannel(GUdpSocket* socket)
  *
  **/
 gint
-gnet_udp_socket_get_ttl(GUdpSocket* us)
+gnet_udp_socket_get_ttl (const GUdpSocket* us)
 {
   gint32 ttl;	/* Warning: on Linux this is 32 bits, but it should be 8 bits */
   socklen_t ttlSize;
@@ -353,7 +353,7 @@ gnet_udp_socket_set_ttl(GUdpSocket* us, int val)
 
 
 /**
- *  gnet_udp_socket_get_mcast_ttl
+ *  gnet_udp_socket_get_mcast_ttl:
  *  @us: GUdpSocket to get TTL from.
  *
  *  Get the TTL for outgoing multicast packests.  TTL is the Time To
@@ -410,7 +410,7 @@ gnet_udp_socket_set_ttl(GUdpSocket* us, int val)
  *
  **/
 gint
-gnet_udp_socket_get_mcast_ttl(GUdpSocket* us)
+gnet_udp_socket_get_mcast_ttl (const GUdpSocket* us)
 {
   guchar ttl;
   socklen_t ttlSize;
@@ -470,10 +470,10 @@ gnet_udp_socket_set_mcast_ttl(GUdpSocket* us, int val)
  *
  **/
 GUdpPacket* 
-gnet_udp_packet_receive_new(gint8* data, gint length)
+gnet_udp_packet_receive_new (guint8* data, gint length)
 {
   /* A receive packet is the same as a send packet without an address */
-  return gnet_udp_packet_send_new(data, length, NULL);
+  return gnet_udp_packet_send_new (data, length, NULL);
 }
 
 
@@ -489,7 +489,7 @@ gnet_udp_packet_receive_new(gint8* data, gint length)
  *
  **/
 GUdpPacket* 
-gnet_udp_packet_send_new(gint8* data, gint length, GInetAddr* addr)
+gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr)
 {
   GUdpPacket* packet = g_new(GUdpPacket, 1);
 
@@ -509,7 +509,7 @@ gnet_udp_packet_send_new(gint8* data, gint length, GInetAddr* addr)
  *
  **/
 void 
-gnet_udp_packet_delete(GUdpPacket* packet)
+gnet_udp_packet_delete (GUdpPacket* packet)
 {
   g_free(packet);
 }

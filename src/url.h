@@ -57,15 +57,15 @@ GURL*     gnet_url_new_fields (const gchar* protocol, const gchar* hostname,
 GURL*     gnet_url_clone (const GURL* url);
 void      gnet_url_delete (GURL* url);
 	       
-guint     gnet_url_hash (const gpointer p);	/* untested */
-gint 	  gnet_url_equal (const gpointer p1, const gpointer p2); /* untested */
+guint     gnet_url_hash (const gpointer p);
+gint 	  gnet_url_equal (const gpointer p1, const gpointer p2);
 
-void 	  gnet_url_set_protocol (GURL* url, gchar* protocol);
-void 	  gnet_url_set_hostname (GURL* url, gchar* hostname);
+void 	  gnet_url_set_protocol (GURL* url, const gchar* protocol);
+void 	  gnet_url_set_hostname (GURL* url, const gchar* hostname);
 void 	  gnet_url_set_port     (GURL* url, gint port);
-void 	  gnet_url_set_resource (GURL* url, gchar* resource);
+void 	  gnet_url_set_resource (GURL* url, const gchar* resource);
 	       
-gchar* 	  gnet_url_get_nice_string (GURL* url);
+gchar* 	  gnet_url_get_nice_string (const GURL* url);
 
 
 #ifdef __cplusplus

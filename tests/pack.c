@@ -19,7 +19,8 @@
 
 #include <glib.h>
 #include <stdio.h>
-#include <gnet/pack.h>
+
+#include <pack.h>
 
 void print_bytes(char* s, int len);
 

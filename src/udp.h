@@ -59,48 +59,48 @@ typedef struct _GUdpPacket
 /* ******************************************** */
 /* UDP socket functions				*/
 
-GUdpSocket* gnet_udp_socket_new(void);
+GUdpSocket* gnet_udp_socket_new (void);
 
-GUdpSocket* gnet_udp_socket_port_new(const gint port);
+GUdpSocket* gnet_udp_socket_port_new (gint port);
 
-void gnet_udp_socket_delete(GUdpSocket* s);
+void gnet_udp_socket_delete (GUdpSocket* s);
 
-void gnet_udp_socket_ref(GUdpSocket* s);
+void gnet_udp_socket_ref (GUdpSocket* s);
 
-void gnet_udp_socket_unref(GUdpSocket* s);
+void gnet_udp_socket_unref (GUdpSocket* s);
 
 
 /* ********** */
 
-gint gnet_udp_socket_send(const GUdpSocket* s, const GUdpPacket* packet);
+gint gnet_udp_socket_send (GUdpSocket* s, const GUdpPacket* packet);
 
-gint gnet_udp_socket_receive(const GUdpSocket* s, GUdpPacket* packet);
+gint gnet_udp_socket_receive (GUdpSocket* s, GUdpPacket* packet);
 
-gboolean gnet_udp_socket_has_packet(const GUdpSocket* s);
+gboolean gnet_udp_socket_has_packet (const GUdpSocket* s);
 
 /* ********** */
 
 /* Do not read or write from the iochannel - it's for watches only */
-GIOChannel* gnet_udp_socket_get_iochannel(GUdpSocket* socket);
+GIOChannel* gnet_udp_socket_get_iochannel (GUdpSocket* socket);
 
-gint gnet_udp_socket_get_ttl(GUdpSocket* us);
+gint gnet_udp_socket_get_ttl (const GUdpSocket* us);
 
-gint gnet_udp_socket_set_ttl(GUdpSocket* us, int val);
+gint gnet_udp_socket_set_ttl (GUdpSocket* us, int val);
 
-gint gnet_udp_socket_get_mcast_ttl(GUdpSocket* us);
+gint gnet_udp_socket_get_mcast_ttl (const GUdpSocket* us);
 
-gint gnet_udp_socket_set_mcast_ttl(GUdpSocket* us, gint val);
+gint gnet_udp_socket_set_mcast_ttl (GUdpSocket* us, gint val);
 
 
 
 /* ******************************************** */
 /* UDP packet functions 			*/
 
-GUdpPacket* gnet_udp_packet_receive_new(gint8* data, gint length);
+GUdpPacket* gnet_udp_packet_receive_new (guint8* data, gint length);
 
-GUdpPacket* gnet_udp_packet_send_new(gint8* data, gint length, GInetAddr* addr);
+GUdpPacket* gnet_udp_packet_send_new (guint8* data, gint length, GInetAddr* addr);
 
-void gnet_udp_packet_delete(GUdpPacket* packet);
+void gnet_udp_packet_delete (GUdpPacket* packet);
 
 
 #ifdef __cplusplus

@@ -2,25 +2,20 @@
 
 @SET_MAKE@
 
-EXTRA_PROGRAMS = pack unpack hash dnstest hostinfo
-CLEANFILES = pack unpack hash dnstest hostinfo
 
-INCLUDES += `gnet-config --cflags`
-LDFLAGS += `gnet-config --libs`
+INCLUDES = -I$(top_srcdir)/src
 
-hash_SOURCES =		\
-	hash.c
+TESTS = 		\
+	dnstest		\
+        hash		\
+	hostinfo	\
+	pack		\
+	unpack
 
-pack_SOURCES =		\
-	pack.c
+noinst_PROGRAMS = $(TESTS)
 
-unpack_SOURCES =	\
-	unpack.c
-
-dnstest_SOURCES =	\
-	dnstest.c
-
-hostinfo_SOURCES = 	\
-	hostinfo.c
-
-tests:	pack unpack hash dnstest hostinfo
+dnstest_LDADD	 = $(top_builddir)/src/libgnet.la
+hash_LDADD	 = $(top_builddir)/src/libgnet.la
+hostinfo_LDADD	 = $(top_builddir)/src/libgnet.la
+pack_LDADD	 = $(top_builddir)/src/libgnet.la
+unpack_LDADD	 = $(top_builddir)/src/libgnet.la
