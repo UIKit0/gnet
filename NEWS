@@ -7,7 +7,8 @@ Changes in Gnet
 1.3.2 ("Sacrilicious" DEVELOPERS release)
 -----
 * DNS bug fixes
-* FreeBSD compile fixes
+* FreeBSD compile fixes and UDP send bug fix
+* New functions: gnet_{udp,mcast}_socket_get_local_inetaddr
 * Build improvements: library is now named libglib-MAJOR.MINOR,
     favors GLib 2 over GLib 1.2
 

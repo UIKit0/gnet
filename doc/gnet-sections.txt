@@ -69,6 +69,7 @@ gnet_mcast_socket_delete
 gnet_mcast_socket_ref
 gnet_mcast_socket_unref
 gnet_mcast_socket_get_io_channel
+gnet_mcast_socket_get_local_inetaddr
 gnet_mcast_socket_join_group
 gnet_mcast_socket_leave_group
 gnet_mcast_socket_get_ttl
@@ -129,6 +130,7 @@ gnet_udp_socket_send
 gnet_udp_socket_receive
 gnet_udp_socket_has_packet
 gnet_udp_socket_get_io_channel
+gnet_udp_socket_get_local_inetaddr
 gnet_udp_socket_get_ttl
 gnet_udp_socket_set_ttl
 </SECTION>

@@ -100,7 +100,7 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
   /* Create socket */
   ms = g_new0(GMcastSocket, 1);
   ms->sockfd = sockfd;
-  memcpy (&ms->sa, &sa, sizeof(ms->sa));
+  ms->sa = sa;
   ms->ref_count = 1;
 
   gnet_mcast_socket_set_loopback (ms, FALSE);
@@ -194,6 +194,22 @@ GIOChannel*
 gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
 {
   return gnet_udp_socket_get_io_channel((GUdpSocket*) socket);
+}
+
+
+/**
+ *  gnet_mcast_socket_get_local_inetaddr
+ *  @socket: a #GMcastSocket
+ *
+ *  Gets the local host's address from a #GMcastSocket.
+ *
+ *  Returns: a #GInetAddr.
+ *
+ **/
+GInetAddr*  
+gnet_mcast_socket_get_local_inetaddr (const GMcastSocket* socket)
+{
+  return gnet_udp_socket_get_local_inetaddr((GUdpSocket*) socket);
 }
 
 

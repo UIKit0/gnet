@@ -14,10 +14,8 @@ EXTRA_DIST= 					\
 	GNET.DSP  				\
 	config.h.win32  			\
 	gnet.def  				\
-	gnet.m4 				\
 	gnet.spec  				\
 	gnet.spec.in 				\
-	gnet.pc.in 				\
 	examples/makefile.mingw 		\
 	src/makefile.mingw 			\
 	src/gnet-private.h  			\
@@ -26,7 +24,9 @@ EXTRA_DIST= 					\
 	tests/makefile.mingw			\
 	tests/testfile				\
 	tests/client_server_test.pl		\
-	tests/dns_test.pl
+	tests/dns_test.pl			\
+	gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).m4		\
+	gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).pc.in
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).m4

@@ -40,7 +40,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
   if (iface)
     {
       family = GNET_INETADDR_FAMILY(iface);
-      memcpy (sa, &iface->sa, sizeof(*sa));
+      *sa = iface->sa;
       GNET_SOCKADDR_PORT(*sa) = g_htons(port);
     }
   else
@@ -56,6 +56,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
 
 	  sa_in = (struct sockaddr_in*) sa;
 	  sa_in->sin_family = AF_INET;
+	  GNET_SOCKADDR_SET_SS_LEN(*sa);
 	  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
 	  sa_in->sin_port = g_htons(port);
 	}
@@ -67,6 +68,7 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
 
 	  sa_in6 = (struct sockaddr_in6*) sa;
 	  sa_in6->sin6_family = AF_INET6;
+	  GNET_SOCKADDR_SET_SS_LEN(*sa);
 	  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
 	  sa_in6->sin6_port = g_htons(port);
 	}

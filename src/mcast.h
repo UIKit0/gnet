@@ -55,6 +55,7 @@ void 	      gnet_mcast_socket_ref (GMcastSocket* socket);
 void 	      gnet_mcast_socket_unref (GMcastSocket* socket);
 
 GIOChannel*   gnet_mcast_socket_get_io_channel (GMcastSocket* socket);
+GInetAddr*    gnet_mcast_socket_get_local_inetaddr (const GMcastSocket* socket);
 
 
 /* ********** */

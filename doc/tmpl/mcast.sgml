@@ -105,6 +105,15 @@ disable loopback.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_mcast_socket_get_local_inetaddr ##### -->
+<para>
+
+</para>
+
+@socket: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_mcast_socket_join_group ##### -->
 <para>
 

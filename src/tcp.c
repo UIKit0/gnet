@@ -320,7 +320,7 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
   s = g_new0 (GTcpSocket, 1);
   s->sockfd = sockfd;
   s->ref_count = 1;
-  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
+  s->sa = addr->sa;
 
   /* Connect */
   rv = connect(sockfd, 
@@ -437,7 +437,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
     }
 
   /* Save address */ 
-  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
+  s->sa = addr->sa;
 
   /* Note that if connect returns 0, then we're already connected and
      we could call the call back immediately.  But, it would probably
@@ -574,7 +574,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
     }
 
   /* Save address */ 
-  memcpy(&s->sa, &addr->sa, sizeof(s->sa));
+  s->sa = addr->sa;
 
   /* Wait for the connection */
   state = g_new0(GTcpSocketAsyncState, 1);
@@ -753,7 +753,7 @@ gnet_tcp_socket_get_remote_inetaddr (const GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   ia = g_new0(GInetAddr, 1);
-  memcpy (&ia->sa, &socket->sa, sizeof(ia->sa));
+  ia->sa = socket->sa;
   ia->ref_count = 1;
 
   return ia;
@@ -784,7 +784,7 @@ gnet_tcp_socket_get_local_inetaddr (const GTcpSocket* socket)
 
   ia = g_new0(GInetAddr, 1);
   ia->ref_count = 1;
-  memcpy (&ia->sa, &sa, sizeof(sa));
+  ia->sa = sa;
 
   return ia;
 }
@@ -969,7 +969,7 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
   /* Create TcpSocket */
   s = g_new0(GTcpSocket, 1);
   s->sockfd = sockfd;
-  memcpy (&s->sa, &sa, sizeof(sa));
+  s->sa = sa;
   s->ref_count = 1;
 
   return s;
@@ -1045,7 +1045,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = sockfd;
-  memcpy(&s->sa, &sa, sizeof(s->sa));
+  s->sa = sa;
 
   return s;
 }
@@ -1112,7 +1112,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = sockfd;
-  memcpy(&s->sa, &sa, sizeof(s->sa));
+  s->sa = sa;
 
   return s;
 }
@@ -1155,7 +1155,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = sockfd;
-  memcpy(&s->sa, &sa, sizeof(s->sa));
+  s->sa = sa;
 
   return s;
 }
@@ -1200,7 +1200,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   s = g_new0(GTcpSocket, 1);
   s->ref_count = 1;
   s->sockfd = sockfd;
-  memcpy(&s->sa, &sa, sizeof(s->sa));
+  s->sa = sa;
 
   return s;
 }

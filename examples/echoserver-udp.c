@@ -33,6 +33,8 @@ main(int argc, char** argv)
   gchar buffer[1024];
   gint ttl;
   gint rv;
+  GInetAddr* addr;
+  gchar* name;
 
   gnet_init ();
 
@@ -58,12 +60,20 @@ main(int argc, char** argv)
   ttl = gnet_udp_socket_get_ttl (server);
   g_assert (ttl == 64);
 
+  /* Print the address */
+  addr = gnet_udp_socket_get_local_inetaddr(server);
+  g_assert (addr);
+  name = gnet_inetaddr_get_canonical_name (addr);
+  g_assert (name);
+  port = gnet_inetaddr_get_port (addr);
+  g_print ("UDP echoserver running on %s:%d\n", name, port);
+  gnet_inetaddr_delete (addr);
+  g_free (name);
 
   while (1)
     {
       gint bytes_received;
       gint rv;
-      GInetAddr* addr;
 
       bytes_received = gnet_udp_socket_receive (server, buffer, sizeof(buffer), 
 						&addr);

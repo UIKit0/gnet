@@ -54,6 +54,7 @@ void 	    gnet_udp_socket_ref (GUdpSocket* socket);
 void 	    gnet_udp_socket_unref (GUdpSocket* socket);
 
 GIOChannel* gnet_udp_socket_get_io_channel (GUdpSocket* socket);
+GInetAddr*  gnet_udp_socket_get_local_inetaddr (const GUdpSocket* socket);
 
 
 /* ********** */

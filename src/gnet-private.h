@@ -128,16 +128,23 @@
 #define GNET_SOCKADDR_LEN(s)	(((s).ss_family == AF_INET)?\
                                   sizeof(struct sockaddr_in):\
                                   sizeof(struct sockaddr_in6))
+#ifdef HAVE_SOCKADDR_SA_LEN
+#define GNET_SOCKADDR_SET_SS_LEN(s) do{(s).ss_len = GNET_SOCKADDR_LEN(s);}while(0)
+#else
+#define GNET_SOCKADDR_SET_SS_LEN(s) while(0){} /* do nothing */
+#endif
 
-#define GNET_INETADDR_SA(i)       GNET_SOCKADDR_SA((i)->sa)
-#define GNET_INETADDR_SA4(i)      GNET_SOCKADDR_SA4((i)->sa)
-#define GNET_INETADDR_SA6(i)      GNET_SOCKADDR_SA6((i)->sa) 
-#define GNET_INETADDR_FAMILY(i)   GNET_SOCKADDR_FAMILY((i)->sa)
-#define GNET_INETADDR_ADDRP(i)    GNET_SOCKADDR_ADDRP((i)->sa)
-#define GNET_INETADDR_ADDR32(i,n) GNET_SOCKADDR_ADDR32((i)->sa,(n))
-#define GNET_INETADDR_ADDRLEN(i)  GNET_SOCKADDR_ADDRLEN((i)->sa)
-#define GNET_INETADDR_PORT(i)     GNET_SOCKADDR_PORT((i)->sa)
-#define GNET_INETADDR_LEN(i)      GNET_SOCKADDR_LEN((i)->sa)
+
+#define GNET_INETADDR_SA(i)         GNET_SOCKADDR_SA((i)->sa)
+#define GNET_INETADDR_SA4(i)        GNET_SOCKADDR_SA4((i)->sa)
+#define GNET_INETADDR_SA6(i)        GNET_SOCKADDR_SA6((i)->sa) 
+#define GNET_INETADDR_FAMILY(i)     GNET_SOCKADDR_FAMILY((i)->sa)
+#define GNET_INETADDR_ADDRP(i)      GNET_SOCKADDR_ADDRP((i)->sa)
+#define GNET_INETADDR_ADDR32(i,n)   GNET_SOCKADDR_ADDR32((i)->sa,(n))
+#define GNET_INETADDR_ADDRLEN(i)    GNET_SOCKADDR_ADDRLEN((i)->sa)
+#define GNET_INETADDR_PORT(i)       GNET_SOCKADDR_PORT((i)->sa)
+#define GNET_INETADDR_LEN(i)        GNET_SOCKADDR_LEN((i)->sa)
+#define GNET_INETADDR_SET_SS_LEN(i) GNET_SOCKADDR_SET_SS_LEN((i)->sa)
 
 
 #define GNET_ANY_IO_CONDITION   (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)

@@ -1,3 +1,53 @@
+Fri Feb 21 17:52:18 2003  David Helder  <dhelder@umich.edu>
+
+	* *: Release 1.3.2
+	
+	* src/gnet-private.h: Add macros for setting ss_len based on
+	    ss_family.  On linux this is a no-op.
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces: GNET_INETADDR_SET_SS_LEN
+	* src/inetaddr.c (gnet_inetaddr_set_bytes): 
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): 
+	* src/inetaddr.c (gnet_inetaddr_new_list_async_cb): 
+	* src/inetaddr.c (gnet_gethostbyname): 
+	* src/inetaddr.c (hostent2ialist): 
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces): 
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces):
+	* src/udp.c (gnet_udp_socket_send): 
+	* src/gnet-private.c (gnet_private_create_listen_socket): 
+
+	* src/inetaddr.c (gnet_inetaddr_get_interface_to): Assign sa,
+	don't memcpy.
+	* src/inetaddr.c (gnet_inetaddr_list_interfaces): "
+	* src/inetaddr.c (gnet_gethostbyname): Set sin_addr, don't memcpy.
+	* src/inetaddr.c (gnet_gethostbyname): " sin6_addr
+	* src/inetaddr.c (gnet_inetaddr_new_nonblock): "
+	* src/udp.c (gnet_udp_socket_receive): 
+	* src/gnet-private.c (gnet_private_create_listen_socket): no memcpy
+	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock): 
+	* src/tcp.c (gnet_tcp_socket_server_accept): 
+	* src/tcp.c (gnet_tcp_socket_server_accept_nonblock): 
+	* src/tcp.c (gnet_tcp_socket_server_accept): "
+	* src/tcp.c (gnet_tcp_socket_get_local_inetaddr): "
+	* src/tcp.c (gnet_tcp_socket_server_new_full): "
+	* src/tcp.c (gnet_tcp_socket_get_remote_inetaddr): 
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): no memcpy
+	* src/tcp.c (gnet_tcp_socket_new_direct): no memcpy
+	* src/tcp.c (gnet_tcp_socket_new_async_direct): "
+	* src/udp.c (gnet_udp_socket_send): "
+	* src/udp.c (gnet_udp_socket_get_local_inetaddr): "
+	* src/udp.c (gnet_udp_socket_new_full): "
+	* src/mcast.c (gnet_mcast_socket_new_full): no memcopy
+
+
+	* examples/echoserver-udp.c: Print address of server.
+
+	* src/udp.c (gnet_udp_socket_send): Map IPv4 dst to IPv6 is socket
+	    is IPv6 and vice versa.  FreeBSD is less tolerant than Linux
+	    about this.  RFC 2553 says to do this anyway.
+	
+	* src/udp.c (gnet_udp_socket_get_local_inetaddr): Added
+	* src/mcast.c (gnet_mcast_socket_get_local_inetaddr): Added
+
 Wed Feb 19 16:55:21 2003  David Helder  <dhelder@umich.edu>
 
 	* Makefile.am (EXTRA_DIST): Distribute tests/testfile

@@ -171,7 +171,6 @@ fi
 
 
 # Check for GLib 2.0
-echo "enable_glib12 = ${enable_glib12}"
 if test "x${PKGCONFIG}" = "xyes" -a "x${enable_glib12}" != "xyes"; then
 
   # Check for GLib 2.0 (or 2.2)
@@ -462,8 +461,5 @@ AC_CONFIG_FILES([
 	doc/Makefile
 	gnetconfig.h
 	gnet.spec
-	gnet.pc],
-	[], # Do nothing
-	[cp -f gnet.pc gnet-1.3.pc
-	 cp -f gnet.m4 gnet-1.3.m4 ])
+	gnet-1.3.pc])
 AC_OUTPUT

@@ -69,6 +69,7 @@ hostent2ialist (const struct hostent* he)
       ia = g_new0(GInetAddr, 1);
       ia->ref_count = 1;
       ia->sa.ss_family = he->h_addrtype;
+      GNET_INETADDR_SET_SS_LEN(ia);
       memcpy (GNET_SOCKADDR_ADDRP(ia->sa), he->h_addr_list[i], he->h_length);
       list = g_list_prepend(list, ia);
     }
@@ -104,7 +105,8 @@ gnet_gethostbyname(const char* hostname)
       sa = (struct sockaddr_in*) &ia->sa;
 
       sa->sin_family = AF_INET;
-      memcpy(&sa->sin_addr, (char*) &inaddr, sizeof(inaddr));
+      GNET_INETADDR_SET_SS_LEN(ia);
+      sa->sin_addr = inaddr;
 
       list = g_list_prepend (list, ia);
       return list;
@@ -119,7 +121,8 @@ gnet_gethostbyname(const char* hostname)
       sa = (struct sockaddr_in6*) &ia->sa;
 
       sa->sin6_family = AF_INET6;
-      memcpy(&sa->sin6_addr, (char*) &in6addr, sizeof(in6addr));
+      GNET_INETADDR_SET_SS_LEN(ia);
+      sa->sin6_addr = in6addr;
       /* don't set the nice name, it's not necessarily canonical */
 
       list = g_list_prepend (list, ia);
@@ -1207,7 +1210,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 	      ia = g_new0(GInetAddr, 1);
 	      ia->ref_count = 1;
 	      ia->sa.ss_family = (size == 4)? AF_INET : AF_INET6;
-
+	      GNET_INETADDR_SET_SS_LEN(ia);
 	      memcpy(GNET_INETADDR_ADDRP(ia), buf, size);
 	      GNET_INETADDR_PORT(ia) = g_htons(state->port);
 
@@ -1423,7 +1426,8 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
       sa_inp = (struct sockaddr_in*) &ia->sa;
 
       sa_inp->sin_family = AF_INET;
-      memcpy(&sa_inp->sin_addr, (char*) &inaddr, sizeof(inaddr));
+      GNET_INETADDR_SET_SS_LEN(ia);
+      sa_inp->sin_addr = inaddr;
       sa_inp->sin_port = g_htons(port);
     }
   else if (inet_pton(AF_INET6, hostname, &in6addr) != 0)
@@ -1435,7 +1439,8 @@ gnet_inetaddr_new_nonblock (const gchar* hostname, gint port)
       sa_inp = (struct sockaddr_in6*) &ia->sa;
 
       sa_inp->sin6_family = AF_INET6;
-      memcpy(&sa_inp->sin6_addr, (char*) &in6addr, sizeof(in6addr));
+      GNET_INETADDR_SET_SS_LEN(ia);
+      sa_inp->sin6_addr = in6addr;
       sa_inp->sin6_port = g_htons(port);
     }
   else
@@ -1475,6 +1480,7 @@ gnet_inetaddr_new_bytes (const gchar* bytes, const guint length)
     GNET_INETADDR_FAMILY(ia) = AF_INET;
   else
     GNET_INETADDR_FAMILY(ia) = AF_INET6;
+  GNET_INETADDR_SET_SS_LEN(ia);
   memcpy(GNET_INETADDR_ADDRP(ia), bytes, length);
 
   return ia;
@@ -2187,6 +2193,7 @@ gnet_inetaddr_set_bytes (GInetAddr* inetaddr,
     GNET_INETADDR_FAMILY(inetaddr) = AF_INET;
   else if (length == 16)
     GNET_INETADDR_FAMILY(inetaddr) = AF_INET6;
+  GNET_INETADDR_SET_SS_LEN(inetaddr);
   memcpy (GNET_INETADDR_ADDRP(inetaddr), bytes, length);
   GNET_INETADDR_PORT(inetaddr) = port;
 }
@@ -2939,7 +2946,7 @@ gnet_inetaddr_get_interface_to (const GInetAddr* inetaddr)
 
   iface = g_new0 (GInetAddr, 1);
   iface->ref_count = 1;
-  memcpy (&iface->sa, (char*) &myaddr, sizeof (iface->sa));
+  iface->sa = myaddr;
 
   return iface;
 }
@@ -3166,6 +3173,7 @@ gnet_inetaddr_list_interfaces (void)
       ia = g_new0 (GInetAddr, 1);
       ia->ref_count = 1;
       GNET_INETADDR_FAMILY(ia) = sa->sa_family;
+      GNET_INETADDR_SET_SS_LEN(ia);
       memcpy(GNET_INETADDR_ADDRP(ia), src, len);
       list = g_list_prepend (list, ia);
     }
@@ -3258,7 +3266,7 @@ gnet_inetaddr_list_interfaces (void)
       /* Create an InetAddr for this one and add it to our list */
       ia = g_new0 (GInetAddr, 1);
       ia->ref_count = 1;
-      memcpy(&ia->sa, &addr, sizeof(addr));
+      ia->sa = addr;
       list = g_list_prepend (list, ia);
     }
 

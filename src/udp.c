@@ -99,7 +99,7 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
   /* Create UDP socket */
   s = g_new0 (GUdpSocket, 1);
   s->sockfd = sockfd;
-  memcpy (&s->sa, &sa, sizeof(s->sa));
+  s->sa = sa;
   s->ref_count = 1;
 
   return s;
@@ -201,6 +201,36 @@ gnet_udp_socket_get_io_channel (GUdpSocket* socket)
 
 
 /**
+ *  gnet_udp_socket_get_local_inetaddr
+ *  @socket: a #GUdpSocket
+ *
+ *  Gets the local host's address from a #GUdpSocket.
+ *
+ *  Returns: a #GInetAddr.
+ *
+ **/
+GInetAddr*  
+gnet_udp_socket_get_local_inetaddr (const GUdpSocket* socket)
+{
+  socklen_t socklen;
+  struct sockaddr_storage sa;
+  GInetAddr* ia;
+
+  g_return_val_if_fail (socket, NULL);
+
+  socklen = sizeof(sa);
+  if (getsockname(socket->sockfd, &GNET_SOCKADDR_SA(sa), &socklen) != 0)
+    return NULL;
+
+  ia = g_new0(GInetAddr, 1);
+  ia->ref_count = 1;
+  ia->sa = sa;
+
+  return ia;
+}
+
+
+/**
  *  gnet_udp_socket_send
  *  @socket: a #GUdpSocket
  *  @buffer: buffer to send
@@ -218,14 +248,51 @@ gnet_udp_socket_send (GUdpSocket* socket,
 		      const GInetAddr* dst)
 {
   gint bytes_sent;
+  struct sockaddr_storage sa;
 
   g_return_val_if_fail (socket, -1);
   g_return_val_if_fail (dst,    -1);
 
-  bytes_sent = sendto (socket->sockfd, 
-		       (void*) buffer, length, 0, 
-		       &GNET_SOCKADDR_SA(dst->sa), 
-		       GNET_SOCKADDR_LEN(dst->sa));
+  /* Address of dst must be address of socket */
+  if (GNET_INETADDR_FAMILY(dst) != GNET_SOCKADDR_FAMILY(socket->sa))
+    {
+      /* If dst is IPv4, map to IPv6 */
+      if (GNET_INETADDR_FAMILY(dst) == AF_INET &&
+          GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
+	{
+          sa.ss_family = AF_INET6;
+	  GNET_SOCKADDR_SET_SS_LEN(sa);
+          GNET_SOCKADDR_PORT(sa) = GNET_INETADDR_PORT(dst);
+          GNET_SOCKADDR_ADDR32(sa, 0) = 0;
+          GNET_SOCKADDR_ADDR32(sa, 1) = 0;
+          GNET_SOCKADDR_ADDR32(sa, 2) = g_htonl(0xffff);
+          GNET_SOCKADDR_ADDR32(sa, 3) = GNET_INETADDR_ADDR32(dst, 0);
+	}
+
+      /* If dst is IPv6, map to IPv4 if possible */
+      else if (GNET_INETADDR_FAMILY(dst) == AF_INET6 &&
+               GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET &&
+               IN6_IS_ADDR_V4MAPPED(&GNET_INETADDR_SA6(dst).sin6_addr))
+	{
+          sa.ss_family = AF_INET;
+	  GNET_SOCKADDR_SET_SS_LEN(sa);
+          GNET_SOCKADDR_PORT(sa) = GNET_INETADDR_PORT(dst);
+          GNET_SOCKADDR_ADDR32(sa, 0) = GNET_INETADDR_ADDR32(dst, 3);
+	}
+      else
+        return -1;
+
+    }
+    /* Addresses match - just copy the address */
+    else
+      {
+	sa = dst->sa;
+      }
+
+
+  bytes_sent = sendto (socket->sockfd,
+                       (void*) buffer, length, 0,
+                       (struct sockaddr*) &sa, GNET_SOCKADDR_LEN(sa));
 
   if (bytes_sent != length)
     return -1;
@@ -271,7 +338,7 @@ gnet_udp_socket_receive (GUdpSocket* socket,
   if (src)
     {
       (*src) = g_new0 (GInetAddr, 1);
-      memcpy (&GNET_INETADDR_SA(*src), &sa, sa_len);
+      (*src)->sa = sa;
       (*src)->ref_count = 1;
     }
 
