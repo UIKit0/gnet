@@ -18,14 +18,13 @@ libgnet_la_SOURCES = 		\
 	inetaddr.c		\
 	mcast.c			\
 	tcp.c			\
-	ftp.c			\
 	udp.c
 
 gnetinclude_HEADERS = 		\
 	gnet.h			\
-	gnet-private.h		\
         inetaddr.h              \
         mcast.h           	\
 	tcp.h			\
-	ftp.h			\
         udp.h
+
+EXTRA_DIST = ftp.h ftp.c gnet-private.h

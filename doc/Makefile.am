@@ -15,7 +15,7 @@ TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
 
 
 scan:
-	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="acconfig.h config.h examples/jmtransfer.h"
+	gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="acconfig.h config.h examples/jmtransfer.h src/gnet-private.h src/ftp.h"
 
 templates: scan
 	gtkdoc-mktmpl --module=$(DOC_MODULE)

@@ -20,6 +20,8 @@
 #ifndef _GNET_PRIVATE_H
 #define _GNET_PRIVATE_H
 
+#include <config.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

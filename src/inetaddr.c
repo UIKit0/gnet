@@ -23,7 +23,6 @@
 #include <config.h>
 
 
-
 static gboolean gnet_inetaddr_new_nonblock_cb (GIOChannel* iochannel, 
 					       GIOCondition condition, 
 					       gpointer data);

@@ -20,7 +20,6 @@
 
 #include "gnet-private.h"
 #include "gnet.h"
-#include <config.h>
 
 
 const guint gnet_major_version = GNET_MAJOR_VERSION;

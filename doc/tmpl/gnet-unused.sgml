@@ -60,6 +60,21 @@
 
 @Returns: 
 
+<!-- ##### FUNCTION gnet_private_inetaddr_sockaddr_new ##### -->
+<para>
+
+</para>
+
+@sa: 
+@Returns: 
+
+<!-- ##### FUNCTION gnet_private_inetaddr_list_interfaces ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
 <!-- ##### STRUCT GTcpSocket ##### -->
 <para>
 

@@ -1,7 +1,18 @@
+Wed Jan 26 11:11:07 2000  David A Helder  <dhelder@umich.edu>
+
+	* src/Makefile.am: Don't install gnet-private.h, ftp.{hc}
+	* src/{gnet,inetaddr}.h: Removed include of config.h
+	* src/gnet-private.h: Added include of config.h
+
+Tue Jan 25 14:48:11 2000  David A Helder  <dhelder@umich.edu>
+
+	* doc/Makefile.am (scan): Added src/ftp, src/gnet-private to
+	    the ignore list
+	* doc/[docs]: Regenerated
 
 Tue Jan 25 12:28:52 2000  David A Helder  <dhelder@umich.edu>
 
-	* auto: Upped version to 0.1.7
+	* auto*: Upped version to 0.1.7
 	* src/gnet.c:
 	    Fixed read/write functions.  Basically brought in line with
 	    Steven's code, which I know to be correct.  readn didn't

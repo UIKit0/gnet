@@ -96,11 +96,13 @@ lib_LTLIBRARIES = libgnet.la
 libgnet_la_LDFLAGS =  	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) 	-release $(LT_RELEASE)
 
 
-libgnet_la_SOURCES =  	gnet.c				gnet-private.c			inetaddr.c			mcast.c				tcp.c				ftp.c				udp.c
+libgnet_la_SOURCES =  	gnet.c				gnet-private.c			inetaddr.c			mcast.c				tcp.c				udp.c
 
 
-gnetinclude_HEADERS =  	gnet.h				gnet-private.h		        inetaddr.h                      mcast.h           		tcp.h				ftp.h			        udp.h
+gnetinclude_HEADERS =  	gnet.h			        inetaddr.h                      mcast.h           		tcp.h			        udp.h
 
+
+EXTRA_DIST = ftp.h ftp.c gnet-private.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -113,7 +115,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libgnet_la_LIBADD = 
 libgnet_la_OBJECTS =  gnet.lo gnet-private.lo inetaddr.lo mcast.lo \
-tcp.lo ftp.lo udp.lo
+tcp.lo udp.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -128,8 +130,8 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/ftp.P .deps/gnet-private.P .deps/gnet.P \
-.deps/inetaddr.P .deps/mcast.P .deps/tcp.P .deps/udp.P
+DEP_FILES =  .deps/gnet-private.P .deps/gnet.P .deps/inetaddr.P \
+.deps/mcast.P .deps/tcp.P .deps/udp.P
 SOURCES = $(libgnet_la_SOURCES)
 OBJECTS = $(libgnet_la_OBJECTS)
 
