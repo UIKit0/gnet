@@ -202,7 +202,7 @@ GTcpSocket* gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket);
  *   @data: User data
  *   
  *   Callback for gnet_tcp_socket_server_accept_async().  The socket
- *   failed if client_socket is NULL.
+ *   had an irrecoverable error if client_socket is NULL.
  *
  **/
 typedef void (*GTcpSocketAcceptFunc)(GTcpSocket* server, 

@@ -13,3 +13,5 @@ dnstest
 ljoust
 echoserver-udp
 echoclient-udp
+echoclient-unix
+echoserver-unix

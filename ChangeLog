@@ -1,3 +1,8 @@
+Mon Feb  4 16:52:58 2002  David Helder  <dhelder@umich.edu>
+
+	* src/tcp.c: Doc updates
+	* doc/*: "
+	
 Mon Feb  4 14:33:37 2002  David Helder  <dhelder@umich.edu>
 
 	* src/tcp.c (gnet_tcp_socket_server_accept_async): Fix warning.

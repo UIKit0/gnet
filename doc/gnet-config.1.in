@@ -9,6 +9,7 @@ gnet-config - script to get information about the installed version of GNet
 the compiler and linker flags that should be used to compile
 and link programs that use \fIGNet\fP. It is also used internally
 to the .m4 macros for GNU autoconf that are included with \fIGNet\fP.
+\fIgnet-config\fP is depricated - use \fIpkg-config\fP for new projects.
 .
 .SH OPTIONS
 .l
@@ -40,6 +41,6 @@ If specified, use PREFIX instead of the installation exec prefix that
 and \-\-libs options.  This option must be specified before any
 \-\-libs or \-\-cflags options.
 .SH SEE ALSO
-.BR glib-config (1)
+.BR glib-config (1), pkg-config (1)
 .SH COPYRIGHT
 Copyright \(co  2001 David A. Helder

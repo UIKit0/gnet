@@ -24,6 +24,9 @@ by calling tcp_socket_new or tcp_socket_port_new.
 @sa: 
 @ref_count: 
 @iochannel: 
+@accept_func: 
+@accept_data: 
+@accept_watch: 
 
 <!-- ##### FUNCTION gnet_tcp_socket_connect ##### -->
 <para>
@@ -238,5 +241,23 @@ by calling tcp_socket_new or tcp_socket_port_new.
 
 @socket: 
 @Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_accept_async ##### -->
+<para>
+
+</para>
+
+@socket: 
+@accept_func: 
+@user_data: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_server_accept_async_cancel ##### -->
+<para>
+
+</para>
+
+@socket: 
 
 

@@ -1123,6 +1123,16 @@ static gboolean tcp_socket_server_accept_async_cb (GIOChannel* iochannel,
 						   GIOCondition condition, 
 						   gpointer data);
 
+/**
+ *  gnet_tcp_socket_server_accept_async:
+ *  @socket: #GTcpSocket to accept connections from.
+ *  @accept_func: Callback function.
+ *  @data: User data passed when callback function is called.
+ *
+ *  Accept a connection from the socket asynchronously.  The callback
+ *  is called when a client has connection or the socket has an error.
+ *
+ **/
 void
 gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
 				     GTcpSocketAcceptFunc accept_func,
@@ -1193,6 +1203,15 @@ tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition
 }
 
 
+
+/**
+ *  gnet_tcp_socket_server_accept_async_cancel:
+ *  @socket: #GTcpSocket accepting connections asynchronously.
+ *
+ *  Stops accepting connections asynchronously from the socket.  This
+ *  does not close the socket.
+ *
+ **/
 void
 gnet_tcp_socket_server_accept_async_cancel (GTcpSocket* socket)
 {

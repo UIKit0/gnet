@@ -7,3 +7,7 @@ gnet-decl-list.txt
 gnet-decl.txt
 gnet-unused.txt
 gnet-config.1
+html.stamp
+sgml.stamp
+tmpl.stamp
+gnet-undocumented.txt

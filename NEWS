@@ -9,6 +9,7 @@ Changes in Gnet
 * Experimental Unix sockets support
 * Experimental SOCKS support
 * URLs support username, password, query, and fragment 
+* New gnet_tcp_socket_server_accept_async function
 * gnet_inetaddr_new_async has pthread implemention,
     no longer succeeds immediately
 * New gnet_{sha,md5}_clone functions

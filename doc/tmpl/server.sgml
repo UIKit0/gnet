@@ -23,8 +23,6 @@ a new connection.
 @iface: 
 @port: 
 @socket: 
-@iochannel: 
-@watch_id: 
 @func: 
 @user_data: 
 
