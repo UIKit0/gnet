@@ -1,3 +1,9 @@
+Mon Apr 23 7:07:21 2001  Andrew Lanoix  <alanoix@umich.edu>
+
+	* src/gnet-private.c (gnet_MainCallBack - Win32 ONLY):
+	  Explicitly force GNet to grab only its own messages,
+	  Found by Anthony Lee. 
+
 Mon Apr  9 17:10:09 2001  David Helder  <dhelder@umich.edu>
 
 	* src/iochannel.c (gnet_io_channel_readn): Bug fix from Wolfgang

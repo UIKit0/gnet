@@ -161,7 +161,7 @@ gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
   SocketWatchAsyncState *WatchState;
 
   /*Take the msg off the message queue */
-  GetMessage (&msg, NULL, 0, 0);
+  GetMessage (&msg, gnet_hWnd, 0, 0);
  
   switch (msg.message) 
     {
