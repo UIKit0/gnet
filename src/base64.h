@@ -39,11 +39,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-#define GNET_BASE64_RAW       0
-#define GNET_BASE64_STRICT    1
-
-gchar* gnet_base64_encode (gchar* src, gint srclen, gint* dstlen, gint strict);
-gchar* gnet_base64_decode (gchar* src, gint srclen, gint* dstlen);
+gchar* gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict);
+gchar* gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp);
 
 
 #ifdef __cplusplus

@@ -37,20 +37,43 @@
 
 static gchar gnet_Base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 #define gnet_Pad64	'='
+static guchar gnet_Base64_rank[256] = {
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0x00-0x0f	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0x10-0x1f	*/
+	255,255,255,255,255,255,255,255,255,255,255, 62,255,255,255, 63, /*	0x20-0x2f	*/
+	 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,255,255,255,255,255,255, /*	0x30-0x3f	*/
+	255,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, /*	0x40-0x4f	*/
+	 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,255,255,255,255,255, /*	0x50-0x5f	*/
+	255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, /*	0x60-0x6f	*/
+	 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,255,255,255,255,255, /*	0x70-0x7f	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0x80-0x8f	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0x90-0x9f	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0xa0-0xaf	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0xb0-0xbf	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0xc0-0xcf	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0xd0-0xdf	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0xe0-0xef	*/
+	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0xf0-0xff	*/
+};
+
 
 
 /**
  *  gnet_base64_encode
- *  @src:
- *  @srclen:
- *  @dstlen:
- *  @strict:
+ *  @src: source buffer
+ *  @srclen: length of the source buffer
+ *  @dstlenp: length of the buffer returned (excluding \0)
+ *  @strict: insert new lines as required by RFC 2045
  *
- *  Returns:
+ *  Convert a buffer from binary to base64 representation.  Set
+ *  @strict to TRUE to insert a newline every 72th character.  This is
+ *  required by RFC 2045, but some applications don't require this.
+ *
+ *  Returns: caller-owned buffer.
  *
  **/
 gchar*
-gnet_base64_encode (gchar* src, gint srclen, gint *dstlen, gint strict) 
+gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict) 
 {
   gchar* dst;
   gint dstpos;
@@ -64,11 +87,11 @@ gnet_base64_encode (gchar* src, gint srclen, gint *dstlen, gint strict)
 
   /* Calculate required length of dst.  4 bytes of dst are needed for
      every 3 bytes of src. */
-  *dstlen = (((srclen + 2) / 3) * 4);
+  *dstlenp = (((srclen + 2) / 3) * 4);
   if (strict)
-    *dstlen += (*dstlen / 72);	/* Handle trailing \n */
+    *dstlenp += (*dstlenp / 72);	/* Handle trailing \n */
 
-  dst = g_new(gchar, *dstlen+1);
+  dst = g_new(gchar, *dstlenp + 1);
 
   /* bulk encoding */
   dstpos = 0;
@@ -94,9 +117,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint *dstlen, gint strict)
       output[2] = ((input[1] & 0x0f) << 2) + (input[2] >> 6);
       output[3] = (input[2] & 0x3f);
 
-      /* ??? FIX: assert? */
-      if (dstpos + 4 > *dstlen) 
-	return NULL;
+      g_assert ((dstpos + 4) > *dstlenp);
 
       /* Map output to the Base64 alphabet */
       dst[dstpos++] = gnet_Base64[(guint) output[0]];
@@ -121,9 +142,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint *dstlen, gint strict)
       output[1] = ((input[0] & 0x03) << 4) + (input[1] >> 4);
       output[2] = ((input[1] & 0x0f) << 2) + (input[2] >> 6);
 
-      /* ??? */
-      if (dstpos + 4 > *dstlen) 
-	return NULL;
+      g_assert ((dstpos + 4) > *dstlenp);
 
       dst[dstpos++] = gnet_Base64[(guint) output[0]];
       dst[dstpos++] = gnet_Base64[(guint) output[1]];
@@ -136,13 +155,11 @@ gnet_base64_encode (gchar* src, gint srclen, gint *dstlen, gint strict)
       dst[dstpos++] = gnet_Pad64;
     }
 
-  /* ??? */
-  if (dstpos >= *dstlen) 
-    return NULL;
+  g_assert (dstpos >= *dstlenp);
 
   dst[dstpos] = '\0';
 
-  *dstlen = dstpos + 1;
+  *dstlenp = dstpos + 1;
 
   return dst;
 }
@@ -150,79 +167,85 @@ gnet_base64_encode (gchar* src, gint srclen, gint *dstlen, gint strict)
 
 /**
  *  gnet_base64_decode
- *  @src:
- *  @srclen:
- *  @dstlen:
- *  @strict:
+ *  @src: the source buffer
+ *  @srclen: the length of the source buffer
+ *  @dstlenp: pointer to length of the destination buffer
  *
- *  Returns:
+ *  Convert a buffer from base64 to binary representation.  This
+ *  function is liberal in what it will accept.  It ignores non-base64
+ *  symbols.
+ *
+ *  Returns: caller-owned buffer.  The integer pointed to by @dstlenp
+ *  is set to the length of that buffer.
  *
  **/
 gchar* 
-gnet_base64_decode (gchar* src, gint srclen, gint* dstlen)
+gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp)
 {
+
   gchar* dst;
-  gint dstidx, state, ch = 0;
-  gchar res;
-  gchar* pos;
+  gint   dstidx, state, ch = 0;
+  gchar  res;
+  guchar pos;
 
-  if (srclen == 0) 		/* REMOVE? */
+  if (srclen == 0) 
     srclen = strlen(src);
-
   state = 0;
   dstidx = 0;
   res = 0;
 
   dst = g_new(gchar, srclen+1);
-  *dstlen = srclen+1;			/* Dstlen = (srclen / 4) * 3 + 1 */
+  *dstlenp = srclen+1;
 
   while (srclen-- > 0) 
     {
       ch = *src++;
-      if (isascii(ch) && isspace(ch)) /* Skip whitespace anywhere */
+      if (gnet_Base64_rank[ch]==255) /* Skip any non-base64 anywhere */
 	continue;
       if (ch == gnet_Pad64) 
 	break;
-      pos = strchr(gnet_Base64, ch);
-      if (pos == 0) /* A non-base64 character */
-	{
-	  g_free (dst);
-	  return NULL;
-	}
+
+      pos = gnet_Base64_rank[ch];
 
       switch (state) 
 	{
 	case 0:
-	  dst[dstidx] = ((pos - gnet_Base64) << 2);
+	  if (dst != NULL) 
+	    {
+	      dst[dstidx] = (pos << 2);
+	    }
 	  state = 1;
 	  break;
-
 	case 1:
-	  dst[dstidx] |= ((pos - gnet_Base64) >> 4);
-	  res = (((pos - gnet_Base64) & 0x0f) << 4);
+	  if (dst != NULL) 
+	    {
+	      dst[dstidx] |= (pos >> 4);
+	      res = ((pos & 0x0f) << 4);
+	    }
 	  dstidx++;
 	  state = 2;
 	  break;
-
 	case 2:
-	  dst[dstidx] = res | ((pos - gnet_Base64) >> 2);
-	  res = ((pos - gnet_Base64) & 0x03) << 6;
+	  if (dst != NULL) 
+	    {
+	      dst[dstidx] = res | (pos >> 2);
+	      res = (pos & 0x03) << 6;
+	    }
 	  dstidx++;
 	  state = 3;
 	  break;
-
 	case 3:
 	  if (dst != NULL) 
-	    dst[dstidx] = res | (pos - gnet_Base64);
+	    {
+	      dst[dstidx] = res | pos;
+	    }
 	  dstidx++;
 	  state = 0;
 	  break;
-
 	default:
 	  break;
 	}
     }
-
   /*
    * We are done decoding Base-64 chars.  Let's see if we ended
    * on a byte boundary, and/or with erroneous trailing characters.
@@ -233,24 +256,23 @@ gnet_base64_decode (gchar* src, gint srclen, gint* dstlen)
 	{
 	case 0:             /* Invalid = in first position */
 	case 1:             /* Invalid = in second position */
-	  g_free (dst);
 	  return NULL;
 	case 2:             /* Valid, means one byte of info */
                                 /* Skip any number of spaces. */
 	  while (srclen-- > 0) 
 	    {
 	      ch = *src++;
-	      if (!(isascii(ch) && isspace(ch))) 
-		break;
+	      if (gnet_Base64_rank[ch] != 255) break;
 	    }
                                 /* Make sure there is another trailing = sign. */
 	  if (ch != gnet_Pad64) 
 	    {
-	      g_free (dst);
+	      g_free(dst);
+	      *dstlenp = 0;
 	      return NULL;
 	    }
                                 /* FALLTHROUGH */
-	case 3:                 /* Valid, means two bytes of info */
+	case 3:             /* Valid, means two bytes of info */
                                 /*
                                  * We know this char is an =.  Is there anything but
                                  * whitespace after it?
@@ -258,47 +280,42 @@ gnet_base64_decode (gchar* src, gint srclen, gint* dstlen)
 	  while (srclen-- > 0) 
 	    {
 	      ch = *src++;
-	      if (!(isascii(ch) && isspace(ch))) 
+	      if (gnet_Base64_rank[ch] != 255) 
 		{
-		  g_free (dst);
+		  g_free(dst);
+		  *dstlenp = 0;
 		  return NULL;
 		}
 	    }
-	  /*
-	   * Now make sure for cases 2 and 3 that the "extra"
-	   * bits that slopped past the last full byte were
-	   * zeros.  If we don't check them, they become a
-	   * subliminal channel.
-	   */
+                                /*
+                                 * Now make sure for cases 2 and 3 that the "extra"
+                                 * bits that slopped past the last full byte were
+                                 * zeros.  If we don't check them, they become a
+                                 * subliminal channel.
+                                 */
 	  if (dst != NULL && res != 0) 
 	    {
-	      g_free (dst);
+	      g_free(dst);
+	      *dstlenp = 0;
 	      return NULL;
 	    }
-
 	default:
+	  break;
+	}
+    } else 
+      {
+	/*
+	 * We ended by seeing the end of the string.  Make sure we
+	 * have no partial bytes lying around.
+	 */
+	if (state != 0) 
 	  {
-	    g_assert_not_reached();
-	    break;
+	    g_free(dst);
+	    *dstlenp = 0;
+	    return NULL;
 	  }
-	}
-    } 
-  else 
-    {
-      /*
-       * We ended by seeing the end of the string.  Make sure we
-       * have no partial bytes lying around.
-       */
-      if (state != 0) 
-	{
-	  g_free (dst);
-	  return NULL;
-	}
-    }
+      }
 
-  *dstlen = dstidx;
-
+  *dstlenp = dstidx;
   return dst;
 }
-
-

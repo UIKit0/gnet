@@ -20,10 +20,13 @@ iochannel
 </para>
 
 @channel: 
-@buf: 
-@len: 
+@buffer: 
+@length: 
 @bytes_written: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@buf: 
+@len: 
 
 
 <!-- ##### FUNCTION gnet_io_channel_readn ##### -->
@@ -32,10 +35,13 @@ iochannel
 </para>
 
 @channel: 
-@buf: 
-@len: 
+@buffer: 
+@length: 
 @bytes_read: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@buf: 
+@len: 
 
 
 <!-- ##### FUNCTION gnet_io_channel_readline ##### -->
@@ -44,10 +50,13 @@ iochannel
 </para>
 
 @channel: 
-@buf: 
-@len: 
+@buffer: 
+@length: 
 @bytes_read: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@buf: 
+@len: 
 
 
 <!-- ##### FUNCTION gnet_io_channel_readline_strdup ##### -->
@@ -56,8 +65,10 @@ iochannel
 </para>
 
 @channel: 
-@buf_ptr: 
+@bufferp: 
 @bytes_read: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@buf_ptr: 
 
 
