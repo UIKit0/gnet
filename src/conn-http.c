@@ -137,7 +137,8 @@ gnet_conn_http_append_to_buf (GConnHttp *conn, const gchar *data, gsize datalen)
 		while (conn->buflen + datalen >= conn->bufalloc)
 			conn->bufalloc += GNET_CONN_HTTP_BUF_INCREMENT;
 
-		conn->buffer = g_realloc (conn->buffer, conn->bufalloc);
+		/* alloc one more to make sure buffer can be NUL-terminated later */
+		conn->buffer = g_realloc (conn->buffer, conn->bufalloc + 1);
 	}
         
 	if (datalen > 0)
@@ -192,7 +193,8 @@ gnet_conn_http_reset (GConnHttp *conn)
 		conn->post_data_len = 0;
 	}
 	
-	conn->buffer   = g_realloc (conn->buffer, GNET_CONN_HTTP_BUF_INCREMENT);
+	/* alloc one more to make sure buffer can be NUL-terminated later */
+	conn->buffer   = g_realloc (conn->buffer, GNET_CONN_HTTP_BUF_INCREMENT + 1);
 	conn->bufalloc = GNET_CONN_HTTP_BUF_INCREMENT;
 	conn->buflen   = 0;
 	
@@ -216,7 +218,8 @@ gnet_conn_http_new (void)
 
 	conn = g_new0 (GConnHttp, 1);
 
-	conn->buffer   = g_malloc (GNET_CONN_HTTP_BUF_INCREMENT);
+	/* alloc one more to make sure buffer can be NUL-terminated later */
+	conn->buffer   = g_malloc (GNET_CONN_HTTP_BUF_INCREMENT + 1);
 	conn->bufalloc = GNET_CONN_HTTP_BUF_INCREMENT;
 	conn->buflen   = 0;
 
@@ -1325,13 +1328,15 @@ gnet_conn_http_steal_buffer (GConnHttp        *conn,
 	 || conn->status == STATUS_ERROR)
 		return FALSE;
 
-	/* Not the best way, but better for app 
-	 *  developers trying to trace down leaks */
 	*length = conn->buflen;
-        *buffer = g_malloc0 (*length + 1);
-	memcpy (*buffer, conn->buffer, *length);
-	
-	conn->buffer   = g_malloc (GNET_CONN_HTTP_BUF_INCREMENT);
+	*buffer = conn->buffer;
+
+	/* we allocated +1 bytes earlier on, so that there
+	 *  is always space for an additional NUL here */
+	conn->buffer[conn->buflen] = '\0';
+
+	/* alloc one more to make sure buffer can be NUL-terminated later */
+	conn->buffer   = g_malloc (GNET_CONN_HTTP_BUF_INCREMENT + 1);
 	conn->bufalloc = GNET_CONN_HTTP_BUF_INCREMENT;
 	conn->buflen   = 0;
 	

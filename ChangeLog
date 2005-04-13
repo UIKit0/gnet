@@ -1,3 +1,17 @@
+2005-04-13  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn-http.c: (gnet_conn_http_append_to_buf),
+	(gnet_conn_http_reset), (gnet_conn_http_new),
+	(gnet_conn_http_steal_buffer):
+	  Fix major memory leak in _steal_buffer(); avoid
+	  making an unnecessary copy in _steal_buffer(): 
+	  always allocate one more byte than required, so we
+	  always have space for a terminating NUL.
+	
+	* tests/conn_http_test.c: (test_simple_get):
+	  Add missing g_free(buf) so we can use the test
+	  to check for memory leaks.
+
 2005-03-10  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* configure.ac

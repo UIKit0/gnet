@@ -324,6 +324,8 @@ test_simple_get (const gchar *url)
 	}
         
 	g_print("\t * gnet_http_get() succeded (buflen = %u, code = %u).\n", buflen, code);
+
+	g_free (buf);
 	
 	return TRUE;
 }
