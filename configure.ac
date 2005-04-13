@@ -68,13 +68,6 @@ AC_MSG_RESULT([$gnet_native_win32])
 AM_CONDITIONAL(OS_WIN32, [test "$gnet_native_win32" = "yes"])
 
 ####################
-# Glib1
-
-AC_ARG_ENABLE(glib12,
-	      AC_HELP_STRING([--enable-glib1.2],
-			     [prefer GLib 1.2 over GLib 2]),,enable_glib12=no)
-
-####################
 # Debug
 
 AC_ARG_ENABLE(debug, [  --enable-debug=[no/minimum/yes]  turn on debugging (default=minimum],,enable_debug=minimum)
@@ -129,7 +122,6 @@ AC_PROG_CC
 AM_PROG_CC_STDC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_CHECK_PROG(PKGCONFIG, [pkg-config], [yes])
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 AC_CHECK_SIZEOF(long)
@@ -209,50 +201,9 @@ int main(void)
   fi
 fi
 
-m4_ifdef([AM_PATH_GLIB],[],[AC_DEFUN([AM_PATH_GLIB],[AC_MSG_ERROR([No GLib 1.2 on this system])])])
-
-# Check for GLib 1.2 if enabled
-if test "x${enable_glib12}" = "xyes"; then
-  AM_PATH_GLIB([1.2.10],
-		# GTHREAD_CFLAGS are included in GLIB_CFLAGS for 1.2
-		GTHREAD_CFLAGS=" ",  
-		AC_MSG_ERROR([GLib 1.2 could not be found]),
-		[gthread])
-   
-fi
-
-
-# Check for GLib 2.0
-if test "x${PKGCONFIG}" = "xyes" -a "x${enable_glib12}" != "xyes"; then
-
-  # Check for GLib 2.0 (or 2.2)
-  PKG_CHECK_MODULES(GLIB, [glib-2.0], [:], [:])
-  PKG_CHECK_MODULES(GTHREAD, [gthread-2.0], [:], [:])
-
-  # Check for GLib 1.2 (using pkg-config)
-  if test "x${GLIB_CFLAGS}" = "x"; then
-
-    PKG_CHECK_MODULES(GLIB, [glib], [:], [:])
-    PKG_CHECK_MODULES(GTHREAD, [gthread], [:], [:])
-  fi
-fi
-
-
-# Check for GLib 1.2 if no GLib 2.X
-if test "x${GLIB_CFLAGS}" = "x"; then
-  AM_PATH_GLIB([1.2.10],
-		# GTHREAD_CFLAGS are included in GLIB_CFLAGS for 1.2
-		GTHREAD_CFLAGS=" ",  
-		,
-		[gthread])
-fi
-
-
-# Fail if we didn't find GLib
-if test "x${GLIB_CFLAGS}" = "x"; then
-   AC_MSG_ERROR([GLib could not be found])
-fi
-
+dnl Check for GLib 2.x
+PKG_CHECK_MODULES(GLIB, [ glib-2.0 >= 2.0.0 ], , [ AC_MSG_ERROR([GLib-2.x development files not found]) ] )
+PKG_CHECK_MODULES(GTHREAD, [gthread-2.0 >= 2.0.0], , [ AC_MSG_ERROR([The impossible happened]) ] )
 
 # These SUBSTs are primarily for gnet-config and gnet.pc
 AC_SUBST(GLIB_CFLAGS)
@@ -322,10 +273,27 @@ AC_TRY_COMPILE([ #include <sys/types.h>
 if test "$have_sockaddr_storage" = yes; then
   AC_DEFINE(HAVE_SOCKADDR_STORAGE,1,[Whether you have struct sockaddr_storage])
   AC_MSG_RESULT(yes)
+  AC_MSG_CHECKING([for struct sockaddr_storage family field])
+  gnet_sockaddr_family_field_name=""
+  AC_TRY_COMPILE([ #include <sys/types.h>
+    #include <sys/socket.h>], [struct sockaddr_storage s; s.ss_family = AF_INET;],
+    gnet_sockaddr_family_field_name=ss_family)
+  if test -z "${gnet_sockaddr_family_field_name}" ; then
+    AC_TRY_COMPILE([ #include <sys/types.h>
+      #include <sys/socket.h>], [struct sockaddr_storage s; s.__ss_family = AF_INET;],
+      gnet_sockaddr_family_field_name=__ss_family)
+  fi
+  if test -z "${gnet_sockaddr_family_field_name}" ; then
+    AC_MSG_ERROR([can't figure out 'family' field of struct sockaddr_storage])
+  fi
+  AC_MSG_RESULT($gnet_sockaddr_family_field_name)
 else
   AC_MSG_RESULT(no)
+  gnet_sockaddr_family_field_name=ss_family
 fi
-
+AC_DEFINE_UNQUOTED(GNET_SOCKADDR_FAMILY_FIELD_NAME,
+          [$gnet_sockaddr_family_field_name],
+          [Name of sockaddr_storage family field])
 
 ###############################
 # Compiler characteristics

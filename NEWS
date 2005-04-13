@@ -7,10 +7,15 @@ Changes in GNet
 2.0.8 (unreleased)
 ------------------
 * Fix major memory leak in GConnHttp
-* Fix GConnHttp documentation: replace references
-  to GString with gnet_conn_http_steal_buffer()
 * gnet_init() can safely be called
   more than once now
+* Dropped support for GLib-1.2
+* Fix build on old systems that have
+  a __ss_family member in struct 
+  sockaddr_storage instead of 
+  ss_family (Jeremy Denise)
+* Documentation fixes: GConnHttp
+
 
 2.0.7
 -----

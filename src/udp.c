@@ -265,7 +265,7 @@ gnet_udp_socket_send (GUdpSocket* socket,
       if (GNET_INETADDR_FAMILY(dst) == AF_INET && 
 	  GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
 	{
-          sa.ss_family = AF_INET6;
+          GNET_SOCKADDR_FAMILY(sa) = AF_INET6;
 	  GNET_SOCKADDR_SET_SS_LEN(sa);
           GNET_SOCKADDR_PORT_SET(sa, GNET_INETADDR_PORT(dst));
           GNET_SOCKADDR_ADDR32_SET(sa, 0, 0);
@@ -279,7 +279,7 @@ gnet_udp_socket_send (GUdpSocket* socket,
                GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET &&
                IN6_IS_ADDR_V4MAPPED(&GNET_INETADDR_SA6(dst).sin6_addr))
 	{
-          sa.ss_family = AF_INET;
+          GNET_SOCKADDR_FAMILY(sa) = AF_INET;
 	  GNET_SOCKADDR_SET_SS_LEN(sa);
           GNET_SOCKADDR_PORT_SET(sa, GNET_INETADDR_PORT(dst));
           GNET_SOCKADDR_ADDR32_SET(sa, 0, GNET_INETADDR_ADDR32(dst, 3));

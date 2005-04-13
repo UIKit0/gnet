@@ -1,5 +1,23 @@
 2005-04-13  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* acinclude.m4:
+	  Added pkg.m4
+
+	* configure.ac:
+	  Drop support for GLib-1.2
+
+	* configure.ac:
+	* src/gnet-private.h:
+	* src/udp.c: (gnet_udp_socket_send):
+	  Check for struct sockaddr_storage family member;
+	  fixes build on systems that use __ss_family instead
+	  of ss_family. Based on patch by Jeremy Denise.
+
+	* NEWS:
+	  Update
+
+2005-04-13  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* NEWS:
 	  Update
 
