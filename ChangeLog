@@ -1,5 +1,15 @@
 2005-04-13  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* NEWS:
+	  Update
+
+	* src/conn-http.h:
+	  Get rid of outdated references to GString in inline
+	  documentation. gnet_conn_http_steal_buffer() is the 
+	  way to take ownership of a HTTP connection's data.
+
+2005-04-13  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/conn-http.c: (gnet_conn_http_append_to_buf),
 	(gnet_conn_http_reset), (gnet_conn_http_new),
 	(gnet_conn_http_steal_buffer):

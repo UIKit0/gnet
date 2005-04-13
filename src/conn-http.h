@@ -315,14 +315,13 @@ struct _GConnHttpEventError
  *  response
  *
  *  %GNET_CONN_HTTP_DATA_PARTIAL: data has been read. The buffer is
- *  caller-owned (ie. owned by GNet), but may be truncated to zero 
- *  length using the appropriate GString methods. You must not free 
- *  the buffer
+ *  owned by GNet and you must not modify it or free it. You can
+ *  take ownership of the buffer with gnet_conn_http_steal_buffer()
  *
  *  %GNET_CONN_HTTP_DATA_COMPLETE: data has been received in full.
- *  The buffer is caller-owned, but may be truncated to zero length
- *  using the appropriate GString methods. You must not free the 
- *  buffer
+ *  The buffer is owned by GNet and you must not modify it or free 
+ *  it. You can acquire ownership of the buffer by calling 
+ *  gnet_conn_http_steal_buffer()
  *
  *  %GNET_CONN_HTTP_TIMEOUT: the connection timed out
  *

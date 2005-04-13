@@ -6,6 +6,9 @@ Changes in GNet
 
 2.0.8 (unreleased)
 ------------------
+* Fix major memory leak in GConnHttp
+* Fix GConnHttp documentation: replace references
+  to GString with gnet_conn_http_steal_buffer()
 * gnet_init() can safely be called
   more than once now
 
