@@ -1,3 +1,22 @@
+2005-04-25  Andreas Rottmann  <a.rottmann at gmx dot at>
+
+	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
+
+	* NEWS:
+	* configure.ac:
+	* doc/gnet-docs.sgml:
+	* src/gnet-private.h:
+	* src/inetaddr.c: (gnet_inetaddr_new_list_async),
+	(inetaddr_new_list_async_gthread),
+	(inetaddr_new_list_async_gthread_dispatch),
+	(gnet_inetaddr_new_list_async_cancel),
+	(gnet_inetaddr_get_name_async),
+	(gnet_inetaddr_get_name_async_cancel),
+	(inetaddr_get_name_async_gthread_dispatch),
+	(inetaddr_get_name_async_gthread):
+	  Eliminate direct usage of pthreads on unix
+	  systems and use GLib GThreads instead.
+
 2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* tests/base64_test.c: (main):

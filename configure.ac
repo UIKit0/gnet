@@ -145,62 +145,6 @@ AC_CHECK_LIB([socket], [main])
 AC_CHECK_LIB([nsl], [main])
 AC_CHECK_LIB([resolv], [main])
 
-# Check for pthreads
-AC_ARG_ENABLE(pthreads,
-             AC_HELP_STRING([--disable-pthreads],
-                            [ignore pthreads library if present]),
-             , # we don't need to do anything here
-             enable_pthreads=yes)
-
-if test "x${enable_pthreads}" = "xyes"; then
-  PTHREAD_LIBS=""
-
-  # Check for pthreads with -pthread
-  AC_MSG_CHECKING([for -pthread])
-  gnet_save_LIBS=$LIBS
-  LIBS="$LIBS -pthread"
-  dash_pthread=""
-  PTHREAD_PROGRAM="
-#include <pthread.h>
-int main(void)
-{  
-   pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
-   return 0;
-}
-"
-  AC_TRY_RUN($PTHREAD_PROGRAM,
-	[dash_pthread="-pthread"
-	 AC_MSG_RESULT(yes)],
-	[dash_pthread=""
-         # Otherwise, check for pthreads with -pthreads
-	 AC_MSG_RESULT(no)
-         AC_MSG_CHECKING([for -pthreads])
-         LIBS="$gnet_save_LIBS -pthreads"
-	 AC_TRY_RUN($PTHREAD_PROGRAM,
-	   [dash_pthread="-pthreads"
-	   AC_MSG_RESULT(yes)],
-	   [dash_pthread=""
-	   AC_MSG_RESULT(no)])
-	])
-  LIBS="$gnet_save_LIBS $dash_pthread"
-
-  # Otherwise, check for -lpthread and -lc_r
-  if test "x$dash_pthread" == "x"; then
-    AC_CHECK_LIB([pthread],
-            [pthread_create],
-            [PTHREAD_LIBS="-lpthread"])
-    AC_CHECK_LIB([c_r],
-            [pthread_create],
-            [PTHREAD_LIBS="-lc_r $PTHREAD_LIBS"])
-  fi    
-  # If either -pthread[s] or -lpthread works, we have pthreads
-  if test "x$PTHREAD_LIBS" != "x" -o "x$dash_pthread" != "x"; then
-          AC_DEFINE(HAVE_LIBPTHREAD, 1,
-                  [Define if pthreads library is available])
-          LIBS="$PTHREAD_LIBS $LIBS"
-  fi
-fi
-
 dnl Check for GLib 2.x
 PKG_CHECK_MODULES(GLIB, [ glib-2.0 >= 2.0.0 ], , [ AC_MSG_ERROR([GLib-2.x development files not found]) ] )
 PKG_CHECK_MODULES(GTHREAD, [gthread-2.0 >= 2.0.0], , [ AC_MSG_ERROR([The impossible happened]) ] )

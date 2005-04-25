@@ -14,6 +14,10 @@ Changes in GNet
 * GConnHttp: do not emit data events for
   pages that are being redirected to a
   new location.
+* Eliminate direct pthread usage on unix
+  and use GLib GThreads instead (also
+  fixes problems with gdb and valgrind)
+  (Andreas Rottmann)
 * Dropped support for GLib-1.2
 * Fix build on old systems that have
   a __ss_family member in struct 

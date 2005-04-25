@@ -21,10 +21,6 @@
 #include "gnet-private.h"
 #include "inetaddr.h"
 
-#ifdef HAVE_LIBPTHREAD
-#include <pthread.h>
-#endif
-
 #ifdef HAVE_LINUX_NETLINK_H
 #include <usagi_ifaddrs.h>
 #endif
@@ -870,8 +866,8 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 
 #ifndef GNET_WIN32  /*********** Unix code ***********/
 
-#ifdef HAVE_LIBPTHREAD
-static void* inetaddr_new_list_async_pthread (void* arg);
+#ifdef G_THREADS_ENABLED
+static void* inetaddr_new_list_async_gthread (void* arg);
 #else
 
 static ssize_t writen (int fd, const void* buf, size_t len);
@@ -918,8 +914,8 @@ writen (int fd, const void* buf, size_t len)
  *  during the call to gnet_inetaddr_new_list_async().  The list
  *  passed in the callback is callee owned.
  *
- *  The Unix version creates a pthread thread which does the lookup.
- *  If pthreads aren't available, it forks and does the lookup.
+ *  The Unix version creates a GThread thread which does the lookup.
+ *  If GThreads aren't available, it forks and does the lookup.
  *  Forking can be slow or even fail when using operating systems that
  *  copy the entire process when forking.
  *
@@ -932,7 +928,7 @@ writen (int fd, const void* buf, size_t len)
  *  GNU ADNS is under the GNU GPL.  This library does not use threads
  *  or processes.
  *
- *  The Windows version is molded after the Unix pthread version.
+ *  The Windows version is molded after the Unix GThread version.
  *
  *  Returns: the ID of the lookup; NULL on failure.  The ID can be
  *  used with gnet_inetaddr_new_list_async_cancel() to cancel the
@@ -949,12 +945,11 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   g_return_val_if_fail(hostname != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-# ifdef HAVE_LIBPTHREAD			/* Pthread */
+# ifdef G_THREADS_ENABLED
   {
+    GThread *thread;
+    GError *error = NULL;
     void** args;
-    pthread_attr_t attr;
-    pthread_t pthread;
-    int rv;
 
     state = g_new0(GInetAddrNewListState, 1);
 
@@ -962,33 +957,22 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
     args[0] = (void*) g_strdup(hostname);
     args[1] = state;
 
-    pthread_mutex_init (&state->mutex, NULL);
-    pthread_mutex_lock (&state->mutex);
+    g_static_mutex_init (&state->mutex);
+    g_static_mutex_lock (&state->mutex);
 
-    pthread_attr_init (&attr);
-    pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+    thread = g_thread_create (inetaddr_new_list_async_gthread, args,
+                              FALSE, &error);
 
-  create_again:
-    rv = pthread_create (&pthread, &attr, 
-			 inetaddr_new_list_async_pthread, args);
-    if (rv == EAGAIN)	/* Try again */
-      {
-	sleep(0);	/* Yield the processor */
-	goto create_again;
-      }
-    else if (rv)	/* Error */
-      {
-	g_warning ("pthread_create error: %s (%d)\n", g_strerror(rv), rv);
-	pthread_mutex_unlock (&state->mutex);
-	pthread_mutex_destroy (&state->mutex);
-	pthread_attr_destroy (&attr);
-	g_free (args[0]);
-	g_free (state);
-	return NULL;
-      }
-
-    pthread_attr_destroy (&attr);
-
+    if (thread == NULL)
+    {
+        g_warning ("g_thread_create error: %s\n", error->message);
+        g_error_free (error);
+        g_static_mutex_unlock (&state->mutex);
+        g_static_mutex_free (&state->mutex);
+        g_free (args[0]);
+        g_free (state);
+        return NULL;
+    }
   }
 # else 					/* Fork */
   {
@@ -1107,22 +1091,22 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   state->func = func;
   state->data = data;
 
-# ifdef HAVE_LIBPTHREAD
+# ifdef G_THREADS_ENABLED
   {
-    pthread_mutex_unlock (&state->mutex);
+    g_static_mutex_unlock (&state->mutex);
   }
 # endif
 
   return state;
 }
 
-#ifdef HAVE_LIBPTHREAD	/* ********** UNIX Pthread ********** */
+#ifdef G_THREADS_ENABLED
 
-static gboolean inetaddr_new_list_async_pthread_dispatch (gpointer data);
+static gboolean inetaddr_new_list_async_gthread_dispatch (gpointer data);
 
 
 static void*
-inetaddr_new_list_async_pthread (void* arg)
+inetaddr_new_list_async_gthread (void* arg)
 {
   void** args = (void**) arg;
   gchar* name = (gchar*) args[0];
@@ -1136,7 +1120,7 @@ inetaddr_new_list_async_pthread (void* arg)
   g_free (name);
 
   /* Lock */
-  pthread_mutex_lock (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
 
   /* If cancelled, destroy state and exit.  The main thread is no
      longer using state. */
@@ -1144,8 +1128,8 @@ inetaddr_new_list_async_pthread (void* arg)
     {
       ialist_free (state->ias);
 
-      pthread_mutex_unlock (&state->mutex);
-      pthread_mutex_destroy (&state->mutex);
+      g_static_mutex_unlock (&state->mutex);
+      g_static_mutex_free (&state->mutex);
 
       g_free (state);
 
@@ -1174,11 +1158,11 @@ inetaddr_new_list_async_pthread (void* arg)
 
   /* Add a source for reply */
   state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
-				   inetaddr_new_list_async_pthread_dispatch,
+				   inetaddr_new_list_async_gthread_dispatch,
 				   state, NULL);
 
   /* Unlock */
-  pthread_mutex_unlock (&state->mutex);
+  g_static_mutex_unlock (&state->mutex);
 
   /* Thread exits... */
   return NULL;
@@ -1186,11 +1170,11 @@ inetaddr_new_list_async_pthread (void* arg)
 
 
 static gboolean
-inetaddr_new_list_async_pthread_dispatch (gpointer data)
+inetaddr_new_list_async_gthread_dispatch (gpointer data)
 {
   GInetAddrNewListState* state = (GInetAddrNewListState*) data;
 
-  pthread_mutex_lock (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
 
   state->in_callback = TRUE;
 
@@ -1204,8 +1188,8 @@ inetaddr_new_list_async_pthread_dispatch (gpointer data)
 
   /* Delete state */
   g_source_remove (state->source);
-  pthread_mutex_unlock (&state->mutex);
-  pthread_mutex_destroy (&state->mutex);
+  g_static_mutex_unlock (&state->mutex);
+  g_static_mutex_free (&state->mutex);
   g_free (state);
 
   return FALSE;
@@ -1235,7 +1219,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
      mutex and deadlock.  in_callback was mostly meant to prevent
      programmer error.  */
 
-  pthread_mutex_lock (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
 
   /* Check if the thread has finished and a reply is pending.  If a
      reply is pending, cancel it and delete state. */
@@ -1245,8 +1229,8 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 
       ialist_free (state->ias);
 
-      pthread_mutex_unlock (&state->mutex);
-      pthread_mutex_destroy (&state->mutex);
+      g_static_mutex_unlock (&state->mutex);
+      g_static_mutex_free (&state->mutex);
 
       g_free (state);
     }
@@ -1260,7 +1244,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
     {
       state->is_cancelled = TRUE;
 
-      pthread_mutex_unlock (&state->mutex);
+      g_static_mutex_unlock (&state->mutex);
     }
 }
 
@@ -1401,10 +1385,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 }
 
 
-#endif	/* UNIX */
-
-
-
+#endif
 
 #else	/*********** Windows code ***********/
 
@@ -1838,8 +1819,8 @@ gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr)
 
 #ifndef GNET_WIN32  /*********** Unix code ***********/
 
-#ifdef HAVE_LIBPTHREAD
-static void* inetaddr_get_name_async_pthread (void* arg);
+#ifdef G_THREADS_ENABLED
+static void* inetaddr_get_name_async_gthread (void* arg);
 #endif
 
 
@@ -1870,40 +1851,28 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
   g_return_val_if_fail(inetaddr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-# ifdef HAVE_LIBPTHREAD			/* Pthread */
+# ifdef G_THREADS_ENABLED
   {
-    pthread_attr_t attr;
-    pthread_t pthread;
-    int rv;
+    GThread *thread;
+    GError *error = NULL;
 
     state = g_new0(GInetAddrReverseAsyncState, 1);
 
-    pthread_mutex_init (&state->mutex, NULL);
-    pthread_mutex_lock (&state->mutex);
+    g_static_mutex_init (&state->mutex);
+    g_static_mutex_lock (&state->mutex);
 
-    pthread_attr_init (&attr);
-    pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+    thread = g_thread_create (inetaddr_get_name_async_gthread, state,
+                              FALSE, &error);
 
-  create_again:
-    rv = pthread_create (&pthread, &attr, inetaddr_get_name_async_pthread, state);
-    if (rv == EAGAIN)
-      {
-	sleep(0);	/* Yield the processor */
-	goto create_again;
-      }
-    else if (rv)
-      {
-	g_warning ("Pthread_create error: %s (%d)\n", g_strerror(rv), rv);
-	pthread_mutex_unlock (&state->mutex);
-	pthread_mutex_destroy (&state->mutex);
-	pthread_attr_destroy (&attr);
-	g_free (state);
-	return NULL;
-      }
-
-    pthread_attr_destroy (&attr);
-
-
+    if (thread == NULL)
+    {
+        g_warning ("g_thread_create error: %s\n", error->message);
+        g_error_free (error);
+        g_static_mutex_unlock (&state->mutex);
+        g_static_mutex_free (&state->mutex);
+        g_free (state);
+        return NULL;
+    }
   }
 # else 					/* Fork */
   {
@@ -2011,9 +1980,9 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
   state->func = func;
   state->data = data;
 
-# ifdef HAVE_LIBPTHREAD
+# ifdef G_THREADS_ENABLED
   {
-    pthread_mutex_unlock (&state->mutex);
+    g_static_mutex_unlock (&state->mutex);
   }
 # endif
 
@@ -2021,9 +1990,9 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
 }
 
 
-#ifdef HAVE_LIBPTHREAD	/* ********** UNIX Pthread ********** */
+#ifdef G_THREADS_ENABLED
 
-static gboolean inetaddr_get_name_async_pthread_dispatch (gpointer data);
+static gboolean inetaddr_get_name_async_gthread_dispatch (gpointer data);
 
 
 /**
@@ -2039,7 +2008,7 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
 
-  pthread_mutex_lock (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
 
   /* Check if the thread has finished and a reply is pending.  If a
      reply is pending, cancel it and delete state. */
@@ -2049,8 +2018,8 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 
       g_source_remove (state->source);
 
-      pthread_mutex_unlock (&state->mutex);
-      pthread_mutex_destroy (&state->mutex);
+      g_static_mutex_unlock (&state->mutex);
+      g_static_mutex_free (&state->mutex);
 
       g_free (state);
     }
@@ -2064,17 +2033,17 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
     {
       state->is_cancelled = TRUE;
 
-      pthread_mutex_unlock (&state->mutex);
+      g_static_mutex_unlock (&state->mutex);
     }
 }
 
 
 static gboolean
-inetaddr_get_name_async_pthread_dispatch (gpointer data)
+inetaddr_get_name_async_gthread_dispatch (gpointer data)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) data;
 
-  pthread_mutex_lock (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
 
   /* Upcall */
   (*state->func)(state->name, state->data);
@@ -2082,8 +2051,8 @@ inetaddr_get_name_async_pthread_dispatch (gpointer data)
   /* Delete state */
   gnet_inetaddr_delete (state->ia);
   g_source_remove (state->source);
-  pthread_mutex_unlock (&state->mutex);
-  pthread_mutex_destroy (&state->mutex);
+  g_static_mutex_unlock (&state->mutex);
+  g_static_mutex_free (&state->mutex);
   memset (state, 0, sizeof(*state));
   g_free (state);
 
@@ -2092,13 +2061,13 @@ inetaddr_get_name_async_pthread_dispatch (gpointer data)
 
 
 static void* 
-inetaddr_get_name_async_pthread (void* arg)
+inetaddr_get_name_async_gthread (void* arg)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) arg;
   gchar* name;
 
   /* Lock */
-  pthread_mutex_lock (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
      
   /* Do lookup */
   if (state->ia->name)
@@ -2113,8 +2082,8 @@ inetaddr_get_name_async_pthread (void* arg)
       g_free (name);
       gnet_inetaddr_delete (state->ia);
 
-      pthread_mutex_unlock (&state->mutex);
-      pthread_mutex_destroy (&state->mutex);
+      g_static_mutex_unlock (&state->mutex);
+      g_static_mutex_free (&state->mutex);
 
       g_free (state);
 
@@ -2131,17 +2100,15 @@ inetaddr_get_name_async_pthread (void* arg)
 
   /* Add a source for reply */
   state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
-				   inetaddr_get_name_async_pthread_dispatch,
+				   inetaddr_get_name_async_gthread_dispatch,
 				   state, NULL);
 
   /* Unlock */
-  pthread_mutex_unlock (&state->mutex);
+  g_static_mutex_unlock (&state->mutex);
 
   /* Thread exits... */
   return NULL;
 }
-
-
 
 
 #else		/* ********** UNIX process ********** */

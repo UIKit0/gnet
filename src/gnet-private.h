@@ -37,10 +37,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_LIBPTHREAD
-#include <pthread.h>
-#endif
-
 #include <glib.h>
 #include "gnet.h"
 #include "gnetconfig.h"
@@ -295,8 +291,8 @@ typedef struct _GInetAddrNewListState
 
 #ifndef GNET_WIN32		/* UNIX */
   gboolean 	in_callback;
-#ifdef HAVE_LIBPTHREAD		/* UNIX pthread	*/
-  pthread_mutex_t mutex;
+#ifdef G_THREADS_ENABLED
+  GStaticMutex mutex;
   gboolean	is_cancelled;
   gboolean	lookup_failed;
   guint 	source;
@@ -343,8 +339,8 @@ typedef struct _GInetAddrReverseAsyncState
   gpointer data;
   gboolean in_callback;
 #ifndef GNET_WIN32		/* UNIX 	*/
-#ifdef HAVE_LIBPTHREAD		/* UNIX pthread	*/
-  pthread_mutex_t mutex;
+#ifdef G_THREADS_ENABLED
+  GStaticMutex mutex;
   gboolean	is_cancelled;
   gchar*	name;
   guint 	source;

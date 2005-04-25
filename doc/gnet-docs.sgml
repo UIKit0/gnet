@@ -188,8 +188,7 @@ PKG_CHECK_MODULES(GNET, gnet &gt; 2.0.0,
 
       <para>
 	There are two ways to hide blocking.  The first is to use
-	threads.  Pthreads is a common thread library available on
-	most systems.  GLib 2.0 also includes thread support.  The
+	threads.  GLib 2.0 includes thread support (GThread).  The
 	second method is to use asynchronous functions.  Asynchronous
 	functions return immediately and call a callback when the
 	operation is completed.  For example,
