@@ -9,6 +9,11 @@ Changes in GNet
 * Fix major memory leak in GConnHttp
 * gnet_init() can safely be called
   more than once now
+* Fix crash when gnet_conn_http_delete()
+  is called from within the user callback.
+* GConnHttp: do not emit data events for
+  pages that are being redirected to a
+  new location.
 * Dropped support for GLib-1.2
 * Fix build on old systems that have
   a __ss_family member in struct 

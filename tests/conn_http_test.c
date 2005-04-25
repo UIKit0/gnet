@@ -169,6 +169,86 @@ test_get (const gchar *uri)
 
 /***************************************************************************
  *
+ *   http_async_callback
+ *
+ ***************************************************************************/
+
+static void
+http_async_callback (GConnHttp *http, GConnHttpEvent *event, gpointer main_loop)
+{
+	if (verbose)
+		g_print ("%s: event->type = %u\n", __FUNCTION__, event->type);
+
+	switch (event->type)
+	{
+		case GNET_CONN_HTTP_RESOLVED:
+		case GNET_CONN_HTTP_RESPONSE:
+		case GNET_CONN_HTTP_DATA_PARTIAL:
+		case GNET_CONN_HTTP_REDIRECT:
+		case GNET_CONN_HTTP_CONNECTED:
+			break;
+		
+		case GNET_CONN_HTTP_ERROR:
+		{
+			GConnHttpEventError *err_event = (GConnHttpEventError*) event;
+			if (verbose)
+				g_print ("Error: %s (code=%u)\n", err_event->message, err_event->code);
+		}
+		/* fallthrough */
+
+		case GNET_CONN_HTTP_DATA_COMPLETE:
+		case GNET_CONN_HTTP_TIMEOUT:
+			if (verbose)
+				g_print ("%s: done. Deleting http object.\n", __FUNCTION__);
+			/* make sure we can call _delete() from the callback */
+			gnet_conn_http_delete (http);
+			g_main_loop_quit ((GMainLoop*) main_loop);
+			break;
+                
+		default:
+			g_assert_not_reached();
+	}
+}
+
+/***************************************************************************
+ *
+ *   test_get_async
+ *
+ *   This mainly tests whether we can do gnet_conn_http_delete()
+ *    from within the async callback when we have the data.
+ *
+ ***************************************************************************/
+
+static gboolean
+test_get_async (const gchar *uri)
+{
+	GMainLoop   *loop;
+	GConnHttp   *httpconn;
+	
+	httpconn = gnet_conn_http_new ();
+
+	g_print ("\n=====> Testing GET (async)\n");
+		
+	if (!gnet_conn_http_set_uri (httpconn, uri))
+		return FALSE;
+
+	loop = g_main_loop_new (NULL, FALSE);
+
+	gnet_conn_http_run_async (httpconn, http_async_callback, loop);
+
+	g_main_loop_run (loop);
+
+	g_print("\t * GET async ok\n");
+
+	g_main_loop_unref (loop);
+
+	/* http conn object has been deleted in callback */
+
+	return TRUE;
+}
+
+/***************************************************************************
+ *
  *   test_get_binary
  *
  ***************************************************************************/
@@ -479,9 +559,17 @@ main (int argc, char **argv)
         }
 	else
 	{
-		gboolean  get_ok, binget_ok, post_ok, redir1_ok, redir2_ok, urlget_ok;
+		gboolean  all_ok, get_ok, async1_ok, async2_ok, binget_ok;
+		gboolean  post_ok, redir1_ok, redir2_ok, urlget_ok;
 		
 		get_ok = test_get("http://www.google.com");
+
+		/* if this test returns, it went ok */
+		async1_ok = test_get_async ("http://non-exist.ant");
+
+		/* if this test returns and doesn't crash, it 
+		 * went ok (conn is deleted from within callback) */
+		async2_ok = test_get_async ("http://www.google.com");
 
 		post_ok = test_post ("Massive Attack", "Blue Lines");
 		
@@ -499,13 +587,16 @@ main (int argc, char **argv)
 		g_print ("------------------------------------------------------------\n");
 		g_print ("GET (html)                 %s\n", (get_ok)    ? "OK" : "FAILED");
 		g_print ("GET (binary)               %s\n", (binget_ok) ? "OK" : "FAILED");
+		g_print ("GET (async1)               %s\n", (async1_ok) ? "OK" : "FAILED");
+		g_print ("GET (async2)               %s\n", (async2_ok) ? "OK" : "FAILED");
 		g_print ("POST                       %s\n", (post_ok)   ? "OK" : "FAILED");
 		g_print ("Redirect (same host)       %s\n", (redir1_ok) ? "OK" : "FAILED");
 		g_print ("Redirect (different host)  %s\n", (redir2_ok) ? "OK" : "FAILED");
 		g_print ("gnet_http_get()            %s\n", (urlget_ok) ? "OK" : "FAILED");
 		g_print ("------------------------------------------------------------\n");
 		
-                g_assert (get_ok && binget_ok && post_ok && redir1_ok && redir2_ok && urlget_ok);
+		all_ok = get_ok && binget_ok && async1_ok && async2_ok && post_ok && redir1_ok && redir2_ok && urlget_ok;
+		g_assert (all_ok);
 	}
 		
 	return EXIT_SUCCESS;

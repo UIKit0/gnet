@@ -96,6 +96,8 @@ struct _GConnHttp
 	gsize                buflen;   /* number of bytes of data in the buffer */
 	
 	GMainLoop           *loop;
+
+	guint                refcount; /* used internally only, if >1 we are in the callback */
 };
 
 typedef struct _GConnHttpHdr GConnHttpHdr;
@@ -124,6 +126,8 @@ static const gchar *req_headers[] =
 #define is_general_header(field)  (is_in_str_arr(gen_headers,G_N_ELEMENTS(gen_headers),field))
 #define is_request_header(field)  (is_in_str_arr(req_headers,G_N_ELEMENTS(req_headers),field))
 
+
+static void       gnet_conn_http_delete_internal (GConnHttp *conn);
 
 /***************************************************************************
  *
@@ -241,6 +245,8 @@ gnet_conn_http_new (void)
 
 	gnet_conn_http_set_timeout (conn, 30*1000); /* 30 secs */
 
+	conn->refcount = 1;
+
 	return conn;
 }
 
@@ -324,6 +330,11 @@ gnet_conn_http_free_event (GConnHttpEvent *event)
  *
  *   gnet_conn_http_emit_event
  *
+ *   Calls user callback with given event. You MUST check whether the
+ *    connection has been deleted from the user callback via checking
+ *    conn->recount == 0 and calling _delete_internal() if so at some
+ *    point before giving control back to the main loop.
+ *
  ***************************************************************************/
 
 static void
@@ -331,9 +342,15 @@ gnet_conn_http_emit_event (GConnHttp *conn, GConnHttpEvent *event)
 {
 	g_return_if_fail (conn != NULL);
 	g_return_if_fail (event != NULL);
-	
+
+	++conn->refcount;
+
 	if (conn->func)
 		conn->func (conn, event, conn->func_data);
+
+	g_return_if_fail (conn->refcount > 0);
+
+	--conn->refcount;
 }
 
 /***************************************************************************
@@ -707,26 +724,32 @@ gnet_conn_http_done (GConnHttp *conn)
 	GConnHttpEvent     *ev;
 	
 	conn->status = STATUS_DONE;
-	
-	ev = gnet_conn_http_new_event (GNET_CONN_HTTP_DATA_COMPLETE);
-	ev_data = (GConnHttpEventData*)ev;
-	ev_data->buffer         = conn->buffer;
-	ev_data->buffer_length  = conn->buflen;
-	ev_data->content_length = conn->content_length;
-	ev_data->data_received  = conn->content_recv;
-	gnet_conn_http_emit_event (conn, ev);
-	gnet_conn_http_free_event (ev);
+
+	/* we don't want to emit a DATA_COMPLETE event
+	 *  if we are getting redirected, do we? */
+	if (conn->redirect_location == NULL)
+	{
+		ev = gnet_conn_http_new_event (GNET_CONN_HTTP_DATA_COMPLETE);
+		ev_data = (GConnHttpEventData*)ev;
+		ev_data->buffer         = conn->buffer;
+		ev_data->buffer_length  = conn->buflen;
+		ev_data->content_length = conn->content_length;
+		ev_data->data_received  = conn->content_recv;
+		gnet_conn_http_emit_event (conn, ev);
+		gnet_conn_http_free_event (ev);
+	}
 
 	if (conn->connection_close)
 		gnet_conn_disconnect(conn->conn);
 	
 	/* need to do auto-redirect now? */
-	if (conn->redirect_location)
+	if (conn->redirect_location && conn->refcount > 0)
 	{
-		if (gnet_conn_http_set_uri(conn, conn->redirect_location))
+		if (gnet_conn_http_set_uri (conn, conn->redirect_location))
 		{
 			/* send request with new URI */
 			gnet_conn_http_run_async (conn, conn->func, conn->func_data);
+
 			return; /* do not quit out own loop just yet */
 		}
 		
@@ -834,7 +857,10 @@ gnet_conn_http_conn_parse_response_headers (GConnHttp *conn)
 
 	/* do the redirect later after receiving the body (if any) */
 	if (ev_redirect->auto_redirect)
+	{
+		g_free (conn->redirect_location);
 		conn->redirect_location = g_strdup(new_location);
+	}
 
 	gnet_conn_http_free_event (ev);
 	return TRUE; /* continue and receive body */
@@ -972,9 +998,6 @@ gnet_conn_http_conn_recv_chunk_size (GConnHttp *conn, gchar *data, gsize len)
 static void
 gnet_conn_http_conn_recv_chunk_body (GConnHttp *conn, gchar *data, gsize len)
 {
-	GConnHttpEventData *ev_data;
-	GConnHttpEvent     *ev;
-	
 	/* do not count the '\r\n' at the end of a block */
 	if (len >=2 && data[len-2] == '\r' && data[len-1] == '\n')
 		len -= 2;
@@ -982,13 +1005,21 @@ gnet_conn_http_conn_recv_chunk_body (GConnHttp *conn, gchar *data, gsize len)
 	conn->content_recv += len;
 	gnet_conn_http_append_to_buf(conn, data, len);
 
-	ev = gnet_conn_http_new_event(GNET_CONN_HTTP_DATA_PARTIAL);
-	ev_data = (GConnHttpEventData*)ev;
-	ev_data->buffer = conn->buffer;
-	ev_data->content_length = conn->content_length;
-	ev_data->data_received  = conn->content_recv;
-	gnet_conn_http_emit_event(conn, ev);
-	gnet_conn_http_free_event(ev);
+	/* we don't want to emit data events if we're 
+	 *  getting redirected anyway, do we? */
+	if (conn->redirect_location == NULL)
+	{
+		GConnHttpEventData *ev_data;
+		GConnHttpEvent     *ev;
+
+		ev = gnet_conn_http_new_event(GNET_CONN_HTTP_DATA_PARTIAL);
+		ev_data = (GConnHttpEventData*)ev;
+		ev_data->buffer = conn->buffer;
+		ev_data->content_length = conn->content_length;
+		ev_data->data_received  = conn->content_recv;
+		gnet_conn_http_emit_event(conn, ev);
+		gnet_conn_http_free_event(ev);
+	}
 
 	gnet_conn_readline(conn->conn);
 
@@ -1004,9 +1035,6 @@ gnet_conn_http_conn_recv_chunk_body (GConnHttp *conn, gchar *data, gsize len)
 static void
 gnet_conn_http_conn_recv_nonchunked_data (GConnHttp *conn, gchar *data, gsize len)
 {
-	GConnHttpEventData *ev_data;
-	GConnHttpEvent     *ev;
-
 	if (conn->content_length > 0)
 	{
 		conn->content_recv += len;
@@ -1034,13 +1062,21 @@ gnet_conn_http_conn_recv_nonchunked_data (GConnHttp *conn, gchar *data, gsize le
 		gnet_conn_readline(conn->conn);
 	}
 
-	ev = gnet_conn_http_new_event(GNET_CONN_HTTP_DATA_PARTIAL);
-	ev_data = (GConnHttpEventData*)ev;
-	ev_data->buffer = conn->buffer;
-	ev_data->content_length = conn->content_length;
-	ev_data->data_received  = conn->content_recv;
-	gnet_conn_http_emit_event(conn, ev);
-	gnet_conn_http_free_event(ev);
+	/* we don't want to emit data events if we're 
+	 *  getting redirected anyway, do we? */
+	if (conn->redirect_location == NULL)
+	{
+		GConnHttpEventData *ev_data;
+		GConnHttpEvent     *ev;
+
+		ev = gnet_conn_http_new_event(GNET_CONN_HTTP_DATA_PARTIAL);
+		ev_data = (GConnHttpEventData*)ev;
+		ev_data->buffer = conn->buffer;
+		ev_data->content_length = conn->content_length;
+		ev_data->data_received  = conn->content_recv;
+		gnet_conn_http_emit_event(conn, ev);
+		gnet_conn_http_free_event(ev);
+	}
 }
 
 /***************************************************************************
@@ -1119,7 +1155,7 @@ gnet_conn_http_conn_cb (GConn *c, GConnEvent *event, GConnHttp *httpconn)
 			if (httpconn->redirect_location)
 			{
 				gnet_conn_http_done(httpconn);
-                                break;
+				break;
 			}
                         
 			if (httpconn->loop)
@@ -1143,6 +1179,9 @@ gnet_conn_http_conn_cb (GConn *c, GConnEvent *event, GConnHttp *httpconn)
 		case GNET_CONN_WRITABLE:
 			break;
 	}
+
+	if (httpconn->refcount == 0)
+		gnet_conn_http_delete_internal (httpconn);
 }
 
 /***************************************************************************
@@ -1172,6 +1211,12 @@ gnet_conn_http_ia_cb (GInetAddr *ia, GConnHttp *conn)
 		ev_resolved->ia = conn->ia;
 		gnet_conn_http_emit_event (conn, ev);
 		gnet_conn_http_free_event (ev);
+
+		if (conn->refcount == 0)
+		{
+			gnet_conn_http_delete_internal (conn);
+			return;
+		}
 	}
 		
 	/* could not resolve hostname? => emit error event and quit */
@@ -1390,20 +1435,17 @@ gnet_conn_http_set_max_redirects (GConnHttp *conn, guint num)
 	conn->max_redirects = num;
 }
 
-
-/**
- *  gnet_conn_http_delete
- *  @conn: a #GConnHttp
+/***************************************************************************
  *
- *  Deletes a #GConnHttp and frees all associated resources.
+ *   gnet_conn_http_delete_internal
  *
- **/
+ ***************************************************************************/
 
-void             
-gnet_conn_http_delete (GConnHttp *conn)
+static void
+gnet_conn_http_delete_internal (GConnHttp *conn)
 {
 	g_return_if_fail (conn != NULL);
-	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
+	g_return_if_fail (conn->refcount == 0);
 
 	if (conn->ia_id > 0)
 		gnet_inetaddr_new_async_cancel(conn->ia_id);
@@ -1441,6 +1483,36 @@ gnet_conn_http_delete (GConnHttp *conn)
 
 	memset(conn, 0xff, sizeof(GConnHttp));
 	g_free(conn);
+}
+
+/**
+ *  gnet_conn_http_delete
+ *  @conn: a #GConnHttp
+ *
+ *  Deletes a #GConnHttp and frees all associated resources.
+ *
+ **/
+
+void             
+gnet_conn_http_delete (GConnHttp *conn)
+{
+	g_return_if_fail (conn != NULL);
+	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
+	g_return_if_fail (conn->refcount > 0);
+
+	--conn->refcount;
+
+	/* if the refcount was greater than 1, we are
+	 *  still calling out into the user callback.
+	 *  In that case, keep the object alive for now,
+	 *  but invalidate it */
+	if (conn->refcount > 0)
+	{
+		conn->stamp = 0;
+		return;
+	}
+
+	gnet_conn_http_delete_internal (conn);
 }
 
 

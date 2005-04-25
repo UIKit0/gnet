@@ -1,5 +1,23 @@
 2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* NEWS:
+	* src/conn-http.c: (gnet_conn_http_new),
+	(gnet_conn_http_emit_event), (gnet_conn_http_done),
+	(gnet_conn_http_conn_parse_response_headers),
+	(gnet_conn_http_conn_recv_chunk_body),
+	(gnet_conn_http_conn_recv_nonchunked_data),
+	(gnet_conn_http_conn_cb), (gnet_conn_http_ia_cb),
+	(gnet_conn_http_delete_internal), (gnet_conn_http_delete):
+	  Make sure the http connection can be deleted from within
+	  the user callback. Do not emit _DATA_PARTIAL or _DATA_COMPLETE
+	  if we are going to be redirected to a different target anyway.
+
+	* tests/conn_http_test.c: (http_async_callback), (test_get_async),
+	(main):
+	  Add some test cases for GConnHttp in async mode.
+
+2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* doc/tmpl/conn-http.sgml:
 	  Add GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION
 	  
