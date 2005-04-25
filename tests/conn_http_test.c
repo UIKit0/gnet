@@ -22,6 +22,7 @@
 
 #define GNET_EXPERIMENTAL 1
 #include "conn-http.h"
+#include "gnet.h"
 
 #include <stdlib.h>
 #include <string.h>       
@@ -532,6 +533,8 @@ int
 main (int argc, char **argv)
 {
 	verbose = FALSE;
+
+	gnet_init ();
 
 	/* DIRTY HACK. Kids, don't do this at home */
 	if (argc > 1  &&  (strcmp(argv[1], "--verbose") == 0 || strcmp(argv[1],"-v") == 0))

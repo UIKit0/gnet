@@ -51,7 +51,8 @@ main (int argc, char* argv[])
   gchar* buf1;
   gchar* buf2;
   gint  len1,len2;
-  len1=0; 
+  len1=0;
+  gnet_init();
   buf1=gnet_base64_encode(sesame,strlen(sesame),&len1,0);
   /* length includes the final \0 */
   TEST("base64 encode/length",len1==strlen(aladin)+1);

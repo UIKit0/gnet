@@ -28,12 +28,12 @@
 
 static int failed = 0;
 
-#define TEST(S, C) do {                             	  \
+#define TEST(S,C) do {                             	  \
 if (C) { /*g_print ("%s: PASS\n", (S)); */        	} \
 else   { g_print ("%s: FAIL\n", (S)); failed = 1;  	} \
 } while (0)
 
-#define IS_TEST(S, A, F) do {				        \
+#define IS_TEST(S,A,F) do {				        \
   GInetAddr* _inetaddr;						\
   gchar* _cname;						\
   _inetaddr = gnet_inetaddr_new_nonblock (A, 0);		\
@@ -56,6 +56,8 @@ main (int argc, char* argv[])
   gchar* cname;
   gchar* cname2;
   gchar bytes[GNET_INETADDR_MAX_LEN];
+
+  gnet_init ();
 
   /* **************************************** */
   /* IPv4 tests */

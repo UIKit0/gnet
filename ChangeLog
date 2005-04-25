@@ -1,5 +1,13 @@
 2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* tests/base64_test.c: (main):
+	* tests/conn_http_test.c: (main):
+	* tests/inetaddr_test.c: (main):
+	  Tests need to call gnet_init() before using any
+	  gnet functions as well.
+
+2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* NEWS:
 	* src/conn-http.c: (gnet_conn_http_new),
 	(gnet_conn_http_emit_event), (gnet_conn_http_done),
