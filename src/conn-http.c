@@ -37,6 +37,9 @@
 #define GNET_CONN_HTTP_DEFAULT_MAX_REDIRECTS  5
 #define GNET_CONN_HTTP_BUF_INCREMENT          8192    /* 8kB */
 
+#define CONN_HTTP_MAGIC_SEQUENCE  499138271
+#define GNET_IS_CONN_HTTP(conn)  ((conn)&&(((GConnHttp*)(conn))->stamp == CONN_HTTP_MAGIC_SEQUENCE))
+
 typedef enum
 {
 	STATUS_NONE = 0,
@@ -51,6 +54,8 @@ typedef enum
 
 struct _GConnHttp
 {
+	guint                stamp;           /* magic cookie instead of a type system */
+
 	GInetAddrNewAsyncID  ia_id;
 	GInetAddr           *ia;
 
@@ -217,6 +222,8 @@ gnet_conn_http_new (void)
 	gchar       agentstr[64];
 
 	conn = g_new0 (GConnHttp, 1);
+
+	conn->stamp = CONN_HTTP_MAGIC_SEQUENCE;
 
 	/* alloc one more to make sure buffer can be NUL-terminated later */
 	conn->buffer   = g_malloc (GNET_CONN_HTTP_BUF_INCREMENT + 1);
@@ -410,6 +417,7 @@ gnet_conn_http_set_header (GConnHttp   *conn,
 
 	g_return_val_if_fail (conn  != NULL, FALSE);
 	g_return_val_if_fail (field != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
 
 	/* Don't allow 'Host' to be set explicitely
 	 *  we'll do that ourselves */
@@ -459,6 +467,8 @@ gnet_conn_http_set_header (GConnHttp   *conn,
 gboolean
 gnet_conn_http_set_user_agent (GConnHttp *conn, const gchar *agent)
 {
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
+
 	return gnet_conn_http_set_header (conn, "User-Agent", agent, 0);
 }
 
@@ -481,6 +491,7 @@ gnet_conn_http_set_uri (GConnHttp *conn, const gchar *uri)
 
 	g_return_val_if_fail (conn != NULL, FALSE);
 	g_return_val_if_fail (uri  != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
 
 	if (conn->uri)
 	{
@@ -551,6 +562,7 @@ gnet_conn_http_set_method (GConnHttp        *conn,
                            gsize             post_data_len)
 {
 	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
 
 	switch (method)
 	{
@@ -1083,6 +1095,8 @@ static void
 gnet_conn_http_conn_cb (GConn *c, GConnEvent *event, GConnHttp *httpconn)
 {
 	GConnHttpEvent *ev;
+
+	g_return_if_fail (GNET_IS_CONN_HTTP (httpconn));
 	
 	switch (event->type)
 	{
@@ -1143,7 +1157,9 @@ static void
 gnet_conn_http_ia_cb (GInetAddr *ia, GConnHttp *conn)
 {
 	conn->ia_id = 0;
-	
+
+	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
+
 	if (ia != conn->ia || ia == NULL)
 	{
 		GConnHttpEventResolved *ev_resolved;
@@ -1163,6 +1179,11 @@ gnet_conn_http_ia_cb (GInetAddr *ia, GConnHttp *conn)
 	{
 		if (conn->loop)
 			g_main_loop_quit(conn->loop);
+
+		gnet_conn_http_emit_error_event (conn, GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION,
+		                                 "Could not resolve hostname '%s'",
+		                                 conn->uri->hostname);
+
 		return;
 	}
 
@@ -1213,8 +1234,9 @@ gnet_conn_http_run_async (GConnHttp        *conn,
                           GConnHttpFunc     func,
                           gpointer          user_data)
 {
-	g_return_if_fail (conn      != NULL);
-	g_return_if_fail (func      != NULL || user_data == NULL);
+	g_return_if_fail (conn != NULL);
+	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
+	g_return_if_fail (func != NULL || user_data == NULL);
 	g_return_if_fail (conn->uri != NULL);
 	g_return_if_fail (conn->ia_id == 0);
 	
@@ -1258,6 +1280,7 @@ gnet_conn_http_run (GConnHttp        *conn,
                     gpointer          user_data)
 {
 	g_return_val_if_fail (conn      != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
 	g_return_val_if_fail (conn->uri != NULL, FALSE);
 	g_return_val_if_fail (conn->ia_id == 0, FALSE);
 
@@ -1322,6 +1345,7 @@ gnet_conn_http_steal_buffer (GConnHttp        *conn,
 	g_return_val_if_fail (conn   != NULL, FALSE);
 	g_return_val_if_fail (buffer != NULL, FALSE);
 	g_return_val_if_fail (length != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
 
 	if (conn->status == STATUS_NONE 
 	 || conn->status == STATUS_SENT_REQUEST
@@ -1379,6 +1403,7 @@ void
 gnet_conn_http_delete (GConnHttp *conn)
 {
 	g_return_if_fail (conn != NULL);
+	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
 
 	if (conn->ia_id > 0)
 		gnet_inetaddr_new_async_cancel(conn->ia_id);
@@ -1401,7 +1426,7 @@ gnet_conn_http_delete (GConnHttp *conn)
 	
 	if (conn->loop != NULL  &&  g_main_loop_is_running(conn->loop))
 	{
-		g_warning("conn->loop != NULL and still running in. This indicates"
+		g_warning("conn->loop != NULL and still running. This indicates"
 		          "\ta bug in your code! You are not allowed to call\n"
 		          "\tgnet_conn_http_delete() before gnet_conn_http_run()\n"
 		          "\thas returned. Use gnet_conn_http_cancel() instead.\n");
@@ -1433,6 +1458,7 @@ void
 gnet_conn_http_cancel (GConnHttp *conn)
 {
 	g_return_if_fail (conn != NULL);
+	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
 	
 	if (conn->loop)
 		g_main_loop_quit(conn->loop);
@@ -1452,6 +1478,7 @@ void
 gnet_conn_http_set_timeout (GConnHttp *conn, guint timeout)
 {
 	g_return_if_fail (conn != NULL);
+	g_return_if_fail (GNET_IS_CONN_HTTP (conn));
 
 	conn->timeout = timeout;
 }

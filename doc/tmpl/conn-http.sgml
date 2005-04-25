@@ -98,6 +98,7 @@ fetch_and_print_url (const gchar *url)
 
 @GNET_CONN_HTTP_ERROR_UNSPECIFIED: 
 @GNET_CONN_HTTP_ERROR_PROTOCOL_UNSUPPORTED: 
+@GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION: 
 
 <!-- ##### ENUM GConnHttpEventType ##### -->
 <para>

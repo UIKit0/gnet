@@ -1,3 +1,24 @@
+2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* doc/tmpl/conn-http.sgml:
+	  Add GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION
+	  
+	* src/conn-http.c: (gnet_conn_http_new),
+	(gnet_conn_http_set_header), (gnet_conn_http_set_user_agent),
+	(gnet_conn_http_set_uri), (gnet_conn_http_set_method),
+	(gnet_conn_http_conn_cb), (gnet_conn_http_ia_cb),
+	(gnet_conn_http_run_async), (gnet_conn_http_run),
+	(gnet_conn_http_steal_buffer), (gnet_conn_http_delete),
+	(gnet_conn_http_cancel), (gnet_conn_http_set_timeout):
+	* src/conn-http.h:
+	  Actually do emit an error when we couldn't resolve the
+	  hostname; add some pseudo-typesafety by adding a magic
+	  cookie to the beginning of the structure and checking
+	  that cookie in all public gnet_conn_http_*() functions;
+	  add GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION; make sure
+	  there are no trailing commas after the last enum value
+	  in enumerations (gcc-2.9x does not seem to like that).
+	  
 2005-04-13  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* acinclude.m4:

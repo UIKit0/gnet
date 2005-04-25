@@ -78,6 +78,7 @@ typedef struct _GConnHttp GConnHttp;
  *   GConnHttpError
  *   @GNET_CONN_HTTP_ERROR_UNSPECIFIED: connection error
  *   @GNET_CONN_HTTP_ERROR_PROTOCOL_UNSUPPORTED: unsupported protocol (ie. not http)
+ *   @GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION: the hostname could not be resolved
  *
  *   Error codes.  Used by #GConnHttpEventError.  Note that 
  *    errors by the HTTP server will be communicated to the
@@ -88,6 +89,7 @@ typedef enum
 {
  GNET_CONN_HTTP_ERROR_UNSPECIFIED,
  GNET_CONN_HTTP_ERROR_PROTOCOL_UNSUPPORTED,
+ GNET_CONN_HTTP_ERROR_HOSTNAME_RESOLUTION
 } GConnHttpError;
 
 
@@ -135,7 +137,7 @@ typedef enum
  GNET_CONN_HTTP_DATA_PARTIAL,       /* we got some data             */
  GNET_CONN_HTTP_DATA_COMPLETE,      /* we got all data              */
  GNET_CONN_HTTP_TIMEOUT,            /* the connection timed out     */
- GNET_CONN_HTTP_ERROR,              /* GConnHttp problem            */
+ GNET_CONN_HTTP_ERROR               /* GConnHttp problem            */
 } GConnHttpEventType;
 
 typedef struct _GConnHttpEvent         GConnHttpEvent;
