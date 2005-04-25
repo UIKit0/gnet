@@ -1,3 +1,12 @@
 .cvsignore
 rules
 control
+Makefile
+Makefile.in
+files
+libgnet-dev
+libgnet2.0-0
+libgnet2.0-0.postinst.debhelper
+libgnet2.0-0.postrm.debhelper
+libgnet2.0-0.substvars
+shlibs.local

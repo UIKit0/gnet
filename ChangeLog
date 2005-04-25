@@ -1,3 +1,29 @@
+2005-04-25  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* configure.ac:
+	  Update version to 2.0.8 as well
+	  
+	* RELEASE:
+	* configure.ac:
+	* debian/.cvsignore:
+	* debian/README.Debian:
+	* debian/changelog:
+	* debian/control.in:
+	* debian/dirs:
+	* debian/docs:
+	* debian/libgnet-dev.preinst:
+	* debian/libgnet1.0.README.Debian:
+	* debian/libgnet1.0.docs:
+	* debian/libgnet1.0.postinst:
+	* debian/libgnet1.1.README.Debian:
+	* debian/libgnet1.1.docs:
+	* debian/libgnet1.1.postinst:
+	* debian/libgnet2.0-0.files:
+	* debian/rules:
+	* debian/rules.in:
+	  Update debian build stuff (most taken directly from
+	  Takuo Kitame's .diff for the real debian packages)
+
 2005-04-25  Andreas Rottmann  <a.rottmann at gmx dot at>
 
 	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
