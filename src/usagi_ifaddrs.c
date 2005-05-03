@@ -370,12 +370,15 @@ free_nlmsglist (struct nlmsg_list *nlm0)
   if (!nlm0)
     return;
   saved_errno = errno;
-  for (nlm = nlm0; nlm; nlm = nlm->nlm_next)
+  nlm = nlm0;
+  while (nlm)
     {
+      struct nlmsg_list *old_node = nlm;
       if (nlm->nlh)
 	free (nlm->nlh);
+      nlm = nlm->nlm_next;
+      free (old_node);
     }
-  free (nlm0);
   __set_errno (saved_errno);
 }
 
