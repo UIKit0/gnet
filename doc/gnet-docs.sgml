@@ -135,8 +135,9 @@
 	If you are a developer and you want to use GNet in your
 	program, you can use the pkg-config script to figure out
 	which flags need to set when compiling.  For example, type
-	<userinput>gcc main.c `pkg-config gnet --cflags --libs`</userinput>
-	to compile the program main.c with GNet and link it to GNet.
+	<userinput>gcc main.c `pkg-config --cflags --libs gnet-2.0`</userinput>
+	to compile the program main.c with GNet and link it to GNet. Note that
+	those are backticks, not apostrophes. 
       </para>
 
       <para>
