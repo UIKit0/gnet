@@ -88,6 +88,7 @@ struct _GConnHttp
 	
 	gsize                content_length;
 	gsize                content_recv;
+	gboolean             got_content_length; /* set if we got a content_length header */
 	
 	gboolean             tenc_chunked;  /* Transfer-Encoding: chunked */
 	
@@ -178,8 +179,9 @@ gnet_conn_http_reset (GConnHttp *conn)
 	conn->connection_close = FALSE;
 	
 	conn->content_length = 0;
-	conn->content_recv   = 0;
-	conn->tenc_chunked   = FALSE;
+	conn->content_recv = 0;
+	conn->tenc_chunked = FALSE;
+	conn->got_content_length = FALSE;
 
 	/* Note: we keep the request headers as they are*/
 	conn->resp_headers = NULL;
@@ -767,7 +769,7 @@ gnet_conn_http_done (GConnHttp *conn)
  *
  ***************************************************************************/
 
-static gboolean
+static void
 gnet_conn_http_conn_parse_response_headers (GConnHttp *conn)
 {
 	GConnHttpEventRedirect *ev_redirect;
@@ -798,6 +800,7 @@ gnet_conn_http_conn_parse_response_headers (GConnHttp *conn)
 		if (g_ascii_strcasecmp(hdr->field, "Content-Length") == 0)
 		{
 			conn->content_length = atoi(hdr->value);
+			conn->got_content_length = TRUE;
 		}
 		else if (g_ascii_strcasecmp(hdr->field, "Transfer-Encoding") == 0 
 		      && g_ascii_strcasecmp(hdr->value, "chunked") == 0)
@@ -830,7 +833,7 @@ gnet_conn_http_conn_parse_response_headers (GConnHttp *conn)
 	
 	/* If not a redirection code, continue normally */
 	if (conn->response_code < 300 || conn->response_code >= 400)
-		return TRUE; /* continue */
+		return; /* continue */
 		
 	ev = gnet_conn_http_new_event (GNET_CONN_HTTP_REDIRECT);
 	ev_redirect = (GConnHttpEventRedirect*)ev;
@@ -863,7 +866,8 @@ gnet_conn_http_conn_parse_response_headers (GConnHttp *conn)
 	}
 
 	gnet_conn_http_free_event (ev);
-	return TRUE; /* continue and receive body */
+
+	return; /* continue and receive body */
 }
 
 
@@ -928,10 +932,15 @@ gnet_conn_http_conn_recv_headers (GConnHttp *conn, gchar *data, gsize len)
 	/* End of headers? */
 	if (*data == 0x00 || g_str_equal(data,"\r\n") || g_str_equal(data,"\r") || g_str_equal(data,"\n"))
 	{
-		if (!gnet_conn_http_conn_parse_response_headers(conn))
-			return; /* redirect - TODO: still used? */
+		gnet_conn_http_conn_parse_response_headers (conn);
 
-		if (conn->tenc_chunked)
+		if (conn->got_content_length && conn->content_length == 0)
+		{
+			/* no body to receive */
+			gnet_conn_http_done (conn);
+			return;
+		}
+		else if (conn->tenc_chunked)
 		{
 			gnet_conn_readline(conn->conn);
 			conn->status = STATUS_RECV_CHUNK_SIZE;

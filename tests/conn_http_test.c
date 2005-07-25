@@ -417,6 +417,10 @@ test_simple_get (const gchar *url)
  *
  ***************************************************************************/
 
+/* PLEASE do not use this developer ID in 
+ *  your own code, get your own one */
+#define AWS_DEV_ID "1BXDDWFYXTVWC8WQXF02"
+
 static gboolean
 test_post (const gchar *artist, const gchar *album)
 {
@@ -444,12 +448,12 @@ test_post (const gchar *artist, const gchar *album)
 	                "<mode xsi:type=\"xsd:string\">music</mode>"
 	                "<tag xsi:type=\"xsd:string\">webservices-20</tag>"
 	                "<type xsi:type=\"xsd:string\">lite</type>"
-	                "<devtag xsi:type=\"xsd:string\"></devtag>"
+	                "<devtag xsi:type=\"xsd:string\">%s</devtag>"
 	                "<keywords xsi:type=\"xsd:string\">%s</keywords>" /* <----------- */
 	                "</q2:ArtistRequest>"
 	                "</soap:Body>"
 	                "</soap:Envelope>",
-	                artist_esc, album_esc);
+	                artist_esc, AWS_DEV_ID, album_esc);
 
 	g_free (artist_esc);
 	g_free (album_esc);

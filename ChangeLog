@@ -1,3 +1,16 @@
+2005-07-25  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn-http.c: (gnet_conn_http_reset),
+	(gnet_conn_http_conn_parse_response_headers),
+	(gnet_conn_http_conn_recv_headers):
+	  Fix redirection to new location in connection with
+	  a Content-Length of 0, ie. no body to receive (would 
+	  just timeout after waiting for the body data before).
+	 
+	* tests/conn_http_test.c: (test_post):
+	  Fix POST test by supplying a developer ID (please
+	  do not use this for your own code, get your own ID).
+
 2005-05-31  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* doc/gnet-docs.sgml:
