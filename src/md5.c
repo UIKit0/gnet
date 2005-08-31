@@ -331,7 +331,7 @@ gnet_md5_new (const gchar* buffer, guint length)
 
   md5 = g_new0 (GMD5, 1);
   MD5Init (&md5->ctx);
-  MD5Update (&md5->ctx, buffer, length);
+  MD5Update (&md5->ctx, (const guchar*) buffer, length);
   MD5Final ((gpointer) &md5->digest, &md5->ctx);
 
   return md5;
@@ -481,7 +481,7 @@ gnet_md5_update (GMD5* md5, const gchar* buffer, guint length)
 {
   g_return_if_fail (md5);
 
-  MD5Update (&md5->ctx, buffer, length);
+  MD5Update (&md5->ctx, (const guchar*) buffer, length);
 }
 
 

@@ -1,3 +1,11 @@
+2005-08-31  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/md5.c: (gnet_md5_new), (gnet_md5_update):
+	* src/sha.c: (gnet_sha_new), (gnet_sha_update):
+	* src/tcp.c: (gnet_tcp_socket_new_async_cb):
+	* src/udp.c: (gnet_udp_socket_receive):
+	  Fix compilation with gcc4 (signedness issues).
+
 2005-07-25  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/conn-http.c: (gnet_conn_http_reset),

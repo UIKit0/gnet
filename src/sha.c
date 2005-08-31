@@ -454,7 +454,7 @@ gnet_sha_new (const gchar* buffer, guint length)
 
   sha = g_new0 (GSHA, 1);
   SHAInit (&sha->ctx);
-  SHAUpdate (&sha->ctx, buffer, length);
+  SHAUpdate (&sha->ctx, (const guchar*) buffer, length);
   SHAFinal ((gpointer) &sha->digest, &sha->ctx);
 
   return sha;
@@ -606,7 +606,7 @@ gnet_sha_update (GSHA* sha, const gchar* buffer, guint length)
 {
   g_return_if_fail (sha);
 
-  SHAUpdate (&sha->ctx, buffer, length);
+  SHAUpdate (&sha->ctx, (const guchar*) buffer, length);
 }
 
 

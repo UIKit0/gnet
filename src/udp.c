@@ -329,7 +329,7 @@ gnet_udp_socket_receive (GUdpSocket* socket,
 {
   gint bytes_received;
   struct sockaddr_storage sa;
-  gint sa_len = sizeof(struct sockaddr_storage);
+  socklen_t sa_len = sizeof (struct sockaddr_storage);
 
   g_return_val_if_fail (socket, -1);
   g_return_val_if_fail (buffer, -1);
