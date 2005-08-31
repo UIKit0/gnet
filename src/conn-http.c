@@ -638,6 +638,7 @@ gnet_conn_http_conn_connected (GConnHttp *conn)
 	gchar       *res;
 
 	gnet_conn_http_reset(conn);
+	gnet_conn_timeout(conn->conn, conn->timeout);
 	
 	request = g_string_new(NULL);
 
@@ -1097,6 +1098,8 @@ gnet_conn_http_conn_recv_nonchunked_data (GConnHttp *conn, gchar *data, gsize le
 static void
 gnet_conn_http_conn_got_data (GConnHttp *conn, gchar *data, gsize len)
 {
+	gnet_conn_timeout (conn->conn, conn->timeout);
+	
 	switch (conn->status)
 	{
 		/* sent request - so this must be the response code */

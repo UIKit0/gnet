@@ -1,5 +1,13 @@
 2005-08-31  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn-http.c: (gnet_conn_http_conn_connected),
+	(gnet_conn_http_conn_got_data):
+	  Renew timeout when connected and whenever data is 
+	  received (makes transfers that take longer than 
+	  30 seconds work).
+
+2005-08-31  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/md5.c: (gnet_md5_new), (gnet_md5_update):
 	* src/sha.c: (gnet_sha_new), (gnet_sha_update):
 	* src/tcp.c: (gnet_tcp_socket_new_async_cb):
