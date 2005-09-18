@@ -187,7 +187,7 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
   if (condition & G_IO_IN)
     {
       GIOError error;
-      guint bytes_read;
+      gsize bytes_read;
 
       /* Read the data into our buffer */
       error = 
@@ -247,7 +247,7 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
   if (condition & G_IO_OUT)
     {
       GIOError error;
-      guint bytes_written;
+      gsize bytes_written;
 
       /* Write the data out */
       error = g_io_channel_write(iochannel, client_state->buffer, 

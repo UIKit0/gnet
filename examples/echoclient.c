@@ -34,7 +34,7 @@ main(int argc, char** argv)
   GIOChannel* iochannel;
   GIOError error = G_IO_ERROR_NONE;
   gchar buffer[1024];
-  guint n;
+  gsize n;
 
   gnet_init ();
 

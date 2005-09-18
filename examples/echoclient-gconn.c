@@ -98,7 +98,7 @@ ob_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
     {
       GIOError error;
       gchar buffer[1024];
-      guint bytes_read;
+      gsize bytes_read;
 
       /* Read the data into our buffer */
       error = gnet_io_channel_readline (iochannel, buffer, 

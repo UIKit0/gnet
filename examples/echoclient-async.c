@@ -122,7 +122,7 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
     {
       GIOError error;
       gchar buffer[1024];
-      guint bytes_read;
+      gsize bytes_read;
 
       /* Read the data into our buffer */
       error = g_io_channel_read (iochannel, buffer, 
@@ -185,7 +185,7 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
     {
       GIOError error;
       gchar buffer[1024];
-      guint bytes_read;
+      gsize bytes_read;
 
       /* Read the data into our buffer */
       error = gnet_io_channel_readline (iochannel, buffer, 
@@ -213,7 +213,7 @@ async_client_in_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	{
 	  GIOChannel* sin;
 	  GIOError error;
-	  guint bytes_written;
+	  gsize bytes_written;
 
 	  sin = (GIOChannel*) data;
 	  error = gnet_io_channel_writen (sin, buffer, bytes_read, 

@@ -667,7 +667,7 @@ gnet_conn_http_conn_connected (GConnHttp *conn)
 			/* Note: this must be 1.1 */
 			g_string_append_printf (request, "POST %s HTTP/1.1\r\n", resource);
 			
-			g_snprintf(buf, sizeof(buf), "%u", conn->post_data_len);
+			g_snprintf(buf, sizeof(buf), "%u", (guint) conn->post_data_len);
 			
 			gnet_conn_http_set_header (conn, "Expect", "100-continue", 0);
 			gnet_conn_http_set_header (conn, "Content-Length", buf, 0);

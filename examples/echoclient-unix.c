@@ -78,7 +78,7 @@ normal_echoclient(gchar* path)
   GUnixSocket *socket = NULL;
   GIOChannel* iochannel = NULL;
   gchar buffer[1024];
-  guint n;
+  gsize n;
   GIOError e = G_IO_ERROR_NONE;
 
   g_assert(path != NULL);

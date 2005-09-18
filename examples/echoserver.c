@@ -40,7 +40,7 @@ main(int argc, char** argv)
   gchar*      name;
   GTcpSocket* client = NULL;
   gchar       buffer[1024];
-  guint       n;
+  gsize       n;
   GIOChannel* ioclient = NULL;
   GIOError    error;
 

@@ -1,3 +1,22 @@
+2005-09-18  Daniel Gryniewicz  <dang at gentoo dot org>
+
+	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/echoclient-async.c: (async_client_sin_iofunc),
+	(async_client_in_iofunc):
+	* examples/echoclient-gconn.c: (ob_in_iofunc):
+	* examples/echoclient-unix.c: (normal_echoclient):
+	* examples/echoclient.c: (main):
+	* examples/echoserver-async.c: (async_client_iofunc):
+	* examples/echoserver-unix.c: (normal_echoserver),
+	(async_client_iofunc):
+	* examples/echoserver.c: (main):
+	* examples/hfetch.c: (hfetch):
+	* src/conn-http.c: (gnet_conn_http_conn_connected):
+	  Fix compilation with -Werror on amd64 (mostly a simple
+	  s/guint/gsize/ for the GIOChannel API that was changed
+	  the same way in the GLib 1.2 => 2.0 transition).
+
 2005-08-31  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/conn-http.c: (gnet_conn_http_conn_connected),

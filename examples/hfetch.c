@@ -113,7 +113,7 @@ hfetch(gchar* server, gint port, gchar* filename)
   gchar* command;
   gchar buffer[1024];
   GIOError error;
-  guint n;
+  gsize n;
 
 
   /* Create the address */

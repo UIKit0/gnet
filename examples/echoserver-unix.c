@@ -95,7 +95,7 @@ normal_echoserver(gchar *path)
 {
   GUnixSocket *client = NULL;
   gchar buffer[1024];
-  guint n;
+  gsize n;
   GIOChannel *ioclient = NULL;
   GIOError e;
 
@@ -228,7 +228,7 @@ async_client_iofunc(GIOChannel *iochannel, GIOCondition c,
   /* Check for data to be read (or if the socket was closed) */
   if (c & G_IO_IN) {
     GIOError e;
-    guint bytes_read;
+    gsize bytes_read;
 
     /* Read the data into our buffer */
     e = g_io_channel_read(iochannel,
@@ -259,7 +259,7 @@ async_client_iofunc(GIOChannel *iochannel, GIOCondition c,
   }
   if (c & G_IO_OUT) {
     GIOError e;
-    guint bytes_written;
+    gsize bytes_written;
     /* Write the data out */
     e = g_io_channel_write(iochannel, cs->buffer, cs->n,
 			   &bytes_written);
