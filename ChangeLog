@@ -1,3 +1,10 @@
+2005-09-19  Steve Morris  <steve_morris at arcadyan dot com>
+
+	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn-http.c: (gnet_conn_http_done):
+	  Disable timeout when we have received all data.
+
 2005-09-18  Daniel Gryniewicz  <dang at gentoo dot org>
 
 	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>

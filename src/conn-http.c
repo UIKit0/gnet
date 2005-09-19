@@ -728,6 +728,8 @@ gnet_conn_http_done (GConnHttp *conn)
 	
 	conn->status = STATUS_DONE;
 
+	gnet_conn_timeout (conn->conn, 0);
+
 	/* we don't want to emit a DATA_COMPLETE event
 	 *  if we are getting redirected, do we? */
 	if (conn->redirect_location == NULL)
@@ -753,7 +755,7 @@ gnet_conn_http_done (GConnHttp *conn)
 			/* send request with new URI */
 			gnet_conn_http_run_async (conn, conn->func, conn->func_data);
 
-			return; /* do not quit out own loop just yet */
+			return; /* do not quit own loop just yet */
 		}
 		
 		gnet_conn_http_emit_error_event (conn, GNET_CONN_HTTP_ERROR_UNSPECIFIED, 
