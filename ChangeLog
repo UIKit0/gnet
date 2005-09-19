@@ -1,3 +1,23 @@
+2005-09-19  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/dnslookup.c:
+	* examples/echoclient-async.c:
+	* examples/echoclient-gconn.c:
+	* examples/echoclient-udp.c:
+	* examples/echoclient.c:
+	* examples/echoserver-async.c:
+	* examples/echoserver-gserver.c:
+	* examples/echoserver-partyline.c: (ob_sig_int):
+	* examples/echoserver-udp.c:
+	* examples/echoserver.c:
+	* examples/hash.c:
+	* examples/hfetch.c:
+	* examples/hostinfo.c:
+	* examples/sdr.c:
+	  Relicense these examples from GPL to LGPL (as approved by the
+	  copyright holder, David Helder, on the gnet mailing list,
+	  Message ID: <f688e4613fd4e6bd85847dca4a4f60f3@gizmolabs.org>).
+
 2005-09-19  Steve Morris  <steve_morris at arcadyan dot com>
 
 	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
