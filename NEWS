@@ -23,8 +23,14 @@ Changes in GNet
   a __ss_family member in struct 
   sockaddr_storage instead of 
   ss_family (Jeremy Denise)
-* Documentation fixes: GConnHttp
-
+* GConnHttp: Documentation fixes
+* Fix compilation with --enable-debug
+  on some 64-bit architectures like
+  amd64 (Daniel Gryniewicz)
+* GConnHttp: fix several timeout issues
+  (Steve Morris, Tim Muller).
+* Relicense source code in examples/
+  directory from GPL to LGPL.
 
 2.0.7
 -----

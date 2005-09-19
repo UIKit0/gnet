@@ -1,5 +1,15 @@
 2005-09-19  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* examples/echoclient-unix.c:
+	* examples/echoserver-unix.c:
+	  Relicense these to LGPL as well (I missed Marks approval,
+	  see below, same message).
+
+	* NEWS:
+	  update
+
+2005-09-19  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* examples/dnslookup.c:
 	* examples/echoclient-async.c:
 	* examples/echoclient-gconn.c:
