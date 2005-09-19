@@ -201,6 +201,36 @@ AC_TRY_CPP([#include <linux/netlink.h>],
 ###############################
 # Check for types
 
+dnl check for Unix98 socklen_t (found on 
+dnl xemacs-patches mailing list, written
+dnl by Martin Buchholz)
+dnl
+dnl On Darwin(MacOSX) socklen_t needs to be
+dnl an int (see accept man page), on all other
+dnl unix systems we need a size_t.
+
+AC_MSG_CHECKING(for socklen_t)
+AC_TRY_COMPILE([
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  socklen_t x;
+], [],[
+  AC_MSG_RESULT(yes)
+],[
+  AC_TRY_COMPILE([
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    int accept (int, struct sockaddr *, size_t *);
+    ],[],[
+      AC_MSG_RESULT(size_t)
+      AC_DEFINE(socklen_t,size_t,[Defined if system has no socklen_t type])
+    ], [
+      AC_MSG_RESULT(int)
+      AC_DEFINE(socklen_t,int,[Defined if system has no socklen_t type])
+    ]
+  )
+])
+
 
 ###############################
 # Check for structures

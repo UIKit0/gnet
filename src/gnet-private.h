@@ -82,14 +82,6 @@ struct sockaddr_storage {
 #define SOCKET gint
 #endif
 
-#ifndef socklen_t
-#  ifdef GNET_APPLE_DARWIN
-#    define socklen_t int	/* socklen_t is int in Darwin */
-#  else
-#    define socklen_t size_t	/* it's size_t on all other Unixes */
-#  endif
-#endif
-
 #define GNET_CLOSE_SOCKET(SOCKFD) close(SOCKFD)
 
 /* Use gnet_private_io_channel_new() to create iochannels */

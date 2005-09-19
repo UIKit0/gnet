@@ -1,5 +1,15 @@
 2005-09-19  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* configure.ac:
+	* src/gnet-private.h:
+	  Check if system provides socklen_t; if not
+	  define it to be size_t or int as required.
+	  
+	* gnetconfig.h.win32:
+	  Bump version numbers to 2.0.8
+
+2005-09-19  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* examples/echoclient-unix.c:
 	* examples/echoserver-unix.c:
 	  Relicense these to LGPL as well (I missed Marks approval,
