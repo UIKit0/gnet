@@ -22,6 +22,10 @@
 
 #include <glib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 gint gnet_pack (const gchar* format, gchar* buffer, const gint length, ...);
 gint gnet_pack_strdup (const gchar* format, gchar** bufferp, ...);
 gint gnet_vpack (const gchar* format, gchar* buffer, const gint length, va_list args);
@@ -31,5 +35,11 @@ gint gnet_vcalcsize (const gchar* format, va_list args);
      
 gint gnet_unpack (const gchar* format, gchar* buffer, gint length, ...);
 gint gnet_vunpack (const gchar* format, gchar* buffer, gint length, va_list args);
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 
 #endif /* _GNET_PACK_H */

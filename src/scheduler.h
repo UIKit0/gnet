@@ -49,6 +49,11 @@
 #include <sys/time.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
 typedef enum
 {
   SCHEDULER_POLICY_ROUND_ROBIN
@@ -85,5 +90,10 @@ void	    scheduler_set_max_ups (Scheduler* scheduler, gint max_units_per_second)
 void	    scheduler_add (Scheduler* scheduler, gpointer user_data, SchedulerFunc func, gint units);
 void	    scheduler_remove (Scheduler* scheduler, gpointer user_data);
 
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCHEDULER_H */

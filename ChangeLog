@@ -1,3 +1,9 @@
+2005-10-27  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/pack.h:
+	* src/scheduler.h:
+	  Add extern "C" bits for c++ compiler.
+
 2005-09-19  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* configure.ac:
