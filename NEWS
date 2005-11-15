@@ -31,6 +31,12 @@ Changes in GNet
   (Steve Morris, Tim Muller).
 * Relicense source code in examples/
   directory from GPL to LGPL.
+* Add 'extern "C"' guards to pack.h to
+  make things work with c++ compilers
+  (thanks to Adriano Winter Bess).
+* New API: gnet_conn_write_direct() to
+  write buffers asynchroneously without
+  copying them (Jeff Garzik)
 
 2.0.7
 -----

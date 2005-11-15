@@ -1,3 +1,11 @@
+2005-11-15  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* NEWS:
+	* configure.ac:
+	* doc/gnet-sections.txt:
+	* gnet.def:
+	  Update for API addition.
+
 2005-11-15  Jeff Garzik  <jgarzik@pobox.com>
 
 	* src/conn.c: (conn_write_free), (gnet_conn_disconnect),
