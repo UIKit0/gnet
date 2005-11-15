@@ -138,7 +138,7 @@ typedef struct _GConn GConn;
  *  object.  The buffer is caller owned.
  *
  *  %GNET_CONN_WRITE: Data has been written.  This event occurs as a
- *  result of calling gnet_conn_write().
+ *  result of calling gnet_conn_write() or gnet_conn_write_direct().
  *
  *  %GNET_CONN_READABLE: The connection is readable.
  *
@@ -231,6 +231,8 @@ void	   gnet_conn_readn (GConn* conn, gint length);
 void	   gnet_conn_readline (GConn* conn);
 
 void	   gnet_conn_write (GConn* conn, gchar* buffer, gint length);
+void	   gnet_conn_write_direct (GConn* conn, gchar* buffer, gint length,
+				   GDestroyNotify buffer_destroy_cb);
 
 void	   gnet_conn_set_watch_readable (GConn* conn, gboolean enable);
 void	   gnet_conn_set_watch_writable (GConn* conn, gboolean enable);

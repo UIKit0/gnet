@@ -1,3 +1,11 @@
+2005-11-15  Jeff Garzik  <jgarzik@pobox.com>
+
+	* src/conn.c: (conn_write_free), (gnet_conn_disconnect),
+	(gnet_conn_write_direct), (gnet_conn_write), (conn_write_async_cb):
+	* src/conn.h:
+	  Add gnet_conn_write_direct(), to allow the caller to
+	  control the write buffer.
+
 2005-10-27  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/pack.h:

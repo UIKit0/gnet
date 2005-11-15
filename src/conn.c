@@ -56,7 +56,7 @@ typedef struct _Write
 {
   gchar* 	buffer;
   gint 		length;
-
+  GDestroyNotify buffer_destroy_cb;
 } Write;
 
 
@@ -418,6 +418,14 @@ conn_connect_cb (GTcpSocket* socket,
 }
 
 
+static void
+conn_write_free(Write *write)
+{
+  if (write->buffer_destroy_cb)
+    write->buffer_destroy_cb(write->buffer);
+  g_free (write);
+}
+
 
 /**
  *  gnet_conn_disconnect
@@ -468,10 +476,7 @@ gnet_conn_disconnect (GConn* conn)
 
   for (i = conn->write_queue; i != NULL; i = i->next)
     {
-      Write* write = i->data;
-      
-      g_free (write->buffer);
-      g_free (write);
+      conn_write_free(i->data);
     }
   g_list_free (conn->write_queue);
   conn->write_queue = NULL;
@@ -1088,6 +1093,43 @@ process_read_buffer (GConn* conn)
 
 
 /**
+ *  gnet_conn_write_direct
+ *  @conn: a #GConn
+ *  @buffer: buffer to write from
+ *  @length: length of @buffer
+ *  @buffer_destroy_cb: function to call when buffer is no longer needed
+ *
+ *  Sets up an asynchronous write to @conn from @buffer.  The buffer is
+ *  created by the caller and will not be copied.  The caller needs to
+ *  make sure the buffer stays valid until @buffer_destroy_cb is called.
+ *  This function can be called again before the asynchronous write
+ *  completes.  @buffer_destroy_cb may be %NULL.
+ *
+ **/
+void
+gnet_conn_write_direct (GConn* conn, gchar* buffer, gint length,
+			GDestroyNotify buffer_destroy_cb)
+{
+  Write* write;
+
+  g_return_if_fail (conn != NULL);
+  g_return_if_fail (buffer != NULL);
+  g_return_if_fail (length >= 0);
+
+  if (length == 0)
+    return;
+
+  /* Add to queue */
+  write = g_new0 (Write, 1);
+  write->buffer = buffer;
+  write->length = length;
+  write->buffer_destroy_cb = buffer_destroy_cb;
+  conn->write_queue = g_list_append (conn->write_queue, write);
+
+  conn_check_write_queue (conn);
+}
+
+/**
  *  gnet_conn_write
  *  @conn: a #GConn
  *  @buffer: buffer to write from
@@ -1101,18 +1143,17 @@ process_read_buffer (GConn* conn)
 void
 gnet_conn_write (GConn* conn, gchar* buffer, gint length)
 {
-  Write* write;
+  gchar *copy;
 
-  g_return_if_fail (conn);
-  g_return_if_fail (conn->func);
+  g_return_if_fail (conn != NULL);
+  g_return_if_fail (buffer != NULL);
+  g_return_if_fail (length >= 0);
 
-  /* Add to queue */
-  write = g_new0 (Write, 1);
-  write->buffer = g_memdup (buffer, length);
-  write->length = length;
-  conn->write_queue = g_list_append (conn->write_queue, write);
+  if (length == 0)
+    return;
 
-  conn_check_write_queue (conn);
+  copy = g_memdup (buffer, length);
+  gnet_conn_write_direct (conn, copy, length, (GDestroyNotify) g_free);
 }
 
 
@@ -1171,8 +1212,7 @@ conn_write_async_cb (GConn* conn)
     {
       /* Remove and delete the queued write */
       conn->write_queue = g_list_remove (conn->write_queue, write);
-      g_free (write->buffer);
-      g_free (write);
+      conn_write_free(write);
 
       conn->bytes_written = 0;
 
