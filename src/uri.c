@@ -21,14 +21,14 @@
 #include "uri.h"
 
 static void   field_unescape (gchar *str);
-static gchar* field_escape (gchar* str, guchar mask);
+static gchar* field_escape (gchar *str, guchar mask);
 
 #define USERINFO_ESCAPE_MASK	0x01
 #define PATH_ESCAPE_MASK	0x02
 #define QUERY_ESCAPE_MASK	0x04
 #define FRAGMENT_ESCAPE_MASK	0x08
 
-static guchar neednt_escape_table[] = 
+static const guchar neednt_escape_table[] = 
 {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -459,13 +459,16 @@ gnet_uri_unescape (GURI* uri)
 
 
 static gchar*
-field_escape (gchar* str, guchar mask)
+field_escape (gchar *signed_str, guchar mask)
 {
   gint len;
   gint i;
   gboolean must_escape = FALSE;
-  gchar* dst;
+  guchar *str;
+  gchar *dst;
   gint j;
+
+  str = (guchar*) signed_str;
 
   if (str == NULL)
     return NULL;
@@ -474,7 +477,7 @@ field_escape (gchar* str, guchar mask)
   len = 0;
   for (i = 0; str[i]; i++)
     {
-      if (neednt_escape_table[(guint) str[i]] & mask)
+      if (neednt_escape_table[str[i]] & mask)
 	len++;
       else
 	{
@@ -485,7 +488,7 @@ field_escape (gchar* str, guchar mask)
 
   /* Don't escape if unnecessary */
   if (must_escape == FALSE)
-    return str;
+    return signed_str;
 	
   /* Allocate buffer */
   dst = (gchar*) g_malloc(len + 1);
@@ -494,7 +497,7 @@ field_escape (gchar* str, guchar mask)
   for (i = j = 0; str[i]; i++, j++)
     {
       /* Unescaped character */
-      if (neednt_escape_table[(guint) str[i]] & mask)
+      if (neednt_escape_table[str[i]] & mask)
 	{
 	  dst[j] = str[i];
 	}
@@ -519,7 +522,7 @@ field_escape (gchar* str, guchar mask)
     }
   dst[j] = '\0';
 
-  g_free (str);
+  g_free (signed_str);
   return dst;
 }
 

@@ -1,3 +1,8 @@
+2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/uri.c: (field_escape):
+	  Fix URI escaping for characters from 0x80-0xff.
+
 2005-11-15  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* NEWS:
