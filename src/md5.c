@@ -310,7 +310,7 @@ MD5Transform(guint32 buf[4], guint32 const in[16])
 struct _GMD5
 {
   struct MD5Context 	ctx;
-  gchar 		digest[GNET_MD5_HASH_LENGTH];
+  guint8 		digest[GNET_MD5_HASH_LENGTH];
 };
 
 
@@ -572,10 +572,7 @@ gnet_md5_get_digest (const GMD5* md5)
 }
 
 
-static gchar bits2hex[16] = { '0', '1', '2', '3', 
-			      '4', '5', '6', '7',
-			      '8', '9', 'a', 'b',
-			      'c', 'd', 'e', 'f' };
+static const gchar bits2hex[] = "0123456789abcdef";
 
 /**
  *  gnet_md5_get_string

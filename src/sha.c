@@ -433,7 +433,7 @@ SHAFinal( char *key, SHA_CTX *shaInfo )
 struct _GSHA
 {
   SHA_CTX	ctx;
-  gchar 	digest[GNET_SHA_HASH_LENGTH];
+  guint8	digest[GNET_SHA_HASH_LENGTH];
 };
 
 
@@ -649,10 +649,7 @@ gnet_sha_get_digest (const GSHA* sha)
 }
 
 
-static gchar bits2hex[16] = { '0', '1', '2', '3', 
-			      '4', '5', '6', '7',
-			      '8', '9', 'a', 'b',
-			      'c', 'd', 'e', 'f' };
+static const gchar bits2hex[] = "0123456789abcdef";
 
 /**
  *  gnet_sha_get_string

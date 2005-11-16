@@ -1,5 +1,13 @@
 2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/base64.c:
+	* src/md5.c:
+	* src/sha.c:
+	  const-ify some more arrays; fix potential signedness issue
+	  in the md5/sha digest stringification code.
+
+2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* NEWS:
 	  Update
 	  
