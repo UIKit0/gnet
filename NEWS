@@ -37,6 +37,9 @@ Changes in GNet
 * New API: gnet_conn_write_direct() to
   write buffers asynchroneously without
   copying them (Jeff Garzik)
+* Fix for race condition and subsequent
+  crash in asynchroneous DNS lookup
+  (Steve Morris, Tim Muller)
 
 2.0.7
 -----

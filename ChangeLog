@@ -1,5 +1,13 @@
 2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* NEWS:
+	  Update
+	  
+	* src/base64.c:
+	  Make table constant
+
+2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/gnet-private.h:
 	* src/inetaddr.c: (gnet_inetaddr_new_async),
 	(inetaddr_new_async_cb):

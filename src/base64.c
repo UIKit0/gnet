@@ -37,7 +37,7 @@
 
 static gchar gnet_Base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 #define gnet_Pad64	'='
-static guchar gnet_Base64_rank[256] = {
+static const guchar gnet_Base64_rank[256] = {
 	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0x00-0x0f	*/
 	255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, /*	0x10-0x1f	*/
 	255,255,255,255,255,255,255,255,255,255,255, 62,255,255,255, 63, /*	0x20-0x2f	*/
