@@ -316,7 +316,9 @@ typedef struct _GInetAddrNewState
   GInetAddrNewAsyncFunc 	func;
   gpointer 			data;
   gboolean			in_callback;
-
+#ifdef G_THREADS_ENABLED
+  GStaticMutex                  mutex;
+#endif
 } GInetAddrNewState;
 
 

@@ -790,16 +790,26 @@ gnet_inetaddr_new_async (const gchar* hostname, gint port,
 
   state = g_new0(GInetAddrNewState, 1);
 
-  list_id = gnet_inetaddr_new_list_async (hostname, port, inetaddr_new_async_cb, state);
-  if (list_id == NULL)
-    {
-      g_free (state);
-      return NULL;
-    }
+#ifdef G_THREADS_ENABLED
+  g_static_mutex_init (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
+#endif
 
-  state->list_id = list_id;
   state->func = func;
   state->data = data;
+
+  list_id = gnet_inetaddr_new_list_async (hostname, port, inetaddr_new_async_cb, state);
+
+  state->list_id = list_id;
+
+#ifdef G_THREADS_ENABLED
+  g_static_mutex_unlock (&state->mutex);
+#endif
+
+  if (list_id == NULL) {
+    g_free (state);
+    return NULL;
+  }
 
   return state;
 }
@@ -836,6 +846,13 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
   g_return_if_fail (state);
 
   state->in_callback = TRUE;
+
+#ifdef G_THREADS_ENABLED
+  /* make sure we don't proceed before gnet_inetaddr_new_async()
+   * has set state->list_id, which is needed by _async_cancel */
+  g_static_mutex_lock (&state->mutex);
+  g_static_mutex_unlock (&state->mutex);
+#endif
 
   if (ialist)
     {

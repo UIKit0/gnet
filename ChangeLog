@@ -1,5 +1,16 @@
 2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/gnet-private.h:
+	* src/inetaddr.c: (gnet_inetaddr_new_async),
+	(inetaddr_new_async_cb):
+	  Fix race condition in async DNS resolution code:
+	  inetaddr_new_async_cb() might be called before
+	  gnet_inetaddr_new_async() gets around to setting 
+	  state->func and state->data (based on patch by
+	  steve_morris@arcadyan.com).
+
+2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/uri.c: (field_escape):
 	  Fix URI escaping for characters from 0x80-0xff.
 
