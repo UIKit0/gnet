@@ -1,3 +1,12 @@
+2005-11-30  Benjamin Lee  <benjamin dot lee at realthought dot net>
+
+	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/echoserver-async.c: (async_client_iofunc):
+	  Check for G_IO_OUT before checking for G_IO_IN, so that we
+	  don't forget to send out the last chunk of bytes if we get
+	  notified of a disconnect via G_IO_IN.
+
 2005-11-16  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/base64.c:

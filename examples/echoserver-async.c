@@ -184,6 +184,54 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
       goto error;
     }
 
+  if (condition & G_IO_OUT)
+    {
+      GIOError error;
+      gsize bytes_written;
+
+      /* Write the data out */
+      error = g_io_channel_write(iochannel, client_state->buffer, 
+				 client_state->n, &bytes_written);
+
+      if (error != G_IO_ERROR_NONE) 
+	{
+	  fprintf (stderr, "Client write error (%s:%d): %d\n", 
+		   client_state->name, client_state->port, error);
+	  goto error;
+	}
+
+      else if (bytes_written > 0)
+	{
+	  guint old_watch_flags;
+
+	  /* Move the memory down some (you wouldn't want to do this
+	     in a performance server because it's slow!) */
+	  client_state->n -= bytes_written;
+	  g_memmove(client_state->buffer, 
+		    &client_state->buffer[bytes_written],
+		    client_state->n);
+
+	  old_watch_flags = client_state->watch_flags;
+
+	  /* Remove OUT watch if done */
+	  if (client_state->n == 0)
+	    client_state->watch_flags &= ~G_IO_OUT;
+
+	  /* Add IN watch */
+	  client_state->watch_flags |= G_IO_IN;
+
+	  /* Update watch flags if they changed */
+	  if (old_watch_flags != client_state->watch_flags)
+	    {
+	      g_source_remove (client_state->watch);
+	      client_state->watch = 
+		g_io_add_watch(iochannel, client_state->watch_flags,
+			       async_client_iofunc, client_state);
+	      rv = FALSE;
+	    }
+	}
+    }
+
   /* Check for data to be read (or if the socket was closed) */
   if (condition & G_IO_IN)
     {
@@ -243,54 +291,6 @@ async_client_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	    }
 	}
 
-    }
-
-  if (condition & G_IO_OUT)
-    {
-      GIOError error;
-      gsize bytes_written;
-
-      /* Write the data out */
-      error = g_io_channel_write(iochannel, client_state->buffer, 
-				 client_state->n, &bytes_written);
-
-      if (error != G_IO_ERROR_NONE) 
-	{
-	  fprintf (stderr, "Client write error (%s:%d): %d\n", 
-		   client_state->name, client_state->port, error);
-	  goto error;
-	}
-
-      else if (bytes_written > 0)
-	{
-	  guint old_watch_flags;
-
-	  /* Move the memory down some (you wouldn't want to do this
-	     in a performance server because it's slow!) */
-	  client_state->n -= bytes_written;
-	  g_memmove(client_state->buffer, 
-		    &client_state->buffer[bytes_written],
-		    client_state->n);
-
-	  old_watch_flags = client_state->watch_flags;
-
-	  /* Remove OUT watch if done */
-	  if (client_state->n == 0)
-	    client_state->watch_flags &= ~G_IO_OUT;
-
-	  /* Add IN watch */
-	  client_state->watch_flags |= G_IO_IN;
-
-	  /* Update watch flags if they changed */
-	  if (old_watch_flags != client_state->watch_flags)
-	    {
-	      g_source_remove (client_state->watch);
-	      client_state->watch = 
-		g_io_add_watch(iochannel, client_state->watch_flags,
-			       async_client_iofunc, client_state);
-	      rv = FALSE;
-	    }
-	}
     }
 
   return rv;
