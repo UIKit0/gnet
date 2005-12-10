@@ -37,6 +37,8 @@ more or less what gnet_http_get() does internally):
 <example>
 <title>Simple <structname>GConnHttp</structname> usage.</title>
 <programlisting>
+&hash;define GNET_EXPERIMENTAL
+&hash;include &lt;gnet.h&gt;
 
 void
 fetch_and_print_url (const gchar *url)
@@ -72,10 +74,22 @@ fetch_and_print_url (const gchar *url)
 </example>
 </para>
 
+<para>
+#GConnHttp is still considered less mature than other parts of GNet, even
+though it should generall work just fine. It just has not received as much
+testing as other parts of GNet yet. You should not use it in production
+level code without thoroughly testing it for your purposes. Because of that,
+you need to define GNET_EXPERIMENTAL in your source code before including the
+GNet headers (otherwise you will get compiler errors when trying to use it).
+</para>
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
 
 <!-- ##### STRUCT GConnHttp ##### -->
 <para>

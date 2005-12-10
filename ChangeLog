@@ -1,3 +1,9 @@
+2005-12-10  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* doc/tmpl/conn-http.sgml:
+	  Mention the need to define GNET_EXPERIMENTAL before
+	  including gnet headers in the docs.
+
 2005-11-30  Benjamin Lee  <benjamin dot lee at realthought dot net>
 
 	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
