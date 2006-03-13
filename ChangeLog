@@ -505,7 +505,7 @@ Wed May 19 22:20:54 2004  David Helder  <dhelder@gizmolabs.org>
 
 Wed May 19 21:58:46 2004  David Helder  <dhelder@gizmolabs.org>
 
-	* *http*: Apply Tim Müller's first HTTP Conn patch.
+	* *http*: Apply Tim MÃ¼ller's first HTTP Conn patch.
 
 Wed May 19 21:38:38 2004  David Helder  <dhelder@gizmolabs.org>
 
@@ -531,7 +531,7 @@ Mon Mar  1 19:07:26 2004  David Helder  <dhelder@gizmolabs.org>
 
 	* *: Prepare 2.0.5
 
-Sun Feb 15 2004 Tomasz K³oczko <kloczek@pld.org.pl>
+Sun Feb 15 2004 Tomasz KÂ³oczko <kloczek@pld.org.pl>
 
 	* gnet-2.0.m4: added missing [] quotation first parameter of
 		AC_DEFUN(). This fix is for aclocal from automake 1.8.x and
@@ -541,7 +541,7 @@ Sat Jan 17 2004 Andrew Lanoix <alanoix@umich.edu>
 
 	*src/tcp.c(gnet_tcp_socket_new_async_direct(): 
 		Watch on GNET_ANY_IO_CONDITION like UNIX.
-		Reported to us by Tim Müller.
+		Reported to us by Tim MÃ¼ller.
 	*src/conn.c: Do not do and a g_io_add_watch() if watch_flags 
 		is NULL in REMOVE_WATCH macro.
 		Found by Andreas Rottmann <a.rottmann@gmx.at>
@@ -579,7 +579,7 @@ Tue Dec  9 21:10:46 2003  David Helder  <dhelder@gizmolabs.org>
 
 	* TODO: Update note on readv(). (Thanks Stephane LOEUILLET)
 
-	* src/gnet-private.c: Apply Tim Muller's patch to use
+	* src/gnet-private.c: Apply Tim MÃ¼ller's patch to use
 	    gsize.  Fixes warnings.
 
 Mon Dec 8 2003 Andrew Lanoix <alanoix@umich.edu>
@@ -1769,7 +1769,7 @@ Mon Aug  5 16:54:55 2002  David Helder  <dhelder@umich.edu>
 	
 	* src/mcast.c (gnet_mcast_socket_port_new): Add g_htonl around
 	   INADDR_ANY (style bug - it should not make a
-	   difference). (thanks Eduardo Pérez Ureta)
+	   difference). (thanks Eduardo PÃ©rez Ureta)
 
 	* src/udp.c (gnet_udp_socket_new_interface): Fix memory leak on
 	   errors (thanks Jakub Jagielka).
