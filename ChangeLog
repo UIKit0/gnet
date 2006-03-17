@@ -1,3 +1,9 @@
+2006-03-17  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/echoserver-unix.c: (main):
+	  No need to re-invent g_strdup(), but if someone does
+	  he better allocate enough space for the terminating NUL.
+
 2005-12-10  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* doc/tmpl/conn-http.sgml:

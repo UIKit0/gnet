@@ -57,8 +57,7 @@ main(int argc, char** argv)
     }
   }
 	
-  path = g_new0(gchar, strlen(argv[argc - 1]));
-  path = memcpy(path, argv[argc - 1], strlen(argv[argc - 1]));
+  path = g_strdup (argv[argc - 1]);
 
   signal(SIGINT, cleanup_on_sig);
   signal(SIGTERM, cleanup_on_sig);
