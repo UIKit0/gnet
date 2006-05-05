@@ -1,3 +1,10 @@
+2006-05-05  Benjamin Otte  <in7y118@public.uni-hamburg.de>
+
+	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn.c: (async_cb):
+	  Don't send an error on HUP (fixes bug #340747)
+
 2006-03-17  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* examples/echoserver-unix.c: (main):

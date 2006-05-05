@@ -534,10 +534,10 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
   GConn* conn = (GConn*) data;
   GConnEvent event = {GNET_CONN_ERROR, NULL, 0};
   
-  if (condition & (G_IO_ERR | G_IO_HUP | G_IO_NVAL))
-    {
-      ref_internal (conn);
+  ref_internal (conn);
 
+  if (condition & (G_IO_ERR | G_IO_NVAL))
+    {
       /* Upcall ERROR */
       gnet_conn_disconnect (conn);
       if (conn->func)
@@ -549,8 +549,6 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 
   if (condition & G_IO_IN)
     {
-      ref_internal (conn);
-
       /* Upcall */
       if (conn->watch_readable)		/* READABLE */
 	{
@@ -573,13 +571,10 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 	  unref_internal (conn);
 	  return FALSE;
 	}
-      unref_internal (conn);
     }
 
   if (condition & G_IO_OUT)
     {
-      ref_internal (conn);
-
       /* Upcall */
       if (conn->watch_writable)		/* WRITABLE */
 	{
@@ -602,9 +597,17 @@ async_cb (GIOChannel* iochannel, GIOCondition condition, gpointer data)
 	  unref_internal (conn);
 	  return FALSE;
 	}
-      unref_internal (conn);
     }
 
+  if (condition & G_IO_HUP)
+    {
+      gnet_conn_disconnect (conn);
+      event.type = GNET_CONN_CLOSE;
+      if (conn->func)
+	(conn->func) (conn, &event, conn->user_data);
+    }
+
+  unref_internal (conn);
   /* Assume we want another callback, even though the source may have
      been destroyed though.  The Glib main loop handles this
      properly. */
