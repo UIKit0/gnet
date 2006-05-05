@@ -508,7 +508,7 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
 
       flag_size = sizeof (flag);
       rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, 
-		      &flag, &flag_size);
+		      (void *) &flag, &flag_size);
       if (flag)
 	is_loopback = 1;
     }
@@ -573,7 +573,7 @@ gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
       flag = (guint) enable;
 
       rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       &flag, sizeof(flag));
+		       (void *) &flag, sizeof(flag));
     }
 #endif
 

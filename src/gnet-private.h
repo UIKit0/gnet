@@ -96,7 +96,9 @@ struct sockaddr_storage {
 #include <winuser.h>
 #include <ws2tcpip.h>
 
-#define socklen_t gint32
+#ifndef socklen_t
+#  define socklen_t gint32
+#endif
 #define in_addr_t guint32
 
 #define GNET_IS_SOCKET_VALID(S) ((S) != INVALID_SOCKET)

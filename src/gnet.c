@@ -30,8 +30,10 @@ const guint gnet_binary_age = GNET_BINARY_AGE;
 
 
 #ifdef HAVE_IPV6
+#ifndef GNET_WIN32
 static gboolean ipv6_detect_envvar (void);
 static gboolean ipv6_detect_iface (void);
+#endif
 #endif
 
 #ifdef GNET_WIN32
@@ -129,6 +131,7 @@ gnet_init (void)
 
 
 #ifdef HAVE_IPV6
+#ifndef GNET_WIN32
 /* 
 
    Try to get policy based on environment variables.  We look in the
@@ -221,4 +224,5 @@ ipv6_detect_iface (void)
 
   return TRUE;
 }
+#endif
 #endif

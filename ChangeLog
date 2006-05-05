@@ -1,3 +1,16 @@
+2006-05-05  Benjamin Otte  <otte@gnome.org>
+
+	various fixes for Windows compilation:
+	* src/gnet-private.h:
+	  define socklen_t only if it's not defined in config.h
+	* src/gnet.c:
+	  do not compile ipv6_detect_envvar and ipv6_detect_iface on Windows
+	* src/inetaddr.c:
+	  inet_ntop is unused on windows
+	* src/mcast.c: (gnet_mcast_socket_is_loopback),
+	(gnet_mcast_socket_set_loopback):
+	  cast [gs]etsockopt pointers to avoid warnings
+
 2006-05-05  Benjamin Otte  <in7y118@public.uni-hamburg.de>
 
 	* src/conn-http.c: (gnet_conn_http_set_uri),

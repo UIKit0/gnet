@@ -34,7 +34,9 @@
 #include <process.h>
 
 static int inet_pton(int af, const char* src, void* dst);
+#if 0
 static const char* inet_ntop(int af, const void *src, char *dst, size_t size);
+#endif
 
 /* TODO: Use Window's inet_pton/inet_ntop if they ever implement it. */
 static int
@@ -50,7 +52,8 @@ inet_pton(int af, const char* src, void* dst)
   return 1;
 }
 
-static const char* 
+#if 0
+static const char*
 inet_ntop(int af, const void* src, char* dst, size_t size)
 {
   struct in_addr addr = *(struct in_addr*) src;
@@ -64,6 +67,7 @@ inet_ntop(int af, const void* src, char* dst, size_t size)
 
   return dst;
 }
+#endif
 
 #endif /* GNET_WIN32 */
 
