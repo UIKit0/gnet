@@ -1,5 +1,12 @@
 2006-05-05  Benjamin Otte  <in7y118@public.uni-hamburg.de>
 
+	* src/conn-http.c: (gnet_conn_http_set_uri),
+	(gnet_conn_http_delete_internal):
+	* src/conn.c:
+	  Deperecated gnet_conn_delete in favour of gnet_conn_unref.
+
+2006-05-05  Benjamin Otte  <in7y118@public.uni-hamburg.de>
+
 	Reviewed by: Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/conn.c: (async_cb):

@@ -543,7 +543,7 @@ gnet_conn_http_set_uri (GConnHttp *conn, const gchar *uri)
 		}
 		if (conn->conn)
 		{
-			gnet_conn_delete(conn->conn);
+			gnet_conn_unref(conn->conn);
 			conn->conn = NULL;
 		}
 	}
@@ -1468,7 +1468,7 @@ gnet_conn_http_delete_internal (GConnHttp *conn)
 		gnet_inetaddr_delete(conn->ia);
 		
 	if (conn->conn)
-		gnet_conn_delete(conn->conn);
+		gnet_conn_unref(conn->conn);
 
 	/* concatenate them into resp_headers, so that 
 	 *  they will be freed in gnet_conn_http_reset() */

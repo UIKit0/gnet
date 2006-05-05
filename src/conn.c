@@ -210,6 +210,7 @@ gnet_conn_new_socket (GTcpSocket* socket,
  *
  *  Deletes a #GConn.
  *
+ *  Deprecated: Use g_conn_unref(), which does the same.
  **/
 void
 gnet_conn_delete (GConn* conn)
