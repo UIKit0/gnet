@@ -1,3 +1,5 @@
+<INCLUDE>gnet.h</INCLUDE>
+
 <SECTION>
 <FILE>gnet</FILE>
 GNET_EXPORT
