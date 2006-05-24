@@ -1,4 +1,3 @@
-#include <windows.h>
 /***************************************************************************
  *
  * GConnHttp test
@@ -538,8 +537,6 @@ int
 main (int argc, char **argv)
 {
 	verbose = FALSE;
-
-	g_print ("%#lx:main() starting\n", GetCurrentThreadId ());
 
 	gnet_init ();
 

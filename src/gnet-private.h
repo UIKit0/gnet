@@ -90,6 +90,10 @@ struct sockaddr_storage {
 #define GNET_IS_SOCKET_VALID(S) ((S) >= 0)
 #define GNET_INVALID_SOCKET (-1)
 
+#define STATUS_IS_SOCKET_ERROR(status) ((status) < 0)
+
+#define ERROR_IS_CONNECT_IN_PROGRESS() (errno == EINPROGRESS)
+
 #else	/*********** Windows specific ***********/
 
 #include <winsock2.h>

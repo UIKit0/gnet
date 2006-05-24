@@ -1,3 +1,13 @@
+2006-05-24  Benjamin Otte  <in7y118@public.uni-hamburg.de>
+
+	* src/gnet-private.h:
+	  add lost stuff for !win32 from previous patch
+	* tests/conn_http_test.c: (main):
+	  remove windows-specific debugging stuff
+	* tests/unpack_test.c: (main):
+	  fix "comparison always true due to limited range of data type"
+	  warning
+
 2006-05-24  Benjamin Otte  <otte@gnome.org>
 
 	* src/gnet-private.c: (DllMain):
