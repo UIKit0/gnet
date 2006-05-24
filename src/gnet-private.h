@@ -88,12 +88,11 @@ struct sockaddr_storage {
 #define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
 
 #define GNET_IS_SOCKET_VALID(S) ((S) >= 0)
+#define GNET_INVALID_SOCKET (-1)
 
 #else	/*********** Windows specific ***********/
 
-#include <windows.h>
-#include <winbase.h>
-#include <winuser.h>
+#include <winsock2.h>
 #include <ws2tcpip.h>
 
 #ifndef socklen_t
@@ -101,7 +100,12 @@ struct sockaddr_storage {
 #endif
 #define in_addr_t guint32
 
+#define STATUS_IS_SOCKET_ERROR(status) ((status) == SOCKET_ERROR)
+
+#define ERROR_IS_CONNECT_IN_PROGRESS() (WSAGetLastError () == WSAEWOULDBLOCK)
+
 #define GNET_IS_SOCKET_VALID(S) ((S) != INVALID_SOCKET)
+#define GNET_INVALID_SOCKET (INVALID_SOCKET)
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
 
@@ -283,10 +287,9 @@ typedef struct _GInetAddrNewListState
   GInetAddrNewListAsyncFunc func;
   gpointer 	data;
 
-#ifndef GNET_WIN32		/* UNIX */
   gboolean 	in_callback;
 #ifdef G_THREADS_ENABLED
-  GStaticMutex mutex;
+  GStaticMutex	mutex;
   gboolean	is_cancelled;
   gboolean	lookup_failed;
   guint 	source;
@@ -299,13 +302,6 @@ typedef struct _GInetAddrNewListState
   int 		len;
   guchar 	buffer[256];
 
-#endif
-#else				/* Windows */
-  gboolean 	in_callback;
-  CRITICAL_SECTION mutex;
-  gboolean	is_cancelled;
-  gboolean	lookup_failed;
-  guint 	source;
 #endif
 
 } GInetAddrNewListState;
@@ -334,7 +330,6 @@ typedef struct _GInetAddrReverseAsyncState
   GInetAddrGetNameAsyncFunc func;
   gpointer data;
   gboolean in_callback;
-#ifndef GNET_WIN32		/* UNIX 	*/
 #ifdef G_THREADS_ENABLED
   GStaticMutex mutex;
   gboolean	is_cancelled;
@@ -348,17 +343,6 @@ typedef struct _GInetAddrReverseAsyncState
 #endif
   guchar	buffer[256 + 1];/* Names can only be 256 characters? */
   int 		len;
-#else				/* WINDOWS */
-  int WSAhandle;
-  char hostentBuffer[MAXGETHOSTSTRUCT];
-  int errorcode;
-
-  CRITICAL_SECTION mutex;
-  gboolean	is_cancelled;
-  gchar*	name;
-  guint 	source;
-
-#endif
 
 } GInetAddrReverseAsyncState;
 
@@ -404,11 +388,6 @@ typedef struct _GTcpSocketConnectState
 /* More Windows specific stuff 			*/
 
 #ifdef GNET_WIN32
-
-extern HWND  gnet_hWnd; 
-extern GHashTable *gnet_hash;
-#define IA_NEW_MSG 100		/* gnet_inetaddr_new_async */
-#define GET_NAME_MSG 101	/* gnet_inetaddr_get_name_async */
 
 /* Name-mangled IPv6 structures for primarily Mingw and a few VC .NET 2002 */
 #ifndef MAX_ADAPTER_ADDRESS_LENGTH

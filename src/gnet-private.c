@@ -31,72 +31,96 @@
    on the particular interface, or on IPv6 policy if there is no interface.
 
  */
-SOCKET
-gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
+
+static SOCKET
+gnet_private_create_ipv4_listen_socket (int type, int port, struct sockaddr_storage* sa)
 {
-  int family = 0;
-  SOCKET sockfd;
+  struct sockaddr_in* sa_in;
+
+  sa_in = (struct sockaddr_in*) sa;
+  sa_in->sin_family = AF_INET;
+  GNET_SOCKADDR_SET_SS_LEN(*sa);
+  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
+  sa_in->sin_port = g_htons(port);
+  
+  return socket (AF_INET, type, 0);
+}
+
+static SOCKET
+gnet_private_create_ipv6_listen_socket (int type, int port, struct sockaddr_storage* sa)
+{
+#ifdef HAVE_IPV6
+  struct sockaddr_in6* sa_in6;
 #ifdef GNET_WIN32
   struct addrinfo Hints, *AddrInfo;
   char port_buff[12];
 #endif
 
+  sa_in6 = (struct sockaddr_in6*) sa;
+
+#ifndef GNET_WIN32    /* Unix */
+  sa_in6->sin6_family = AF_INET6;
+  GNET_SOCKADDR_SET_SS_LEN(*sa);
+  memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
+  sa_in6->sin6_port = g_htons(port);
+#else                 /* Windows */
+  /* A simple memset does not work for some reason on Windows */
+  sprintf(port_buff, "%d", port);
+  memset(&Hints, 0, sizeof(Hints));
+  Hints.ai_family = AF_INET6;
+  Hints.ai_socktype = type;
+  Hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
+  pfn_getaddrinfo(NULL, port_buff, &Hints, &AddrInfo);
+  memcpy(sa_in6, AddrInfo->ai_addr, AddrInfo->ai_addrlen);
+  pfn_freeaddrinfo(AddrInfo);
+#endif
+  return socket (AF_INET6, type, 0);
+
+#else
+  return GNET_INVALID_SOCKET;
+#endif
+}
+
+SOCKET
+gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
+{
+  SOCKET sockfd = GNET_INVALID_SOCKET;
+
   if (iface)
     {
-      family = GNET_INETADDR_FAMILY(iface);
+      int family = GNET_INETADDR_FAMILY(iface);
       *sa = iface->sa;
       GNET_SOCKADDR_PORT_SET(*sa, g_htons(port));
+
+      sockfd = socket (family, type, 0);
     }
   else
     {
       GIPv6Policy ipv6_policy;
 
       ipv6_policy = gnet_ipv6_get_policy();
-      if (ipv6_policy == GIPV6_POLICY_IPV4_ONLY)	/* IPv4 */
-	{
-	  struct sockaddr_in* sa_in;
-
-	  family = AF_INET;
-
-	  sa_in = (struct sockaddr_in*) sa;
-	  sa_in->sin_family = AF_INET;
-	  GNET_SOCKADDR_SET_SS_LEN(*sa);
-	  sa_in->sin_addr.s_addr = g_htonl(INADDR_ANY);
-	  sa_in->sin_port = g_htons(port);
-	}
-#ifdef HAVE_IPV6
-      else						/* IPv6 */
-	{
-	  struct sockaddr_in6* sa_in6;
-
-	  sa_in6 = (struct sockaddr_in6*) sa;
-	  family = AF_INET6;
-
-  #ifndef GNET_WIN32    /* Unix */
-
-	sa_in6->sin6_family = AF_INET6;
-	GNET_SOCKADDR_SET_SS_LEN(*sa);
-	memset(&sa_in6->sin6_addr, 0, sizeof(sa_in6->sin6_addr));
-	sa_in6->sin6_port = g_htons(port);
-
-  #else                 /* Windows */
-
-    /* A simple memset does not work for some reason on Windows */
-	sprintf(port_buff, "%d", port);
-	memset(&Hints, 0, sizeof(Hints));
-    Hints.ai_family = AF_INET6;
-    Hints.ai_socktype = type;
-    Hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
-	pfn_getaddrinfo(NULL, port_buff, &Hints, &AddrInfo);
-	memcpy(sa_in6, AddrInfo->ai_addr, AddrInfo->ai_addrlen);
-	pfn_freeaddrinfo(AddrInfo);
-
-  #endif
-	}
-#endif
+      switch (ipv6_policy) {
+	case GIPV6_POLICY_IPV4_THEN_IPV6:
+	  sockfd = gnet_private_create_ipv4_listen_socket (type, port, sa);
+	  if (!GNET_IS_SOCKET_VALID(sockfd))
+	    sockfd = gnet_private_create_ipv6_listen_socket (type, port, sa);
+	  break;
+	case GIPV6_POLICY_IPV6_THEN_IPV4:
+	  sockfd = gnet_private_create_ipv6_listen_socket (type, port, sa);
+	  if (!GNET_IS_SOCKET_VALID(sockfd))
+	    sockfd = gnet_private_create_ipv4_listen_socket (type, port, sa);
+	  break;
+	case GIPV6_POLICY_IPV4_ONLY:
+	  sockfd = gnet_private_create_ipv4_listen_socket (type, port, sa);
+	  break;
+	case GIPV6_POLICY_IPV6_ONLY:
+	  sockfd = gnet_private_create_ipv6_listen_socket (type, port, sa);
+	  break;
+	default:
+	  g_assert_not_reached ();
+	  break;
+      }
     }
-
-  sockfd = socket(family, type, 0);
 
   return sockfd;
 }
@@ -134,87 +158,10 @@ gnet_private_io_channel_new (SOCKET sockfd)
 
 #ifdef GNET_WIN32
 
-static WNDCLASSEX gnetWndClass;
-HWND  gnet_hWnd; 
-static guint gnet_io_watch_ID;
-static GIOChannel *gnet_iochannel;
-
-int gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata);
-
-LRESULT CALLBACK
-GnetWndProc(HWND hwnd,
-	    UINT uMsg,
-	    WPARAM wParam,
-	    LPARAM lParam);
-
 BOOL WINAPI 
 DllMain(HINSTANCE hinstDLL,
 	DWORD fdwReason,
 	LPVOID lpvReserved);
-
-/* This function is still necessary (even though it does nothing) since it 
-	presence works around an issue in the Glib main loop. */
-
-int 
-gnet_MainCallBack(GIOChannel *iochannel, GIOCondition condition, void *nodata)
-{
-  MSG msg;
-  int i;
-
-  while ((i = PeekMessage (&msg, gnet_hWnd, 0, 0, PM_REMOVE)))
-  {
-	switch (msg.message) 
-    {
-		case IA_NEW_MSG:
-		{
-			break;
-		}
-		case GET_NAME_MSG:
-		{
-			break;
-		}
-	} /* switch */
-  } /* while */
-
-  return 1;
-}
-
-/* Not used but required*/
-LRESULT CALLBACK
-GnetWndProc(HWND hwnd,        /* handle to window */
-	    UINT uMsg,        /* message identifier */
-	    WPARAM wParam,    /* first message parameter */
-	    LPARAM lParam)    /* second message parameter */
-{ 
-
-    switch (uMsg) 
-    { 
-        case WM_CREATE: 
-            /* Initialize the window. */
-            return 0; 
- 
-        case WM_PAINT: 
-            /* Paint the window's client area. */ 
-            return 0; 
- 
-        case WM_SIZE: 
-            /* Set the size and position of the window. */ 
-            return 0; 
- 
-        case WM_DESTROY: 
-            /* Clean up window-specific data objects. */
-            return 0; 
- 
-        /* 
-          Process other messages. 
-        */ 
- 
-        default: 
-            return DefWindowProc(hwnd, uMsg, wParam, lParam); 
-    } 
-    return 0; 
-} 
-
 
 BOOL WINAPI 
 DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
@@ -234,56 +181,6 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 	}
  
 	/* The WinSock DLL is acceptable. Proceed. */
-
-	/* Setup and register a windows class that we use for our GIOchannel */
-	gnetWndClass.cbSize = sizeof(WNDCLASSEX); 
-	gnetWndClass.style = CS_SAVEBITS; /* doesn't matter, need something? */ 
-	gnetWndClass.lpfnWndProc = (WNDPROC) GnetWndProc; 
-	gnetWndClass.cbClsExtra = 0; 
-	gnetWndClass.cbWndExtra = 0; 
-	gnetWndClass.hInstance = hinstDLL; 
-	gnetWndClass.hIcon = NULL; 
-	gnetWndClass.hCursor = NULL; 
-	gnetWndClass.hbrBackground = NULL; 
-	gnetWndClass.lpszMenuName = NULL; 
-	gnetWndClass.lpszClassName = "Gnet"; 
-	gnetWndClass.hIconSm = NULL; 
-
-	if (!RegisterClassEx(&gnetWndClass))
-	  {
-	    if (GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
-			return FALSE;
-	  }
-
-	gnet_hWnd  = CreateWindowEx
-	  (
-	   0,
-	   "Gnet", 
-	   "none",
-	   WS_OVERLAPPEDWINDOW, 
-	   CW_USEDEFAULT, 
-	   CW_USEDEFAULT, 
-	   CW_USEDEFAULT, 
-	   CW_USEDEFAULT, 
-	   (HWND) NULL, 
-	   (HMENU) NULL, 
-	   hinstDLL, 
-	   (LPVOID) NULL);  
-
-	if (!gnet_hWnd) 
-	  {
-	    return FALSE;
-	  }
-
-	gnet_iochannel = g_io_channel_win32_new_messages((unsigned int)gnet_hWnd);
-
-	/* Add a watch */
-	
-	gnet_io_watch_ID = g_io_add_watch(gnet_iochannel,
-					  (GIOCondition)(G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
-					  gnet_MainCallBack, 
-					  NULL);
-					  
 	break;
       }
     case DLL_THREAD_ATTACH:
@@ -301,10 +198,6 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
     case DLL_PROCESS_DETACH:
       /* The DLL unmapped from process's address space. Do necessary cleanup */
       {
-	g_source_remove(gnet_io_watch_ID);
-	g_free(gnet_iochannel);
- 	DestroyWindow(gnet_hWnd); 
-
 	/*CleanUp WinSock 2 */
 	WSACleanup();
 

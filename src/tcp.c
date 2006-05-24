@@ -371,9 +371,6 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 }
 
 
-#ifndef GNET_WIN32  /*********** Unix code ***********/
-
-
 /**
  *  gnet_tcp_socket_new_async_direct
  *  @addr: address
@@ -396,10 +393,15 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 				  GTcpSocketNewAsyncFunc func,
 				  gpointer data)
 {
-  gint 			sockfd;
+  SOCKET		sockfd;
+#ifndef GNET_WIN32
   gint 			flags;
+#else
+  u_long		arg;
+#endif
   GTcpSocket* 		s;
   GTcpSocketAsyncState* state;
+  gint			status;
 
   g_return_val_if_fail(addr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
@@ -412,6 +414,8 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
       return NULL;
     }
 
+  /* Force the socket into non-blocking mode */
+#ifndef GNET_WIN32
   /* Get the flags (should all be 0?) */
   flags = fcntl(sockfd, F_GETFL, 0);
   if (flags == -1) 
@@ -427,6 +431,10 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
       GNET_CLOSE_SOCKET(sockfd);    
       return NULL;
     }
+#else
+  arg = 1;
+  ioctlsocket(sockfd, FIONBIO, &arg);
+#endif
 
   /* Create our structure */
   s = g_new0(GTcpSocket, 1);
@@ -434,10 +442,11 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   s->sockfd = sockfd;
 
   /* Connect (but non-blocking!) */
-  if (connect(s->sockfd, &GNET_INETADDR_SA(addr), 
-	      GNET_INETADDR_LEN(addr)) < 0)
+  status = connect(s->sockfd, &GNET_INETADDR_SA(addr), 
+		   GNET_INETADDR_LEN(addr));
+  if (STATUS_IS_SOCKET_ERROR (status))
     {
-      if (errno != EINPROGRESS)
+      if (!ERROR_IS_CONNECT_IN_PROGRESS ())
 	{
 	  GNET_CLOSE_SOCKET(sockfd);    
 	  g_free(s);
@@ -458,8 +467,11 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   state->socket = s;
   state->func = func;
   state->data = data;
+#ifndef GNET_WIN32
   state->flags = flags;
-  state->iochannel = gnet_private_io_channel_new(s->sockfd);
+#endif
+  state->iochannel = gnet_tcp_socket_get_io_channel (s);
+  g_io_channel_ref (state->iochannel);
   state->connect_watch = g_io_add_watch(state->iochannel,
 					GNET_ANY_IO_CONDITION,
 					gnet_tcp_socket_new_async_cb, 
@@ -483,7 +495,6 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   g_io_channel_unref (state->iochannel);
   state->iochannel = NULL;
 
-  errno = 0;
   if (!((condition & G_IO_IN) || (condition & G_IO_OUT)))
     goto error;
 
@@ -500,12 +511,14 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   if (error)
     goto error;
 
+#ifndef GNET_WIN32
   /* Reset the flags */
   if (fcntl(state->socket->sockfd, F_SETFL, state->flags) != 0)
     {
       g_warning ("fcntl() failed");
       goto error;
     }
+#endif
 
   /* Success */
   (*state->func)(state->socket, state->data);
@@ -542,110 +555,6 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
   gnet_tcp_socket_delete (state->socket);
   g_free (state);
 }
-
-#else	/*********** Windows code ***********/
-
-
-GTcpSocketNewAsyncID
-gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
-				  GTcpSocketNewAsyncFunc func,
-				  gpointer data)
-{
-  SOCKET sockfd;
-  gint status;
-  GTcpSocket* s;
-  GTcpSocketAsyncState* state;
-  u_long arg;
-
-  g_return_val_if_fail(addr != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
-
-  /* Create socket */
-  sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
-  if (!GNET_IS_SOCKET_VALID(sockfd))
-    {
-      g_warning ("socket() failed");
-      return NULL;
-    }
-	
-  /* Create our structure */
-  s = g_new0(GTcpSocket, 1);
-  s->ref_count = 1;
-  s->sockfd = sockfd;
-
-  /* Force the socket into non-blocking mode */
-  arg = 1;
-  ioctlsocket(sockfd, FIONBIO, &arg);
-
-  status = connect(s->sockfd, &GNET_INETADDR_SA(addr), 
-		   GNET_INETADDR_LEN(addr));
-  if (status == SOCKET_ERROR) /* Returning an error is ok, unless.. */
-    {
-      status = WSAGetLastError();
-      if (status != WSAEWOULDBLOCK)
-	{
-	  g_free(s);
-	  return NULL;
-	}
-    }
-
-  /* Save address */ 
-  s->sa = addr->sa;
-
-  /* Wait for the connection */
-  state = g_new0(GTcpSocketAsyncState, 1);
-  state->socket = s;
-  state->func = func;
-  state->data = data;
-  state->socket->sockfd = sockfd;
-
-  state->connect_watch = 
-    g_io_add_watch(gnet_private_io_channel_new(s->sockfd),
-		   GNET_ANY_IO_CONDITION,
-		   gnet_tcp_socket_new_async_cb, 
-		   state);
-
-  if (state->connect_watch <= 0)
-      return NULL;
-
-  return state;
-}
-
-
-
-gboolean
-gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
-			      GIOCondition condition,
-			      gpointer data)
-{
-  GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
-
-  if (condition & G_IO_ERR)
-    goto error;
-
-  (*state->func)(state->socket, state->data);
-  g_free (state);
-  return FALSE;
-
- error:
-  (*state->func)(NULL, state->data);
-  gnet_tcp_socket_delete (state->socket);
-  g_free (state);
-  return FALSE;
-}
-
-
-void
-gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
-{
-  GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
-	
-  g_source_remove(state->connect_watch);
-  gnet_tcp_socket_delete(state->socket);
-  g_free (state);
-}
-
-#endif		/*********** End Windows code ***********/
 
 
 

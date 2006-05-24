@@ -1,3 +1,25 @@
+2006-05-24  Benjamin Otte  <otte@gnome.org>
+
+	* src/gnet-private.c: (DllMain):
+	* src/gnet-private.h:
+	* src/gnet.c: (gnet_init):
+	* src/inetaddr.c: (inet_pton), (inet_ntop), (gnet_gethostbyname),
+	(gnet_gethostbyaddr), (inetaddr_new_list_async_gthread),
+	(gnet_inetaddr_get_canonical_name), (gnet_inetaddr_get_host_name):
+	* src/inetaddr.h:
+	* src/mcast.c: (gnet_mcast_socket_is_loopback),
+	(gnet_mcast_socket_set_loopback):
+	* src/tcp.c: (gnet_tcp_socket_new_async_direct),
+	(gnet_tcp_socket_new_async_cb), (gnet_tcp_socket_new_async_cancel):
+	* tests/conn_http_test.c: (main):
+	  apply patch from bug #147392 - it removes a lot of not-needed
+	  special cases for the Windows backend
+	* src/gnet-private.c: (gnet_private_create_ipv4_listen_socket),
+	(gnet_private_create_ipv6_listen_socket),
+	(gnet_private_create_listen_socket)
+	* src/gnet-private.h:
+	  handle IP version policy correctly when creating listening sockets
+
 2006-05-20  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* doc/gnet-sections.txt:

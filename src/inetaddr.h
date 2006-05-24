@@ -24,10 +24,6 @@
 
 #include <glib.h>
 
-#ifdef   GNET_WIN32
-#include <winsock2.h>	/* This needs to be here */
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

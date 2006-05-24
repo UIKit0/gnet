@@ -33,42 +33,81 @@
 #ifdef GNET_WIN32
 #include <process.h>
 
-static int inet_pton(int af, const char* src, void* dst);
-#if 0
-static const char* inet_ntop(int af, const void *src, char *dst, size_t size);
-#endif
-
 /* TODO: Use Window's inet_pton/inet_ntop if they ever implement it. */
 static int
 inet_pton(int af, const char* src, void* dst)
 {
-  in_addr_t addr;
+  int address_length;
+  struct sockaddr_storage sa;
+  struct sockaddr_in *sin = (struct sockaddr_in *)&sa;
+  struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&sa;
 
-  addr = inet_addr(src);
-  if (addr == INADDR_NONE && strcmp(src, "255.255.255.255"))
-    return 0;
+  switch (af)
+    {
+    case AF_INET:
+      address_length = sizeof (struct sockaddr_in);
+      break;
+      
+    case AF_INET6:
+      address_length = sizeof (struct sockaddr_in6);
+      break;
+      
+    default:
+      return -1;
+    }
 
-  *((in_addr_t*) dst) = addr;
-  return 1;
+  if (WSAStringToAddress ((LPTSTR) src, af, NULL, (LPSOCKADDR) &sa, &address_length) == 0)
+    {
+      switch (af)
+	{
+	case AF_INET:
+	  memcpy (dst, &sin->sin_addr, sizeof (struct in_addr));
+	  break;
+
+	case AF_INET6:
+	  memcpy (dst, &sin6->sin6_addr, sizeof (struct in6_addr));
+	  break;
+	}
+      return 1;
+    }
+  
+  return 0;
 }
 
-#if 0
 static const char*
 inet_ntop(int af, const void* src, char* dst, size_t size)
 {
-  struct in_addr addr = *(struct in_addr*) src;
-  const char* buf;
+  int address_length;
+  DWORD string_length = size;
+  struct sockaddr_storage sa;
+  struct sockaddr_in *sin = (struct sockaddr_in *)&sa;
+  struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&sa;
 
-  buf = inet_ntoa(addr);
-  if (buf == NULL)
-    return NULL;
+  memset (&sa, 0, sizeof (sa));
+  switch (af)
+    {
+    case AF_INET:
+      address_length = sizeof (struct sockaddr_in);
+      sin->sin_family = af;
+      memcpy (&sin->sin_addr, src, sizeof (struct in_addr));
+      break;
+      
+    case AF_INET6:
+      address_length = sizeof (struct sockaddr_in6);
+      sin6->sin6_family = af;
+      memcpy (&sin6->sin6_addr, src, sizeof (struct in6_addr));
+      break;
 
-  strcpy(dst, buf);
+    default:
+      return NULL;
+    }
 
-  return dst;
+  if (WSAAddressToString ((LPSOCKADDR) &sa, address_length, NULL,
+			  dst, &string_length) == 0)
+    return dst;
+  
+  return NULL;
 }
-#endif
-
 #endif /* GNET_WIN32 */
 
 
@@ -123,7 +162,6 @@ hostent2ialist (const struct hostent* he)
 /* Thread safe gethostbyname.  Maps hostname to list of
    sockaddr_storage pointers. */
 
-#ifndef GNET_WIN32
 GList*
 gnet_gethostbyname(const char* hostname)
 {
@@ -325,11 +363,6 @@ gnet_gethostbyname(const char* hostname)
   }
 
 #else 
-#ifdef GNET_WIN32
-  {
-/* moved to own func */
-  }
-#else
   {
     struct hostent* he;
 
@@ -349,7 +382,6 @@ gnet_gethostbyname(const char* hostname)
 #endif
 #endif
 #endif
-#endif
 
   if (list)
     list = g_list_reverse (list);
@@ -357,92 +389,6 @@ gnet_gethostbyname(const char* hostname)
   return list;
 
 }
-#else /* GNET_WIN32 */
-GList*
-gnet_gethostbyname(const char* hostname)
-{
-	GList* list = NULL;
-
-	if (pfn_getaddrinfo)
-	{
-		struct addrinfo hints;
-		struct addrinfo* res;
-		int rv;
-		GIPv6Policy policy;
-
-		/*  printf("Using pfn_getaddrinfo in gnet_gethostbyname\n"); */
-
-		policy = gnet_ipv6_get_policy();
-
-		memset (&hints, 0, sizeof(hints));
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_family = PF_UNSPEC;
-		rv = pfn_getaddrinfo(hostname, NULL, &hints, &res);
-
-		if (rv == 0)
-		{
-			struct addrinfo* i;
-			GList* ipv4_list = NULL;
-			GList* ipv6_list = NULL;
-	
-			for (i = res; i != NULL; i = i->ai_next)
-			{
-				GInetAddr* ia;
-
-				ia = g_new0(GInetAddr, 1);
-				ia->ref_count = 1;
-				memcpy (&ia->sa, i->ai_addr, i->ai_addrlen);
-
-				if (i->ai_family == PF_INET)
-					ipv4_list = g_list_prepend (ipv4_list, ia);
-				else if (i->ai_family == PF_INET6)
-					ipv6_list = g_list_prepend (ipv6_list, ia);
-				else
-					g_free (ia);
-			} /* for */
-
-			if (policy == GIPV6_POLICY_IPV4_ONLY)
-			{
-				list = ipv4_list;
-				g_list_free (ipv6_list);
-			}
-			else if (policy == GIPV6_POLICY_IPV4_THEN_IPV6)
-			{
-				list = g_list_concat (ipv6_list, ipv4_list);
-				/* list will be reversed below */
-			}
-			else if (policy == GIPV6_POLICY_IPV6_ONLY)
-			{
-				list = ipv6_list;
-				g_list_free (ipv4_list);
-			}
-			else if (policy == GIPV6_POLICY_IPV6_THEN_IPV4)
-			{
-				list = g_list_concat (ipv4_list, ipv6_list);
-				/* list will be reversed below */
-			}
-
-			pfn_freeaddrinfo(res);
-		} /* if (rv == 0) */
-	}
-	else
-	{
-		struct hostent* result;
-
-		/* One hostent struct per thread according to MSDN so we do not 
-			have to put a lock around this call. */
-		result = gethostbyname(hostname);
-		if (result != NULL)
-			list = hostent2ialist(result);
-
-	} /* if (pfn_getaddrinfo) */
-
-	if (list)
-		list = g_list_reverse (list);
-	return list;
-}
-#endif
-
 
 /* Free list of GInetAddr's.  We assume name hasn't been allocated. */
 static void
@@ -613,38 +559,6 @@ gnet_gethostbyaddr(const struct sockaddr_storage* sa)
     G_UNLOCK (dnslock);
   }
 #else
-#ifdef GNET_WIN32
-  {
-	if (pfn_getnameinfo)
-	{
-		int gnirv;
-		char host[NI_MAXHOST];
-
-		/* printf("Using pfn_getnameinfo in gnet_gethostbyaddr\n"); */
-		gnirv = pfn_getnameinfo((const struct sockaddr*) sa, 
-			GNET_SOCKADDR_LEN(*sa),
-			host, sizeof(host),
-			NULL, 0, NI_NAMEREQD);
-
-		if (gnirv == 0)
-			rv = g_strdup(host);
-	}
-	else
-	{
-		const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
-		int			sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
-		int         sa_type   = GNET_SOCKADDR_FAMILY(*sa);
-
-		struct hostent* he;
-
-		/* One hostent struct per thread according to MSDN so we do not 
-			have to put a lock around this call. */
-		he = gethostbyaddr(sa_addr, sa_len, sa_type);
-		if (he != NULL && he->h_name != NULL)
-			rv = g_strdup(he->h_name);
-	}
-  }
-#else
   {
     const char* sa_addr   = GNET_SOCKADDR_ADDRP(*sa);
     size_t      sa_len    = GNET_SOCKADDR_ADDRLEN(*sa);
@@ -656,7 +570,6 @@ gnet_gethostbyaddr(const struct sockaddr_storage* sa)
     if (he != NULL && he->h_name != NULL)
       rv = g_strdup(he->h_name);
   }
-#endif
 #endif
 #endif
 #endif
@@ -884,8 +797,6 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 /* **************************************** */
 /* gnet_inetaddr_new_list_async()	    */
 
-
-#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 #ifdef G_THREADS_ENABLED
 static void* inetaddr_new_list_async_gthread (void* arg);
@@ -1185,7 +1096,7 @@ inetaddr_new_list_async_gthread (void* arg)
   /* Unlock */
   g_static_mutex_unlock (&state->mutex);
 
-  /* Thread exits... */
+ /* Thread exits... */
   return NULL;
 }
 
@@ -1407,201 +1318,6 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 
 
 #endif
-
-#else	/*********** Windows code ***********/
-
-static unsigned __stdcall inetaddr_new_list_async_thread (void* arg);
-static gboolean inetaddr_new_list_async_thread_dispatch (gpointer data);
-
-GInetAddrNewListAsyncID
-gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
-			      GInetAddrNewListAsyncFunc func, 
-			      gpointer data)
-{
-	void** args;
-	HANDLE hThread;
-    unsigned threadID;
-	GInetAddrNewListState* state = NULL;
-
-	g_return_val_if_fail(hostname != NULL, NULL);
-	g_return_val_if_fail(func != NULL, NULL);
-
-    state = g_new0(GInetAddrNewListState, 1);
-
-    args = g_new (void*, 2);
-    args[0] = (void*) g_strdup(hostname);
-    args[1] = state;
-
-	InitializeCriticalSection(&state->mutex);
-	EnterCriticalSection(&state->mutex);
-
-	hThread = (HANDLE)_beginthreadex( NULL, 0, &inetaddr_new_list_async_thread,
-		args, 0, &threadID );
-	
-	if (hThread == 0)
-	{
-	  g_warning ("_beginthreadex in gnet_inetaddr_new_list_async");
-	  LeaveCriticalSection(&state->mutex);
-      DeleteCriticalSection(&state->mutex);
-	  g_free (args[0]);
-	  g_free (state);
-      return NULL;
-	}
-	CloseHandle(hThread);
-
-	g_assert (state);
-	state->port = port;
-	state->func = func;
-	state->data = data;
-
-	LeaveCriticalSection(&state->mutex);
-	return state;
-}
-
-static unsigned __stdcall
-inetaddr_new_list_async_thread (void* arg)
-{
-  void** args = (void**) arg;
-  gchar* name = (gchar*) args[0];
-  GInetAddrNewListState* state = (GInetAddrNewListState*) args[1];
-  GList* ialist;
-
-  g_free (args);
-
-  /* Do lookup */
-  ialist = gnet_gethostbyname (name);
-  g_free (name);
-
-  /* Lock */
-  EnterCriticalSection(&state->mutex);
-
-  /* If cancelled, destroy state and exit.  The main thread is no
-     longer using state. */
-  if (state->is_cancelled)
-    {
-      ialist_free (state->ias);
-
-      LeaveCriticalSection(&state->mutex);
-      DeleteCriticalSection(&state->mutex);
-
-      g_free (state);
-
-      return 0;
-    }
-
-  if (ialist)
-    {
-      GList* i;
-
-      /* Set the port */
-      for (i = ialist; i != NULL; i = i->next)
-	{
-	  GInetAddr* ia = (GInetAddr*) i->data;
-          GNET_INETADDR_PORT_SET(ia, g_htons(state->port));
-	}
-
-      /* Save the list */
-      state->ias = ialist;
-    }
-  else
-    {
-      /* Flag failure */
-      state->lookup_failed = TRUE;
-    }
-
-  /* Add a source for reply */
-  state->source = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, 
-				   inetaddr_new_list_async_thread_dispatch,
-				   state, NULL);
-
-  /* This helps work around an issue in the Glib main loop */
-  if (!PostMessage(gnet_hWnd, IA_NEW_MSG, (WPARAM) NULL, (LPARAM) NULL))
-	  g_warning ("PostMessage in inetaddr_new_list_async_thread");
-
-  /* Unlock */
-  LeaveCriticalSection(&state->mutex);
-
-  /* Thread exits... */
-  return 0;
-}
-
-static gboolean
-inetaddr_new_list_async_thread_dispatch (gpointer data)
-{
-  GInetAddrNewListState* state = (GInetAddrNewListState*) data;
-
-  EnterCriticalSection(&state->mutex);
-
-  state->in_callback = TRUE;
-
-  /* Upcall */
-  if (!state->lookup_failed)
-    (*state->func)(state->ias, state->data);
-  else
-    (*state->func)(NULL, state->data);
-
-  state->in_callback = FALSE;
-
-  /* Delete state */
-  g_source_remove (state->source);
-  LeaveCriticalSection (&state->mutex);
-  DeleteCriticalSection (&state->mutex);
-  g_free (state);
-
-  return FALSE;
-}
-
-void
-gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
-{
-  GInetAddrNewListState* state = (GInetAddrNewListState*) id;
-
-  g_return_if_fail (state);
-
-  if (state->in_callback)
-    return;
-
-  /* We don't use in_callback because we'd have to get the mutex to
-     access it and if we're in the callback we'd already have the
-     mutex and deadlock.  in_callback was mostly meant to prevent
-     programmer error.  */
-
-  EnterCriticalSection (&state->mutex);
-
-  /* Check if the thread has finished and a reply is pending.  If a
-     reply is pending, cancel it and delete state. */
-  if (state->source)
-    {
-      g_source_remove (state->source);
-
-      ialist_free (state->ias);
-
-      LeaveCriticalSection (&state->mutex);
-      DeleteCriticalSection (&state->mutex);
-
-      g_free (state);
-    }
-
-  /* Otherwise, the thread is still running.  Set the cancelled flag
-     and allow the thread to complete.  When the thread completes, it
-     will delete state. */
-
-  else
-    {
-      state->is_cancelled = TRUE;
-
-      LeaveCriticalSection (&state->mutex);
-    }
-}
-
-gboolean 
-gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel, 
-					  GIOCondition condition, 
-					  gpointer data) { /* do nothing */ return 0;}
-
-#endif		/*********** End Windows code ***********/
-
-
 
 /**
  *  gnet_inetaddr_new_nonblock:
@@ -1837,8 +1553,6 @@ gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr)
 }
 
 
-
-#ifndef GNET_WIN32  /*********** Unix code ***********/
 
 #ifdef G_THREADS_ENABLED
 static void* inetaddr_get_name_async_gthread (void* arg);
@@ -2220,175 +1934,6 @@ gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id)
 #endif
 
 
-#else	/*********** Windows code ***********/
-
-static unsigned __stdcall inetaddr_get_name_async_thread (void* arg);
-static gboolean inetaddr_get_name_async_thread_dispatch (gpointer data);
-
-
-GInetAddrGetNameAsyncID
-gnet_inetaddr_get_name_async(GInetAddr* inetaddr,
-			     GInetAddrGetNameAsyncFunc func,
-			     gpointer data)
-{
-  HANDLE hThread;
-  unsigned threadID;
-
-  GInetAddrReverseAsyncState* state = NULL;
-
-  g_return_val_if_fail(inetaddr != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
-
-  state = g_new0(GInetAddrReverseAsyncState, 1);
-
-  InitializeCriticalSection(&state->mutex);
-  EnterCriticalSection(&state->mutex);
-  
-  hThread = (HANDLE)_beginthreadex( NULL, 0, &inetaddr_get_name_async_thread,
-		state, 0, &threadID );
-  
-  if (hThread == 0)
-  {
-	  g_warning ("_beginthreadex in gnet_inetaddr_get_name_async");
-	  LeaveCriticalSection(&state->mutex);
-      DeleteCriticalSection(&state->mutex);
-	  g_free (state);
-      return NULL;
-  }
-  CloseHandle(hThread);
-
-  /* Set up state for callback */
-  g_assert (state);
-  state->ia = gnet_inetaddr_clone(inetaddr);
-  state->func = func;
-  state->data = data;
-  
-  LeaveCriticalSection (&state->mutex);
-  return state;
-}
-
-
-void
-gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
-{
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
-
-  EnterCriticalSection (&state->mutex);
-
-  /* Check if the thread has finished and a reply is pending.  If a
-     reply is pending, cancel it and delete state. */
-  if (state->source){
-      g_free (state->name);
-
-      g_source_remove (state->source);
-
-      LeaveCriticalSection (&state->mutex);
-      DeleteCriticalSection (&state->mutex);
-
-      g_free (state);
-    }
-
-  /* Otherwise, the thread is still running.  Set the cancelled flag
-     and allow the thread to complete.  When the thread completes, it
-     will delete state.  We can't kill the thread because we'd loose
-     the resources allocated in gethostbyname_r. */
-
-  else
-    {
-      state->is_cancelled = TRUE;
-
-      LeaveCriticalSection (&state->mutex);
-    }
-}
-
-
-static gboolean
-inetaddr_get_name_async_thread_dispatch (gpointer data)
-{
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) data;
-
-  EnterCriticalSection (&state->mutex);
-
-  /* Upcall */
-  (*state->func)(state->name, state->data);
-
-  /* Delete state */
-  gnet_inetaddr_delete (state->ia);
-  g_source_remove (state->source);
-  LeaveCriticalSection (&state->mutex);
-  DeleteCriticalSection (&state->mutex);
-  memset (state, 0, sizeof(*state));
-  g_free (state);
-
-  return FALSE;
-}
-
-
-static unsigned __stdcall
-inetaddr_get_name_async_thread (void* arg)
-{
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) arg;
-  gchar* name;
-
-  /* Lock */
-  EnterCriticalSection (&state->mutex);
-     
-  /* Do lookup */
-  if (state->ia->name)
-    name = g_strdup (state->ia->name);
-  else
-    name = gnet_gethostbyaddr(&state->ia->sa);
-
-  /* If cancelled, destroy state and exit.  The main thread is no
-     longer using state. */
-  if (state->is_cancelled)
-    {
-      g_free (name);
-      gnet_inetaddr_delete (state->ia);
-
-      LeaveCriticalSection (&state->mutex);
-      DeleteCriticalSection (&state->mutex);
-
-      g_free (state);
-
-      return 0;
-    }
-
-  /* Copy name to state */
-  if (name)
-  {
-      state->name = name;
-  }
-  else 	/* Lookup failed: name is canonical name */
-    {
-		state->name = gnet_inetaddr_get_canonical_name(state->ia);
-    }
-
-  /* Add a source for reply */
-  state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
-				   inetaddr_get_name_async_thread_dispatch,
-				   state, NULL);
-
-  /* Helps work around a Glib main loop issue on Windows */
-  if (!PostMessage(gnet_hWnd, GET_NAME_MSG, (WPARAM) NULL, (LPARAM) NULL))
-	  g_warning ("PostMessage in inetaddr_new_list_async_thread");
-
-  /* Unlock */
-  LeaveCriticalSection (&state->mutex);
-
-  /* Thread exits... */
-  return 0;
-}
-
-gboolean 
-gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
-				 GIOCondition condition, 
-				 gpointer data)
-{return 0;} /* do nothing, not used on Windows */
-
-#endif		/*********** End Windows code ***********/
-
-
 /**
  *  gnet_inetaddr_get_length
  *  @inetaddr: a #GInetAddr
@@ -2488,27 +2033,10 @@ gnet_inetaddr_get_canonical_name(const GInetAddr* inetaddr)
   
   g_return_val_if_fail (inetaddr != NULL, NULL);
 
-#ifndef GNET_WIN32
   if (inet_ntop(GNET_INETADDR_FAMILY(inetaddr), 
 		GNET_INETADDR_ADDRP(inetaddr),
 		buffer, sizeof(buffer)) == NULL)
     return NULL;
-#else
-  if (pfn_getnameinfo)
-  {
-	int rv = pfn_getnameinfo((const struct sockaddr FAR *)&inetaddr->sa,
-		(socklen_t)GNET_INETADDR_LEN(inetaddr), buffer, sizeof(buffer), NULL, 0, 
-		NI_NUMERICHOST);
-	if (rv != 0)
-		return NULL;
-  }
-  else
-  {
-    guchar* p = (guchar*) GNET_INETADDR_ADDRP(inetaddr);
-	g_snprintf(buffer, sizeof(buffer), 
-	     "%d.%d.%d.%d", p[0], p[1], p[2], p[3]);
-  }
-#endif
   return g_strdup(buffer);
 }
 
@@ -3022,8 +2550,6 @@ gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2)
 
 /* **************************************** */
 
-#ifndef GNET_WIN32  /*********** Unix code ***********/
-
 /**
  *  gnet_inetaddr_get_host_name:
  * 
@@ -3035,7 +2561,8 @@ gnet_inetaddr_noport_equal (gconstpointer p1, gconstpointer p2)
 gchar*
 gnet_inetaddr_get_host_name (void)
 {
-  gchar* name = NULL;
+  gchar* name;
+#ifndef GNET_WIN32
   struct utsname myname;
   GInetAddr* addr;
 
@@ -3054,32 +2581,16 @@ gnet_inetaddr_get_host_name (void)
     name = g_strdup (myname.nodename);
 
   gnet_inetaddr_delete (addr);
-
-  return name;
-}
-
-
-#else	/*********** Windows code ***********/
-/* (Windows doesn't have uname */
-
-gchar*
-gnet_inetaddr_get_host_name (void)
-{
-  gchar* name = NULL;
-  int error = 0;
-
+#else
   name = g_new0(char, 256);
-  error = gethostname(name, 256);
-  if (error)
+  if (gethostname(name, 256))
     {
       g_free(name);
       return NULL;
     }
-
+#endif
   return name;
 }
-
-#endif		/*********** End Windows code ***********/
 
 
 /**

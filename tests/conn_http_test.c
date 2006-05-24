@@ -1,3 +1,4 @@
+#include <windows.h>
 /***************************************************************************
  *
  * GConnHttp test
@@ -511,7 +512,7 @@ test_post (const gchar *artist, const gchar *album)
 	g_free(buf);
 	return TRUE;
 }
-
+#if 0
 /***************************************************************************
  *
  *   foo
@@ -525,7 +526,7 @@ foo (gpointer baz)
 {
 	return TRUE;
 }
-
+#endif
 
 /***************************************************************************
  *
@@ -537,6 +538,8 @@ int
 main (int argc, char **argv)
 {
 	verbose = FALSE;
+
+	g_print ("%#lx:main() starting\n", GetCurrentThreadId ());
 
 	gnet_init ();
 
@@ -550,8 +553,9 @@ main (int argc, char **argv)
         
 	/* without this, the GLib mainloop 
 	 * doesn't seem to get started?! */
+#if 0
 	g_timeout_add(50, foo, NULL); 
-
+#endif
 	if (argc > 1)
 	{
 		gboolean ok;
@@ -562,7 +566,7 @@ main (int argc, char **argv)
 		g_print ("GET (%s):  %s\n", argv[1], (ok) ? "OK" : "FAILED");
 		g_print ("------------------------------------------------------------\n");
 		
-		g_assert (ok == TRUE);
+		return (ok == TRUE) ? 0 : 1;
         }
 	else
 	{
@@ -603,7 +607,7 @@ main (int argc, char **argv)
 		g_print ("------------------------------------------------------------\n");
 		
 		all_ok = get_ok && binget_ok && async1_ok && async2_ok && post_ok && redir1_ok && redir2_ok && urlget_ok;
-		g_assert (all_ok);
+		return all_ok ? 0 : 1;
 	}
 		
 	return EXIT_SUCCESS;

@@ -29,7 +29,7 @@ const guint gnet_interface_age = GNET_INTERFACE_AGE;
 const guint gnet_binary_age = GNET_BINARY_AGE;
 
 
-#ifdef HAVE_IPV6
+#if !defined(GNET_WIN32) && defined(HAVE_IPV6)
 #ifndef GNET_WIN32
 static gboolean ipv6_detect_envvar (void);
 static gboolean ipv6_detect_iface (void);
@@ -71,10 +71,8 @@ gnet_init (void)
   been_here = TRUE;
 
 #ifdef G_THREADS_ENABLED
-#ifndef GNET_WIN32 
   if (!g_thread_supported ()) 
     g_thread_init (NULL);
-#endif
 #endif /* G_THREADS_ENABLED */
 
 
@@ -130,7 +128,7 @@ gnet_init (void)
 }
 
 
-#ifdef HAVE_IPV6
+#if !defined(GNET_WIN32) && defined(HAVE_IPV6)
 #ifndef GNET_WIN32
 /* 
 
