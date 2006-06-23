@@ -1,6 +1,10 @@
 #!/bin/sh
 # Gnome autogen.sh
 
+AUTOCONF_BIN=autoconf
+AUTOHEADER_BIN=autoheader
+AUTOMAKE_BIN=automake
+ACLOCAL_BIN=aclocal
 
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
@@ -52,6 +56,87 @@ if test "$DIE" -eq 1; then
   exit 1
 fi
 
+
+AUTOMAKE_VERSION_REAL=`automake --version | head -n 1 | awk '{print $4}'`
+AUTOMAKE_VERSION=`echo $AUTOMAKE_VERSION_REAL | sed -e 's/\.\([0-9]\).*/\1/'`
+
+echo "***** Checking automake version: $AUTOMAKE_VERSION_REAL"
+
+if [ "x$AUTOMAKE_VERSION" == "x14" ] || [ "x$AUTOMAKE_VERSION" == "x15" ]
+then
+  echo "***** Checking for newer automake versions...";
+
+  FOUND_AM=0
+
+  for ver in 2.0 1.9 1.8 1.7 1.6
+  do
+    if automake-$ver --version </dev/null &>/dev/null
+    then
+      AUTOMAKE_BIN=automake-$ver;
+      ACLOCAL_BIN=aclocal-$ver;
+      echo "***** Found $AUTOMAKE_BIN. Using that instead.";
+      FOUND_AM=1
+      break
+    fi
+  done
+
+  if [ "x$FOUND_AM" = "x0" ]; then
+    echo "***** Your automake version (1.4 or 1.5) is too old.";
+    echo "***** Please install a newer version (1.9, 1.8, 1.7 or 1.6)";
+  fi
+
+fi
+
+#-----------------------------------------------------------------------------#
+# ... and the same for autoconf ...
+#-----------------------------------------------------------------------------#
+
+# This only seems not to work with autoconf2.13, but does work with 2.5x
+AUTOCONF_VERSION_REAL=`$AUTOCONF_BIN --version | head -n 1 | awk '{print $4}'`
+
+if [ -z $AUTOCONF_VERSION_REAL ]; then
+  AUTOCONF_VERSION_REAL=`$AUTOCONF_BIN --version | head -n 1 | awk '{print $3}'`
+fi
+
+echo "***** Checking autoconf version: $AUTOCONF_VERSION_REAL"
+
+# Check whether the autoconf version detected is too old.
+FOUND_OLD_AC=0
+for ver in 2.10 2.11 2.12 2.13
+do
+  if [ "x$AUTOCONF_VERSION_REAL" = "x$ver" ]
+  then
+    FOUND_OLD_AC=1
+    break
+  fi
+done
+
+if [ "x$FOUND_OLD_AC" = "x1" ];
+then
+  echo "***** Checking for newer autoconf versions..."
+
+  FOUND_NEW_AC=0
+
+  for ver in 2.53 2.54 2.55 2.56 2.57 2.58 2.60
+  do
+    if autoconf$ver --version </dev/null &>/dev/null
+    then
+      AUTOCONF_BIN=autoconf$ver;
+      AUTOHEADER_BIN=autoheader$ver;
+      echo "***** Found $AUTOCONF_BIN. Using that instead.";
+      FOUND_NEW_AC=1
+      break
+    fi
+  done
+
+  if [ "x$FOUND_NEW_AC" = "x0" ]; then
+    echo "***** Your autoconf version (<=2.52) is too old.";
+    echo "***** Please install a newer version (>=2.53)";
+  fi
+fi
+
+
+
 if test -z "$*"; then
   echo "**Warning**: I am going to run \`configure' with no arguments."
   echo "If you wish to pass any to it, please specify them on the"
@@ -102,15 +187,16 @@ do
 	ln -sf /usr/share/misc/config.guess config.guess
 	
       echo "Running aclocal $aclocalinclude ..."
-      aclocal $aclocalinclude
+      $ACLOCAL_BIN $aclocalinclude || { echo "$ACLOCAL_BIN failed!"; exit 1; }
+
       if grep "^AM_CONFIG_HEADER" configure.ac >/dev/null; then
-	echo "Running autoheader..."
-	autoheader
+        echo "Running autoheader..."
+        $AUTOHEADER_BIN || { echo "$AUTOHEADER_BIN failed!"; exit 1; }
       fi
       echo "Running automake --gnu $am_opt ..."
-      automake --add-missing --gnu $am_opt
+      $AUTOMAKE_BIN --add-missing --gnu $am_opt || { echo "$AUTOMAKE_BIN failed!"; exit 1; }
       echo "Running autoconf ..."
-      autoconf
+      $AUTOCONF_BIN || { echo "$AUTOCONF_BIN failed!"; exit 1; }
     )
   fi
 done
