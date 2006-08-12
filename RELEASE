@@ -5,6 +5,10 @@ Creating the release tarball:
  - make sure the created tarball
    really incnludes the HTML docs
    (try 'make dist' if not)
+ - run 'grep ss_family src/*.c' - there should
+   be no results; if there are any, use the
+   GNET_SOCKADDR_FAMILY macro instead.
+   
 
 Adding new source files:
  - add to GNET.DSP

@@ -1,3 +1,15 @@
+2006-08-12  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* RELEASE:
+	  Add note to check for ss_family usage before release.
+
+	* src/inetaddr.c: (hostent2ialist),
+	(gnet_inetaddr_new_list_async_cb):
+	  Don't access the ss_family field directly, use the
+	  GNET_SOCKADDR_FAMILY() accessor macro instead in
+	  order to keep tings compiling on older systems.
+	  Patch by: Mark Drago <mdrago at bascom com>
+
 2006-06-23  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* autogen.sh:

@@ -145,7 +145,7 @@ hostent2ialist (const struct hostent* he)
 
       ia = g_new0(GInetAddr, 1);
       ia->ref_count = 1;
-      ia->sa.ss_family = he->h_addrtype;
+      GNET_SOCKADDR_FAMILY(ia->sa) = he->h_addrtype;
       GNET_INETADDR_SET_SS_LEN(ia);
       memcpy (GNET_SOCKADDR_ADDRP(ia->sa), he->h_addr_list[i], he->h_length);
       list = g_list_prepend(list, ia);
@@ -1243,7 +1243,7 @@ gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel,
 	      /* Save the address */
 	      ia = g_new0(GInetAddr, 1);
 	      ia->ref_count = 1;
-	      ia->sa.ss_family = (size == 4)? AF_INET : AF_INET6;
+	      GNET_SOCKADDR_FAMILY(ia->sa) = (size == 4)? AF_INET : AF_INET6;
 	      GNET_INETADDR_SET_SS_LEN(ia);
 	      memcpy(GNET_INETADDR_ADDRP(ia), buf, size);
 	      GNET_INETADDR_PORT(ia) = g_htons(state->port);
