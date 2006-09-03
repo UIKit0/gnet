@@ -162,54 +162,10 @@ hostent2ialist (const struct hostent* he)
 /* Thread safe gethostbyname.  Maps hostname to list of
    sockaddr_storage pointers. */
 
-GList*
+static GList*
 gnet_gethostbyname(const char* hostname)
 {
   GList* list = NULL;
-
-  /* **************************************** */
-  /* First attempt non-blocking lookup */
-  
-  struct in_addr inaddr;
-#ifdef HAVE_IPV6
-  struct in6_addr in6addr;
-#endif
-
-  if (inet_pton(AF_INET, hostname, &inaddr) > 0)
-    {
-      GInetAddr* ia;
-      struct sockaddr_in* sa;
-
-      ia = g_new0(GInetAddr, 1);
-      ia->ref_count = 1;
-      sa = (struct sockaddr_in*) &ia->sa;
-
-      sa->sin_family = AF_INET;
-      GNET_INETADDR_SET_SS_LEN(ia);
-      sa->sin_addr = inaddr;
-
-      list = g_list_prepend (list, ia);
-      return list;
-    }
-#ifdef HAVE_IPV6
-  else if (inet_pton(AF_INET6, hostname, &in6addr) > 0)
-    {
-      GInetAddr* ia;
-      struct sockaddr_in6* sa;
-
-      ia = g_new0(GInetAddr, 1);
-      ia->ref_count = 1;
-      sa = (struct sockaddr_in6*) &ia->sa;
-
-      sa->sin6_family = AF_INET6;
-      GNET_INETADDR_SET_SS_LEN(ia);
-      sa->sin6_addr = in6addr;
-      /* don't set the nice name, it's not necessarily canonical */
-
-      list = g_list_prepend (list, ia);
-      return list;
-    }
-#endif
 
   /* **************************************** */
   /* DNS lookup: getaddrinfo() */
@@ -605,6 +561,13 @@ gnet_inetaddr_new (const gchar* hostname, gint port)
   GList* ialist;
   GInetAddr* ia = NULL;
 
+  /*
+   * First attempt nonblocking lookup
+   */
+  ia = gnet_inetaddr_new_nonblock (hostname, port);
+  if (ia)
+    return ia;
+
   ialist = gnet_gethostbyname (hostname);
   if (!ialist)
     return NULL;
@@ -628,16 +591,24 @@ gnet_inetaddr_new (const gchar* hostname, gint port)
  *  Creates a GList of #GInetAddr's from a host name and port.  This
  *  function makes a DNS lookup on the host name so it may block.
  *
- *  Returns: a GList of #GInetAddr's; NULL on error.
+ *  Returns: a GList of #GInetAddr structures or NULL on error.
  *
  **/
 GList*
 gnet_inetaddr_new_list (const gchar* hostname, gint port)
 {
+  GInetAddr* ia;
   GList* ialist;
   GList* i;
 
   g_return_val_if_fail (hostname != NULL, NULL);
+
+  /*
+   * First attempt nonblocking lookup
+   */
+  ia = gnet_inetaddr_new_nonblock (hostname, port);
+  if (ia)
+    return g_list_prepend (NULL, ia);
 
   /* Try to get the host by name (ie, DNS) */
   ialist = gnet_gethostbyname(hostname);
@@ -797,6 +768,7 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 /* **************************************** */
 /* gnet_inetaddr_new_list_async()	    */
 
+static gboolean inetaddr_new_list_async_nonblock_dispatch (gpointer data);
 
 #ifdef G_THREADS_ENABLED
 static void* inetaddr_new_list_async_gthread (void* arg);
@@ -873,10 +845,28 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
 			      gpointer data)
 {
   GInetAddrNewListState* state = NULL;
+  GInetAddr* ia;
 
   g_return_val_if_fail(hostname != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
+  /*
+   * First attempt nonblocking lookup
+   */
+  ia = gnet_inetaddr_new_nonblock (hostname, port);
+  if (ia)
+    {
+      state = g_new0 (GInetAddrNewListState, 1);
+#ifdef G_THREADS_ENABLED
+      g_static_mutex_init (&state->mutex);
+      g_static_mutex_lock (&state->mutex);
+#endif
+      state->ias = g_list_prepend (NULL, ia);
+      state->source = g_idle_add_full (G_PRIORITY_DEFAULT,
+				       inetaddr_new_list_async_nonblock_dispatch,
+				       state, NULL);
+    }
+  else
 # ifdef G_THREADS_ENABLED
   {
     GThread *thread;
@@ -1032,6 +1022,33 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   return state;
 }
 
+/* TODO: we could merge this with inetaddr_new_list_async_gthread_dispatch()
+ * if we used the same type of mutex for the structure ... */
+static gboolean
+inetaddr_new_list_async_nonblock_dispatch (gpointer data)
+{
+  GInetAddrNewListState* state = (GInetAddrNewListState*) data;
+
+#ifdef G_THREAD_ENABLED
+  g_thread_mutex_lock (&state->mutex);
+#endif
+
+  state->in_callback = TRUE;
+
+  (*state->func) (state->ias, state->data);
+
+  state->in_callback = FALSE;
+
+  g_source_remove (state->source);
+#ifdef G_THREADS_ENABLES
+  g_thread_mutex_unlock (&state->mutex);
+  g_thread_mutex_free (&state->mutex);
+#endif
+  g_free (state);
+
+  return FALSE;
+}
+
 #ifdef G_THREADS_ENABLED
 
 static gboolean inetaddr_new_list_async_gthread_dispatch (gpointer data);
@@ -1099,7 +1116,6 @@ inetaddr_new_list_async_gthread (void* arg)
  /* Thread exits... */
   return NULL;
 }
-
 
 static gboolean
 inetaddr_new_list_async_gthread_dispatch (gpointer data)

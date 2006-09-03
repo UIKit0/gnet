@@ -105,7 +105,7 @@ main(int argc, char* argv[])
   TEST (10000, 0, 0);
 
   TEST1 (10100, 0x01, "b", &buf[1], sizeof(igint8), igint8);
-  TEST1 (10110, 0xf1, "b", &bufh[1], sizeof(igint8), igint8);
+  TEST1 (10110, (gint8) 0xf1, "b", &bufh[1], sizeof(igint8), igint8);
 
   TEST1 (10200, 0x01, "B", &buf[1], sizeof(iguint8), iguint8);
   TEST1 (10210, 0xf1, "B", &bufh[1], sizeof(iguint8), iguint8);
@@ -208,7 +208,7 @@ main(int argc, char* argv[])
   TEST (20000, 0, 0);
 
   TEST1 (20100, 0x01, "<b", &buf[1], 1, igint8);
-  TEST1 (20110, 0xf1, "<b", &bufh[1], 1, igint8);
+  TEST1 (20110, (gint8) 0xf1, "<b", &bufh[1], 1, igint8);
 
   TEST1 (20200, 0x01, "<B", &buf[1], 1, iguint8);
   TEST1 (20210, 0xf1, "<B", &bufh[1], 1, iguint8);
@@ -246,7 +246,7 @@ main(int argc, char* argv[])
   TEST (30000, 0, 0);
 
   TEST1 (30100, 0x01, ">b", &buf[1], 1, igint8);
-  TEST1 (30110, 0xf1, ">b", &bufh[1], 1, igint8);
+  TEST1 (30110, (gint8) 0xf1, ">b", &bufh[1], 1, igint8);
 
   TEST1 (30200, 0x01, ">B", &buf[1], 1, iguint8);
   TEST1 (30210, 0xf1, ">B", &bufh[1], 1, iguint8);
