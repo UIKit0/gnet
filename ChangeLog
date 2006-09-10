@@ -1,3 +1,19 @@
+2006-09-10  Tim-Philipp Müller  <tim at centricular dot net>
+
+	Patch by: Dov Grobgeld <dov dot grobgeld at gmail dot com>
+
+	* configure.ac:
+	* examples/Makefile.am:
+	* examples/xmlrpc/.cvsignore:
+	* examples/xmlrpc/Makefile.am:
+	* examples/xmlrpc/README:
+	* examples/xmlrpc/test-xmlrpc-client.c:
+	* examples/xmlrpc/test-xmlrpc-server.c:
+	* examples/xmlrpc/xmlrpc-client.c:
+	* examples/xmlrpc/xmlrpc-server.c:
+	* examples/xmlrpc/xmlrpc.h:
+	  Add Dov Grobgeld's XMLRPC code to the examples for posteriority.
+
 2006-09-03  Tim-Philipp Müller  <tim at centricular dot net>
 
 	Patch by: Thadeu Lima de Souza Cascardo <cascardo at minaslivre org>

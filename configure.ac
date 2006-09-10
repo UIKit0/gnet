@@ -467,6 +467,7 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	examples/Makefile
+	examples/xmlrpc/Makefile
 	tests/Makefile
 	doc/Makefile
 	doc/version.xml

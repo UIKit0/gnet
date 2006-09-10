@@ -2,6 +2,8 @@
 
 @SET_MAKE@
 
+SUBDIRS = xmlrpc
+
 if OS_WIN32
 noinst_PROGRAMS = echoclient       echoserver 			\
 		  echoclient-async echoserver-async 		\
