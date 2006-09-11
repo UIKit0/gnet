@@ -100,7 +100,7 @@ for ($i = 0; $i < 32; $i++)
 */
 
 
-/* our own ISSPACE.  ANSI isspace is local dependent */
+/* our own ISSPACE.  ANSI isspace is locale dependent */
 #define ISSPACE(C) (((C) >= 9 && (C) <= 13) || (C) == ' ')
 
 
@@ -170,6 +170,10 @@ gnet_uri_new (const gchar* uri)
 
       /* Hostname */
 
+      /* Check for no hostname at all (e.g. file:// URIs) */ 
+      if (*p == '/')
+        goto path;
+
       /* Check for IPv6 canonical hostname in brackets */
       if (*p == '[')
 	{
@@ -201,6 +205,9 @@ gnet_uri_new (const gchar* uri)
     }
 
   /* Path (we are liberal and won't check if it starts with /) */
+
+path:
+
   temp = p;
   while (*p && *p != '?' && *p != '#')
     ++p;
@@ -597,8 +604,11 @@ gnet_uri_get_string (const GURI* uri)
   if (uri->scheme)
     g_string_sprintfa (buffer, "%s:", uri->scheme);
 
-  if (uri->userinfo || uri->hostname || uri->port)
-    g_string_append (buffer, "//");
+  if (uri->userinfo  || uri->hostname  || uri->port ||
+      (uri->scheme && uri->hostname == NULL && uri->path && *uri->path == '/'))
+    {
+      g_string_append (buffer, "//");
+    }
 
   if (uri->userinfo)
     {

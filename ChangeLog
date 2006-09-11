@@ -1,3 +1,13 @@
+2006-09-11  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/uri.c: (gnet_uri_new), (gnet_uri_get_string):
+	* tests/uri_test.c: (main):
+	  Add support for absolute file:// URIs and add two simple test cases.
+	  Not entirely convinced about the required fix to _get_string(), but
+	  it doesn't seem to break any of the tests, so it can't be too bad
+	  even if it's not entirely correct. Fixes bug #317456. Based
+	  on patch by Milosz Derezynski <internalerror at gmail com>
+
 2006-09-10  Tim-Philipp Müller  <tim at centricular dot net>
 
 	Patch by: Dov Grobgeld <dov dot grobgeld at gmail dot com>

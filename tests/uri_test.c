@@ -133,6 +133,11 @@ struct URITest tests[] =
   { " \f\n\r\t\vpath", "path",
     {NULL, NULL, NULL, 0, "path", NULL, NULL}},
 
+  /* file URI */
+  { "file://host/home/joe/foo.txt", NULL, 
+    {"file", NULL, "host", 0, "/home/joe/foo.txt", NULL, NULL}},
+  { "file:///home/joe/foo.txt", NULL, 
+    {"file", NULL, NULL, 0, "/home/joe/foo.txt", NULL, NULL}},
 
   { NULL, NULL, {NULL, NULL, NULL, 0, NULL, NULL, NULL} }
 
