@@ -148,10 +148,8 @@ gnet_private_io_channel_new (SOCKET sockfd)
   if (iochannel == NULL)
     return NULL;
 
-#if GLIB_MAJOR_VERSION == 2
   g_io_channel_set_encoding (iochannel, NULL, NULL);
   g_io_channel_set_buffered (iochannel, FALSE);
-#endif
 
   return iochannel;
 }

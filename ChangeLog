@@ -1,5 +1,11 @@
 2006-09-11  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/gnet-private.c: (gnet_private_io_channel_new):
+	  No need to special-case for GLib-2.0 any more, since we don't
+	  support 1.2 any longer.
+	  
+2006-09-11  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/uri.c: (gnet_uri_new), (gnet_uri_get_string):
 	* tests/uri_test.c: (main):
 	  Add support for absolute file:// URIs and add two simple test cases.
