@@ -223,14 +223,6 @@ extern "C" {
 
 
 
-struct _GUdpSocket
-{
-  SOCKET sockfd;
-  guint ref_count;
-  GIOChannel* iochannel;
-  struct sockaddr_storage sa;
-};
-
 struct _GMcastSocket
 {
   SOCKET sockfd;

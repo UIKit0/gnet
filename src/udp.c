@@ -21,6 +21,17 @@
 #include "gnet-private.h"
 #include "udp.h"
 
+#define GNET_UDP_SOCKET_TYPE_COOKIE  71254329
+#define GNET_IS_UDP_SOCKET(s)  ((s)&&(((GUdpSocket*)(s))->type == GNET_UDP_SOCKET_TYPE_COOKIE))
+
+struct _GUdpSocket
+{
+  gsize type;
+  SOCKET sockfd;
+  gint ref_count;
+  GIOChannel* iochannel;
+  struct sockaddr_storage sa;
+};
 
 /**
  *  gnet_udp_socket_new
@@ -102,6 +113,7 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 
   /* Create UDP socket */
   s = g_new0 (GUdpSocket, 1);
+  s->type = GNET_UDP_SOCKET_TYPE_COOKIE;
   s->sockfd = sockfd;
   s->sa = sa;
   s->ref_count = 1;
@@ -113,16 +125,19 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
 
 /**
  *  gnet_udp_socket_delete:
- *  @socket: a #GUdpSocket
+ *  @socket: a #GUdpSocket, or NULL
  *
- *  Deletes a #GUdpSocket.
+ *  Deletes a #GUdpSocket. Does nothing if @socket is NULL.
  *
  **/
 void
 gnet_udp_socket_delete (GUdpSocket* socket)
 {
-  if (socket != NULL)
+  if (socket != NULL) {
+    g_return_if_fail (GNET_IS_UDP_SOCKET (socket));
+
     gnet_udp_socket_unref (socket);
+  }
 }
 
 
@@ -138,8 +153,9 @@ void
 gnet_udp_socket_ref (GUdpSocket* socket)
 {
   g_return_if_fail (socket != NULL);
+  g_return_if_fail (GNET_IS_UDP_SOCKET (socket));
 
-  socket->ref_count++;
+  g_atomic_int_inc (&socket->ref_count);
 }
 
 
@@ -152,21 +168,20 @@ gnet_udp_socket_ref (GUdpSocket* socket)
  *
  **/
 void
-gnet_udp_socket_unref (GUdpSocket* s)
+gnet_udp_socket_unref (GUdpSocket* socket)
 {
-  g_return_if_fail(s != NULL);
+  g_return_if_fail (socket != NULL);
+  g_return_if_fail (GNET_IS_UDP_SOCKET (socket));
 
-  s->ref_count--;
+  if (g_atomic_int_dec_and_test (&socket->ref_count)) {
+    GNET_CLOSE_SOCKET (socket->sockfd);  /* Don't care if this fails... */
 
-  if (s->ref_count == 0)
-    {
-      GNET_CLOSE_SOCKET(s->sockfd);	/* Don't care if this fails... */
+    if (socket->iochannel)
+      g_io_channel_unref (socket->iochannel);
 
-      if (s->iochannel)
-	g_io_channel_unref(s->iochannel);
-
-      g_free(s);
-    }
+    socket->type = 0;
+    g_free (socket);
+  }
 }
 
 
@@ -195,6 +210,7 @@ GIOChannel*
 gnet_udp_socket_get_io_channel (GUdpSocket* socket)
 {
   g_return_val_if_fail (socket != NULL, NULL);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), NULL);
 
   if (socket->iochannel == NULL)
     socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
@@ -221,6 +237,7 @@ gnet_udp_socket_get_local_inetaddr (const GUdpSocket* socket)
   GInetAddr* ia;
 
   g_return_val_if_fail (socket, NULL);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), NULL);
 
   socklen = sizeof(sa);
   if (getsockname(socket->sockfd, &GNET_SOCKADDR_SA(sa), &socklen) != 0)
@@ -254,8 +271,10 @@ gnet_udp_socket_send (GUdpSocket* socket,
   gint bytes_sent;
   struct sockaddr_storage sa;
 
-  g_return_val_if_fail (socket, -1);
-  g_return_val_if_fail (dst,    -1);
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), -1);
+  g_return_val_if_fail (dst != NULL, -1);
+  g_return_val_if_fail (buffer != NULL, -1);
 
   /* Address of dst must be address of socket */
 #ifdef HAVE_IPV6
@@ -331,8 +350,9 @@ gnet_udp_socket_receive (GUdpSocket* socket,
   struct sockaddr_storage sa;
   socklen_t sa_len = sizeof (struct sockaddr_storage);
 
-  g_return_val_if_fail (socket, -1);
-  g_return_val_if_fail (buffer, -1);
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (buffer != NULL, -1);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), -1);
 
   bytes_received = recvfrom (socket->sockfd, 
 			     (void*) buffer, length, 
@@ -370,6 +390,9 @@ gnet_udp_socket_has_packet (const GUdpSocket* socket)
   fd_set readfds;
   struct timeval timeout = {0, 0};
 
+  g_return_val_if_fail (socket != NULL, FALSE);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), FALSE);
+
   FD_ZERO (&readfds);
   FD_SET (socket->sockfd, &readfds);
   if ((select(socket->sockfd + 1, &readfds, NULL, NULL, &timeout)) == 1)
@@ -392,6 +415,9 @@ gnet_udp_socket_has_packet (const GUdpSocket* socket)
   guint packetlength;
   u_long arg;
   gint error;
+
+  g_return_val_if_fail (socket != NULL, FALSE);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), FALSE);
 
   arg = 1;
   ioctlsocket(socket->sockfd, FIONBIO, &arg); /* set to non-blocking mode */
@@ -446,6 +472,9 @@ gnet_udp_socket_get_ttl (const GUdpSocket* socket)
   socklen_t ttl_size;
   int rv = -2;
 
+  g_return_val_if_fail (socket != NULL, FALSE);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), FALSE);
+
   ttl_size = sizeof(ttl);
 
   /* Get the IPv4 TTL if it's bound to an IPv4 address */
@@ -493,6 +522,9 @@ gnet_udp_socket_set_ttl (GUdpSocket* socket, gint ttl)
 #ifdef HAVE_IPV6
   GIPv6Policy policy;
 #endif
+
+  g_return_val_if_fail (socket != NULL, FALSE);
+  g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), FALSE);
 
   rv1 = -1;
   rv2 = -1;

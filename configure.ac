@@ -146,8 +146,47 @@ AC_CHECK_LIB([nsl], [main])
 AC_CHECK_LIB([resolv], [main])
 
 dnl Check for GLib 2.x
-PKG_CHECK_MODULES(GLIB, [ glib-2.0 >= 2.0.0 ], , [ AC_MSG_ERROR([GLib-2.x development files not found]) ] )
-PKG_CHECK_MODULES(GTHREAD, [gthread-2.0 >= 2.0.0], , [ AC_MSG_ERROR([The impossible happened]) ] )
+
+GLIB_REQ=2.6.0
+
+PKG_CHECK_MODULES(GLIB, [ glib-2.0 >= $GLIB_REQ ], , [
+  AC_MSG_ERROR(
+  [
+    GLib-2.x development files not found (or version too old):
+
+    Cannot find glib-2.0 >= $GLIB_REQ
+                    
+    Please check the following:
+                    
+     * Do you have the glib2 _development_ package installed?
+       (usually called glib2-devel, libglib2.0-dev or similar)
+       If 
+           ls -l /usr/lib/pkgconfig/glib-2.0.pc
+       reports that the file does not exist, then you are missing
+       the development package. If this is the case, you are most
+       likely missing a whole bunch of other -devel packages as
+       well (e.g. gtk2-devel, libglade2-devel, gstreamer-devel), so
+       you might want to install them all in one go. If you installed 
+       glib2 from source, this point does not apply to you.
+
+     * Do you have glib2 installed more than once, e.g. once from
+       package and once from source? (if both 
+           ls /usr/lib/libglib-2.0*
+       and
+           ls /usr/local/lib/libglib-2.0*
+       show results, you need to fix your installation.
+                    
+     * Did you install glib from source? If yes, you might need to
+       point pkg-config to the location of the glib-2.0.pc file by
+       doing something like
+          export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+       and then running ./configure again.
+                    
+   ])
+])
+
+
+PKG_CHECK_MODULES(GTHREAD, [gthread-2.0 >= $GLIB_REQ], , [ AC_MSG_ERROR([The impossible happened]) ] )
 
 # These SUBSTs are primarily for gnet-config and gnet.pc
 AC_SUBST(GLIB_CFLAGS)

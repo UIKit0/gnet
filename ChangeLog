@@ -1,5 +1,23 @@
 2006-09-11  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* configure.ac:
+	  Require at least GLib-2.6. Give more extensive error message if
+	  GLib development files are not found.
+
+	* src/gnet-private.h:
+	* src/udp.c: (gnet_udp_socket_new_full), (gnet_udp_socket_delete),
+	(gnet_udp_socket_ref), (gnet_udp_socket_unref),
+	(gnet_udp_socket_get_io_channel),
+	(gnet_udp_socket_get_local_inetaddr), (gnet_udp_socket_send),
+	(gnet_udp_socket_receive), (gnet_udp_socket_has_packet),
+	(gnet_udp_socket_get_ttl), (gnet_udp_socket_set_ttl):
+	  Move private struct over to where it belong (udp.c); guard all
+	  public functions properly against bad input; try harder to guard
+	  against bad input by adding a type cookie to the beginning of
+	  our struct; do refcounting atomically for GUdpSocket.
+
+2006-09-11  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/gnet-private.c: (gnet_private_io_channel_new):
 	  No need to special-case for GLib-2.0 any more, since we don't
 	  support 1.2 any longer.
