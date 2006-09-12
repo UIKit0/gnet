@@ -84,7 +84,7 @@ gboolean gnet_mcast_socket_has_packet (const GMcastSocket* socket);
  *  gnet_mcast_socket_to_udp_socket
  *  @MS: a #GMcastSocket
  *
- *  Converts a #GMcastSocket to a #GUdpSocket.  A #GMcastSocket is
+ *  Converts a #GMcastSocket to a #GUdpSocket.  A #GMcastSocket is a
  *  child of #GUdpSocket.
  *
  **/

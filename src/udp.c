@@ -21,17 +21,9 @@
 #include "gnet-private.h"
 #include "udp.h"
 
-#define GNET_UDP_SOCKET_TYPE_COOKIE  71254329
-#define GNET_IS_UDP_SOCKET(s)  ((s)&&(((GUdpSocket*)(s))->type == GNET_UDP_SOCKET_TYPE_COOKIE))
-
-struct _GUdpSocket
-{
-  gsize type;
-  SOCKET sockfd;
-  gint ref_count;
-  GIOChannel* iochannel;
-  struct sockaddr_storage sa;
-};
+#define GNET_UDP_SOCKET_TYPE(s) (((GUdpSocket*)(s))->type)
+#define GNET_IS_UDP_SOCKET(s)   ((s) && (GNET_UDP_SOCKET_TYPE(s) == GNET_UDP_SOCKET_TYPE_COOKIE \
+                                      || GNET_UDP_SOCKET_TYPE(s) == GNET_MCAST_SOCKET_TYPE_COOKIE))
 
 /**
  *  gnet_udp_socket_new

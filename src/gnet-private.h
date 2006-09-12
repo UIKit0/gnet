@@ -221,14 +221,21 @@ extern "C" {
 
 */
 
+#define GNET_UDP_SOCKET_TYPE_COOKIE    71254329
+#define GNET_MCAST_SOCKET_TYPE_COOKIE  49712423
 
+struct _GUdpSocket
+{
+  guint type;
+  SOCKET sockfd;
+  gint ref_count;
+  GIOChannel* iochannel;
+  struct sockaddr_storage sa;
+};
 
 struct _GMcastSocket
 {
-  SOCKET sockfd;
-  guint ref_count;
-  GIOChannel* iochannel;
-  struct sockaddr_storage sa;
+  GUdpSocket udpsocket;
 };
 
 struct _GTcpSocket

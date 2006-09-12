@@ -20,6 +20,8 @@
 #include "gnet-private.h"
 #include "mcast.h"
 
+#define GNET_UDP_SOCKET(s)       ((GUdpSocket*)(s))
+#define GNET_IS_MCAST_SOCKET(s)  ((s)&&(GNET_UDP_SOCKET(s)->type == GNET_MCAST_SOCKET_TYPE_COOKIE))
 
 /**
  *  gnet_mcast_socket_new
@@ -75,10 +77,11 @@ gnet_mcast_socket_new_with_port (gint port)
 GMcastSocket* 
 gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
 {
-  int 			  sockfd;
   struct sockaddr_storage sa;
-  GMcastSocket* 	  ms;
+  GMcastSocket*           ms;
+  GUdpSocket*             us;
   const int               on = 1;
+  int                     sockfd;
 
   /* Create sockfd and address */
   sockfd = gnet_private_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
@@ -102,9 +105,11 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
 
   /* Create socket */
   ms = g_new0(GMcastSocket, 1);
-  ms->sockfd = sockfd;
-  ms->sa = sa;
-  ms->ref_count = 1;
+  us = (GUdpSocket *) ms;
+  us->type = GNET_MCAST_SOCKET_TYPE_COOKIE;
+  us->sockfd = sockfd;
+  us->sa = sa;
+  us->ref_count = 1;
 
   gnet_mcast_socket_set_loopback (ms, FALSE);
 
@@ -115,16 +120,17 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
 
 /**
  *  gnet_mcast_socket_delete:
- *  @socket: a #GMcastSocket
+ *  @socket: a #GMcastSocket, or NULL
  *
- *  Deletes a #GMcastSocket.
+ *  Deletes a #GMcastSocket. Does nothing if @socket is NULL.
  *
  **/
 void
 gnet_mcast_socket_delete (GMcastSocket* socket)
 {
-  if (socket != NULL)
-    gnet_mcast_socket_unref(socket);
+  g_return_if_fail (socket == NULL || GNET_IS_MCAST_SOCKET (socket));
+
+  gnet_udp_socket_unref ((GUdpSocket *) socket);
 }
 
 
@@ -140,8 +146,9 @@ void
 gnet_mcast_socket_ref (GMcastSocket* socket)
 {
   g_return_if_fail (socket != NULL);
+  g_return_if_fail (GNET_IS_MCAST_SOCKET (socket));
 
-  socket->ref_count++;
+  gnet_udp_socket_ref ((GUdpSocket *) socket);
 }
 
 
@@ -157,18 +164,9 @@ void
 gnet_mcast_socket_unref (GMcastSocket* socket)
 {
   g_return_if_fail (socket != NULL);
+  g_return_if_fail (GNET_IS_MCAST_SOCKET (socket));
 
-  socket->ref_count--;
-
-  if (socket->ref_count == 0)
-    {
-      GNET_CLOSE_SOCKET(socket->sockfd);/* Don't care if this fails... */
-
-      if (socket->iochannel)
-	g_io_channel_unref (socket->iochannel);
-
-      g_free (socket);
-    }
+  gnet_udp_socket_unref ((GUdpSocket *) socket);
 }
 
 
@@ -196,6 +194,9 @@ gnet_mcast_socket_unref (GMcastSocket* socket)
 GIOChannel*   
 gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
 {
+  g_return_val_if_fail (socket != NULL, NULL);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), NULL);
+
   return gnet_udp_socket_get_io_channel((GUdpSocket*) socket);
 }
 
@@ -212,6 +213,9 @@ gnet_mcast_socket_get_io_channel (GMcastSocket* socket)
 GInetAddr*  
 gnet_mcast_socket_get_local_inetaddr (const GMcastSocket* socket)
 {
+  g_return_val_if_fail (socket != NULL, NULL);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), NULL);
+
   return gnet_udp_socket_get_local_inetaddr((GUdpSocket*) socket);
 }
 
@@ -231,7 +235,13 @@ gint
 gnet_mcast_socket_join_group (GMcastSocket* socket, 
 			      const GInetAddr* inetaddr)
 {
+  GUdpSocket *udpsocket;
   gint rv = -1;
+
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), -1);
+
+  udpsocket = GNET_UDP_SOCKET (socket);
 
   if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
     {
@@ -243,8 +253,8 @@ gnet_mcast_socket_join_group (GMcastSocket* socket,
       mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
 
       /* Join the group */
-      rv = setsockopt(socket->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		      (void*) &mreq, sizeof(mreq));
+      rv = setsockopt (udpsocket->sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+          (void*) &mreq, sizeof(mreq));
     }
 #ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
@@ -257,8 +267,8 @@ gnet_mcast_socket_join_group (GMcastSocket* socket,
       mreq.ipv6mr_interface = 0;
 
       /* Join the group */
-      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-		      (void*) &mreq, sizeof(mreq));
+      rv = setsockopt (udpsocket->sockfd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
+          (void*) &mreq, sizeof(mreq));
     }
 #endif
   else
@@ -282,7 +292,14 @@ gint
 gnet_mcast_socket_leave_group (GMcastSocket* socket, 
 			       const GInetAddr* inetaddr)
 {
+  GUdpSocket *udpsocket;
+
   gint rv = -1;
+
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), -1);
+
+  udpsocket = GNET_UDP_SOCKET (socket);
 
   if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET)
     {
@@ -294,8 +311,8 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
       mreq.imr_interface.s_addr = g_htonl(INADDR_ANY);
 
       /* Join the group */
-      rv = setsockopt(socket->sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
-		      (void*) &mreq, sizeof(mreq));
+      rv = setsockopt (udpsocket->sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP,
+          (void*) &mreq, sizeof(mreq));
     }
 #ifdef HAVE_IPV6
   else if (GNET_INETADDR_FAMILY(inetaddr) == AF_INET6)
@@ -308,8 +325,8 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
       mreq.ipv6mr_interface = 0;
 
       /* Join the group */
-      rv = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
-		      (void*) &mreq, sizeof(mreq));
+      rv = setsockopt (udpsocket->sockfd, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
+          (void*) &mreq, sizeof(mreq));
     }
 #endif
   else
@@ -378,25 +395,31 @@ gnet_mcast_socket_leave_group (GMcastSocket* socket,
 gint
 gnet_mcast_socket_get_ttl (const GMcastSocket* socket)
 {
+  GUdpSocket *udpsocket;
   guchar ttl;
   socklen_t ttl_size;
   int rv = -1;
 
+  g_return_val_if_fail (socket != NULL, -2);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), -2);
+
+  udpsocket = GNET_UDP_SOCKET (socket);
+
   ttl_size = sizeof(ttl);
 
   /* Get the IPv4 TTL if the socket is bound to an IPv4 address */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET)
+  if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET)
     {
-      rv = getsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
-		      (void*) &ttl, &ttl_size);
+      rv = getsockopt (udpsocket->sockfd, IPPROTO_IP,
+          IP_MULTICAST_TTL, (void*) &ttl, &ttl_size);
     }
 
   /* Get the IPv6 TTL if the socket is bound to an IPv6 address */
 #ifdef HAVE_IPV6
-  else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
+  else if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET6)
     {
-      rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
-		      (void*) &ttl, &ttl_size);
+      rv = getsockopt (udpsocket->sockfd, IPPROTO_IPV6,
+          IPV6_MULTICAST_HOPS, (void*) &ttl, &ttl_size);
     }
 #endif
   else
@@ -424,11 +447,17 @@ gnet_mcast_socket_get_ttl (const GMcastSocket* socket)
 gint
 gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
 {
+  GUdpSocket *udpsocket;
   guchar ttlb;
   int rv1, rv2;
 #ifdef HAVE_IPV6
   GIPv6Policy policy;
 #endif
+
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), -1);
+
+  udpsocket = GNET_UDP_SOCKET (socket);
 
   rv1 = -1;
   rv2 = -1;
@@ -437,27 +466,27 @@ gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
      0::0 IPv6 and IPv6 policy allows IPv4, set IP_TTL.  In the latter case,
      if we bind to 0::0 and the host is dual-stacked, then all IPv4
      interfaces will be bound to also. */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET 
+  if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET 
 #ifdef HAVE_IPV6
-      || (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
-       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
+      || (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET6 &&
+       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(udpsocket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4))
 #endif
       )
     {
       ttlb = ttl;
-      rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
+      rv1 = setsockopt (udpsocket->sockfd, IPPROTO_IP, IP_MULTICAST_TTL, 
 		       (void*) &ttlb, sizeof(ttlb));
     }
 
 
   /* If the bind address is IPv6, set IPV6_UNICAST_HOPS */
 #ifdef HAVE_IPV6
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
+  if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET6)
     {
       ttlb = ttl;
-      rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
+      rv2 = setsockopt (udpsocket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 
 		       (void*) &ttlb, sizeof(ttlb));
     }
 #endif
@@ -484,17 +513,23 @@ gnet_mcast_socket_set_ttl (GMcastSocket* socket, gint ttl)
 gint
 gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
 {
+  GUdpSocket *udpsocket;
   socklen_t flag_size;
   int rv = -1;
   gint is_loopback = 0;
 
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), -1);
+
+  udpsocket = GNET_UDP_SOCKET (socket);
+
   /* Get IPv4 loopback if it's bound to a IPv4 address */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET)
+  if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET)
     {
       guchar flag;
 
       flag_size = sizeof (flag);
-      rv = getsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, 
+      rv = getsockopt (udpsocket->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP, 
 		      (char *) &flag, &flag_size);
       if (flag)
 	is_loopback = 1;
@@ -502,12 +537,12 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
 
   /* Otherwise, get IPv6 loopback */
 #ifdef HAVE_IPV6
-  else if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
+  else if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET6)
     {
       guint flag;
 
       flag_size = sizeof (flag);
-      rv = getsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, 
+      rv = getsockopt (udpsocket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, 
 		      (void *) &flag, &flag_size);
       if (flag)
 	is_loopback = 1;
@@ -538,19 +573,25 @@ gnet_mcast_socket_is_loopback (const GMcastSocket* socket)
 gint
 gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
 {
+  GUdpSocket *udpsocket;
   int rv1, rv2;
 #ifdef HAVE_IPV6
   GIPv6Policy policy;
 #endif
 
+  g_return_val_if_fail (socket != NULL, -1);
+  g_return_val_if_fail (GNET_IS_MCAST_SOCKET (socket), -1);
+
+  udpsocket = GNET_UDP_SOCKET (socket);
+
   rv1 = -1;
   rv2 = -1;
 
   /* Set IPv4 loopback.  (As in set_ttl().) */
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET 
+  if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET 
 #ifdef HAVE_IPV6
-      || (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6 &&
-       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6(socket->sa).sin6_addr) &&
+      || (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET6 &&
+       IN6_IS_ADDR_UNSPECIFIED(&GNET_SOCKADDR_SA6 (udpsocket->sa).sin6_addr) &&
        ((policy = gnet_ipv6_get_policy()) == GIPV6_POLICY_IPV4_THEN_IPV6 ||
 	policy == GIPV6_POLICY_IPV6_THEN_IPV4))
 #endif
@@ -560,19 +601,19 @@ gnet_mcast_socket_set_loopback (GMcastSocket* socket, gboolean enable)
 
       flag = (guchar) enable;
 
-      rv1 = setsockopt(socket->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP,
+      rv1 = setsockopt (udpsocket->sockfd, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       (char *) &flag, sizeof(flag));
     }
 
   /* Set IPv6 loopback */
 #ifdef HAVE_IPV6
-  if (GNET_SOCKADDR_FAMILY(socket->sa) == AF_INET6)
+  if (GNET_SOCKADDR_FAMILY (udpsocket->sa) == AF_INET6)
     {
       guint flag;
 
       flag = (guint) enable;
 
-      rv2 = setsockopt(socket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+      rv2 = setsockopt (udpsocket->sockfd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       (void *) &flag, sizeof(flag));
     }
 #endif

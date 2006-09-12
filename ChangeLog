@@ -1,6 +1,22 @@
 2006-09-12  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/gnet-private.h:
+	* src/mcast.c: (gnet_mcast_socket_new_full),
+	(gnet_mcast_socket_delete), (gnet_mcast_socket_ref),
+	(gnet_mcast_socket_unref), (gnet_mcast_socket_get_io_channel),
+	(gnet_mcast_socket_get_local_inetaddr),
+	(gnet_mcast_socket_join_group), (gnet_mcast_socket_leave_group),
+	(gnet_mcast_socket_get_ttl), (gnet_mcast_socket_set_ttl),
+	(gnet_mcast_socket_is_loopback), (gnet_mcast_socket_set_loopback):
+	* src/mcast.h:
+	* src/udp.c:
+	  Move GUdpSocket structure back into gnet-private.h and make
+	  GMcastSocket derive from it explicitly and properly. More and
+	  better guards for input to public gnet_mcast_*() functions.
+
+2006-09-12  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/gnet-private.h:
 	* src/unix.c:
 	  Move another private structure that is only used locally
 	  to where it belongs.
