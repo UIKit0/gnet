@@ -252,22 +252,6 @@ struct _GInetAddr
 };
 
 
-#ifndef GNET_WIN32  /*********** Unix specific ***********/
-
-struct _GUnixSocket
-{
-  gint sockfd;
-  guint ref_count;
-  GIOChannel *iochannel;
-  struct sockaddr_un sa;
-
-  gboolean server;
-};
-
-#endif	/*********** End Unix specific ***********/
-
-
-
 /* **************************************** */
 /* Async functions			*/
 

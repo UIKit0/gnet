@@ -24,6 +24,16 @@
 
 #include "unix.h"
 
+struct _GUnixSocket
+{
+  gint sockfd;
+  guint ref_count;
+  GIOChannel *iochannel;
+  struct sockaddr_un sa;
+
+  gboolean server;
+};
+
 #define PATH(S) (((struct sockaddr_un *) (&(S)->sa))->sun_path)
 gboolean gnet_unix_socket_unlink (const gchar *path);
 
