@@ -1,27 +1,27 @@
-
 GNet AUTHORS
 ------------
 
 GNet authors and other contributors
 
-Lead Developer
---------------
-David Helder 	   <dhelder@gizmolabs.org>
+Lead Developers
+---------------
+Tim-Philipp Müller <tim centricular net>
+David Helder       <dhelder@gizmolabs.org>
 
 Authors
 -------
-David Helder 	   <dhelder@umich.edu>		 Original version, Deb's
+David Helder       <dhelder@umich.edu>           Original version, Debs
 Xavier Nicolovici  <nicolovi@club-internet.fr>   gnet.spec.in
-Soeren Sandmann	   <sandmann@daimi.au.dk>	 HP-UX portability fixes
-Jacques Fortier    <jfortier@seul.org>		 iochannel_readline_strdup()
-Andrew Lanoix      <alanoix@umich.edu>		 Win32 port
-Eric Cronin	   <ecronin@umich.edu>		 MacOSX port
-David Bolcsfoldi   <david.bolcsfoldi@telia.com>	 URL improvements
-Marius Eriksen	   <marius@umich.edu>		 SOCKS support
-Mark Ferlatte      <ferlatte@cryptio.net>	 Unix sockets
-Eric Williams	   <ericjw@umich.edu>		 URL escape code
-Alfred Reibenschuh <alfredreibenschuh@gmx.net>	 Base64 module
-Tim M�ller	   <t.i.m@zen.co.uk>		 HTTP Conn module
+Soeren Sandmann    <sandmann@daimi.au.dk>        HP-UX portability fixes
+Jacques Fortier    <jfortier@seul.org>           iochannel_readline_strdup()
+Andrew Lanoix      <alanoix@umich.edu>           Win32 port
+Eric Cronin        <ecronin@umich.edu>           MacOSX port
+David Bolcsfoldi   <david.bolcsfoldi@telia.com>  URL improvements
+Marius Eriksen	   <marius@umich.edu>            SOCKS support
+Mark Ferlatte      <ferlatte@cryptio.net>        Unix sockets
+Eric Williams      <ericjw@umich.edu>            URL escape code
+Alfred Reibenschuh <alfredreibenschuh@gmx.net>   Base64 module
+Tim-Philipp Müller <t.i.m@zen.co.uk>             HTTP Conn module
 
 Credits
 -------

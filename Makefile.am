@@ -44,7 +44,7 @@ configinclude_DATA = gnetconfig.h
 
 WEBPATH=/home/web/gnetlibrary.org/data
 
-DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING
+DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING MAINTAINERS
 
 TARBALL=gnet-$(VERSION).tar.gz
 

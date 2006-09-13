@@ -1,5 +1,12 @@
 2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* AUTHORS:
+	* MAINTAINERS:
+	* Makefile.am:
+	  Add maintainers file, update/utf8-ise/reformat authors file.
+
+2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/tcp.c: (gnet_tcp_socket_connect_async_cancel):
 	  We used gnet_inetaddr_new_list_async(), so we also need to call
 	  gnet_inetaddr_new_list_async_cancel() to cancel it, and not
