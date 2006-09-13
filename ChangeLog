@@ -1,5 +1,16 @@
 2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* tests/.cvsignore:
+	* tests/Makefile.am:
+	* tests/tcp_test.c:
+	  Add unit test for bug #305854.
+
+	* examples/sdr.c: (main):
+	  Add some refs/unrefs to test the derived nature of GMcastSocket and
+	  the run-time 'type checks'.
+
+2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/gnet-private.h:
 	* src/inetaddr.c: (gnet_inetaddr_new_async):
 	* src/tcp.c: (gnet_tcp_socket_connect_async),

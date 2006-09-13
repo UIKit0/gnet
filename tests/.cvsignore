@@ -12,3 +12,4 @@ base64_test
 .client*
 .server*
 conn_http_test
+tcp_test

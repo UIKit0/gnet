@@ -51,6 +51,14 @@ main(int argc, char** argv)
   ms = gnet_mcast_socket_new_with_port (9875);
   g_assert(ms != NULL);
 
+  /* Make sure it derives properly from GUdpSocket */
+  gnet_udp_socket_ref ((GUdpSocket *) ms);
+  gnet_udp_socket_unref ((GUdpSocket *) ms);
+
+  /* Let's check this as well then, just for fun */
+  gnet_mcast_socket_ref (ms);
+  gnet_mcast_socket_unref (ms);
+
   /* Get address of our group */
   ia = gnet_inetaddr_new ("sap.mcast.net", 9875);
   g_assert(ia != NULL);

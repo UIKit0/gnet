@@ -2,8 +2,8 @@
 
 @SET_MAKE@
 
-TESTS =  base64_test conn_http_test hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test $(NETWORK_TESTS)
-check_PROGRAMS = base64_test conn_http_test hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test
+TESTS =  base64_test conn_http_test hash_test inetaddr_test ipv6_test pack_test tcp_test unpack_test uri_test $(NETWORK_TESTS)
+check_PROGRAMS = base64_test conn_http_test hash_test inetaddr_test ipv6_test pack_test tcp_test unpack_test uri_test
 check_SCRIPTS= $(NETWORK_TESTS)
 #EXTRA_PROGRAMS = base64_test conn_http_test hash_test inetaddr_test ipv6_test pack_test unpack_test uri_test
 EXTRA_SCRIPTS = client_server_test.pl dns_test.pl
@@ -18,6 +18,7 @@ hash_test_SOURCES     = hash_test.c
 inetaddr_test_SOURCES = inetaddr_test.c
 ipv6_test_SOURCES     = ipv6_test.c
 pack_test_SOURCES     = pack_test.c
+tcp_test_SOURCES      = tcp_test.c
 unpack_test_SOURCES   = unpack_test.c
 uri_test_SOURCES      = uri_test.c
 
