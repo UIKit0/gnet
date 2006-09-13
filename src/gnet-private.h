@@ -360,8 +360,8 @@ typedef struct _GTcpSocketConnectState
   GList* ia_list;
   GList* ia_next;
 
-  gpointer inetaddr_id;
-  gpointer tcp_id;
+  GInetAddrNewListAsyncID  inetaddr_id;
+  GTcpSocketNewAsyncID     tcp_id;
 
   gboolean in_callback;
 

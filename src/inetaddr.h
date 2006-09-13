@@ -24,10 +24,7 @@
 
 #include <glib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
+G_BEGIN_DECLS
 
 /**
  *  GInetAddr
@@ -117,7 +114,7 @@ GList*     gnet_inetaddr_list_interfaces (void);
  *   calling gnet_inetaddr_new_async_cancel() with the ID.
  *
  **/
-typedef gpointer GInetAddrNewAsyncID;
+typedef struct _GInetAddrNewState * GInetAddrNewAsyncID;
 
 
 
@@ -130,8 +127,7 @@ typedef gpointer GInetAddrNewAsyncID;
  *   The address will be NULL if the lookup failed.
  *
  **/
-typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr, 
-				      gpointer data);
+typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr, gpointer data);
 
 
 GInetAddrNewAsyncID 
@@ -150,7 +146,7 @@ void gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
  *   calling gnet_inetaddr_new_list_async_cancel() with the ID.
  *
  **/
-typedef gpointer GInetAddrNewListAsyncID;
+typedef struct _GInetAddrNewListState * GInetAddrNewListAsyncID;
 
 
 
@@ -163,7 +159,7 @@ typedef gpointer GInetAddrNewListAsyncID;
  *   list of GInetAddrs.  The list is NULL if the lookup failed.
  *
  **/
-typedef void (*GInetAddrNewListAsyncFunc)(GList* list, gpointer data);
+typedef void (*GInetAddrNewListAsyncFunc) (GList * list, gpointer data);
 
 GInetAddrNewListAsyncID 
 gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
@@ -181,7 +177,7 @@ void gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
  *   calling gnet_inetaddr_get_name_async_cancel() with the ID.
  *
  **/
-typedef gpointer GInetAddrGetNameAsyncID;
+typedef struct _GInetAddrReverseAsyncState * GInetAddrGetNameAsyncID;
 
 
 
@@ -194,8 +190,7 @@ typedef gpointer GInetAddrGetNameAsyncID;
  *   name.  The name will be NULL if the lookup failed.
  *
  **/
-typedef void (*GInetAddrGetNameAsyncFunc)(gchar* hostname,
-					  gpointer data);
+typedef void (*GInetAddrGetNameAsyncFunc) (gchar * hostname, gpointer data);
 
 
 GInetAddrGetNameAsyncID
@@ -205,10 +200,6 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
 
 void    gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
 
-
-
-#ifdef __cplusplus
-}
-#endif				/* __cplusplus */
+G_END_DECLS
 
 #endif /* _GNET_INETADDR_H */

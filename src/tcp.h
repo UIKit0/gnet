@@ -26,9 +26,7 @@
 
 #include <glib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
 /**
  *  GTcpSocket
@@ -106,7 +104,7 @@ void 	    gnet_tcp_socket_set_tos (GTcpSocket* socket, GNetTOS tos);
  *  by calling gnet_tcp_socket_connect_async_cancel() with the ID.
  *
  **/
-typedef gpointer GTcpSocketConnectAsyncID;
+typedef struct _GTcpSocketConnectState * GTcpSocketConnectAsyncID;
 
 
 
@@ -214,9 +212,6 @@ void gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
 void gnet_tcp_socket_server_accept_async_cancel (GTcpSocket* socket);
 
 
-
-#ifdef __cplusplus
-}
-#endif				/* __cplusplus */
+G_END_DECLS
 
 #endif /* _GNET_TCP_H */

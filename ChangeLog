@@ -1,3 +1,17 @@
+2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/tcp.c: (gnet_tcp_socket_connect_async_cancel):
+	  We used gnet_inetaddr_new_list_async(), so we also need to call
+	  gnet_inetaddr_new_list_async_cancel() to cancel it, and not
+	  gnet_inetaddr_new_async_cancel(). Would cause invalid memory access,
+	  double frees and other weird things when cancelling an asynchronous
+	  TCP connect before the dns lookup has finished. Fixes #305854.
+
+	* src/gnet-private.h:
+	* src/inetaddr.h:
+	* src/tcp.h:
+	  The compiler can help us with stuff like this. Let's let it.
+
 2006-09-12  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/gnet-private.h:
