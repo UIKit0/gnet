@@ -22,6 +22,38 @@
 #include "socks-private.h"
 #include "tcp.h"
 
+static gboolean gnet_tcp_socket_new_async_cb (GIOChannel * iochannel,
+    GIOCondition condition, gpointer data);
+static void gnet_tcp_socket_connect_inetaddr_cb (GList * ia_list, gpointer data);
+static void gnet_tcp_socket_connect_tcp_cb (GTcpSocket * socket, gpointer data);
+
+typedef struct _GTcpSocketAsyncState
+{
+  GTcpSocket             * socket;
+  GTcpSocketNewAsyncFunc   func;
+  gpointer                 data;
+  gint                     flags;
+  GIOChannel             * iochannel;
+  guint                    connect_watch;
+#ifdef GNET_WIN32
+  gint                     errorcode;
+#endif
+} GTcpSocketAsyncState;
+
+typedef struct _GTcpSocketConnectState
+{
+  GList * ia_list;
+  GList * ia_next;
+
+  GInetAddrNewListAsyncID  inetaddr_id;
+  GTcpSocketNewAsyncID     tcp_id;
+
+  gboolean in_callback;
+
+  GTcpSocketConnectAsyncFunc func;
+  gpointer                   data;
+} GTcpSocketConnectState;
+
 /**
  *  gnet_tcp_socket_connect
  *  @hostname: host name
@@ -91,12 +123,13 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
   g_return_val_if_fail(func != NULL, NULL);
 
   state = g_new0(GTcpSocketConnectState, 1);
+
   state->func = func;
   state->data = data;
 
   state->inetaddr_id = 
     gnet_inetaddr_new_list_async (hostname, port,  
-				  gnet_tcp_socket_connect_inetaddr_cb, 
+				  gnet_tcp_socket_connect_inetaddr_cb,
 				  state);
 
   /* On failure, gnet_inetaddr_new_list_async() returns NULL.  It will
@@ -112,7 +145,7 @@ gnet_tcp_socket_connect_async (const gchar* hostname, gint port,
 
 
 
-void
+static void
 gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
@@ -127,8 +160,8 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 
       while (state->ia_next != NULL)
 	{
+	  GTcpSocketNewAsyncID tcp_id;
 	  GInetAddr* ia;
-	  gpointer tcp_id;
 
 	  ia = (GInetAddr*) state->ia_next->data;
 	  state->ia_next = state->ia_next->next;
@@ -164,7 +197,7 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 }
 
 
-void 
+static void 
 gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, gpointer data)
 {
   GTcpSocketConnectState* state = (GTcpSocketConnectState*) data;
@@ -481,7 +514,7 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
 }
 
 
-gboolean 
+static gboolean 
 gnet_tcp_socket_new_async_cb (GIOChannel* iochannel, 
 			      GIOCondition condition, 
 			      gpointer data)

@@ -29,6 +29,72 @@
 #include <ifaddrs.h>
 #endif
 
+#ifndef G_THREADS_ENABLED /* unix fork() variant */
+static gboolean gnet_inetaddr_new_list_async_cb (GIOChannel * iochannel,
+    GIOCondition condition, gpointer data);
+static gboolean gnet_inetaddr_get_name_async_cb (GIOChannel * iochannel,
+    GIOCondition condition, gpointer data);
+#endif
+
+typedef struct _GInetAddrNewListState 
+{
+  GList*	ias;
+  gint		port;
+  GInetAddrNewListAsyncFunc func;
+  gpointer 	data;
+
+  gboolean 	in_callback;
+#ifdef G_THREADS_ENABLED
+  GStaticMutex	mutex;
+  gboolean	is_cancelled;
+  gboolean	lookup_failed;
+  guint 	source;
+
+#else			       	/* UNIX process	*/
+  int 		fd;
+  pid_t 	pid;
+  GIOChannel* 	iochannel;
+  guint 	watch;
+  int 		len;
+  guchar 	buffer[256];
+
+#endif
+
+} GInetAddrNewListState;
+
+typedef struct _GInetAddrNewState 
+{
+  GInetAddrNewListAsyncID   list_id;
+  GInetAddrNewAsyncFunc     func;
+  gpointer                  data;
+  gboolean                  in_callback;
+#ifdef G_THREADS_ENABLED
+  GStaticMutex              mutex;
+#endif
+} GInetAddrNewState;
+
+typedef struct _GInetAddrReverseAsyncState 
+{
+  GInetAddr* ia;
+  GInetAddrGetNameAsyncFunc func;
+  gpointer data;
+  gboolean in_callback;
+#ifdef G_THREADS_ENABLED
+  GStaticMutex mutex;
+  gboolean	is_cancelled;
+  gchar*	name;
+  guint 	source;
+#else				/* UNIX process	*/
+  int 		fd;
+  pid_t 	pid;
+  guint 	watch;
+  GIOChannel* 	iochannel;
+#endif
+  guchar	buffer[256 + 1];/* Names can only be 256 characters? */
+  int 		len;
+
+} GInetAddrReverseAsyncState;
+
 
 #ifdef GNET_WIN32
 #include <process.h>
@@ -695,6 +761,9 @@ gnet_inetaddr_new_async (const gchar* hostname, gint port,
 #endif
 
   if (list_id == NULL) {
+#ifdef G_THREADS_ENABLED
+    g_static_mutex_free (&state->mutex);
+#endif
     g_free (state);
     return NULL;
   }
@@ -1199,7 +1268,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
 #else		/* ********** UNIX process ********** */
 
 
-gboolean 
+static gboolean 
 gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel, 
 				 GIOCondition condition, 
 				 gpointer data)

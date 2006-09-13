@@ -1,5 +1,15 @@
 2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/gnet-private.h:
+	* src/inetaddr.c: (gnet_inetaddr_new_async):
+	* src/tcp.c: (gnet_tcp_socket_connect_async),
+	(gnet_tcp_socket_connect_inetaddr_cb):
+	  Move more private and only locally used structs into the
+	  appropriate .c files; make some internal functions static;
+	  use proper AsyncID types for such IDs; don't leak mutex. 
+
+2006-09-13  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* AUTHORS:
 	* MAINTAINERS:
 	* Makefile.am:
