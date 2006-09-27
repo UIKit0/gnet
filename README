@@ -25,9 +25,9 @@ Features:
 GNet has been ported to Linux, *BSD, MacOSX, Solaris, HP, MacOS X, and
 Windows.  It may work on other operating systems also.
 
-GNet requires GLib 1.2 or 2.0/2.2, available at www.gtk.org.  Or, if
+GNet requires GLib 2.x, available at www.gtk.org.  Or, if
 you have a system with packages (e.g., Red Hat or Debian), look for
-the latest glib package.
+the latest glib package (glib2-devel or libglib2.0-dev usually).
 
 Comments and questions should be sent to gnet@gnetlibrary.org.
 
@@ -41,10 +41,6 @@ In a nutshell:
   > ./configure
   > make
   > make install
-
-To force GNet to build against GLib 1.2, pass the --enable-glib1.2 to
-configure.  GNet will attempt to build against GLib 2 by default and
-GLib 1.2 if GLib 2 is not available.
 
 If gethostbyname() and gethostbyaddr() are thread-safe, pass the
 --enable-threadsafe-gethostbyname() to configure.  (If it is and you
