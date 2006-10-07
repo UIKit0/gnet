@@ -1,3 +1,14 @@
+2006-10-07  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/base64.c: (gnet_base64_encode), (gnet_base64_decode):
+	  Add guards for NULL input. A 0-length input to gnet_base64_encode()
+	  should return an empty string and not NULL. In the case of
+	  gnet_base64_decode(), use strlen(src) for all non-positive values
+	  of srclen and not just 0, since glib usually uses -1 for this
+	  (0-sized input should really just have returned a 0-sized output
+	  buffer, but we can't change that now for backwards compatibility
+	  reasons).
+
 2006-09-27  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* README:

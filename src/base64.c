@@ -7,7 +7,7 @@
  *  |___/
  *
  *  created by Alfred Reibenschuh <alfredreibenschuh@gmx.net>,
- *  under the ``GNU Library General Public License´´ (see below).
+ *  under the GNU Library General Public License (see below).
  *
  ***********************************************************************
  *
@@ -69,7 +69,10 @@ static const guchar gnet_Base64_rank[256] = {
  *  @strict to TRUE to insert a newline every 72th character.  This is
  *  required by RFC 2045, but some applications don't require this.
  *
- *  Returns: caller-owned buffer.
+ *  If @srclen is 0, an empty string will be returned (not NULL).
+ *
+ *  Returns: a newly-allocated and NUL-terminated string containing the
+ *  input data in base64 coding. Free with g_free() when no longer needed.
  *
  **/
 gchar*
@@ -82,8 +85,11 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
   gint ocnt;
   gint i;
 
+  g_return_val_if_fail (src != NULL, NULL);
+  g_return_val_if_fail (srclen >= 0, NULL);
+
   if (srclen == 0) 
-    return NULL;	/* FIX: Or return ""? */
+    return g_strdup ("");
 
   /* Calculate required length of dst.  4 bytes of dst are needed for
      every 3 bytes of src. */
@@ -168,28 +174,31 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
 /**
  *  gnet_base64_decode
  *  @src: the source buffer
- *  @srclen: the length of the source buffer
- *  @dstlenp: pointer to length of the destination buffer
+ *  @srclen: the length of the source buffer, or -1 for strlen(@src).
+ *  @dstlenp: where to return the length of the returned output buffer
  *
  *  Convert a buffer from base64 to binary representation.  This
  *  function is liberal in what it will accept.  It ignores non-base64
  *  symbols.
  *
- *  Returns: caller-owned buffer.  The integer pointed to by @dstlenp
- *  is set to the length of that buffer.
+ *  Returns: newly-allocated buffer. Free with g_free() when no longer
+ *  needed. The integer pointed to by @dstlenp is set to the length of
+ *  that buffer. 
  *
  **/
 gchar* 
 gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp)
 {
-
   gchar* dst;
   gint   dstidx, state, ch = 0;
   gchar  res;
   guchar pos;
 
-  if (srclen == 0) 
+  g_return_val_if_fail (src != NULL, NULL);
+
+  if (srclen <= 0) 
     srclen = strlen(src);
+
   state = 0;
   dstidx = 0;
   res = 0;
