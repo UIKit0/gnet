@@ -184,11 +184,21 @@ http_async_callback (GConnHttp *http, GConnHttpEvent *event, gpointer main_loop)
 	{
 		case GNET_CONN_HTTP_RESOLVED:
 		case GNET_CONN_HTTP_RESPONSE:
-		case GNET_CONN_HTTP_DATA_PARTIAL:
 		case GNET_CONN_HTTP_REDIRECT:
 		case GNET_CONN_HTTP_CONNECTED:
 			break;
 		
+		case GNET_CONN_HTTP_DATA_PARTIAL:
+		{
+			GConnHttpEventData *data_event = (GConnHttpEventData*) event;
+
+			/* we received data, make sure these values are set */
+			g_assert (data_event->buffer != NULL);
+			g_assert (data_event->buffer_length > 0);
+			g_assert (data_event->data_received > 0);
+			break;
+		}
+
 		case GNET_CONN_HTTP_ERROR:
 		{
 			GConnHttpEventError *err_event = (GConnHttpEventError*) event;

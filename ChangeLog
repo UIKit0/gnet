@@ -1,5 +1,17 @@
 2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn-http.c: (gnet_conn_http_conn_recv_chunk_body),
+	(gnet_conn_http_conn_recv_nonchunked_data):
+	  Don't forget to set the buffer_length member in our
+	  GConnHttpEventData structure when emitting a PARTIAL_DATA
+	  event.
+
+	* tests/conn_http_test.c: (http_async_callback):
+	  Check that GConnHttpEventData members are set for PARTIAL_DATA
+	  events.
+
+2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/conn-http.c: (gnet_conn_http_append_to_buf),
 	(gnet_conn_http_new), (gnet_conn_http_set_user_agent):
 	  Append comment with GNet version to any custom user agent

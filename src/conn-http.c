@@ -1072,6 +1072,7 @@ gnet_conn_http_conn_recv_chunk_body (GConnHttp *conn, gchar *data, gsize len)
 		ev = gnet_conn_http_new_event(GNET_CONN_HTTP_DATA_PARTIAL);
 		ev_data = (GConnHttpEventData*)ev;
 		ev_data->buffer = conn->buffer;
+		ev_data->buffer_length = conn->buflen;
 		ev_data->content_length = conn->content_length;
 		ev_data->data_received  = conn->content_recv;
 		gnet_conn_http_emit_event(conn, ev);
@@ -1129,6 +1130,7 @@ gnet_conn_http_conn_recv_nonchunked_data (GConnHttp *conn, gchar *data, gsize le
 		ev = gnet_conn_http_new_event(GNET_CONN_HTTP_DATA_PARTIAL);
 		ev_data = (GConnHttpEventData*)ev;
 		ev_data->buffer = conn->buffer;
+		ev_data->buffer_length = conn->buflen;
 		ev_data->content_length = conn->content_length;
 		ev_data->data_received  = conn->content_recv;
 		gnet_conn_http_emit_event(conn, ev);
