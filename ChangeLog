@@ -1,5 +1,19 @@
 2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn-http.c: (gnet_conn_http_conn_connected),
+	(gnet_conn_http_conn_recv_response),
+	(gnet_conn_http_conn_recv_headers),
+	(gnet_conn_http_conn_recv_chunk_body),
+	(gnet_conn_http_conn_recv_nonchunked_data),
+	(gnet_conn_http_conn_cb):
+	  Fix behaviour when the server closes the connection (this is not
+	  automatically an error). Fix retrieval of non-text data in
+	  non-chunked mode (we would use _readline() for non-chunked mode,
+	  but this might cause data at the end of the file to be lost if
+	  the file is random binary data).
+
+2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/conn-http.c: (gnet_conn_http_conn_recv_chunk_body),
 	(gnet_conn_http_conn_recv_nonchunked_data):
 	  Don't forget to set the buffer_length member in our

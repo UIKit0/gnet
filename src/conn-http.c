@@ -751,6 +751,7 @@ gnet_conn_http_conn_connected (GConnHttp *conn)
 	gnet_conn_write(conn->conn, request->str, request->len);
 	conn->status = STATUS_SENT_REQUEST;
 
+	/* read response */
 	gnet_conn_readline(conn->conn);
 
 	g_string_free(request, TRUE);
@@ -942,6 +943,7 @@ gnet_conn_http_conn_recv_response (GConnHttp *conn, gchar *data, gsize len)
 	{
 		conn->response_code = (guint) strtol(start+1, &endptr, 10);
 
+		/* read first header */
 		gnet_conn_readline(conn->conn);
 		
 		/* may we continue the POST request? */
@@ -990,6 +992,7 @@ gnet_conn_http_conn_recv_headers (GConnHttp *conn, gchar *data, gsize len)
 		}
 		else if (conn->tenc_chunked)
 		{
+			/* read line with chunk size of first data chunk */
 			gnet_conn_readline(conn->conn);
 			conn->status = STATUS_RECV_CHUNK_SIZE;
 			return;
@@ -1019,6 +1022,7 @@ gnet_conn_http_conn_recv_headers (GConnHttp *conn, gchar *data, gsize len)
 		conn->resp_headers = g_list_append(conn->resp_headers, hdr);
 	}
 
+	/* read next header line */
 	gnet_conn_readline(conn->conn);
 }
 
@@ -1079,6 +1083,7 @@ gnet_conn_http_conn_recv_chunk_body (GConnHttp *conn, gchar *data, gsize len)
 		gnet_conn_http_free_event(ev);
 	}
 
+	/* read line with chunk size of next chunk */
 	gnet_conn_readline(conn->conn);
 
 	conn->status = STATUS_RECV_CHUNK_SIZE;
@@ -1108,16 +1113,9 @@ gnet_conn_http_conn_recv_nonchunked_data (GConnHttp *conn, gchar *data, gsize le
 	}
 	else
 	{
-		/* len contains terminating NUL with _readline() */
-		/* remote closed connection? */
-		if (len == 1 && *data == 0x00) 
-		{
-			gnet_conn_http_done(conn);
-			return;
-		}
-		conn->content_recv += len-1; /* see above */
-		gnet_conn_http_append_to_buf(conn, data, len-1);
-		gnet_conn_readline(conn->conn);
+		conn->content_recv += len;
+		gnet_conn_http_append_to_buf (conn, data, len);
+		gnet_conn_read (conn->conn);
 	}
 
 	/* we don't want to emit data events if we're 
@@ -1211,16 +1209,8 @@ gnet_conn_http_conn_cb (GConn *c, GConnEvent *event, GConnHttp *httpconn)
 		
 		case GNET_CONN_CLOSE:
 			gnet_conn_disconnect(httpconn->conn);
-                        
-			/* Makes sure we retrieve new location if required */
-			if (httpconn->redirect_location)
-			{
-				gnet_conn_http_done(httpconn);
-				break;
-			}
-                        
-			if (httpconn->loop)
-				g_main_loop_quit(httpconn->loop);
+			/* _done() will take care of redirection and main loop quitting */
+			gnet_conn_http_done(httpconn);
 			break;
 		
 		case GNET_CONN_TIMEOUT:
@@ -1232,6 +1222,7 @@ gnet_conn_http_conn_cb (GConn *c, GConnEvent *event, GConnHttp *httpconn)
 			break;
 		
 		case GNET_CONN_READ:
+			/* Note: GConn translates reads of 0 bytes into CLOSE for us */
 			gnet_conn_http_conn_got_data(httpconn, event->buffer, event->length);
 			break;
 		
