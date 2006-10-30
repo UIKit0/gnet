@@ -14,6 +14,8 @@ Changes in GNet
 * GConnHttp: do not emit data events for
   pages that are being redirected to a
   new location.
+* GConnHttp: add gnet_conn_http_set_escaped_uri()
+  (Samuel Cormier-Iijima)
 * Eliminate direct pthread usage on unix
   and use GLib GThreads instead (also
   fixes problems with gdb and valgrind)

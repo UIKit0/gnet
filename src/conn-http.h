@@ -343,6 +343,9 @@ GConnHttp       *gnet_conn_http_new                (void);
 gboolean         gnet_conn_http_set_uri            (GConnHttp        *conn,
                                                     const gchar      *uri);
 
+gboolean         gnet_conn_http_set_escaped_uri    (GConnHttp        *conn,
+                                                    const gchar      *uri);
+
 gboolean         gnet_conn_http_set_header         (GConnHttp           *conn,
                                                     const gchar         *field,
                                                     const gchar         *value,

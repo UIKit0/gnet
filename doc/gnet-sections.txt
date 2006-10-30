@@ -180,6 +180,7 @@ GConnHttpFunc
 GConnHttpHeaderFlags
 gnet_conn_http_new
 gnet_conn_http_set_uri
+gnet_conn_http_set_escaped_uri
 gnet_conn_http_set_header
 gnet_conn_http_set_max_redirects
 gnet_conn_http_set_timeout

@@ -491,26 +491,13 @@ gnet_conn_http_set_user_agent (GConnHttp *conn, const gchar *agent)
 	return gnet_conn_http_set_header (conn, "User-Agent", agent, 0);
 }
 
-
-/**
- *  gnet_conn_http_set_uri
- *  @conn: a #GConnHttp
- *  @uri: URI string
- *
- *  Sets the URI to GET or POST, e.g. http://www.google.com
- *
- *  Returns: TRUE if the URI has been accepted.
- *
- **/
-
-gboolean
-gnet_conn_http_set_uri (GConnHttp *conn, const gchar *uri)
+static gboolean
+gnet_conn_http_set_uri_internal (GConnHttp *conn, const gchar *uri,
+    gboolean uri_is_escaped)
 {
 	gchar *old_hostname = NULL;
 
-	g_return_val_if_fail (conn != NULL, FALSE);
-	g_return_val_if_fail (uri  != NULL, FALSE);
-	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
+	g_assert (conn != NULL && uri != NULL);
 
 	if (conn->uri)
 	{
@@ -555,11 +542,54 @@ gnet_conn_http_set_uri (GConnHttp *conn, const gchar *uri)
 
 	gnet_uri_set_scheme(conn->uri, "http");
 
-	gnet_uri_escape(conn->uri);
+	if (!uri_is_escaped)
+		gnet_uri_escape (conn->uri);
 
 	return TRUE;
 }
 
+/**
+ *  gnet_conn_http_set_uri
+ *  @conn: a #GConnHttp
+ *  @uri: URI string
+ *
+ *  Sets the URI to GET or POST, e.g. http://www.foo.com/bar.html. @uri is
+ *  assumed to be unescaped, so all special URI characters will be escaped.
+ *
+ *  Returns: TRUE if the URI has been accepted.
+ *
+ **/
+
+gboolean
+gnet_conn_http_set_uri (GConnHttp *conn, const gchar *uri)
+{
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (uri  != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
+
+	return gnet_conn_http_set_uri_internal (conn, uri, FALSE);
+}
+
+/**
+ *  gnet_conn_http_set_escaped_uri
+ *  @conn: a #GConnHttp
+ *  @uri: URI string with special characters already escaped
+ *
+ *  Sets the URI to GET or POST, e.g. http://www.foo.com/My%%20Documents/bar.txt
+ *
+ *  Returns: TRUE if the URI has been accepted.
+ *
+ **/
+
+gboolean
+gnet_conn_http_set_escaped_uri (GConnHttp *conn, const gchar *uri)
+{
+	g_return_val_if_fail (conn != NULL, FALSE);
+	g_return_val_if_fail (uri  != NULL, FALSE);
+	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
+
+	return gnet_conn_http_set_uri_internal (conn, uri, TRUE);
+}
 
 /**
  *  gnet_conn_http_set_method
