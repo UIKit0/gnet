@@ -142,7 +142,7 @@ gnet_conn_http_append_to_buf (GConnHttp *conn, const gchar *data, gsize datalen)
 	g_return_if_fail (conn != NULL);
 	g_return_if_fail (data != NULL);
 	
-        if (conn->buflen + datalen >= conn->bufalloc)
+	if (conn->buflen + datalen >= conn->bufalloc)
 	{
 		while (conn->buflen + datalen >= conn->bufalloc)
 			conn->bufalloc += GNET_CONN_HTTP_BUF_INCREMENT;
@@ -225,7 +225,6 @@ GConnHttp *
 gnet_conn_http_new (void)
 {
 	GConnHttp  *conn;
-	gchar       agentstr[64];
 
 	conn = g_new0 (GConnHttp, 1);
 
@@ -236,10 +235,9 @@ gnet_conn_http_new (void)
 	conn->bufalloc = GNET_CONN_HTTP_BUF_INCREMENT;
 	conn->buflen   = 0;
 
-	g_snprintf(agentstr, sizeof(agentstr), "GNet-%u.%u.%u",
-	           GNET_MAJOR_VERSION, GNET_MINOR_VERSION, GNET_MICRO_VERSION);
+	/* set default user agent */
+	gnet_conn_http_set_user_agent (conn, NULL);
 
-	gnet_conn_http_set_user_agent (conn, agentstr);
 	gnet_conn_http_set_method (conn, GNET_CONN_HTTP_METHOD_GET, NULL, 0);
 
 	gnet_conn_http_set_header (conn, "Accept", "*/*", 0);
@@ -475,7 +473,8 @@ gnet_conn_http_set_header (GConnHttp   *conn,
 /**
  *  gnet_conn_http_set_user_agent
  *  @conn: a #GConnHttp
- *  @agent: the user agent string to send
+ *  @agent: the user agent string to send (will be supplemented by a GNet
+ *          version number comment)
  *
  *  Convenience function. Wraps gnet_conn_http_set_header().
  *
@@ -486,9 +485,25 @@ gnet_conn_http_set_header (GConnHttp   *conn,
 gboolean
 gnet_conn_http_set_user_agent (GConnHttp *conn, const gchar *agent)
 {
+	gboolean ret;
+	gchar *full;
+
 	g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
 
-	return gnet_conn_http_set_header (conn, "User-Agent", agent, 0);
+	if (agent == NULL)
+	{
+		agent = (const gchar *) g_get_prgname ();
+		if (agent == NULL)
+			agent = "GNet";
+	}
+
+	full = g_strdup_printf ("%s (GNet-%u.%u.%u)", agent, GNET_MAJOR_VERSION,
+	                        GNET_MINOR_VERSION, GNET_MICRO_VERSION);
+
+	ret = gnet_conn_http_set_header (conn, "User-Agent", full, 0);
+	g_free (full);
+
+	return ret;
 }
 
 static gboolean

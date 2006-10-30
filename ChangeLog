@@ -1,5 +1,12 @@
 2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn-http.c: (gnet_conn_http_append_to_buf),
+	(gnet_conn_http_new), (gnet_conn_http_set_user_agent):
+	  Append comment with GNet version to any custom user agent
+	  strings; minor indentation fix in _append_to_buf().
+
+2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
+
 	Based on patch by: Samuel Cormier-Iijima  <sciyoshi@gmail.com>
 
 	* NEWS:
