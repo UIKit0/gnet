@@ -1,3 +1,10 @@
+2006-12-10  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/xmlrpc/xmlrpc-client.c: (gnet_xmlrpc_client_call),
+	(build_xmlrpc_message):
+	  Use gsize where appropriate; add cast from gsize to correct printf
+	  format. Patch by Jeff Garzik <jeff at garzik org>.
+
 2006-10-30  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/conn-http.c: (gnet_conn_http_conn_connected),

@@ -92,7 +92,7 @@ int gnet_xmlrpc_client_call(GNetXmlRpcClient *_client,
   gchar *p;
   GString *xmlrpc_string = g_string_new("");
   GString *reply_string = g_string_new("");
-  guint n;
+  gsize n;
   gchar buffer[1024];
   gint error;
   
@@ -254,8 +254,8 @@ static gchar *build_xmlrpc_message(const gchar *method,
                          "User-Agent: Frontier/5.1.2 (WinNT)\n"
                          "Host: localhost\n"
                          "Content-Type: text/xml\n"
-                         "Content-length: %d\n\n",
-                         xmlrpc_msg->len);
+                         "Content-length: %u\n\n",
+                         (guint) xmlrpc_msg->len);
   g_string_append_len(req_string,
                       xmlrpc_msg->str,
                       xmlrpc_msg->len);
