@@ -277,14 +277,10 @@ gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id)
     }
 
   if (state->inetaddr_id)
-    {
       gnet_inetaddr_new_list_async_cancel (state->inetaddr_id);
-    }
 
   if (state->tcp_id)
-    {
       gnet_tcp_socket_new_async_cancel (state->tcp_id);
-    }
 
   g_free (state);
 }

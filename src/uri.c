@@ -663,11 +663,8 @@ gnet_uri_set_scheme (GURI* uri, const gchar* scheme)
 {
   g_return_if_fail (uri);
 
-  if (uri->scheme)
-    {
-      g_free (uri->scheme);
-      uri->scheme = NULL;
-    }
+  g_free (uri->scheme);
+  uri->scheme = NULL;
 
   if (scheme)
     uri->scheme = g_strdup (scheme);
@@ -687,11 +684,8 @@ gnet_uri_set_userinfo (GURI* uri, const gchar* userinfo)
 {
   g_return_if_fail (uri);
 
-  if (uri->userinfo)
-    {
-      g_free (uri->userinfo);
-      uri->userinfo = NULL;
-    }
+  g_free (uri->userinfo);
+  uri->userinfo = NULL;
 
   if (userinfo)
     uri->userinfo = g_strdup (userinfo);
@@ -711,11 +705,8 @@ gnet_uri_set_hostname (GURI* uri, const gchar* hostname)
 {
   g_return_if_fail (uri);
 
-  if (uri->hostname)
-    {
-      g_free (uri->hostname);
-      uri->hostname = NULL;
-    }
+  g_free (uri->hostname);
+  uri->hostname = NULL;
 
   if (hostname)
     uri->hostname = g_strdup (hostname);
@@ -750,11 +741,8 @@ gnet_uri_set_path (GURI* uri, const gchar* path)
 {
   g_return_if_fail (uri);
 
-  if (uri->path)
-    {
-      g_free (uri->path);
-      uri->path = NULL;
-    }
+  g_free (uri->path);
+  uri->path = NULL;
 
   if (path)
     uri->path = g_strdup (path);
@@ -775,11 +763,8 @@ gnet_uri_set_query (GURI* uri, const gchar* query)
 {
   g_return_if_fail (uri);
 
-  if (uri->query)
-    {
-      g_free (uri->query);
-      uri->query = NULL;
-    }
+  g_free (uri->query);
+  uri->query = NULL;
 
   if (query)
     uri->query = g_strdup (query);
@@ -799,11 +784,8 @@ gnet_uri_set_fragment (GURI* uri, const gchar* fragment)
 {
   g_return_if_fail (uri);
 
-  if (uri->fragment)
-    {
-      g_free (uri->fragment);
-      uri->fragment = NULL;
-    }
+  g_free (uri->fragment);
+  uri->fragment = NULL;
 
   if (fragment)
     uri->fragment = g_strdup (fragment);

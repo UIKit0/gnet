@@ -260,8 +260,7 @@ gnet_conn_unref (GConn* conn)
   if (conn->inetaddr)
     gnet_inetaddr_delete (conn->inetaddr);
 
-  if (conn->buffer)
-    g_free (conn->buffer);
+  g_free (conn->buffer);
 
   g_free (conn);
 }

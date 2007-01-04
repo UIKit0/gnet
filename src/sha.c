@@ -561,8 +561,7 @@ gnet_sha_clone (const GSHA* sha)
 void
 gnet_sha_delete (GSHA* sha)
 {
-  if (sha)
-    g_free (sha);
+  g_free (sha);
 }
 
 

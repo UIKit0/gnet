@@ -438,8 +438,7 @@ gnet_md5_clone (const GMD5* md5)
 void
 gnet_md5_delete (GMD5* md5)
 {
-  if (md5)
-    g_free (md5);
+  g_free (md5);
 }
 
 

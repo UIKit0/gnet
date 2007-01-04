@@ -1576,8 +1576,7 @@ gnet_inetaddr_unref (GInetAddr* inetaddr)
 
   if (inetaddr->ref_count == 0)
     {
-      if (inetaddr->name != NULL) 
-	g_free (inetaddr->name);
+      g_free (inetaddr->name);
       g_free (inetaddr);
     }
 }
@@ -1967,8 +1966,7 @@ gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel,
 	  name = g_new(gchar, state->buffer[0] + 1);
 	  memcpy (name, &state->buffer[1], state->buffer[0]);
 	  name[state->buffer[0]] = '\0';
-	  if (state->ia->name) 
-	    g_free(state->ia->name);
+	  g_free(state->ia->name);
 	  state->ia->name = name;
 
 	  /* Remove the watch now in case we don't return immediately */
