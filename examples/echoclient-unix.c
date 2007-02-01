@@ -51,7 +51,8 @@ main(int argc, char** argv)
 
   switch (client_type) {
   case NORMAL:
-    g_print ("Normal echo client running\n");
+    /* output would confuse our testing scripts */
+    /* g_print ("Normal echo client running\n"); */
     normal_echoclient(argv[argc - 1]);
     break;
   case ASYNC:

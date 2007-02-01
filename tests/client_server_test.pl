@@ -7,6 +7,7 @@
 
 my $bin_dir = '../examples';
 my $port = 8174;
+my $unix_socket = '/tmp/gnet-unix-socket-test';
 my $debug = 0;
 my $testfile = 'testfile';
 my $pause = 3;
@@ -36,7 +37,7 @@ test ("echoserver", 	    "echoclient", 1);
 test ("echoserver", 	    "echoclient", 2);
 test ("echoserver", 	    "echoclient", 16);
 test ("echoserver", 	    "echoclient", 32);
-	
+
 test ("echoserver", 	    "echoclient-async", 1);
 test ("echoserver", 	    "echoclient-async", 2);
 test ("echoserver", 	    "echoclient-async", 16);
@@ -84,6 +85,14 @@ test ("echoserver-udp",     "echoclient-udp", 1);
 test ("echoserver-udp",     "echoclient-udp", 2);
 test ("echoserver-udp",     "echoclient-udp", 16);
 test ("echoserver-udp",     "echoclient-udp", 32);
+
+# now the tests that take a unix socket path argument
+$port = 0;
+
+test ("echoserver-unix", "echoclient-unix", 1);
+test ("echoserver-unix", "echoclient-unix", 2);
+test ("echoserver-unix", "echoclient-unix", 16);
+test ("echoserver-unix", "echoclient-unix", 32);
 
 exit $failed;
 
@@ -199,7 +208,14 @@ sub server
     {
 
 	setpgrp (0, $$);
-	system ("$bin_dir/$server $port > $tempfile 2>&1");
+	if ($port == 0)
+	{
+		system ("$bin_dir/$server $unix_socket > $tempfile 2>&1");
+	}
+	else
+	{
+		system ("$bin_dir/$server $port > $tempfile 2>&1");
+	}
 	exit 2;   # This shouldn't happen
     }
     else                     # Error
@@ -231,7 +247,14 @@ sub client
 	setpgrp (0, $$);
 
 	alarm 15;
-	system ("$bin_dir/$client localhost $port < $testfile > $tempfile 2>&1");
+	if ($port == 0)
+	{
+		system ("$bin_dir/$client $unix_socket < $testfile > $tempfile 2>&1");
+	}
+	else
+	{
+		system ("$bin_dir/$client localhost $port < $testfile > $tempfile 2>&1");
+	}
 	exit 3 if $? != 0;
 	alarm 0;
 

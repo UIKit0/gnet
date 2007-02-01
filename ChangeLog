@@ -1,3 +1,12 @@
+2007-02-01  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/echoclient-unix.c: (main):
+	  Don't print a welcome message to stdout, it confuses the
+	  automatic testing script.
+
+	* tests/client_server_test.pl:
+	  Test unix socket server/client as well.
+
 2007-01-04  Tim-Philipp Müller  <tim at centricular dot net>
 
 	Patch by: Jeff Garzik <jeff at garzik org>
