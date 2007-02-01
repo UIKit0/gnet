@@ -48,6 +48,9 @@ event will eventually occur.
 See also GServer and the echoclient-gconn example.
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GConn ##### -->
 <para>
 
@@ -237,6 +240,17 @@ See also GServer and the echoclient-gconn example.
 @conn: 
 @buffer: 
 @length: 
+
+
+<!-- ##### FUNCTION gnet_conn_write_direct ##### -->
+<para>
+
+</para>
+
+@conn: 
+@buffer: 
+@length: 
+@buffer_destroy_cb: 
 
 
 <!-- ##### FUNCTION gnet_conn_set_watch_error ##### -->

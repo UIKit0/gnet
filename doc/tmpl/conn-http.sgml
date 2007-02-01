@@ -214,6 +214,16 @@ GNet headers (otherwise you will get compiler errors when trying to use it).
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_conn_http_set_escaped_uri ##### -->
+<para>
+
+</para>
+
+@conn: 
+@uri: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_conn_http_set_header ##### -->
 <para>
 
@@ -296,8 +306,6 @@ GNet headers (otherwise you will get compiler errors when trying to use it).
 @buffer: 
 @length: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@buflen: 
 
 
 <!-- ##### FUNCTION gnet_conn_http_cancel ##### -->

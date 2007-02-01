@@ -45,6 +45,9 @@ This module will use SOCKS if enabled.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GTcpSocket ##### -->
 <para>
 
@@ -119,8 +122,6 @@ This module will use SOCKS if enabled.
 </para>
 
 @id: 
-<!-- # Unused Parameters # -->
-@async_id: 
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_new ##### -->
@@ -149,8 +150,6 @@ This module will use SOCKS if enabled.
 </para>
 
 @id: 
-<!-- # Unused Parameters # -->
-@async_id: 
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_delete ##### -->
@@ -159,8 +158,6 @@ This module will use SOCKS if enabled.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_ref ##### -->
@@ -169,8 +166,6 @@ This module will use SOCKS if enabled.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_unref ##### -->
@@ -179,8 +174,6 @@ This module will use SOCKS if enabled.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_get_io_channel ##### -->
@@ -245,8 +238,6 @@ This module will use SOCKS if enabled.
 </para>
 
 @Returns: 
-<!-- # Unused Parameters # -->
-@port: 
 
 
 <!-- ##### FUNCTION gnet_tcp_socket_server_new_with_port ##### -->

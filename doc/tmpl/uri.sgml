@@ -25,6 +25,9 @@ unescaped URIs.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GURI ##### -->
 <para>
 
@@ -72,8 +75,6 @@ unescaped URIs.
 @query: 
 @fragment: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@protocol: 
 
 
 <!-- ##### FUNCTION gnet_uri_clone ##### -->

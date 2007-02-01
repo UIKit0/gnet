@@ -15,6 +15,9 @@ should be called at the beginning of any GNet program.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### MACRO GNET_EXPORT ##### -->
 <para>
 

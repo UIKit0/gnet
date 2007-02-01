@@ -63,6 +63,9 @@ gnet_md5_delete (md5);
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GMD5 ##### -->
 <para>
 
@@ -102,8 +105,6 @@ gnet_md5_delete (md5);
 
 @md5: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_delete ##### -->
@@ -112,8 +113,6 @@ gnet_md5_delete (md5);
 </para>
 
 @md5: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_new_incremental ##### -->
@@ -132,8 +131,6 @@ gnet_md5_delete (md5);
 @md5: 
 @buffer: 
 @length: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_final ##### -->
@@ -142,8 +139,6 @@ gnet_md5_delete (md5);
 </para>
 
 @md5: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_equal ##### -->
@@ -172,8 +167,6 @@ gnet_md5_delete (md5);
 
 @md5: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_get_string ##### -->
@@ -183,8 +176,6 @@ gnet_md5_delete (md5);
 
 @md5: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 
 <!-- ##### FUNCTION gnet_md5_copy_string ##### -->
@@ -194,7 +185,5 @@ gnet_md5_delete (md5);
 
 @md5: 
 @buffer: 
-<!-- # Unused Parameters # -->
-@gmd5: 
 
 

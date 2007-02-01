@@ -66,6 +66,9 @@ variables are not checked on Windows.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GIPv6Policy ##### -->
 <para>
 

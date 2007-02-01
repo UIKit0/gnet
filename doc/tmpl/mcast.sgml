@@ -31,6 +31,9 @@ disable loopback.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GMcastSocket ##### -->
 <para>
 
@@ -62,8 +65,6 @@ disable loopback.
 @iface: 
 @port: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ia: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_delete ##### -->
@@ -72,8 +73,6 @@ disable loopback.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@ms: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_ref ##### -->
@@ -82,8 +81,6 @@ disable loopback.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_unref ##### -->
@@ -92,8 +89,6 @@ disable loopback.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_get_io_channel ##### -->
@@ -122,9 +117,6 @@ disable loopback.
 @socket: 
 @inetaddr: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@ia: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_leave_group ##### -->
@@ -135,9 +127,6 @@ disable loopback.
 @socket: 
 @inetaddr: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@ia: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_get_ttl ##### -->
@@ -147,9 +136,6 @@ disable loopback.
 
 @socket: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@us: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_set_ttl ##### -->
@@ -160,9 +146,6 @@ disable loopback.
 @socket: 
 @ttl: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@val: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_send ##### -->
@@ -175,9 +158,6 @@ disable loopback.
 @length: 
 @dst: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@data: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_receive ##### -->
@@ -190,9 +170,6 @@ disable loopback.
 @length: 
 @src: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@data: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_has_packet ##### -->
@@ -202,8 +179,6 @@ disable loopback.
 
 @socket: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_is_loopback ##### -->
@@ -213,8 +188,6 @@ disable loopback.
 
 @socket: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
 
 
 <!-- ##### FUNCTION gnet_mcast_socket_set_loopback ##### -->
@@ -225,9 +198,6 @@ disable loopback.
 @socket: 
 @enable: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@ms: 
-@b: 
 
 
 <!-- ##### MACRO gnet_mcast_socket_to_udp_socket ##### -->

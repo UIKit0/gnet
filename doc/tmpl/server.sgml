@@ -22,6 +22,9 @@ See also #GConn and the echoserver-gserver example.
 <para>
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GServer ##### -->
 <para>
 

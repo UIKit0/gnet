@@ -15,6 +15,9 @@ writing to GIOChannels.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### FUNCTION gnet_io_channel_writen ##### -->
 <para>
 
@@ -25,10 +28,6 @@ writing to GIOChannels.
 @length: 
 @bytes_writtenp: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@bytes_written: 
-@buf: 
-@len: 
 
 
 <!-- ##### FUNCTION gnet_io_channel_readn ##### -->
@@ -41,10 +40,6 @@ writing to GIOChannels.
 @length: 
 @bytes_readp: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@bytes_read: 
-@buf: 
-@len: 
 
 
 <!-- ##### FUNCTION gnet_io_channel_readline ##### -->
@@ -57,10 +52,6 @@ writing to GIOChannels.
 @length: 
 @bytes_readp: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@bytes_read: 
-@buf: 
-@len: 
 
 
 <!-- ##### FUNCTION gnet_io_channel_readline_strdup ##### -->
@@ -72,8 +63,5 @@ writing to GIOChannels.
 @bufferp: 
 @bytes_readp: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@bytes_read: 
-@buf_ptr: 
 
 

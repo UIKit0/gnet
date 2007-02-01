@@ -1,5 +1,26 @@
 2007-02-01  Tim-Philipp Müller  <tim at centricular dot net>
 
+        * doc/tmpl/base64.sgml:
+        * doc/tmpl/conn-http.sgml:
+        * doc/tmpl/conn.sgml:
+        * doc/tmpl/gnet.sgml:
+        * doc/tmpl/inetaddr.sgml:
+        * doc/tmpl/iochannel.sgml:
+        * doc/tmpl/ipv6.sgml:
+        * doc/tmpl/mcast.sgml:
+        * doc/tmpl/md5.sgml:
+        * doc/tmpl/pack.sgml:
+        * doc/tmpl/server.sgml:
+        * doc/tmpl/sha.sgml:
+        * doc/tmpl/socks.sgml:
+        * doc/tmpl/tcp.sgml:
+        * doc/tmpl/udp.sgml:
+        * doc/tmpl/unix.sgml:
+        * doc/tmpl/uri.sgml:
+	  Update.
+
+2007-02-01  Tim-Philipp Müller  <tim at centricular dot net>
+
 	Based on patch by: Zeeshan Ali  <zeenix at gmail.com>
 
 	* NEWS:

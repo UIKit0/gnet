@@ -28,6 +28,9 @@ version is used.  The default is version 5.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### MACRO GNET_SOCKS_PORT ##### -->
 <para>
 
@@ -72,8 +75,6 @@ version is used.  The default is version 5.
 </para>
 
 @inetaddr: 
-<!-- # Unused Parameters # -->
-@ia: 
 
 
 <!-- ##### FUNCTION gnet_socks_get_version ##### -->

@@ -44,6 +44,9 @@ applications.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GUdpSocket ##### -->
 <para>
 
@@ -83,8 +86,6 @@ applications.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_ref ##### -->
@@ -93,8 +94,6 @@ applications.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_unref ##### -->
@@ -103,8 +102,6 @@ applications.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_send ##### -->
@@ -117,9 +114,6 @@ applications.
 @length: 
 @dst: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@s: 
-@data: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_receive ##### -->
@@ -132,9 +126,6 @@ applications.
 @length: 
 @src: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@s: 
-@data: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_has_packet ##### -->
@@ -144,8 +135,6 @@ applications.
 
 @socket: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_get_io_channel ##### -->
@@ -173,8 +162,6 @@ applications.
 
 @socket: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@us: 
 
 
 <!-- ##### FUNCTION gnet_udp_socket_set_ttl ##### -->
@@ -185,8 +172,5 @@ applications.
 @socket: 
 @ttl: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@us: 
-@val: 
 
 

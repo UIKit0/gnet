@@ -29,6 +29,9 @@ See the documentation on TCP sockets for more information.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GUnixSocket ##### -->
 <para>
 
@@ -50,8 +53,6 @@ See the documentation on TCP sockets for more information.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_unix_socket_ref ##### -->
@@ -60,8 +61,6 @@ See the documentation on TCP sockets for more information.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_unix_socket_unref ##### -->
@@ -70,8 +69,6 @@ See the documentation on TCP sockets for more information.
 </para>
 
 @socket: 
-<!-- # Unused Parameters # -->
-@s: 
 
 
 <!-- ##### FUNCTION gnet_unix_socket_get_io_channel ##### -->
