@@ -23,6 +23,13 @@
 #ifndef GNET_WIN32
 
 #include "unix.h"
+#include <errno.h>
+#include <string.h>
+
+#ifndef SUN_LEN
+#define SUN_LEN(sa_un) \
+    G_STRUCT_OFFSET (struct sockaddr_un, sun_path) + strlen (sa_un->sun_path)
+#endif
 
 struct _GUnixSocket
 {
@@ -52,24 +59,27 @@ gboolean gnet_unix_socket_unlink (const gchar *path);
 GUnixSocket*
 gnet_unix_socket_new (const gchar* path)
 {
-  GUnixSocket *s = g_new0(GUnixSocket, 1);
   struct sockaddr_un *sa_un;
+  GUnixSocket *s;
 	
-  g_return_val_if_fail(path != NULL, NULL);
-  sa_un = (struct sockaddr_un *) &s->sa;
+  g_return_val_if_fail (path != NULL, NULL);
+
   /* Create socket */
+  s = g_new0 (GUnixSocket, 1);
+  sa_un = (struct sockaddr_un *) &s->sa;
   s->ref_count = 1;
   s->server = FALSE;
-  s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (!GNET_IS_SOCKET_VALID(s->sockfd))
-    {
-      g_warning ("socket() failed");
-      g_free(s);
-      return NULL;
-    }
-  memcpy(sa_un->sun_path, path, strlen(path));
+  s->sockfd = socket (AF_UNIX, SOCK_STREAM, 0);
+  if (!GNET_IS_SOCKET_VALID (s->sockfd)) {
+    g_warning ("socket(%s) failed: %s", path, g_strerror (errno));
+    g_free(s);
+    return NULL;
+  }
+  strncpy (sa_un->sun_path, path, sizeof (sa_un->sun_path) - 1);
   sa_un->sun_family = AF_UNIX;
-  if (connect(s->sockfd, (struct sockaddr*) &s->sa, sizeof(s->sa)) != 0) {
+  if (connect (s->sockfd, (struct sockaddr*) sa_un, SUN_LEN (sa_un)) != 0) {
+    g_warning ("connect(%s) failed: %s", path, g_strerror (errno));
+    GNET_CLOSE_SOCKET (s->sockfd);
     g_free(s);
     return NULL;
   }
@@ -209,40 +219,40 @@ gnet_unix_socket_server_new (const gchar *path)
   s = g_new0(GUnixSocket, 1);
   sa_un = (struct sockaddr_un *) &s->sa;
   sa_un->sun_family = AF_UNIX;
-  memcpy(sa_un->sun_path, path, strlen(path));
+  strncpy (sa_un->sun_path, path, sizeof (sa_un->sun_path) - 1);
   s->ref_count = 1;
   s->server = TRUE;
   
-  if (! gnet_unix_socket_unlink(PATH(s)))
+  if (!gnet_unix_socket_unlink(PATH(s)))
     goto error;
   
   s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (!GNET_IS_SOCKET_VALID(s->sockfd))
     {
-      g_warning ("socket() failed");
+      g_warning ("socket(%s) failed: %s", path, g_strerror (errno));
       goto error;
     }
 
   flags = fcntl(s->sockfd, F_GETFL, 0);
   if (flags == -1)
     {
-      g_warning ("fcntl() failed");
+      g_warning ("fcntl(%s) failed: %s", path, g_strerror (errno));
       goto error;
     }
 
   /* Make the socket non-blocking */
   if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
     {
-      g_warning ("fcntl() failed");
+      g_warning ("fcntl(%s) failed: %s", path, g_strerror (errno));
       goto error;
     }
 
-  if (bind(s->sockfd, (struct sockaddr*) &s->sa, sizeof(s->sa)) != 0)
+  if (bind (s->sockfd, (struct sockaddr*) sa_un, SUN_LEN (sa_un)) != 0)
     goto error;
 
   n = sizeof(s->sa);
   /* Get the socket name FIXME (why? -DAH) */
-  if (getsockname(s->sockfd, (struct sockaddr*) &s->sa, &n) != 0)
+  if (getsockname (s->sockfd, (struct sockaddr*) &s->sa, &n) != 0)
     goto error;
 
   if (listen(s->sockfd, 10) != 0)
@@ -250,9 +260,8 @@ gnet_unix_socket_server_new (const gchar *path)
 
   return s;
 	
- error:
-  if (s)
-    gnet_unix_socket_delete(s);
+error:
+  gnet_unix_socket_delete (s);
   return NULL;
 }
 

@@ -41,7 +41,10 @@ Changes in GNet
   copying them (Jeff Garzik)
 * Fix for race condition and subsequent
   crash in asynchroneous DNS lookup
-  (Steve Morris, Tim Muller)
+  (Steve Morris, Tim Müller)
+* Pass correct size parameters to bind()
+  and connect() when creating unix sockets
+  (Zeeshan Ali, #403197)
 
 2.0.7
 -----

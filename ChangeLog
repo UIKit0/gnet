@@ -1,5 +1,18 @@
 2007-02-01  Tim-Philipp Müller  <tim at centricular dot net>
 
+	Based on patch by: Zeeshan Ali  <zeenix at gmail.com>
+
+	* NEWS:
+	* src/unix.c: (gnet_unix_socket_new), (gnet_unix_socket_server_new):
+	  Pass SUN_LEN (struct sockaddr_un) as size parameter to bind() and
+	  connect() rather than just sizeof (struct sockaddr_un); apparently
+	  this matters in some environments (yay for great APIs; also yay for
+	  wrong man pages). Fixes #403197.
+	  Also do a bunch of small clean-ups, and don't leak memory/sockets
+	  in some failure cases.
+
+2007-02-01  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* examples/echoclient-unix.c: (main):
 	  Don't print a welcome message to stdout, it confuses the
 	  automatic testing script.
