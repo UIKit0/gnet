@@ -26,11 +26,6 @@
 #include <errno.h>
 #include <string.h>
 
-#ifndef SUN_LEN
-#define SUN_LEN(sa_un) \
-    G_STRUCT_OFFSET (struct sockaddr_un, sun_path) + strlen (sa_un->sun_path)
-#endif
-
 struct _GUnixSocket
 {
   gint sockfd;
@@ -42,10 +37,19 @@ struct _GUnixSocket
   gboolean abstract;        /* Abstract unix socket? */
 };
 
+#define PATH(S) (((struct sockaddr_un *) (&(S)->sa))->sun_path)
+
+#ifndef SUN_LEN
+#define SUN_LEN(sa_un) \
+    G_STRUCT_OFFSET (struct sockaddr_un, sun_path) + strlen (sa_un->sun_path)
+#endif
+
 /* GNET_SUN_LEN: our own version of SUN_LEN that also works for abstract
  * sockets where SUN_LEN fails because it doesn't take into account the
  * initial zero in the path string in the case of abstract sockets */
 #define GNET_SUN_LEN(sa_un) gnet_sun_len(sa_un)
+
+static gboolean gnet_unix_socket_unlink (const gchar *path);
 
 static guint
 gnet_sun_len (struct sockaddr_un *sa_un)
@@ -58,9 +62,6 @@ gnet_sun_len (struct sockaddr_un *sa_un)
   return G_STRUCT_OFFSET (struct sockaddr_un, sun_path) + 1
        + strlen (sa_un->sun_path + 1);
 }
-
-#define PATH(S) (((struct sockaddr_un *) (&(S)->sa))->sun_path)
-gboolean gnet_unix_socket_unlink (const gchar *path);
 
 static GUnixSocket*
 gnet_unix_socket_new_internal (const gchar * path, gboolean abstract)
@@ -463,30 +464,20 @@ gnet_unix_socket_server_accept_nonblock (const GUnixSocket *socket)
   return s;
 }
 
-
-/**
- *  gnet_unix_socket_unlink
- *  @path: path
- *
- *  Unlink a Unix socket named @path.
- *
- *  Returns: TRUE on success, FALSE on failure.
- **/
-gboolean
-gnet_unix_socket_unlink(const gchar *path)
+static gboolean
+gnet_unix_socket_unlink(const gchar * path)
 {
   struct stat stbuf;
-  int r;
 
-  g_return_val_if_fail(path != NULL, FALSE);
-  r = stat(path, &stbuf);
-  if (r == 0) {
+  g_return_val_if_fail (path != NULL, FALSE);
+
+  if (stat (path, &stbuf) == 0) {
     if (S_ISSOCK(stbuf.st_mode)) {
       if (unlink(path) == 0) {
-	return TRUE;
+        return TRUE;
       } else {
-				/* Can't unlink */
-	return FALSE;
+        /* Can't unlink */
+        return FALSE;
       }
     } else {
       /* path is not a socket */
