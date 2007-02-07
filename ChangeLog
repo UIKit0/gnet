@@ -1,3 +1,26 @@
+2007-02-07  Tim-Philipp Müller  <tim at centricular dot net>
+
+	Patch by: Zeeshan Ali <zeenix gmail com>
+
+	* AUTHORS:
+	* NEWS:
+	* configure.ac:
+	* doc/gnet-sections.txt:
+	* doc/tmpl/unix.sgml:
+	* examples/echoclient-unix.c:
+	* examples/echoserver-unix.c:
+	* src/unix.c: (gnet_sun_len), (gnet_unix_socket_new_internal),
+	(gnet_unix_socket_new),	(gnet_unix_socket_new_abstract),
+	(gnet_unix_socket_unref), (gnet_unix_socket_server_new_internal),
+	(gnet_unix_socket_server_new), (gnet_unix_socket_server_new_abstract):
+	* src/unix.h:
+	* tests/client_server_test.pl:
+	  API: gnet_unix_socket_new_abstract()
+	  API: gnet_unix_socket_server_new_abstract()
+	  Add support for abstract unix sockets. If not supported on the
+	  platform used, the new functions will try to create normal unix
+	  sockets. (#404583)
+
 2007-02-01  Tim-Philipp Müller  <tim at centricular dot net>
 
         * doc/tmpl/base64.sgml:

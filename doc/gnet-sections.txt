@@ -303,12 +303,14 @@ gnet_socks_set_version
 <FILE>unix</FILE>
 GUnixSocket
 gnet_unix_socket_new
+gnet_unix_socket_new_abstract
 gnet_unix_socket_delete
 gnet_unix_socket_ref
 gnet_unix_socket_unref
 gnet_unix_socket_get_io_channel
 gnet_unix_socket_get_path
 gnet_unix_socket_server_new
+gnet_unix_socket_server_new_abstract
 gnet_unix_socket_server_accept
 gnet_unix_socket_server_accept_nonblock
 </SECTION>

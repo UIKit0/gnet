@@ -21,7 +21,8 @@ Marius Eriksen	   <marius@umich.edu>            SOCKS support
 Mark Ferlatte      <ferlatte@cryptio.net>        Unix sockets
 Eric Williams      <ericjw@umich.edu>            URL escape code
 Alfred Reibenschuh <alfredreibenschuh@gmx.net>   Base64 module
-Tim-Philipp Müller <t.i.m@zen.co.uk>             HTTP Conn module
+Tim-Philipp Müller <tim centricular net>         HTTP Conn module
+Zeeshan Ali        <zeenix@gstreamer.net>        Abstract unix socket support
 
 Credits
 -------

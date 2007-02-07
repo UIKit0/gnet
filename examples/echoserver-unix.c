@@ -33,8 +33,8 @@ typedef enum { NORMAL, ASYNC} ServerType;
 void cleanup_on_sig(int signum);
 
 static void usage(int status);
-static void normal_echoserver(gchar *path);
-static void async_echoserver(gchar *path);
+static void normal_echoserver(gchar *path, gboolean abstract);
+static void async_echoserver(gchar *path, gboolean abstract);
 
 GUnixSocket *server;
 
@@ -43,20 +43,21 @@ main(int argc, char** argv)
 {
   gchar *path = NULL;
   ServerType server_type = NORMAL;
+  gboolean abstract = FALSE;
 	
   gnet_init ();
 
-  if (argc !=  2 && argc != 3) {
+  if (argc < 2) {
     usage(EXIT_FAILURE);
   }
-  if (argc == 3) {
-    if (strcmp(argv[1], "--async") == 0)
+  if (argc > 2) {
+    if (strcmp(argv[1], "--async") == 0 || strcmp(argv[2], "--async") == 0)
       server_type = ASYNC;
-    else {
-      usage(EXIT_FAILURE);
-    }
+    if (strcmp(argv[1], "--abstract") == 0 ||
+            strcmp(argv[2], "--abstract") == 0)
+      abstract = TRUE;
   }
-	
+
   path = g_strdup (argv[argc - 1]);
 
   signal(SIGINT, cleanup_on_sig);
@@ -65,11 +66,11 @@ main(int argc, char** argv)
   switch (server_type) {
   case NORMAL:
     g_print("Normal echo server running\n");
-    normal_echoserver(path);
+    normal_echoserver(path, abstract);
     break;
   case ASYNC:
     g_print("Async echo server running\n");
-    async_echoserver(path);
+    async_echoserver(path, abstract);
     break;
   default:
     g_assert_not_reached();
@@ -80,7 +81,7 @@ main(int argc, char** argv)
 static void
 usage(int status)
 {
-  g_print("usage: echoserver-unix [(nothing)|--async] <path>\n");
+  g_print("usage: echoserver-unix [(nothing)|--async| --abstract] <path>\n");
   exit(status);
 }
 
@@ -92,7 +93,7 @@ cleanup_on_sig(int signum)
 }
 
 static void
-normal_echoserver(gchar *path)
+normal_echoserver(gchar *path, gboolean abstract)
 {
   GUnixSocket *client = NULL;
   gchar buffer[1024];
@@ -101,9 +102,11 @@ normal_echoserver(gchar *path)
   GIOError e;
 
   g_assert(path != NULL);
-	
   /* Create the server */
-  server = gnet_unix_socket_server_new(path);
+  if (abstract)
+    server = gnet_unix_socket_server_new_abstract(path);
+  else
+    server = gnet_unix_socket_server_new(path);
   g_assert(server != NULL);
 
   while ((client = gnet_unix_socket_server_accept(server)) != NULL) {
@@ -151,13 +154,16 @@ clientstate_delete(client_state *state)
 }
 
 static void
-async_echoserver(gchar *path)
+async_echoserver(gchar *path, gboolean abstract)
 {
   GIOChannel *iochannel = NULL;
   GMainLoop *main_loop = NULL;
 
   g_assert(path != NULL);
-  server = gnet_unix_socket_server_new(path);
+  if (abstract)
+    server = gnet_unix_socket_server_new_abstract(path);
+  else
+    server = gnet_unix_socket_server_new(path);
   g_assert(server != NULL);
 
   main_loop = g_main_new(FALSE);

@@ -39,11 +39,72 @@ struct _GUnixSocket
   struct sockaddr_un sa;
 
   gboolean server;
+  gboolean abstract;        /* Abstract unix socket? */
 };
+
+/* GNET_SUN_LEN: our own version of SUN_LEN that also works for abstract
+ * sockets where SUN_LEN fails because it doesn't take into account the
+ * initial zero in the path string in the case of abstract sockets */
+#define GNET_SUN_LEN(sa_un) gnet_sun_len(sa_un)
+
+static guint
+gnet_sun_len (struct sockaddr_un *sa_un)
+{
+  /* normal unix socket */
+  if (sa_un->sun_path[0] != '\0')
+    return SUN_LEN (sa_un);
+
+  /* abstract socket, has a zero byte before the path */
+  return G_STRUCT_OFFSET (struct sockaddr_un, sun_path) + 1
+       + strlen (sa_un->sun_path + 1);
+}
 
 #define PATH(S) (((struct sockaddr_un *) (&(S)->sa))->sun_path)
 gboolean gnet_unix_socket_unlink (const gchar *path);
 
+static GUnixSocket*
+gnet_unix_socket_new_internal (const gchar * path, gboolean abstract)
+{
+  struct sockaddr_un *sa_un;
+  GUnixSocket *s;
+	
+  g_return_val_if_fail (path != NULL, NULL);
+
+#ifndef HAVE_ABSTRACT_SOCKETS
+  /* if abstract unix sockets are not available, create a normal unix socket */
+  abstract = FALSE;
+#endif
+
+  /* Create socket */
+  s = g_new0 (GUnixSocket, 1);
+  sa_un = (struct sockaddr_un *) &s->sa;
+  s->ref_count = 1;
+  s->server = FALSE;
+  s->sockfd = socket (AF_UNIX, SOCK_STREAM, 0);
+  if (!GNET_IS_SOCKET_VALID (s->sockfd)) {
+    g_warning ("socket(%s) failed: %s", path, g_strerror (errno));
+    g_free(s);
+    return NULL;
+  }
+    
+  if (abstract) {
+    sa_un->sun_path[0] = '\0';
+    strncpy (sa_un->sun_path + 1, path, sizeof (sa_un->sun_path) - 2);
+    s->abstract = TRUE;
+  } else {
+    strncpy (sa_un->sun_path, path, sizeof (sa_un->sun_path) - 1);
+  }
+
+  sa_un->sun_family = AF_UNIX;
+  if (connect (s->sockfd, (struct sockaddr*) sa_un, GNET_SUN_LEN (sa_un)) != 0) {
+    g_warning ("connect(%s) failed: %s", path, g_strerror (errno));
+    GNET_CLOSE_SOCKET (s->sockfd);
+    g_free(s);
+    return NULL;
+  }
+
+  return s;
+}
 
 /**
  *  gnet_unix_socket_new
@@ -57,35 +118,31 @@ gboolean gnet_unix_socket_unlink (const gchar *path);
  *
  **/
 GUnixSocket*
-gnet_unix_socket_new (const gchar* path)
+gnet_unix_socket_new (const gchar * path)
 {
-  struct sockaddr_un *sa_un;
-  GUnixSocket *s;
-	
-  g_return_val_if_fail (path != NULL, NULL);
-
-  /* Create socket */
-  s = g_new0 (GUnixSocket, 1);
-  sa_un = (struct sockaddr_un *) &s->sa;
-  s->ref_count = 1;
-  s->server = FALSE;
-  s->sockfd = socket (AF_UNIX, SOCK_STREAM, 0);
-  if (!GNET_IS_SOCKET_VALID (s->sockfd)) {
-    g_warning ("socket(%s) failed: %s", path, g_strerror (errno));
-    g_free(s);
-    return NULL;
-  }
-  strncpy (sa_un->sun_path, path, sizeof (sa_un->sun_path) - 1);
-  sa_un->sun_family = AF_UNIX;
-  if (connect (s->sockfd, (struct sockaddr*) sa_un, SUN_LEN (sa_un)) != 0) {
-    g_warning ("connect(%s) failed: %s", path, g_strerror (errno));
-    GNET_CLOSE_SOCKET (s->sockfd);
-    g_free(s);
-    return NULL;
-  }
-  return s;
+  return gnet_unix_socket_new_internal (path, FALSE);
 }
 
+/**
+ *  gnet_unix_socket_new_abstract
+ *  @path: path
+ *
+ *  Creates a #GUnixSocket and connects to @path in the abstract
+ *  unix socket domain. This function will block to connect.  Use this
+ *  constructor to create a #GUnixSocket for a client.
+ *
+ *  If the abstract unix sockets are not available on the platform in use,
+ *  this function will behave like gnet_unix_socket_new().
+ *
+ *  Returns: a new #GUnixSocket, or NULL on failure.
+ *
+ *  Since: 2.0.8
+ **/
+GUnixSocket*
+gnet_unix_socket_new_abstract (const gchar * path)
+{
+  return gnet_unix_socket_new_internal (path, TRUE);
+}
 
 
 /**
@@ -133,15 +190,14 @@ gnet_unix_socket_unref (GUnixSocket* socket)
   g_return_if_fail (socket != NULL);
 
   socket->ref_count--;
-  if (socket->ref_count == 0) 
-    {
-      GNET_CLOSE_SOCKET(socket->sockfd); /* Don't care if this fails. */
-      if (socket->iochannel)
-	g_io_channel_unref(socket->iochannel);
-      if (socket->server)
-	gnet_unix_socket_unlink(PATH(socket));
-      g_free(socket);
-    }
+  if (socket->ref_count == 0)  {
+    GNET_CLOSE_SOCKET(socket->sockfd); /* Don't care if this fails. */
+    if (socket->iochannel)
+      g_io_channel_unref (socket->iochannel);
+    if (socket->server && !socket->abstract)
+      gnet_unix_socket_unlink (PATH (socket));
+    g_free(socket);
+  }
 }
  
    
@@ -195,6 +251,72 @@ gnet_unix_socket_get_path(const GUnixSocket* socket)
   return g_strdup (PATH(socket));
 }
 
+static GUnixSocket*
+gnet_unix_socket_server_new_internal (const gchar * path, gboolean abstract)
+{
+  struct sockaddr_un *sa_un;
+  GUnixSocket *s;
+  gint flags;
+  socklen_t n;
+
+  g_return_val_if_fail (path != NULL, NULL);
+
+#ifndef HAVE_ABSTRACT_SOCKETS
+  /* if abstract unix sockets are not available, create a normal unix socket */
+  abstract = FALSE;
+#endif
+	
+  s = g_new0 (GUnixSocket, 1);
+  sa_un = (struct sockaddr_un *) &s->sa;
+  sa_un->sun_family = AF_UNIX;
+  s->ref_count = 1;
+  s->server = TRUE;
+  
+  if (abstract) {
+    sa_un->sun_path[0] = '\0';
+    strncpy (sa_un->sun_path + 1, path, sizeof (sa_un->sun_path) - 2);
+    s->abstract = TRUE;
+  } else {
+    strncpy (sa_un->sun_path, path, sizeof (sa_un->sun_path) - 1);
+    if (!gnet_unix_socket_unlink (PATH (s)))
+      goto error;
+  }
+
+  s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (!GNET_IS_SOCKET_VALID(s->sockfd)) {
+    g_warning ("socket(%s) failed: %s", path, g_strerror (errno));
+    goto error;
+  }
+
+  flags = fcntl(s->sockfd, F_GETFL, 0);
+  if (flags == -1) {
+    g_warning ("fcntl(%s) failed: %s", path, g_strerror (errno));
+    goto error;
+  }
+
+  /* Make the socket non-blocking */
+  if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1) {
+    g_warning ("fcntl(%s) failed: %s", path, g_strerror (errno));
+    goto error;
+  }
+
+  if (bind (s->sockfd, (struct sockaddr*) sa_un, GNET_SUN_LEN (sa_un)) != 0)
+    goto error;
+
+  /* Get the socket name FIXME (why? -DAH) */
+  n = sizeof(s->sa);
+  if (getsockname (s->sockfd, (struct sockaddr*) &s->sa, &n) != 0)
+    goto error;
+
+  if (listen (s->sockfd, 10) != 0)
+    goto error;
+
+  return s;
+
+error:
+  gnet_unix_socket_delete (s);
+  return NULL;
+}
 
 /**
  *  gnet_unix_socket_server_new
@@ -207,64 +329,32 @@ gnet_unix_socket_get_path(const GUnixSocket* socket)
  *
  **/
 GUnixSocket*
-gnet_unix_socket_server_new (const gchar *path)
+gnet_unix_socket_server_new (const gchar * path)
 {
-  struct sockaddr_un *sa_un;
-  GUnixSocket *s;
-  gint flags;
-  socklen_t n;
-
-  g_return_val_if_fail(path != NULL, NULL);
-	
-  s = g_new0(GUnixSocket, 1);
-  sa_un = (struct sockaddr_un *) &s->sa;
-  sa_un->sun_family = AF_UNIX;
-  strncpy (sa_un->sun_path, path, sizeof (sa_un->sun_path) - 1);
-  s->ref_count = 1;
-  s->server = TRUE;
-  
-  if (!gnet_unix_socket_unlink(PATH(s)))
-    goto error;
-  
-  s->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if (!GNET_IS_SOCKET_VALID(s->sockfd))
-    {
-      g_warning ("socket(%s) failed: %s", path, g_strerror (errno));
-      goto error;
-    }
-
-  flags = fcntl(s->sockfd, F_GETFL, 0);
-  if (flags == -1)
-    {
-      g_warning ("fcntl(%s) failed: %s", path, g_strerror (errno));
-      goto error;
-    }
-
-  /* Make the socket non-blocking */
-  if (fcntl(s->sockfd, F_SETFL, flags | O_NONBLOCK) == -1)
-    {
-      g_warning ("fcntl(%s) failed: %s", path, g_strerror (errno));
-      goto error;
-    }
-
-  if (bind (s->sockfd, (struct sockaddr*) sa_un, SUN_LEN (sa_un)) != 0)
-    goto error;
-
-  n = sizeof(s->sa);
-  /* Get the socket name FIXME (why? -DAH) */
-  if (getsockname (s->sockfd, (struct sockaddr*) &s->sa, &n) != 0)
-    goto error;
-
-  if (listen(s->sockfd, 10) != 0)
-    goto error;
-
-  return s;
-	
-error:
-  gnet_unix_socket_delete (s);
-  return NULL;
+  return gnet_unix_socket_server_new_internal (path, FALSE);
 }
 
+/**
+ *  gnet_unix_socket_server_new_abstract
+ *  @path: path
+ *
+ *  Creates a #GUnixSocket bound to @path in the abstract unix socket
+ *  domain.  Use this constructor to create a #GUnixSocket for a
+ *  server.
+ *
+ *  If the abstract unix sockets are not available on the platform in use,
+ *  this function will behave the same as gnet_unix_socket_server_new().
+ *
+ *  Returns: a new #GUnixSocket, or NULL on error.
+ *
+ *
+ *  Since: 2.0.8
+ **/
+GUnixSocket*
+gnet_unix_socket_server_new_abstract (const gchar * path)
+{
+  return gnet_unix_socket_server_new_internal (path, TRUE);
+}
 
 /**
  *  gnet_unix_socket_server_accept

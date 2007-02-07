@@ -45,6 +45,12 @@ Changes in GNet
 * Pass correct size parameters to bind()
   and connect() when creating unix sockets
   (Zeeshan Ali, #403197)
+* New API: gnet_unix_socket_new_abstract()
+  and gnet_unix_socket_server_new_abstract()
+  add support for abstract unix sockets on
+  systems where this is supported
+  (Zeeshan Ali, #404583)
+
 
 2.0.7
 -----

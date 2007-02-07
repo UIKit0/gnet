@@ -30,34 +30,36 @@ typedef enum { NORMAL, ASYNC} ClientType;
 
 static void usage (int status);
 
-static void normal_echoclient (gchar* path);
-static void async_echoclient (gchar* path);
+static void normal_echoclient (gchar* path, gboolean abstract);
+static void async_echoclient (gchar* path, gboolean abstract);
 
 int
 main(int argc, char** argv)
 {
   ClientType client_type = NORMAL;
+  gboolean abstract = FALSE;
 
   gnet_init ();
 
-  if (argc != 2 && argc != 3)
+  if (argc < 2)
     usage(EXIT_FAILURE);
-  if (argc == 3) {
-    if (strcmp(argv[1], "--async") == 0)
+  if (argc > 2) {
+    if (strcmp(argv[1], "--async") == 0 || strcmp(argv[2], "--async") == 0)
       client_type = ASYNC;
-    else
-      usage(EXIT_FAILURE);
+    if (strcmp(argv[1], "--abstract") == 0 ||
+            strcmp(argv[2], "--abstract") == 0)
+      abstract = TRUE;
   }
 
   switch (client_type) {
   case NORMAL:
     /* output would confuse our testing scripts */
     /* g_print ("Normal echo client running\n"); */
-    normal_echoclient(argv[argc - 1]);
+    normal_echoclient(argv[argc - 1], abstract);
     break;
   case ASYNC:
     g_print ("Asynchronous echo client running (UNFINISHED)\n");
-    async_echoclient(argv[argc - 1]);
+    async_echoclient(argv[argc - 1], abstract);
     break;
   default:
     g_assert_not_reached();
@@ -69,13 +71,13 @@ main(int argc, char** argv)
 static void
 usage (int status)
 {
-	g_print ("usage: echoclient [(nothing)|--async] <path>\n");
+	g_print ("usage: echoclient [(nothing)|--async| --abstract] <path>\n");
 	exit(status);
 }
 
 
 static void
-normal_echoclient(gchar* path)
+normal_echoclient(gchar* path, gboolean abstract)
 {
   GUnixSocket *socket = NULL;
   GIOChannel* iochannel = NULL;
@@ -86,7 +88,10 @@ normal_echoclient(gchar* path)
   g_assert(path != NULL);
 
   /* Create the socket */
-  socket = gnet_unix_socket_new(path);
+  if (abstract)
+    socket = gnet_unix_socket_new_abstract(path);
+  else
+    socket = gnet_unix_socket_new(path);
   g_assert (socket != NULL);
 
   /* Get the IOChannel */
@@ -110,7 +115,7 @@ normal_echoclient(gchar* path)
 }
 
 static void
-async_echoclient(gchar *path)
+async_echoclient(gchar *path, gboolean abstract)
 {
   g_print("Sorry, there is no async echoclient yet.\n");
   return;

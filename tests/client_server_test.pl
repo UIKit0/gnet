@@ -94,6 +94,19 @@ test ("echoserver-unix", "echoclient-unix", 2);
 test ("echoserver-unix", "echoclient-unix", 16);
 test ("echoserver-unix", "echoclient-unix", 32);
 
+# should fallback to normal unix sockets on systems that don't have
+# abstract unix sockets
+test ("echoserver-unix", "echoclient-unix", 1, '--abstract');
+test ("echoserver-unix", "echoclient-unix", 2, '--abstract');
+test ("echoserver-unix", "echoclient-unix", 16, '--abstract');
+test ("echoserver-unix", "echoclient-unix", 32, '--abstract');
+
+# the async echoserver/client isn't finished yet, so doesn't work
+#test ("echoserver-unix", "echoclient-unix", 1, '--async');
+#test ("echoserver-unix", "echoclient-unix", 2, '--async');
+#test ("echoserver-unix", "echoclient-unix", 16, '--async');
+#test ("echoserver-unix", "echoclient-unix", 32, '--async');
+
 exit $failed;
 
 
@@ -113,6 +126,7 @@ sub test
     my $server = $_[0];
     my $client = $_[1];
     my $num_clients = $_[2];
+    my $extra_args = $_[3];
     my $tempfile = "$server.$client.$num_clients";
 
     my $fail = 0;
@@ -124,14 +138,14 @@ sub test
     sleep($pause);
 
     # Launch server
-    server ($server, $tempfile);
+    server ($server, $tempfile, $extra_args);
     sleep (2);
 
     # Launch client(s)
     my $i;
     for ($i = 0; $i < $num_clients; $i++)
     {
-	client ($client, $i, $tempfile);
+	client ($client, $i, $tempfile, $extra_args);
     }
 
     # Wait for all but one (the server) to finish
@@ -195,6 +209,7 @@ sub server
 {
     my $server = $_[0];
     my $tempfile = ".server." . $_[1] . ".out";
+    my $extra_args = $_[2];
     my $pid;
 
     print STDERR "start $tempfile server\n" if $debug;
@@ -207,14 +222,18 @@ sub server
     elsif (defined $pid)     # Child
     {
 
+	if (!defined ($extra_args)) {
+      $extra_args = '';
+	}
+
 	setpgrp (0, $$);
 	if ($port == 0)
 	{
-		system ("$bin_dir/$server $unix_socket > $tempfile 2>&1");
+		system ("$bin_dir/$server $extra_args $unix_socket > $tempfile 2>&1");
 	}
 	else
 	{
-		system ("$bin_dir/$server $port > $tempfile 2>&1");
+		system ("$bin_dir/$server $extra_args $port > $tempfile 2>&1");
 	}
 	exit 2;   # This shouldn't happen
     }
@@ -231,6 +250,7 @@ sub client
     my $num = $_[1];
     my $tempfile = ".client.$num." . $_[2] . ".out";
     my $difffile = ".client.$num." . $_[2] . ".diff";
+    my $extra_args = $_[3];
     my $pid;
 
     print STDERR "start $tempfile client $num\n" if $debug;
@@ -244,16 +264,20 @@ sub client
     {
 	$SIG{'ALRM'} = sub { exit 5; };
 
+	if (!defined ($extra_args)) {
+      $extra_args = '';
+	}
+
 	setpgrp (0, $$);
 
 	alarm 15;
 	if ($port == 0)
 	{
-		system ("$bin_dir/$client $unix_socket < $testfile > $tempfile 2>&1");
+		system ("$bin_dir/$client $extra_args $unix_socket < $testfile > $tempfile 2>&1");
 	}
 	else
 	{
-		system ("$bin_dir/$client localhost $port < $testfile > $tempfile 2>&1");
+		system ("$bin_dir/$client $extra_args localhost $port < $testfile > $tempfile 2>&1");
 	}
 	exit 3 if $? != 0;
 	alarm 0;

@@ -37,6 +37,7 @@ extern "C" {
 typedef struct _GUnixSocket GUnixSocket;
 
 GUnixSocket* gnet_unix_socket_new (const gchar* path);
+GUnixSocket* gnet_unix_socket_new_abstract (const gchar* path);
 
 void 	     gnet_unix_socket_delete (GUnixSocket* socket);
 
@@ -48,6 +49,7 @@ GIOChannel*  gnet_unix_socket_get_io_channel (GUnixSocket* socket);
 gchar*       gnet_unix_socket_get_path (const GUnixSocket* socket);
 
 GUnixSocket* gnet_unix_socket_server_new (const gchar* path);
+GUnixSocket* gnet_unix_socket_server_new_abstract (const gchar* path);
 
 GUnixSocket* gnet_unix_socket_server_accept (const GUnixSocket* socket);
 GUnixSocket* gnet_unix_socket_server_accept_nonblock (const GUnixSocket* socket);

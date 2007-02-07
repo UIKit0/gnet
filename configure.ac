@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 #
-# $Id$
+# $Id: configure.ac,v 1.58 2006/09/11 13:11:45 tpm Exp $
 
 # autoconf requirement
 AC_PREREQ([2.53])
@@ -10,7 +10,7 @@ AC_INIT([gnet], [2.0.8], [gnet@gnetlibrary.org])
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_MAINTAINER_MODE
-AC_REVISION([$Revision$])
+AC_REVISION([$Revision: 1.58 $])
 AC_CONFIG_SRCDIR([src/gnet.c])
 
 # On making releases:
@@ -307,6 +307,53 @@ fi
 AC_DEFINE_UNQUOTED(GNET_SOCKADDR_FAMILY_FIELD_NAME,
           [$gnet_sockaddr_family_field_name],
           [Name of sockaddr_storage family field])
+
+dnl #######################################
+dnl Check if abstract sockets are supported
+dnl #######################################
+ 
+AC_LANG_PUSH(C)
+AC_CACHE_CHECK([for abstract socket namespace availability],
+		ac_cv_gnet_have_abstract_sockets,
+		[AC_RUN_IFELSE([AC_LANG_PROGRAM(
+[[
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <errno.h>
+]],
+[[
+  int listen_fd, len;
+  struct sockaddr_un addr;
+  
+  listen_fd = socket (PF_UNIX, SOCK_STREAM, 0);
+  if (listen_fd < 0) {
+    perror ("socket() failed: ");
+    exit (1);
+  }
+  memset (&addr, '\0', sizeof (addr));
+  addr.sun_family = AF_UNIX;
+  strcpy (addr.sun_path, "X/tmp/gnet-fake-socket-path-used-in-configure-test");
+  len = SUN_LEN (&addr); /* calculate size before adding the \0 */
+  addr.sun_path[0] = '\0'; /* this is what makes it abstract */
+  
+  if (bind (listen_fd, (struct sockaddr*) &addr, len) < 0) {
+    perror ("Abstract socket namespace bind() failed: ");
+    exit (1);
+  }
+  exit (0);
+]])],
+              [ac_cv_gnet_have_abstract_sockets=yes],
+              [ac_cv_gnet_have_abstract_sockets=no]
+)])
+AC_LANG_POP(C)
+
+if test x$ac_cv_gnet_have_abstract_sockets = xyes ; then
+   AC_DEFINE(HAVE_ABSTRACT_SOCKETS,1,[Have abstract socket namespace])
+fi
 
 ###############################
 # Compiler characteristics

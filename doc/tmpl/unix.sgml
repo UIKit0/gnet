@@ -47,6 +47,15 @@ See the documentation on TCP sockets for more information.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_unix_socket_new_abstract ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_unix_socket_delete ##### -->
 <para>
 
@@ -90,6 +99,15 @@ See the documentation on TCP sockets for more information.
 
 
 <!-- ##### FUNCTION gnet_unix_socket_server_new ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_unix_socket_server_new_abstract ##### -->
 <para>
 
 </para>
