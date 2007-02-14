@@ -1,3 +1,9 @@
+2007-02-14  Tim-Philipp Müller  <tim at centricular dot net>
+
+        * src/conn-http.c: (gnet_conn_http_reset),
+	(gnet_conn_http_free_event):
+	  Fix two small memory leaks.
+
 2007-02-07  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/unix.c: (gnet_unix_socket_unlink):

@@ -184,7 +184,6 @@ gnet_conn_http_reset (GConnHttp *conn)
 	conn->got_content_length = FALSE;
 
 	/* Note: we keep the request headers as they are*/
-	conn->resp_headers = NULL;
 	for (node = conn->resp_headers;  node;  node = node->next)
 	{
 		GConnHttpHdr *hdr = (GConnHttpHdr*)node->data;
@@ -310,17 +309,20 @@ gnet_conn_http_free_event (GConnHttpEvent *event)
 	g_return_if_fail (event != NULL);
 	g_return_if_fail (event->stsize > 0);
 
-	if (event->type == GNET_CONN_HTTP_RESPONSE)
-	{
-		g_strfreev(((GConnHttpEventResponse*)event)->header_fields);
-		g_strfreev(((GConnHttpEventResponse*)event)->header_values);
+	switch (event->type) {
+		case GNET_CONN_HTTP_RESPONSE:
+			g_strfreev(((GConnHttpEventResponse*)event)->header_fields);
+			g_strfreev(((GConnHttpEventResponse*)event)->header_values);
+			break;
+		case GNET_CONN_HTTP_REDIRECT:
+			g_free(((GConnHttpEventRedirect*)event)->new_location);
+			break;
+		case GNET_CONN_HTTP_ERROR:
+			g_free(((GConnHttpEventError*)event)->message);
+			break;
+		default:
+			break;
 	}
-
-	if (event->type == GNET_CONN_HTTP_REDIRECT)
-	{
-		g_free(((GConnHttpEventRedirect*)event)->new_location);
-	}
-	
 	/* poison struct */
 	memset(event, 0xff, event->stsize);
 	g_free(event);
