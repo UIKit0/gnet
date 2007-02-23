@@ -4,7 +4,7 @@
                      GNetXmlRpc server and client
                   XMLRPC functionality using GLib/GNet
               Written by Dov Grobgeld <dov.grobgeld@gmail.com>
-                           Version 0.0.2
+                           Version 0.0.3
 
   ===========================================================================
 

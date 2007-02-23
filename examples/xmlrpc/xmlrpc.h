@@ -39,6 +39,12 @@ typedef gint (GNetXmlRpcCommandCallback) (GNetXmlRpcServer * server,
                                           gpointer           user_data,
                                           gchar           ** reply_string);
 
+typedef int (GNetXmlRpcCommandAsyncCallback)(GNetXmlRpcServer *server,
+                                             GConn *gnet_client,
+                                             const gchar *command,
+                                             const gchar *param,
+                                             gpointer user_data);
+
 GNetXmlRpcServer * gnet_xmlrpc_server_new    (gint port);
 
 void               gnet_xmlrpc_server_delete (GNetXmlRpcServer * server);
@@ -47,6 +53,10 @@ gint               gnet_xmlrpc_server_register_command (GNetXmlRpcServer        
                                                         const gchar               * command,
                                                         GNetXmlRpcCommandCallback * callback,
                                                         gpointer                    user_data);
+gint               gnet_xmlrpc_server_register_async_command (GNetXmlRpcServer               * server,
+                                                              const gchar                    * command,
+                                                              GNetXmlRpcCommandAsyncCallback * async_callback,
+                                                              gpointer                         user_data);
 
 /* GNetXmlRpcClient API */
 
@@ -65,6 +75,8 @@ gint               gnet_xmlrpc_client_call   (GNetXmlRpcClient * client,
                                               const gchar      * param,
                                               gchar           ** reply);  /* output */
 
+int                gnet_xmlrpc_async_client_response(GConn *gnet_client,
+                                                     const gchar *reply);
 
 
 G_END_DECLS

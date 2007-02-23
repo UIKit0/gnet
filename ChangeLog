@@ -1,3 +1,10 @@
+2007-02-23  Dov Grobgeld  <dov.grobgeld@gmail.com>
+
+	* examples/xmlrpc: Added option to split the call and the reply for xmlrpc
+	commands through the addition of command gnet_xmlrpc_server_register_async_command(),
+	which passes the connection variable but does not return a reply. This is useful
+	when the reply may not be given immediately (in terms of mainloop interaction).
+
 2007-02-14  Tim-Philipp Müller  <tim at centricular dot net>
 
         * src/conn-http.c: (gnet_conn_http_reset),

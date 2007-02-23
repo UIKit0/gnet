@@ -32,6 +32,7 @@ typedef struct {
 
 typedef struct {
   GNetXmlRpcCommandCallback *callback;
+  GNetXmlRpcCommandAsyncCallback *async_callback;
   gpointer user_data;
 } command_hash_value_t;
 
@@ -131,6 +132,14 @@ ob_client_func (GConn* conn, GConnEvent* event, gpointer user_data)
                                               command_name);
             if (!command_val)
               response = create_response_string("No such method!");
+            else if (command_val->async_callback)
+              {
+                (*command_val->async_callback)((GNetXmlRpcServer*)xmlrpc_server,
+                                               conn,
+                                               command_name,
+                                               parameter,
+                                               command_val->user_data);
+              }
             else
               {
                 gchar *reply;
@@ -143,10 +152,13 @@ ob_client_func (GConn* conn, GConnEvent* event, gpointer user_data)
                 response = create_response_string(reply);
                 g_free(reply);
               }
-              
-            /* Send reply */
-            gnet_conn_write (conn, response, strlen(response));
-            g_free(response);
+
+            if (response)
+              {
+                /* Send reply */
+                gnet_conn_write (conn, response, strlen(response));
+                g_free(response);
+              }
             
             /* printf("rs = ((%s)) len=%d\n", req_string->str, event->length); */
             g_string_assign(conn_state->connection_string, "");
@@ -181,19 +193,68 @@ ob_client_func (GConn* conn, GConnEvent* event, gpointer user_data)
     }
 }
 
-int gnet_xmlrpc_server_register_command(GNetXmlRpcServer *_xmlrpc_server,
-                                        const gchar *command,
-                                        GNetXmlRpcCommandCallback *callback,
-                                        gpointer user_data)
+static int
+gnet_xmlrpc_server_register_command_full(GNetXmlRpcServer *_xmlrpc_server,
+                                         const gchar *command,
+                                         GNetXmlRpcCommandCallback *callback,
+                                         GNetXmlRpcCommandAsyncCallback *async_callback,
+                                         gpointer user_data)
 {
   GNetXmlRpcServerPrivate *xmlrpc_server = (GNetXmlRpcServerPrivate*)_xmlrpc_server;
   /* TBD - Check if command exist and override it */
   command_hash_value_t *val = g_new0(command_hash_value_t, 1);
   val->callback = callback;
+  val->async_callback = async_callback;
   val->user_data = user_data;
   g_hash_table_insert(xmlrpc_server->command_hash,
                       g_strdup(command),
                       val);
+
+  return 0;
+}
+
+int gnet_xmlrpc_server_register_command(GNetXmlRpcServer *_xmlrpc_server,
+                                        const gchar *command,
+                                        GNetXmlRpcCommandCallback *callback,
+                                        gpointer user_data)
+{
+  gnet_xmlrpc_server_register_command_full(_xmlrpc_server,
+                                           command,
+                                           callback,
+                                           NULL, /* async */
+                                           user_data);
+
+  return 0;
+}
+
+int gnet_xmlrpc_server_register_async_command(GNetXmlRpcServer *_xmlrpc_server,
+                                              const gchar *command,
+                                              GNetXmlRpcCommandAsyncCallback *async_callback,
+                                              gpointer user_data)
+{
+  gnet_xmlrpc_server_register_command_full(_xmlrpc_server,
+                                           command,
+                                           NULL,
+                                           async_callback, /* async */
+                                           user_data);
+  return 0;
+}
+
+/** 
+ * Reply to an async request
+ * 
+ * @param gnet_client 
+ * @param reply_string 
+ * 
+ * @return 
+ */
+int gnet_xmlrpc_async_client_response(GConn *conn,
+                                      const gchar *reply)
+{
+  gchar *response = create_response_string(reply);
+  /* Send reply */
+  gnet_conn_write (conn, response, strlen(response));
+  g_free(response);
 
   return 0;
 }

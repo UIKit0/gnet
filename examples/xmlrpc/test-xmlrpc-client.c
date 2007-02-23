@@ -49,7 +49,19 @@ main(int argc, char *argv[])
 			      /* output  */
 			      &reply) == 0)
     {
-      printf("reply = %s\n", reply);
+      printf("echo reply = %s\n", reply);
+      g_free(reply);
+    }
+  else
+    printf("Failed executing echo!\n");
+
+  if (gnet_xmlrpc_client_call(client,
+			      "async",
+			      "",
+			      // output
+			      &reply) == 0)
+    {
+      printf("async reply = %s\n", reply);
       g_free(reply);
     }
   else

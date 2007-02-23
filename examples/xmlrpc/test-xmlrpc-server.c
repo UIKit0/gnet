@@ -34,6 +34,14 @@ int do_echo(GNetXmlRpcServer *server,
 	    /* output */
 	    gchar **reply_string);
 
+int do_async(GNetXmlRpcServer *server,
+             GConn *conn,
+             const gchar *command,
+             const gchar *param,
+             gpointer user_data);
+
+gboolean say_hello(gpointer user_data);
+
 int
 main(int argc, char** argv)
 {
@@ -67,6 +75,11 @@ main(int argc, char** argv)
 				      "echo",
 				      do_echo,
 				      NULL);
+  
+  gnet_xmlrpc_server_register_async_command(server,
+				      "async",
+				      do_async,
+				      NULL);
 
   /* Start the main loop */
   g_main_loop_run(main_loop);
@@ -96,4 +109,23 @@ int do_echo(GNetXmlRpcServer *server,
     *reply_string = g_strdup_printf("You said: \"%s\"", param);
 
     return 0;
+}
+
+int do_async(GNetXmlRpcServer *server,
+             GConn *conn,
+             const gchar *command,
+             const gchar *param,
+             gpointer user_data)
+{
+  g_timeout_add(2000,
+                say_hello,
+                conn);
+  return 0;
+}
+
+gboolean say_hello(gpointer user_data)
+{
+  GConn *conn = (GConn*)user_data;
+  gnet_xmlrpc_async_client_response(conn, "hi!!");
+  return FALSE;
 }
