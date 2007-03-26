@@ -146,9 +146,9 @@
 	your configure.in:
       
 	<programlisting>
-PKG_CHECK_MODULES(GNET, gnet &gt; 2.0.0,
+PKG_CHECK_MODULES(GNET, gnet-2.0 &gt; 2.0.0,
   [LIBS="$LIBS $GNET_LIBS" CFLAGS="$CFLAGS $GNET_CFLAGS"],
-  AC_MSG_ERROR(Cannot find GNet: Is gnet-config in path?))
+  AC_MSG_ERROR(Cannot find GNet: do you have the GNet development packages installed?))
 	</programlisting>
 
       </para>

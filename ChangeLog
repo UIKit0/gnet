@@ -1,3 +1,8 @@
+2007-03-26  Tim-Philipp Müller  <tim at centricular dot net>
+
+        * doc/gnet-docs.sgml:
+	  The pkg-config module name is gnet-2.0, not gnet. Fix docs.
+
 2007-02-23  Dov Grobgeld  <dov.grobgeld@gmail.com>
 
 	* examples/xmlrpc: Added option to split the call and the reply for xmlrpc
