@@ -55,6 +55,8 @@ Internal Improvements
     * Add option to use GNU ADNS? (and update license)
     * Consider modifying glibc/BIND code?
 
+- use thread pools for async DNS stuff?
+
 - gnet_inetaddr_new will give you localhost if you give it an hostname
     of "" in Linux.  Is this true on all systems?  If not, we should
     do a return-on-fail when we get an empty string.

@@ -61,6 +61,10 @@ typedef struct _GServer GServer;
  *   this callback is called with @conn set to NULL.  The callback is
  *   not called again.
  *
+ *   If @conn is non-NULL, the address (IP, port) of the client that
+ *   established the connection can be found in the inetaddr member of
+ *   the #GConn structure.
+ *
  **/
 typedef void (*GServerFunc)(GServer* server,
 			    GConn* conn,

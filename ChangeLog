@@ -1,3 +1,12 @@
+2007-04-30  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* TODO:
+	  Minor update.
+
+	* src/server.h:
+	  Document where to find details of the connecting client in the
+	  GServer callback.
+
 2007-03-26  Tim-Philipp Müller  <tim at centricular dot net>
 
         * doc/gnet-docs.sgml:
