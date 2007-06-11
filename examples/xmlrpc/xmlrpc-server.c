@@ -399,7 +399,7 @@ gchar *create_response_string(const gchar *reply)
   g_string_append_printf(response_string,
                          "HTTP/1.1 200 OK\n"
                          "Connection: close\n"
-                         "Content-Length: %d\n"
+                         "Content-Length: %" G_GSIZE_FORMAT "\n"
                          "Content-Type: text/xml\n"
                          "Date: Fri, 1 Jan 2000 00:00:00 GMT\n"
                          "Server: GNetXMLRpc server\n"
