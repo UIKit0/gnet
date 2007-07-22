@@ -1,3 +1,12 @@
+2007-07-22  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* autogen.sh:
+	  Use '=' instead of '==' to test for equality, dash in gutsy (which
+	  seems to be the default shell now) doesn't seem to like '=='.
+
+	* tests/conn_http_test.c:
+	  Add cast to fix compiler warnings due to printf format.
+
 2007-06-11  Tim-Philipp Müller  <tim at centricular dot net>
 
 	Patch by: Samuel Cormier-Iijima <sciyoshi@gmail.com>
@@ -1993,7 +2002,7 @@ Mon Oct 21 23:24:30 2002  David Helder  <dhelder@umich.edu>
 
 	* src/inetaddr.c (inetaddr_new_async_pthread_dispatch): 
 	    Address is callee owned.
-	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): Delete
+i	* src/tcp.c (gnet_tcp_socket_connect_inetaddr_cb): Delete
 	    the address.
 
 	* src/*: s/get_iochannel/get_io_channel/, 

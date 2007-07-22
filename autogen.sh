@@ -62,7 +62,7 @@ AUTOMAKE_VERSION=`echo $AUTOMAKE_VERSION_REAL | sed -e 's/\.\([0-9]\).*/\1/'`
 
 echo "***** Checking automake version: $AUTOMAKE_VERSION_REAL"
 
-if [ "x$AUTOMAKE_VERSION" == "x14" ] || [ "x$AUTOMAKE_VERSION" == "x15" ]
+if [ "x$AUTOMAKE_VERSION" = "x14" ] || [ "x$AUTOMAKE_VERSION" = "x15" ]
 then
   echo "***** Checking for newer automake versions...";
 

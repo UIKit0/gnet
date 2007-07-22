@@ -410,11 +410,13 @@ test_simple_get (const gchar *url)
 	
 	if (ret == FALSE)
 	{
-		g_print("\t * gnet_http_get() failed (buflen = %u, code = %u).\n", buflen, code);
+		g_print("\t * gnet_http_get() failed (buflen = %u, code = %u).\n",
+		        (guint) buflen, code);
 		return FALSE;                
 	}
         
-	g_print("\t * gnet_http_get() succeeded (buflen = %u, code = %u).\n", buflen, code);
+	g_print("\t * gnet_http_get() succeeded (buflen = %u, code = %u).\n",
+	        (guint) buflen, code);
 
 	g_free (buf);
 	
