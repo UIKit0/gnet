@@ -1,3 +1,20 @@
+2007-07-26  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* Makefile.am:
+	* configure.ac:
+	* macros/Makefile.am:
+	* macros/gnet-arch.m4:
+	* tests/Makefile.am:
+	* tests/check/Makefile.am:
+	* tests/check/gnet-valgrind.supp:
+	* tests/check/gnet/gnetabi.c:
+	* tests/check/gnet/struct_i386.h:
+	* tests/check/gnet/struct_ppc64.h:
+	* tests/check/gnet/struct_x86_64.h:
+	* tests/check/gnetcheck.c:
+	* tests/check/gnetcheck.h:
+	  Add build infrastructure for unit tests based on libcheck.
+
 2007-07-22  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* autogen.sh:

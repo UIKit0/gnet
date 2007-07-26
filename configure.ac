@@ -67,6 +67,11 @@ esac
 AC_MSG_RESULT([$gnet_native_win32])
 AM_CONDITIONAL(OS_WIN32, [test "$gnet_native_win32" = "yes"])
 
+###############################################################
+# Check Host CPU type (needed for abi test among other things)
+
+AG_GNET_ARCH
+
 ####################
 # Debug
 
@@ -544,6 +549,36 @@ fi
 
 GTK_DOC_CHECK(1.2)
 
+
+###############################
+# libcheck unit test framework
+###############################
+
+#dnl check for "check", unit testing library/header
+#AM_PATH_CHECK([0.9.2],
+#    [
+#        HAVE_CHECK=yes
+#        AC_MSG_NOTICE(CHECK_CFLAGS: $CHECK_CFLAGS)
+#        AC_MSG_NOTICE(CHECK_LIBS: $CHECK_LIBS)
+#    ], [
+#        HAVE_CHECK=no
+#    ])
+#AM_CONDITIONAL(HAVE_CHECK, test "x$HAVE_CHECK" = "xyes")
+
+dnl pkg-config check that for libcheck that works for cross-compiling
+dnl but not normal compilation on Fedora & Ubuntu:
+ PKG_CHECK_MODULES(CHECK, check >= 0.9.2,
+   AM_CONDITIONAL(HAVE_CHECK, true),
+   AM_CONDITIONAL(HAVE_CHECK, false)
+ )
+
+dnl check for valgrind
+AC_PATH_PROG(VALGRIND_PATH, valgrind, no)
+AM_CONDITIONAL(HAVE_VALGRIND, test ! "x$VALGRIND_PATH" = "xno")
+
+dnl just disable coverage stuff for now
+AM_CONDITIONAL(GNET_GCOV_ENABLED, test "xyes" = "xno")
+
 ###############################
 # Outputs
 ###############################
@@ -554,10 +589,13 @@ AC_CONFIG_FILES([
 	src/Makefile
 	examples/Makefile
 	examples/xmlrpc/Makefile
+	macros/Makefile
 	tests/Makefile
+	tests/check/Makefile
 	doc/Makefile
 	doc/version.xml
 	gnetconfig.h
 	gnet.spec
 	gnet-2.0.pc])
 AC_OUTPUT
+

@@ -22,3 +22,13 @@ tcp_test_SOURCES      = tcp_test.c
 unpack_test_SOURCES   = unpack_test.c
 uri_test_SOURCES      = uri_test.c
 
+if HAVE_CHECK
+SUBDIRS_CHECK = check
+else
+SUBDIRS_CHECK =
+endif
+
+SUBDIRS = $(SUBDIRS_CHECK)
+
+DIST_SUBDIRS = check
+
