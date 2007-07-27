@@ -1,5 +1,16 @@
 2007-07-27  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/pack.c: (flipmemcpy):
+	  Fix broken flipmemcpy() function - it never actually reversed the
+	  order! Which noone ever noticed, because it is only used if more
+	  than four bytes need reversing, and the only types with a possible
+	  size of more than four bytes are void* and double and at least for
+	  the latter the endianness modifiers are ignored. Not sure what to
+	  do about pointers yet, we should probably just ignore those
+	  modifiers for pointers too. Also fix gtk-doc blurb.
+
+2007-07-27  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/base64.c: (gnet_base64_encode), (gnet_base64_decode):
 	* src/base64.h:
 	  Make arguments for input buffers constant; add more guards against

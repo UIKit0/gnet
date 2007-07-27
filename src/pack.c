@@ -22,7 +22,7 @@
 
 
 static gsize strlenn(char* str, gsize n);
-static void flipmemcpy(char* dst, char* src, gsize n);
+static inline void flipmemcpy(char* dst, char* src, gsize n);
 
 
 #define MEMCPY(D,S,N)				\
@@ -91,10 +91,10 @@ strlenn(char* str, gsize n)
 static void 
 flipmemcpy(char* dst, char* src, gsize n)
 {
-  int nn = n;
-
-  for (; n; --n)
-    *dst++ = src[nn-n];
+  while (n > 0) {
+    *dst++ = src[n-1];
+    --n;
+  }
 }
 
 
@@ -230,7 +230,7 @@ flipmemcpy(char* dst, char* src, gsize n)
  *  l/L is a signed/unsigned long.
  *
  *  f/D is a float/double (always native order/size).
- *  
+ *
  *  v is a void pointer (always native size).
  *
  *  s is a zero-terminated string.
