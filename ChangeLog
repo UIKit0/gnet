@@ -1,3 +1,10 @@
+2007-07-27  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/base64.c: (gnet_base64_encode), (gnet_base64_decode):
+	* src/base64.h:
+	  Make arguments for input buffers constant; add more guards against
+	  invalid arguments.
+
 2007-07-26  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* Makefile.am:

@@ -29,6 +29,7 @@
  *
  ***********************************************************************/
 
+/* FIXME: use new GLib functions once we depend on GLib >= 2.12 */
 
 #include "base64.h"
 #include <string.h>
@@ -76,7 +77,7 @@ static const guchar gnet_Base64_rank[256] = {
  *
  **/
 gchar*
-gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict) 
+gnet_base64_encode (const gchar* src, gint srclen, gint* dstlenp, gboolean strict) 
 {
   gchar* dst;
   gint dstpos;
@@ -87,6 +88,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
 
   g_return_val_if_fail (src != NULL, NULL);
   g_return_val_if_fail (srclen >= 0, NULL);
+  g_return_val_if_fail (dstlenp != NULL, NULL);
 
   if (srclen == 0) 
     return g_strdup ("");
@@ -187,7 +189,7 @@ gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict)
  *
  **/
 gchar* 
-gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp)
+gnet_base64_decode (const gchar* src, gint srclen, gint* dstlenp)
 {
   gchar* dst;
   gint   dstidx, state, ch = 0;
@@ -195,6 +197,7 @@ gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp)
   guchar pos;
 
   g_return_val_if_fail (src != NULL, NULL);
+  g_return_val_if_fail (dstlenp != NULL, NULL);
 
   if (srclen <= 0) 
     srclen = strlen(src);

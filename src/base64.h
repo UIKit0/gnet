@@ -24,17 +24,12 @@
 
 #include <glib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
+gchar * gnet_base64_encode (const gchar * src, gint srclen, gint * dstlenp, gboolean strict);
 
-gchar* gnet_base64_encode (gchar* src, gint srclen, gint* dstlenp, gboolean strict);
-gchar* gnet_base64_decode (gchar* src, gint srclen, gint* dstlenp);
+gchar * gnet_base64_decode (const gchar * src, gint srclen, gint * dstlenp);
 
-
-#ifdef __cplusplus
-}
-#endif				/* __cplusplus */
+G_END_DECLS
 
 #endif /* _GNET_BASE64_H */
