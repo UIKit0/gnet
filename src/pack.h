@@ -22,24 +22,30 @@
 
 #include <glib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-gint gnet_pack (const gchar* format, gchar* buffer, const gint length, ...);
-gint gnet_pack_strdup (const gchar* format, gchar** bufferp, ...);
-gint gnet_vpack (const gchar* format, gchar* buffer, const gint length, va_list args);
-
-gint gnet_calcsize (const gchar* format, ...);
-gint gnet_vcalcsize (const gchar* format, va_list args);
-     
-gint gnet_unpack (const gchar* format, gchar* buffer, gint length, ...);
-gint gnet_vunpack (const gchar* format, gchar* buffer, gint length, va_list args);
+G_BEGIN_DECLS
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+/* pack */
 
+gint gnet_pack  (const gchar * format, gchar  * buffer, const gint length, ...);
+
+gint gnet_vpack (const gchar * format, gchar  * buffer, const gint length, va_list args);
+
+gint gnet_pack_strdup (const gchar * format, gchar ** bufferp, ...);
+
+/* calculate size */
+
+gint gnet_calcsize  (const gchar * format, ...);
+
+gint gnet_vcalcsize (const gchar * format, va_list args);
+
+/* unpack */
+
+gint gnet_unpack  (const gchar * format, const gchar * buffer, gint length, ...);
+
+gint gnet_vunpack (const gchar * format, const gchar * buffer, gint length, va_list args);
+
+
+G_END_DECLS
 
 #endif /* _GNET_PACK_H */

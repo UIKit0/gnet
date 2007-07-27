@@ -21,8 +21,8 @@
 #include <string.h>
 
 
-static gsize strlenn(char* str, gsize n);
-static inline void flipmemcpy(char* dst, char* src, gsize n);
+static inline gsize strlenn(const char* str, gsize n);
+static inline void flipmemcpy(char* dst, const char* src, gsize n);
 
 
 #define MEMCPY(D,S,N)				\
@@ -78,7 +78,7 @@ static inline void flipmemcpy(char* dst, char* src, gsize n);
 
 */
 static gsize
-strlenn(char* str, gsize n)
+strlenn(const char* str, gsize n)
 {
   gsize len = 0;
 
@@ -89,7 +89,7 @@ strlenn(char* str, gsize n)
 
 
 static void 
-flipmemcpy(char* dst, char* src, gsize n)
+flipmemcpy(char* dst, const char* src, gsize n)
 {
   while (n > 0) {
     *dst++ = src[n-1];
@@ -833,7 +833,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const gint length, va_list args)
  * 
  **/
 gint 
-gnet_unpack (const gchar* format, gchar* buffer, gint length, ...)
+gnet_unpack (const gchar * format, const gchar * buffer, gint length, ...)
 {
   va_list args;
   gint rv;
@@ -860,7 +860,8 @@ gnet_unpack (const gchar* format, gchar* buffer, gint length, ...)
  *
  **/
 gint 
-gnet_vunpack (const gchar* format, gchar* buffer, gint length, va_list args)
+gnet_vunpack (const gchar * format, const gchar * buffer, gint length,
+    va_list args)
 {
   gint n = 0;
   gchar* p = (gchar*) format;

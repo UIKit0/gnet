@@ -1,5 +1,11 @@
 2007-07-27  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/pack.c:
+	* src/pack.h:
+	  Const-ify input buffer arguments to gnet_unpack*().
+
+2007-07-27  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/pack.c: (flipmemcpy):
 	  Fix broken flipmemcpy() function - it never actually reversed the
 	  order! Which noone ever noticed, because it is only used if more
