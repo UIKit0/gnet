@@ -1,3 +1,10 @@
+2007-07-28  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* tests/check/gnetcheck.c:
+	* tests/check/gnetcheck.h:
+	  Call the internal gnet_check_init() when setting up a unit test,
+	  so we intercept criticals and ASSERT_WARNING() in the tests works.
+
 2007-07-27  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/pack.c:

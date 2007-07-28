@@ -29,7 +29,7 @@
 
 #include <check.h>
 
-#include <glib.h>
+#include <gnet.h>
 
 G_BEGIN_DECLS
 
@@ -51,8 +51,6 @@ extern gboolean _gnet_check_expecting_log;
 GMutex *check_mutex;
 GCond *check_cond;
 
-
-void gnet_check_init (int *argc, char **argv[]);
 
 gint gnet_check_run_suite (Suite *suite, const gchar *name, const gchar *fname);
 
@@ -314,7 +312,6 @@ G_STMT_START {							\
 int main (int argc, char **argv)				\
 {								\
   Suite *s = name ## _suite ();					\
-  gnet_init ();                                                 \
   return gnet_check_run_suite (s, # name, __FILE__);		\
 }
 

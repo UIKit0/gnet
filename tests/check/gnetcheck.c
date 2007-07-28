@@ -70,7 +70,7 @@ gnet_check_log_critical_func (const gchar * log_domain,
 }
 
 /* initialize GNet testing */
-void
+static void
 gnet_check_init (int *argc, char **argv[])
 {
   gnet_init ();
@@ -86,6 +86,8 @@ gnet_check_init (int *argc, char **argv[])
       gnet_check_log_critical_func, NULL);
   g_log_set_handler ("GNet", G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING,
       gnet_check_log_critical_func, NULL);
+  g_log_set_handler ("GLib", G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING,
+      gnet_check_log_critical_func, NULL);
   g_log_set_handler ("GLib-GObject", G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING,
       gnet_check_log_critical_func, NULL);
 
@@ -100,6 +102,8 @@ gnet_check_run_suite (Suite * suite, const gchar * name, const gchar * fname)
   gint nf;
 
   SRunner *sr = srunner_create (suite);
+
+  gnet_check_init (NULL, NULL);
 
   if (g_getenv ("GNET_CHECK_XML")) {
     /* how lucky we are to have __FILE__ end in .c */
