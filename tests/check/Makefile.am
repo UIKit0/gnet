@@ -166,8 +166,13 @@ EXTRA_DIST = $(SUPPRESSIONS)
 
 clean-local: clean-local-check
 
-check_PROGRAMS =				\
-	gnet/gnetabi
+check_PROGRAMS = \
+	gnet/gnetabi    \
+	gnet/gnetbase64 \
+	gnet/gnethash   \
+	gnet/gnetpack   \
+	gnet/gnetunpack \
+	gnet/gneturi
 
 # failing tests
 noinst_PROGRAMS =

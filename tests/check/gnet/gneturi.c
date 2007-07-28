@@ -1,5 +1,6 @@
-/* Parse various URIs
- * Copyright (C) 2001  David Helder
+/* GNet URI parser unit test
+ * Copyright (C) 2001 David Helder
+ * Copyright (C) 2007 Tim-Philipp Müller  <tim centricular net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +17,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <glib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "gnetcheck.h"
+
 #include <string.h>
-#include <gnet.h>
 
-static int failed = 0;
+#if 0
+#define SAFESTRCMP(A,B) (((A)&&(B))?(strcmp((A),(B))):((A)||(B)))
+#endif
 
-#define TEST(N, S, C) do {                             \
-if (C) { /*g_print ("%d %s: PASS\n", (N), (S)); */        } \
-else   { g_print ("%d %s: FAIL\n", (N), (S)); failed = 1; } \
-} while (0)
+GNET_START_TEST (test_uri_errors)
+{
+  /* Empty string is an error */
+  fail_unless (gnet_uri_new("") == NULL);
+
+  /* String of whitespace is an error */
+  fail_unless (gnet_uri_new(" \n\t\r") == NULL);
+}
+
+GNET_END_TEST;
+
+/*** test parsing */
 
 struct URITest
 {
@@ -137,22 +145,77 @@ struct URITest tests[] =
   { "file://host/home/joe/foo.txt", NULL, 
     {"file", NULL, "host", 0, "/home/joe/foo.txt", NULL, NULL}},
   { "file:///home/joe/foo.txt", NULL, 
-    {"file", NULL, NULL, 0, "/home/joe/foo.txt", NULL, NULL}},
-
-  { NULL, NULL, {NULL, NULL, NULL, 0, NULL, NULL, NULL} }
-
+    {"file", NULL, NULL, 0, "/home/joe/foo.txt", NULL, NULL}}
 };
 
-
-struct EscapeTest
+GNET_START_TEST (test_uri_parsing)
 {
+  guint i;
+
+  for (i = 0; i < G_N_ELEMENTS (tests); ++i) {
+    gchar *unescape;
+    gchar *escape;
+    gchar *pretty;
+    GURI *uri;
+
+    uri = gnet_uri_new (tests[i].str);
+    fail_unless (uri != NULL, "gnet_uri_new(%s) failed", tests[i].str);
+
+    pretty = gnet_uri_get_string (uri);
+    fail_unless (pretty != NULL, "no pretty string for '%s'", tests[i].str);
+
+    if (tests[i].pretty) {
+      fail_unless_equals_string (pretty, tests[i].pretty);
+    } else {
+      fail_unless_equals_string (pretty, tests[i].str);
+    }
+
+#define fail_unless_equals_string_safe(a,b) \
+    { \
+       fail_unless (((a) != NULL && (b) != NULL) || ((a) == NULL && (b) == NULL));  \
+       if ((a) && (b)) {                                                            \
+         fail_unless_equals_string ((a), (b));                                      \
+       }                                                                            \
+    }
+
+    fail_unless_equals_string_safe (uri->scheme, tests[i].uri.scheme);
+    fail_unless_equals_string_safe (uri->userinfo, tests[i].uri.userinfo);
+    fail_unless_equals_string_safe (uri->hostname, tests[i].uri.hostname);
+    fail_unless_equals_string_safe (uri->scheme, tests[i].uri.scheme);
+    fail_unless_equals_int (uri->port, tests[i].uri.port);
+    fail_unless_equals_string_safe (uri->path, tests[i].uri.path);
+    fail_unless_equals_string_safe (uri->query, tests[i].uri.query);
+    fail_unless_equals_string_safe (uri->fragment, tests[i].uri.fragment);
+
+    gnet_uri_escape (uri);
+    escape = gnet_uri_get_string (uri);
+    fail_unless (escape != NULL,
+        "gnet_uri_escape() failed for %s", tests[i].str);
+
+    gnet_uri_unescape (uri);
+    unescape = gnet_uri_get_string (uri);
+    fail_unless (unescape != NULL,
+        "gnet_uri_unescape() failed for %s after escape", tests[i].str);
+      
+    fail_unless_equals_string (pretty, unescape);
+
+    g_free (escape);
+    g_free (unescape);
+    g_free (pretty);
+
+    gnet_uri_delete (uri);
+  }
+}
+
+GNET_END_TEST;
+
+/*** test escaping ***/
+
+struct {
   gchar* escaped;
   gchar* unescaped;
   gchar* escaped2;
-};
-
-struct EscapeTest escape_tests[] = 
-{
+} escape_tests[] =  {
   { "http://userinfo@www.example.com:80/path?query#fragment",
     "http://userinfo@www.example.com:80/path?query#fragment" , NULL},
   { "http://userinfo@www.example.com:80/~path?query#fragment",
@@ -169,114 +232,63 @@ struct EscapeTest escape_tests[] =
   { "http://www.example.com/pa%th", "http://www.example.com/pa%th",
     "http://www.example.com/pa%25th"},
   { "http://www.example.com/%e9%e9.html",
-    "http://www.example.com/\xe9\xe9.html", NULL },
-  { NULL, NULL , NULL}
+    "http://www.example.com/\xe9\xe9.html", NULL }
 };
 
-
-#define SAFESTRCMP(A,B) (((A)&&(B))?(strcmp((A),(B))):((A)||(B)))
-
-int
-main (int argc, char* argv[])
+GNET_START_TEST (test_uri_escaping)
 {
-  int i;
+  guint i;
 
-  gnet_init ();
+  for (i = 0; i < G_N_ELEMENTS (escape_tests); ++i) {
+    gchar *escape;
+    gchar *unescape;
+    GURI *uri;
 
-  /* Empty string is an error */
-  if (gnet_uri_new("") != NULL)
-    {
-      g_print ("empty string is error: FAIL\n");
-      failed = 1;
+    uri = gnet_uri_new (escape_tests[i].escaped);
+    fail_unless (uri != NULL, "gnet_uri_new(%s) failed",
+        escape_tests[i].escaped);
+
+    gnet_uri_unescape (uri);
+    unescape = gnet_uri_get_string (uri);
+    fail_unless (unescape != NULL,
+        "Couldn't unescape '%s'", escape_tests[i].escaped);
+    fail_unless_equals_string (unescape, escape_tests[i].unescaped);
+    g_free (unescape);
+
+    gnet_uri_escape (uri);
+    escape = gnet_uri_get_string (uri);
+    fail_unless (escape != NULL,
+        "Couldn't re-escape '%s'", escape_tests[i].unescaped);
+
+    /* and check that the escape is correct */
+    if (escape_tests[i].escaped2) {
+      fail_unless_equals_string (escape, escape_tests[i].escaped2);
+    } else {
+      fail_unless_equals_string (escape, escape_tests[i].escaped);
     }
 
-  /* String of whitespace is an error */
-  if (gnet_uri_new(" \n\t\r") != NULL)
-    {
-      g_print ("whitespace string is error: FAIL\n");
-      failed = 1;
-    }
-
-  for (i = 0; tests[i].str; ++i)
-    {
-      GURI* uri;
-      gchar* pretty;
-      gchar* escape;
-      gchar* unescape;
-
-      uri = gnet_uri_new (tests[i].str);
-      TEST (i, "gnet_uri_new", uri != NULL);
-      if (!uri) continue;
-
-      pretty = gnet_uri_get_string (uri);
-      TEST (i, "gnet_uri_get_string", pretty);
-      if (!pretty) continue;
-
-      if (tests[i].pretty)
-	TEST (i, "pretty1", !strcmp (pretty, tests[i].pretty));
-      else
-	TEST (i, "pretty2", !strcmp (pretty, tests[i].str));
-
-      TEST (i, "scheme",   !SAFESTRCMP(uri->scheme,   tests[i].uri.scheme));
-      TEST (i, "userinfo", !SAFESTRCMP(uri->userinfo, tests[i].uri.userinfo));
-      TEST (i, "hostname", !SAFESTRCMP(uri->hostname, tests[i].uri.hostname));
-      TEST (i, "port",     uri->port == tests[i].uri.port);
-      TEST (i, "path",     !SAFESTRCMP(uri->path,     tests[i].uri.path));
-      TEST (i, "query",    !SAFESTRCMP(uri->query,    tests[i].uri.query));
-      TEST (i, "fragment", !SAFESTRCMP(uri->fragment, tests[i].uri.fragment));
-
-      gnet_uri_escape (uri);
-      escape = gnet_uri_get_string (uri);
-      TEST (i, "gnet_uri_escape", escape != NULL);
-/*        g_print ("%s -e-> %s\n", pretty, escape); */
-
-      gnet_uri_unescape (uri);
-      unescape = gnet_uri_get_string (uri);
-      TEST (i, "gnet_uri_unescape", unescape != NULL);
-/*        g_print ("%s -u-> %s\n", escape, unescape); */
-      
-      TEST (i, "url = unescape(escape(url))", !strcmp(pretty, unescape));
-
-      g_free (escape);
-      g_free (unescape);
-      g_free (pretty);
-
-      gnet_uri_delete (uri);
-    }
-
-  for (i = 0; escape_tests[i].escaped; ++i)
-    {
-      GURI* uri;
-      gchar* escape;
-      gchar* unescape;
-
-      uri = gnet_uri_new (escape_tests[i].escaped);
-      TEST (i, "gnet_uri_new", uri != NULL);
-      if (!uri) continue;
-
-      gnet_uri_unescape (uri);
-      unescape = gnet_uri_get_string (uri);
-      TEST (i, "gnet_uri_unescape", unescape != NULL);
-
-      TEST (i, "unescape is correct", 
-	    !strcmp(escape_tests[i].unescaped, unescape));
-      g_free (unescape);
-
-      gnet_uri_escape (uri);
-      escape = gnet_uri_get_string (uri);
-      TEST (i, "gnet_uri_escape", escape != NULL);
-
-      if (escape_tests[i].escaped2)
-	TEST (i, "escape is correct", !strcmp(escape_tests[i].escaped2, escape));
-      else
-	TEST (i, "escape is correct", !strcmp(escape_tests[i].escaped, escape));
-
-      g_free (escape);
-    }
-
-  if (failed)
-    exit (1);
-
-  exit (0);
-
+    g_free (escape);
+    gnet_uri_delete (uri);
+  }
 }
+
+GNET_END_TEST;
+
+static Suite *
+gneturi_suite (void)
+{
+  Suite *s = suite_create ("GURI");
+  TCase *tc_chain = tcase_create ("uri");
+
+  tcase_set_timeout (tc_chain, 0);
+
+  suite_add_tcase (s, tc_chain);
+  tcase_add_test (tc_chain, test_uri_errors);
+  tcase_add_test (tc_chain, test_uri_escaping);
+  tcase_add_test (tc_chain, test_uri_parsing);
+
+  return s;
+}
+
+GNET_CHECK_MAIN (gneturi);
+

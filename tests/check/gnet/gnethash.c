@@ -1,5 +1,6 @@
-/* MD5/SHA test
+/* GNet unit test for MD5/SHA routines
  * Copyright (C) 2000, 2002  David Helder
+ * Copyright (C) 2007 Tim-Philipp Müller  <tim centricular net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,37 +17,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
-#include "config.h"
+#include "gnetcheck.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
-#include <gnet.h>
-
-
-
-int
-main (int argc, char* argv[])
+GNET_START_TEST (test_md5)
 {
-  gchar* buffer;
+  gchar *buffer;
+  gchar *str;
 
-  gchar* str;
-
-  GMD5* md5;
-  GMD5* md5b;
-
-  GSHA* sha;
-  GSHA* shab;
-
-  gnet_init ();
-
-
-  /* **************************************** */
+  GMD5 *md5;
+  GMD5 *md5b;
 
   buffer = g_malloc (20000);
-  g_assert (buffer);
   memset (buffer, 'A', 20000);
 
   /* Create MD5 */
@@ -68,7 +52,22 @@ main (int argc, char* argv[])
   gnet_md5_delete (md5);
   gnet_md5_delete (md5b);
 
-  /* **************************************** */
+  g_free (buffer);
+}
+
+GNET_END_TEST;
+
+GNET_START_TEST (test_sha1)
+{
+  gchar *buffer;
+  gchar *str;
+
+  GSHA *sha;
+  GSHA *shab;
+
+  buffer = g_malloc (20000);
+  g_assert (buffer);
+  memset (buffer, 'A', 20000);
 
   /* Create SHA */
   sha = gnet_sha_new (buffer, 20000);	
@@ -89,14 +88,24 @@ main (int argc, char* argv[])
   gnet_sha_delete (sha);
   gnet_sha_delete (shab);
 
-  /* **************************************** */
-
-  if (buffer)
-    g_free (buffer);
-
-  /* **************************************** */
-
-  exit (EXIT_SUCCESS);
-
-  return 0;
+  g_free (buffer);
 }
+
+GNET_END_TEST;
+
+static Suite *
+gnethash_suite (void)
+{
+  Suite *s = suite_create ("GNetHashes");
+  TCase *tc_chain = tcase_create ("hashes");
+
+  tcase_set_timeout (tc_chain, 0);
+
+  suite_add_tcase (s, tc_chain);
+  tcase_add_test (tc_chain, test_md5);
+  tcase_add_test (tc_chain, test_sha1);
+  return s;
+}
+
+GNET_CHECK_MAIN (gnethash);
+

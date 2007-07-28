@@ -1,5 +1,24 @@
 2007-07-28  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* tests/Makefile.am:
+	* tests/base64_test.c:
+	* tests/check/Makefile.am:
+	* tests/check/gnet/gnetbase64.c:
+	* tests/check/gnet/gnethash.c:
+	* tests/check/gnet/gnetpack.c:
+	* tests/check/gnet/gnetunpack.c:
+	* tests/check/gnet/gneturi.c:
+	* tests/hash_test.c:
+	* tests/pack_test.c:
+	* tests/unpack_test.c:
+	* tests/uri_test.c:
+	  Migrate some of the existing unit tests over to the check unit
+	  testing framework (will currently only be run if you do
+	  'make check' in tests/check/). While we're at it, fix up packing
+	  and unpacking checks for 64-bit platforms.
+
+2007-07-28  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* tests/check/gnetcheck.c:
 	* tests/check/gnetcheck.h:
 	  Call the internal gnet_check_init() when setting up a unit test,
