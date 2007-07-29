@@ -1,5 +1,6 @@
-/* Test GNet Inetaddrs (deterministic, computation-based tests only)
+/* GNet IPv6 unit test
  * Copyright (C) 2002  David Helder
+ * Copyright (C) 2007 Tim-Philipp Müller  <tim centricular net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,29 +17,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <glib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <gnet.h>
+#include "config.h"
+#include "gnetcheck.h"
 
-static int failed = 0;
-
-
-int
-main (int argc, char* argv[])
+GNET_START_TEST (test_ipv6_policy)
 {
   GIPv6Policy ipv6_policy;
-  gchar* policy_str = NULL;
-
-  gnet_init ();
+  const gchar *policy_str = NULL;
 
   ipv6_policy = gnet_ipv6_get_policy();
-  gnet_ipv6_set_policy(ipv6_policy);
 
-  switch (ipv6_policy)
-    {
+  switch (ipv6_policy) {
     case GIPV6_POLICY_IPV4_THEN_IPV6:
       policy_str = "GIPV6_POLICY_IPV4_THEN_IPV6";
       break;
@@ -52,16 +41,36 @@ main (int argc, char* argv[])
       policy_str = "GIPV6_POLICY_IPV6_ONLY";
       break;
     default:
-      failed = 1;
-    }	
+      /* this aborts */
+      g_error ("Invalid IPv6 policy %d", ipv6_policy);
+      break;
+  }
 
-/*   if (policy_str) */
-/*     g_print ("%s\n", policy_str); */
+  g_print ("GNet IPv6 default policy: %s\n", policy_str);
 
-  if (failed)
-    exit (1);
-
-  exit (0);
-
-  return 0;
+  /* not that it will do anything, but just try to set all of these */
+  gnet_ipv6_set_policy (GIPV6_POLICY_IPV4_THEN_IPV6);
+  gnet_ipv6_set_policy (GIPV6_POLICY_IPV6_THEN_IPV4);
+  gnet_ipv6_set_policy (GIPV6_POLICY_IPV4_ONLY);
+  gnet_ipv6_set_policy (GIPV6_POLICY_IPV6_ONLY);
+  gnet_ipv6_set_policy (ipv6_policy);
 }
+
+GNET_END_TEST;
+
+static Suite *
+gnetipv6_suite (void)
+{
+  Suite *s = suite_create ("GNetIPv6");
+  TCase *tc_chain = tcase_create ("ipv6");
+
+  tcase_set_timeout (tc_chain, 0);
+
+  suite_add_tcase (s, tc_chain);
+  tcase_add_test (tc_chain, test_ipv6_policy);
+  /* TODO: more tests */
+  return s;
+}
+
+GNET_CHECK_MAIN (gnetipv6);
+

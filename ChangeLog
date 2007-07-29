@@ -1,3 +1,18 @@
+2007-07-29  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* configure.ac:
+	* tests/Makefile.am:
+	* tests/check/Makefile.am:
+	* tests/check/gnet/gnetconnhttp.c:
+	* tests/check/gnet/gnetinetaddr.c:
+	* tests/check/gnet/gnetipv6.c:
+	* tests/check/gnet/gnettcpsocket.c:
+	* tests/conn_http_test.c:
+	* tests/inetaddr_test.c:
+	* tests/ipv6_test.c:
+	* tests/tcp_test.c:
+	  Move some more tests over to the check unit testing framework.
+
 2007-07-28  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* tests/Makefile.am:

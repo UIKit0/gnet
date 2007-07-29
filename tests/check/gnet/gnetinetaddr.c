@@ -1,5 +1,6 @@
-/* Test GNet Inetaddrs (deterministic, computation-based tests only)
- * Copyright (C) 2002  David Helder
+/* GNet GInetAddr unit test (deterministic, computation-based tests only)
+ * Copyright (C) 2002 David Helder
+ * Copyright (C) 2007 Tim-Philipp Müller <tim centricular net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,40 +17,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <glib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <gnet.h>
-
 #include "config.h"
+#include "gnetcheck.h"
 
+#include <string.h>
 
-static int failed = 0;
+/*** IPv4 tests */
 
-#define TEST(S,C) do {                             	  \
-if (C) { /*g_print ("%s: PASS\n", (S)); */        	} \
-else   { g_print ("%s: FAIL\n", (S)); failed = 1;  	} \
-} while (0)
-
-#define IS_TEST(S,A,F) do {				        \
-  GInetAddr* _inetaddr;						\
-  gchar* _cname;						\
-  _inetaddr = gnet_inetaddr_new_nonblock (A, 0);		\
-  TEST(S " (inetaddr new)", _inetaddr != NULL);			\
-  _cname = gnet_inetaddr_get_canonical_name (_inetaddr);	\
-  TEST(S " (get cname)", _cname != NULL);			\
-/*  g_print ("%s\n", _cname);*/					\
-  TEST(S " (inetaddr == cname)", !strcmp(_cname, (A)));	\
-  TEST(S, F(_inetaddr));					\
-  g_free (_cname);						\
-  gnet_inetaddr_delete (_inetaddr);				\
-} while (0)
-
-
-int
-main (int argc, char* argv[])
+GNET_START_TEST (test_inetaddr_ipv4)
 {
   GInetAddr* inetaddr;
   GInetAddr* inetaddr2;
@@ -57,77 +32,73 @@ main (int argc, char* argv[])
   gchar* cname2;
   gchar bytes[GNET_INETADDR_MAX_LEN];
 
-  gnet_init ();
-
-  /* **************************************** */
-  /* IPv4 tests */
-
   /* new (canonical, IPv4) */
   inetaddr = gnet_inetaddr_new ("141.213.11.124", 23);
-  TEST ("new", inetaddr != NULL);
+  fail_unless (inetaddr != NULL);
   
   /* get_port */
-  TEST ("get port", gnet_inetaddr_get_port (inetaddr) == 23);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 23);
 
   /* set_port */
   gnet_inetaddr_set_port (inetaddr, 42);
-  TEST ("set port", gnet_inetaddr_get_port (inetaddr) == 42);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 42);
 
   /* get_canonical_name */
   cname = gnet_inetaddr_get_canonical_name (inetaddr);
-  TEST ("cname != NULL", cname != NULL);
-  TEST ("cname == 141.213.11.124", !strcmp(cname, "141.213.11.124"));
+  fail_unless (cname != NULL);
+  fail_unless_equals_string (cname, "141.213.11.124");
   g_free (cname);
 
   /* clone */
   inetaddr2 = gnet_inetaddr_clone (inetaddr);
-  TEST ("clone", inetaddr != NULL);
+  fail_unless (inetaddr2 != NULL);
   cname2 = gnet_inetaddr_get_canonical_name (inetaddr2);
-  TEST ("cname2 != NULL", cname2 != NULL);
-  TEST ("cname2 == 141.213.11.124", !strcmp(cname2, "141.213.11.124"));
-  TEST ("inetaddr2 port", gnet_inetaddr_get_port (inetaddr2) == 42);
+  fail_unless (cname2 != NULL);
+  fail_unless_equals_string (cname2, "141.213.11.124");
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr2), 42);
   g_free(cname2);
 
   /* equal, noport_equal */
-  TEST ("equal", gnet_inetaddr_equal (inetaddr, inetaddr2));
-  TEST ("equal, no port", gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
+  fail_unless (gnet_inetaddr_equal (inetaddr, inetaddr2));
+  fail_unless (gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
   gnet_inetaddr_set_port (inetaddr2, 23);
-  TEST ("not equal", !gnet_inetaddr_equal (inetaddr, inetaddr2));
-  TEST ("equal, no port", gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
+  fail_if (gnet_inetaddr_equal (inetaddr, inetaddr2));
+  fail_unless (gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
   
   /* hash */
-  TEST ("hash", gnet_inetaddr_hash (inetaddr) == 2379549526u);
-  TEST ("hash port", gnet_inetaddr_hash (inetaddr) != gnet_inetaddr_hash (inetaddr2));
+  fail_unless_equals_int (gnet_inetaddr_hash (inetaddr), 2379549526u);
+  /* hash port */
+  fail_unless (gnet_inetaddr_hash (inetaddr) != gnet_inetaddr_hash (inetaddr2));
 
   gnet_inetaddr_delete (inetaddr);
   gnet_inetaddr_delete (inetaddr2);
 
   /* bytes */
   inetaddr = gnet_inetaddr_new_bytes ("\x8d\xd5\xb\x7c", 4);
-  TEST ("new_bytes", inetaddr);
+  fail_unless (inetaddr != NULL);
 
   cname = gnet_inetaddr_get_canonical_name (inetaddr);
-  TEST ("new_bytes cname", cname);
-  TEST ("new_bytes addr", !strcmp("141.213.11.124", cname));
+  fail_unless (cname != NULL);
+  fail_unless_equals_string ("141.213.11.124", cname);
   g_free (cname);
 
-  TEST ("new_bytes port", gnet_inetaddr_get_port (inetaddr) == 0);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 0);
   gnet_inetaddr_set_port (inetaddr, 2345);
-  TEST ("new_bytes port2", gnet_inetaddr_get_port (inetaddr) == 2345);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 2345);
 
-  TEST ("new_bytes length", gnet_inetaddr_get_length (inetaddr) == 4);
+  fail_unless_equals_int (gnet_inetaddr_get_length (inetaddr), 4);
 
   gnet_inetaddr_set_bytes (inetaddr, "\x7c\xb\xd5\x8d", 4);
   cname = gnet_inetaddr_get_canonical_name (inetaddr);
-  TEST ("set_bytes cname", cname);
-  TEST ("set_bytes addr", !strcmp("124.11.213.141", cname));
-  TEST ("set_bytes port", gnet_inetaddr_get_port (inetaddr) == 2345);
+  fail_unless (cname != NULL);
+  fail_unless_equals_string ("124.11.213.141", cname);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 2345);
   g_free (cname);
 
-  TEST ("new_bytes length2", gnet_inetaddr_get_length (inetaddr) == 4);
+  fail_unless_equals_int (gnet_inetaddr_get_length (inetaddr), 4);
 
   gnet_inetaddr_get_bytes (inetaddr, bytes);
-  TEST ("get_bytes addr", !memcmp(bytes, "\x7c\xb\xd5\x8d", 4));
+  fail_unless (memcmp(bytes, "\x7c\xb\xd5\x8d", 4) == 0);
 
 #ifdef HAVE_IPV6
 
@@ -135,81 +106,36 @@ main (int argc, char* argv[])
   gnet_inetaddr_set_bytes (inetaddr, "\x3f\xfe\x0b\x00" "\x0c\x18\x1f\xff"
 			   "\0\0\0\0"         "\0\0\0\x6f", 16);
   cname = gnet_inetaddr_get_canonical_name (inetaddr);
-  TEST ("set_bytes cname6", cname);
-  TEST ("set_bytes addr6", !strcasecmp("3ffe:b00:c18:1fff::6f", cname));
+  fail_unless (cname != NULL);
+  fail_unless (!strcasecmp("3ffe:b00:c18:1fff::6f", cname));
   g_free (cname);
-  TEST ("set_bytes port6", gnet_inetaddr_get_port (inetaddr) == 2345);
-
-  TEST ("new_bytes length6", gnet_inetaddr_get_length (inetaddr) == 16);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 2345);
+  fail_unless_equals_int (gnet_inetaddr_get_length (inetaddr), 16);
 
   gnet_inetaddr_get_bytes (inetaddr, bytes);
-  TEST ("get_bytes addr6", !memcmp(bytes, "\x3f\xfe\x0b\x00\x0c\x18\x1f\xff\0\0\0\0\0\0\0\x6f", 16));
-
-  gnet_inetaddr_delete (inetaddr);
-
-
-  /* **************************************** */
-  /* IPv6 tests */
-
-  /* new (canonical, IPv4) */
-  inetaddr = gnet_inetaddr_new ("3ffe:b00:c18:1fff::6f", 23);
-  TEST ("new", inetaddr != NULL);
-  
-  /* get_port */
-  TEST ("get port", gnet_inetaddr_get_port (inetaddr) == 23);
-
-  /* set_port */
-  gnet_inetaddr_set_port (inetaddr, 42);
-  TEST ("set port", gnet_inetaddr_get_port (inetaddr) == 42);
-
-  /* get_canonical_name */
-  cname = gnet_inetaddr_get_canonical_name (inetaddr);
-  TEST ("cname != NULL", cname != NULL);
-  TEST ("cname == original", !strcasecmp(cname, "3ffe:b00:c18:1fff::6f"));
-  g_free (cname);
-
-  /* clone */
-  inetaddr2 = gnet_inetaddr_clone (inetaddr);
-  TEST ("clone", inetaddr != NULL);
-  cname2 = gnet_inetaddr_get_canonical_name (inetaddr2);
-  TEST ("cname2 != NULL", cname2 != NULL);
-  TEST ("cname2 == original", !strcasecmp(cname2, "3ffe:b00:c18:1fff::6f"));
-  TEST ("inetaddr2 port", gnet_inetaddr_get_port (inetaddr2) == 42);
-  g_free(cname2);
-
-  /* equal, noport_equal */
-  TEST ("equal", gnet_inetaddr_equal (inetaddr, inetaddr2));
-  TEST ("equal, no port", gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
-  gnet_inetaddr_set_port (inetaddr2, 23);
-  TEST ("not equal", !gnet_inetaddr_equal (inetaddr, inetaddr2));
-  TEST ("equal, no port", gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
-  
-  /* hash */
-  TEST ("hash2", gnet_inetaddr_hash (inetaddr) == 870716602u);
-  TEST ("hash2 port", gnet_inetaddr_hash (inetaddr) != gnet_inetaddr_hash (inetaddr2));
-
-  gnet_inetaddr_delete (inetaddr);
-  gnet_inetaddr_delete (inetaddr2);
-
-  /* bytes */
-  inetaddr = gnet_inetaddr_new_bytes ("\x3f\xfe\x0b\x00" "\x0c\x18\x1f\xff"
-				      "\0\0\0\0"         "\0\0\0\x6f", 16);
-  TEST ("new_bytes", inetaddr);
-  cname = gnet_inetaddr_get_canonical_name (inetaddr);
-  TEST ("new_bytes cname", cname);
-  TEST ("new_bytes addr", !strcasecmp("3ffe:b00:c18:1fff::6f", cname));
-  TEST ("new_bytes port", gnet_inetaddr_get_port (inetaddr) == 0);
-  gnet_inetaddr_delete (inetaddr);
-  g_free (cname);
+  fail_unless (!memcmp(bytes, "\x3f\xfe\x0b\x00\x0c\x18\x1f\xff\0\0\0\0\0\0\0\x6f", 16));
 
 #endif
 
+  gnet_inetaddr_delete (inetaddr);
+}
+GNET_END_TEST;
 
+#define IS_TEST(S,A,F) do {                                     \
+  GInetAddr* _inetaddr;                                         \
+  gchar* _cname;                                                \
+  _inetaddr = gnet_inetaddr_new_nonblock (A, 0);                \
+  fail_unless (_inetaddr != NULL);                              \
+  _cname = gnet_inetaddr_get_canonical_name (_inetaddr);        \
+  fail_unless (_cname != NULL);                                 \
+  fail_unless_equals_string (_cname, (A));                      \
+  fail_unless (F (_inetaddr));                                  \
+  g_free (_cname);                                              \
+  gnet_inetaddr_delete (_inetaddr);                             \
+} while (0)
 
-
-  /* **************************************** */
-  /* is_XXXX tests			      */
-
+GNET_START_TEST (test_inetaddr_is_ipv4)
+{
   /* IPv4 */
   IS_TEST ("IPv4", "141.213.11.124", 	     	  gnet_inetaddr_is_ipv4);
 
@@ -251,8 +177,13 @@ main (int argc, char* argv[])
 
   /* Internet */
   IS_TEST ("Internet1", "141.213.11.124", 	   gnet_inetaddr_is_internet);
+}
+GNET_END_TEST;
 
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
+
+GNET_START_TEST (test_inetaddr_is_ipv6)
+{
   /* IPv6 */
   IS_TEST ("!IPv4", "3ffe:b00:c18:1fff::6f", 	  !gnet_inetaddr_is_ipv4);
   IS_TEST ("IPv6", "3ffe:b00:c18:1fff::6f",  	  gnet_inetaddr_is_ipv6);
@@ -285,20 +216,106 @@ main (int argc, char* argv[])
   IS_TEST ("Internet2", "3ffe:b00:c18:1fff::6f",   gnet_inetaddr_is_internet);
   IS_TEST ("!Internet1",  "255.255.255.255",       !gnet_inetaddr_is_internet);
   IS_TEST ("!Internet2",  "ffff::1",     	   !gnet_inetaddr_is_internet);
+}
+GNET_END_TEST;
+
+#endif /* HAVE_IPV6 */
+
+
+/*** IPv6 tests ***/
+
+#if HAVE_IPV6
+GNET_START_TEST (test_inetaddr_ipv6)
+{
+  GInetAddr* inetaddr;
+  GInetAddr* inetaddr2;
+  gchar* cname;
+  gchar* cname2;
+
+  /* new (canonical, IPv6) */
+  inetaddr = gnet_inetaddr_new ("3ffe:b00:c18:1fff::6f", 23);
+  fail_unless (inetaddr != NULL);
+  
+  /* get_port */
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 23);
+
+  /* set_port */
+  gnet_inetaddr_set_port (inetaddr, 42);
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 42);
+
+  /* get_canonical_name */
+  cname = gnet_inetaddr_get_canonical_name (inetaddr);
+  fail_unless (cname != NULL);
+  fail_unless (!strcasecmp(cname, "3ffe:b00:c18:1fff::6f"));
+  g_free (cname);
+
+  /* clone */
+  inetaddr2 = gnet_inetaddr_clone (inetaddr);
+  fail_unless (inetaddr != NULL);
+  cname2 = gnet_inetaddr_get_canonical_name (inetaddr2);
+  fail_unless (cname2 != NULL);
+  fail_unless (!strcasecmp(cname2, "3ffe:b00:c18:1fff::6f"));
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr2), 42);
+  g_free(cname2);
+
+  /* equal, noport_equal */
+  fail_unless (gnet_inetaddr_equal (inetaddr, inetaddr2));
+  fail_unless (gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
+  gnet_inetaddr_set_port (inetaddr2, 23);
+  fail_if (gnet_inetaddr_equal (inetaddr, inetaddr2));
+  fail_unless (gnet_inetaddr_noport_equal (inetaddr, inetaddr2));
+  
+  /* hash */
+  fail_unless_equals_int (gnet_inetaddr_hash (inetaddr), 870716602u);
+  /* hash port */
+  fail_unless (gnet_inetaddr_hash (inetaddr) != gnet_inetaddr_hash (inetaddr2));
+
+  gnet_inetaddr_delete (inetaddr);
+  gnet_inetaddr_delete (inetaddr2);
+
+  /* bytes */
+  inetaddr = gnet_inetaddr_new_bytes ("\x3f\xfe\x0b\x00" "\x0c\x18\x1f\xff"
+				      "\0\0\0\0"         "\0\0\0\x6f", 16);
+  fail_unless (inetaddr != NULL);
+  cname = gnet_inetaddr_get_canonical_name (inetaddr);
+  fail_unless (cname != NULL);
+  fail_unless (!strcasecmp("3ffe:b00:c18:1fff::6f", cname));
+  fail_unless_equals_int (gnet_inetaddr_get_port (inetaddr), 0);
+  gnet_inetaddr_delete (inetaddr);
+  g_free (cname);
+}
+GNET_END_TEST;
+#endif /* HAVE_IPV6 */
+
+GNET_START_TEST (test_inetaddr_is_internet_domainname)
+{
+  fail_unless (gnet_inetaddr_is_internet_domainname ("speak.eecs.umich.edu"));
+  fail_unless (gnet_inetaddr_is_internet_domainname ("141.213.11.124"));
+  fail_if (gnet_inetaddr_is_internet_domainname ("localhost"));
+  fail_if (gnet_inetaddr_is_internet_domainname ("localhost.localdomain"));
+  fail_if (gnet_inetaddr_is_internet_domainname ("speak"));
+}
+GNET_END_TEST;
+
+static Suite *
+gnetinetaddr_suite (void)
+{
+  Suite *s = suite_create ("GInetAddr");
+  TCase *tc_chain = tcase_create ("inetaddr");
+
+  tcase_set_timeout (tc_chain, 0);
+
+  suite_add_tcase (s, tc_chain);
+  tcase_add_test (tc_chain, test_inetaddr_is_internet_domainname);
+  tcase_add_test (tc_chain, test_inetaddr_ipv4);
+  tcase_add_test (tc_chain, test_inetaddr_is_ipv4);
+#if HAVE_IPV6
+  tcase_add_test (tc_chain, test_inetaddr_ipv6);
+  tcase_add_test (tc_chain, test_inetaddr_is_ipv6);
 #endif
 
-  /* **************************************** */
-  /* Other tests				*/
-  TEST ("domainname", gnet_inetaddr_is_internet_domainname ("speak.eecs.umich.edu"));
-  TEST ("domainname2", gnet_inetaddr_is_internet_domainname ("141.213.11.124"));
-  TEST ("!domainname1", !gnet_inetaddr_is_internet_domainname ("localhost"));
-  TEST ("!domainname2", !gnet_inetaddr_is_internet_domainname ("localhost.localdomain"));
-  TEST ("!domainname3", !gnet_inetaddr_is_internet_domainname ("speak"));
-
-  if (failed)
-    exit (1);
-
-  exit (0);
-
-  return 0;
+  return s;
 }
+
+GNET_CHECK_MAIN (gnetinetaddr);
+

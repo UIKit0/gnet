@@ -1,8 +1,5 @@
-/***************************************************************************
- *
- * GTcpSocket test
- *
- * Copyright (C) 2006  Tim-Philipp Müller <tim centricular net>
+/* GNet GTcpSocket unit test
+ * Copyright (C) 2006 Tim-Philipp Müller  <tim centricular net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- ***************************************************************************/
+ */
 
-#include "gnet.h"
-#include <stdlib.h>
-
-#undef ENABLE_DEBUG
-/* #define ENABLE_DEBUG 1 */
+#include "config.h"
+#include "gnetcheck.h"
 
 typedef enum {
   TEST_STATE_IDLE = 0,
@@ -41,11 +34,7 @@ static void
 default_log_handler (const gchar *domain, GLogLevelFlags level,
     const gchar * msg, gpointer data)
 {
-#ifndef ENABLE_DEBUG
-  if (domain != NULL)
-#else
-  if (1)
-#endif
+  if (g_getenv ("GNET_DEBUG") != NULL)
   {
     g_print ("%s%s%s", (domain) ? domain: "", (domain) ? ": " : "", msg);
   } else {
@@ -98,7 +87,8 @@ sock_cb (GTcpSocket * socket, GTcpSocketConnectAsyncStatus status, gpointer data
 static gboolean
 idle_cb (gpointer data)
 {
-  const gchar *hostnames[] = { "localhost", "127.0.0.1", "www.google.com" };
+  const gchar *hostnames[] = { "localhost", "127.0.0.1", "www.google.com",
+      "www.gnome.org", "www.yahoo.com", "www.ebay.com", "www.amazon.co.jp" };
 
   switch (cur_state) {
     case TEST_STATE_IDLE: {
@@ -167,12 +157,12 @@ stop_connecting (gpointer id)
  * that's kind of to be expected and depends a lot on the environment.
  * We should use thread pools for DNS lookups.
  */
-
-static void
-test_tcp_async_connect_cancel_test (void)
+GNET_START_TEST (test_tcp_socket_async_connect_cancel)
 {
   GMainLoop *loop;
   gint idle_id;
+
+  g_log_set_default_handler (default_log_handler, NULL);
 
   loop = g_main_loop_new (NULL, FALSE);
 
@@ -187,19 +177,24 @@ test_tcp_async_connect_cancel_test (void)
   g_main_loop_run (loop);
 
   g_main_loop_unref (loop);
-}
-
-int
-main (int argc, char **argv)
-{
-  g_log_set_default_handler (default_log_handler, NULL);
-
-  gnet_init ();
-
-  test_tcp_async_connect_cancel_test ();
 
   g_print ("%u attempts\n", counter);
-
-  return EXIT_SUCCESS;
 }
+
+GNET_END_TEST;
+
+static Suite *
+gnettcpsocket_suite (void)
+{
+  Suite *s = suite_create ("GTcpSocket");
+  TCase *tc_chain = tcase_create ("tcpsocket");
+
+  tcase_set_timeout (tc_chain, 0);
+
+  suite_add_tcase (s, tc_chain);
+  tcase_add_test (tc_chain, test_tcp_socket_async_connect_cancel);
+  return s;
+}
+
+GNET_CHECK_MAIN (gnettcpsocket);
 

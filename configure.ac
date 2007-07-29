@@ -97,15 +97,14 @@ AC_MSG_RESULT($enable_debug)
 
 
 # Network tests
-AC_MSG_CHECKING([network tests])
+AC_MSG_CHECKING([whether to run network tests])
 AC_ARG_ENABLE(network_tests, 
 	      AC_HELP_STRING([--enable-network-tests],
 			     [enable tests that use the network]),
 	      ,
               [enable_network_tests=no])
 if test "x${enable_network_tests}" = "xyes"; then
-   NETWORK_TESTS="client_server_test.pl dns_test.pl"
-   AC_SUBST(NETWORK_TESTS)
+  AM_CONDITIONAL(ENABLE_NETWORK_TESTS, test "x${enable_network_tests}" = "xyes")
 fi
 AC_MSG_RESULT($enable_network_tests)
 
