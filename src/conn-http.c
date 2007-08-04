@@ -1366,10 +1366,18 @@ gnet_conn_http_run_async (GConnHttp        *conn,
  *
  *  Starts connecting and sending the specified http request. Will 
  *   return once the operation has finished and either an error has 
- *   occured, or the data has been received in full. This function will
- *   run its own main loop in the default GLib main context.
+ *   occured, or the data has been received in full.
  *
- *   Returns: TRUE if no error occured befor connecting
+ *   This function will run its own main loop in the default GLib main context,
+ *   which means that if your application is based on Gtk+ or sets up GLib
+ *   timeouts or idle callbacks, it is possible that those callback functions
+ *   are invoked while you are waiting for gnet_conn_http_run() to return. This
+ *   means you shouldn't make assumptions about any state you set up before
+ *   calling this function, because it might have been changed again from
+ *   within a callback in the mean time (if this can happen or not depends on
+ *   your callbacks and what they do of course).
+ *
+ *   Returns: TRUE if no error occured before connecting
  *
  **/
 
@@ -1644,7 +1652,16 @@ gnet_http_get_cb (GConnHttp *conn, GConnHttpEvent *event, gpointer user_data)
  *  Caller (you) needs to free the buffer with g_free() when
  *   no longer needed.
  *
- *   Returns: TRUE if @buffer, @length and @response are set,
+ *  This function will run its own main loop in the default GLib main context,
+ *   which means that if your application is based on Gtk+ or sets up GLib
+ *   timeouts or idle callbacks, it is possible that those callback functions
+ *   are invoked while you are waiting for gnet_http_get() to return. This
+ *   means you shouldn't make assumptions about any state you set up before
+ *   calling this function, because it might have been changed again from
+ *   within a callback in the mean time (if this can happen or not depends on
+ *   your callbacks and what they do of course).
+ *
+ *  Returns: TRUE if @buffer, @length and @response are set,
  *   otherwise FALSE.
  *
  **/

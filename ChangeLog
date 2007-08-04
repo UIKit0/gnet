@@ -1,3 +1,10 @@
+2007-08-04  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn-http.c:
+	  Add more info to docs about the implications of gnet_http_get()
+	  and gnet_conn_http_run() running a main loop iterating the default
+	  GLib main context.
+
 2007-07-29  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* configure.ac:
