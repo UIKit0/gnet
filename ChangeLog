@@ -1,3 +1,10 @@
+2007-08-08  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* examples/xmlrpc/Makefile.am:
+	  Don't use absolute path from top_builddir for local target, make
+	  isn't smart enough to recognise it's a local target which makes
+	  the build fail when using make -j2 or similar.
+
 2007-08-04  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/conn-http.c:

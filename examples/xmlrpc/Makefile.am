@@ -17,10 +17,10 @@ libgnetxmlrpc_a_LIBADD = $(top_builddir)/src/libgnet-$(GNET_MAJOR_VERSION).$(GNE
 
 test_xmlrpc_client_SOURCES = test-xmlrpc-client.c xmlrpc.h
 test_xmlrpc_client_LDADD = \
-	$(top_builddir)/examples/xmlrpc/libgnetxmlrpc.a \
+	libgnetxmlrpc.a \
 	$(top_builddir)/src/libgnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).la
 
 test_xmlrpc_server_SOURCES = test-xmlrpc-server.c xmlrpc.h
 test_xmlrpc_server_LDADD = \
-	$(top_builddir)/examples/xmlrpc/libgnetxmlrpc.a \
+	libgnetxmlrpc.a \
 	$(top_builddir)/src/libgnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).la
