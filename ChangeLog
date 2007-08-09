@@ -1,3 +1,9 @@
+2007-08-09  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* MAINTAINERS:
+	  Format maintainers file as requested by the sysadmins on
+	  the gnome devel-announce mailing list.
+
 2007-08-08  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* examples/xmlrpc/Makefile.am:
