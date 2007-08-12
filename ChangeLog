@@ -1,3 +1,9 @@
+2007-08-12  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* MAINTAINERS:
+	  Obscure e-mail addresses with spaces only, as suggested on
+	  desktop-devel.
+
 2007-08-09  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* MAINTAINERS:
