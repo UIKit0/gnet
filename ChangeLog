@@ -1,3 +1,14 @@
+2007-10-16  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* NEWS:
+	* src/conn-http.c:
+	  Fix parsing of POST method response if the server returns
+	  optional headers after the initial 100-Continue response.
+	  Should fix #459895.
+
+	* tests/check/gnet/gnetconnhttp.c:
+	  Add unit test for the above.
+
 2007-08-12  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* MAINTAINERS:

@@ -933,9 +933,13 @@ gnet_conn_http_conn_recv_response (GConnHttp *conn, gchar *data, gsize len)
 {
 	gchar *endptr, *start;
 
-	/* wait for proper response */
-	if (conn->method == GNET_CONN_HTTP_METHOD_POST && len == 1 && *data == 0x00)
-	{
+	/* after a 100 Continue response, skip everything until we get a
+	 * proper next response (there may be headers and there should
+	 * definitely be an empty line following the 100 Continue response) */
+	if (conn->method == GNET_CONN_HTTP_METHOD_POST &&
+	    conn->response_code == 100 &&
+	    !g_str_has_prefix (data, "HTTP/") &&
+	    !g_str_has_prefix (data, "http/")) {
 		gnet_conn_readline(conn->conn);
 		return;
 	}

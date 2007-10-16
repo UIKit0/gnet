@@ -278,10 +278,11 @@ GNET_END_TEST;
 #define POST_ARTIST "Massive Attack"
 #define POST_ALBUM "Blue lines"
 
-GNET_START_TEST (test_conn_http_post)
+static gchar *
+do_post_for_uri (const gchar * uri)
 {
   GConnHttp   *http;
-  gchar       *postdata, *buf, *tag, *artist_esc, *album_esc;
+  gchar       *postdata, *buf, *artist_esc, *album_esc;
   gsize        buflen;
   
   /* g_markup_printf_escaped() only exists in Glib-2.4 and later */
@@ -314,8 +315,8 @@ GNET_START_TEST (test_conn_http_post)
 
   http = gnet_conn_http_new();
 
-  fail_unless (gnet_conn_http_set_uri (http,
-      "http://soap.amazon.com/onca/soap3"));
+  fail_unless (gnet_conn_http_set_uri (http, uri),
+      "Could not set URI '%s'", uri);
 
   fail_unless (gnet_conn_http_set_method (http, GNET_CONN_HTTP_METHOD_POST,
       postdata, strlen(postdata)));
@@ -331,6 +332,16 @@ GNET_START_TEST (test_conn_http_post)
   
   gnet_conn_http_steal_buffer(http, &buf, &buflen);
   g_print ("POST operation ok, received %u bytes.\n", (guint) buflen);
+  gnet_conn_http_delete(http);
+  g_free(postdata);
+  return buf;
+}
+
+GNET_START_TEST (test_conn_http_post)
+{
+  gchar *buf, *tag;
+
+  buf = do_post_for_uri ("http://soap.amazon.com/onca/soap3");
 
   /* now parse result */
   tag = strstr(buf, "</ListPrice>");
@@ -348,9 +359,125 @@ GNET_START_TEST (test_conn_http_post)
     g_print ("Could not find ListPrice for CD %s, %s in data returned :|\n",
         POST_ARTIST, POST_ALBUM);
 
-  gnet_conn_http_delete(http);
-  g_free(postdata);
   g_free(buf);
+}
+GNET_END_TEST;
+
+static void
+http_post_conn_func (GConn * conn, GConnEvent * event, gpointer data)
+{
+  guint *p_written = (guint *) data;
+
+  if (event->type == GNET_CONN_WRITE)
+    *p_written += 1;
+}
+
+static GConn *last_conn = NULL; /* save here so we can delete it d'oh */
+
+static void
+http_post_server_func (GServer * srv, GConn * conn, gpointer user_data)
+{
+  const gchar **lines = (const gchar **) user_data;
+  gint num_lines = 0, lines_written = 0;
+
+  last_conn = conn;
+
+  fail_unless (conn != NULL, "Can't set up server, some error occured");
+
+  fail_unless (gnet_conn_is_connected (conn));
+
+  gnet_conn_set_callback (conn, http_post_conn_func, &lines_written);
+
+  /* don't parse or check what the server sends us, just assume it does what
+   * we expect it to and send out data as would be appropriate as response */
+  while (lines != NULL && lines[0] != NULL) {
+    gnet_conn_write (conn, (gchar *) lines[0], strlen (lines[0]));
+    ++lines;
+    ++num_lines;
+  }
+  /* can't disconnect/close here yet, or the pending data might not actually
+   * be sent (see open bug about this); work around this by iterating the
+   * main context until there are no more pending events, ie. the
+   * writable-watch set up by gnet_conn_write() has been removed */
+  while (lines_written < num_lines) {
+    g_main_context_iteration (NULL, TRUE);
+  }
+
+  /* FIXME: gnet_conn_disconnect (conn); */
+  /* FIXME: gnet_conn_unref (conn); */
+}
+
+GNET_START_TEST (test_conn_http_post_local)
+{
+  const gchar *lines[] = {
+      "HTTP/1.1 100 Continue\r\n",
+      "Connection: Keep-Alive\r\n",
+      "\r\n",
+      "HTTP/1.1 200 OK\r\n",
+      "Date: Mon, 15 Oct 2007 14:40:20 GMT\r\n",
+      "Server: Server\r\n",
+      "nnCoection: close\r\n",
+      "Content-Type: text/xml; charset=UTF-8\r\n",
+      "Vary: Accept-Encoding,User-Agent\r\n",
+      "nnCoection: close\r\n",
+      "Transfer-Encoding: chunked\r\n",
+      "Connection: Keep-Alive\r\n",
+      "\r\n",
+      "d\r\n",
+      "<html></html>\r\n",
+      "0\r\n",
+      NULL
+   };
+  const gchar *lines2[] = {
+      "HTTP/1.1 100 Continue\r\n",
+      "\r\n",
+      "HTTP/1.1 200 OK\r\n",
+      "Date: Mon, 15 Oct 2007 14:40:20 GMT\r\n",
+      "Server: Server\r\n",
+      "nnCoection: close\r\n",
+      "Content-Type: text/xml; charset=UTF-8\r\n",
+      "Vary: Accept-Encoding,User-Agent\r\n",
+      "nnCoection: close\r\n",
+      "Transfer-Encoding: chunked\r\n",
+      "Connection: Keep-Alive\r\n",
+      "\r\n",
+      "d\r\n",
+      "<html></html>\r\n",
+      "0\r\n",
+      NULL
+   };
+  GInetAddr *ia;
+  GServer *srv;
+  gchar *uri;
+  gchar *buf;
+
+  /* Test case where we get headers after the HTTP/1.1 100 Continue */
+  ia = gnet_inetaddr_new ("127.0.0.1", 0);
+  fail_unless (ia != NULL);
+  srv = gnet_server_new (ia, 0, http_post_server_func, lines);
+  gnet_inetaddr_unref (ia);
+  fail_unless (srv != NULL, "Could not bind to 127.0.0.1, check your setup");
+  uri = g_strdup_printf ("http://127.0.0.1:%d", srv->port);
+  buf = do_post_for_uri (uri);
+  g_free (uri);
+  fail_unless_equals_string (buf, "<html></html>");
+  g_free (buf);
+  gnet_conn_unref (last_conn);
+  last_conn = NULL;
+
+  /* Test case where we get no headers after the HTTP/1.1 100 Continue */
+  ia = gnet_inetaddr_new ("127.0.0.1", 0);
+  fail_unless (ia != NULL);
+  srv = gnet_server_new (ia, 0, http_post_server_func, lines2);
+  gnet_inetaddr_unref (ia);
+  fail_unless (srv != NULL, "Could not bind to 127.0.0.1, check your setup");
+  uri = g_strdup_printf ("http://127.0.0.1:%d", srv->port);
+  buf = do_post_for_uri (uri);
+  g_free (uri);
+  fail_unless_equals_string (buf, "<html></html>");
+  g_free (buf);
+  gnet_conn_unref (last_conn);
+  last_conn = NULL;
 }
 GNET_END_TEST;
 
@@ -439,6 +566,7 @@ gnetconnhttp_suite (void)
   tcase_add_test (tc_chain, test_conn_http_run);
   tcase_add_test (tc_chain, test_conn_http_get_async);
   tcase_add_test (tc_chain, test_conn_http_post);
+  tcase_add_test (tc_chain, test_conn_http_post_local);
   tcase_add_test (tc_chain, test_gnet_http_get);
   tcase_add_test (tc_chain, test_get_binary);
   return s;

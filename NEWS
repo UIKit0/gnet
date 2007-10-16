@@ -31,6 +31,9 @@ Changes in GNet
   amd64 (Daniel Gryniewicz)
 * GConnHttp: fix several timeout issues
   (Steve Morris, Tim Muller).
+* GConnHttp: fix parsing of POST method
+  response when there are optional headers
+  after the 100-Continue response (#459895).
 * Relicense source code in examples/
   directory from GPL to LGPL.
 * Add 'extern "C"' guards to pack.h to
