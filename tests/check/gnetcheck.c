@@ -117,3 +117,26 @@ gnet_check_run_suite (Suite * suite, const gchar * name, const gchar * fname)
   srunner_free (sr);
   return nf;
 }
+
+gboolean
+_gnet_check_run_test_func (const gchar * func_name)
+{
+  const gchar *gnet_checks;
+  gchar **funcs, **f;
+
+  gnet_checks = g_getenv ("GNET_CHECKS");
+
+  /* no filter specified => run all checks */
+  if (gnet_checks == NULL || *gnet_checks == '\0')
+    return TRUE;
+
+  /* only run specified functions */
+  funcs = g_strsplit (gnet_checks, ",", -1);
+  for (f = funcs; f != NULL && *f != NULL; ++f) {
+    if (strcmp (*f, func_name) == 0)
+      return TRUE;
+  }
+  return FALSE;
+}
+
+

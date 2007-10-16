@@ -315,6 +315,19 @@ int main (int argc, char **argv)				\
   return gnet_check_run_suite (s, # name, __FILE__);		\
 }
 
+gboolean _gnet_check_run_test_func (const gchar * func_name);
+
+static inline void
+__gnet_tcase_add_test (TCase * tc, TFun tf, const gchar * func_name)
+{
+  if (_gnet_check_run_test_func (func_name)) {
+    tcase_add_test (tc, tf);
+  }
+}
+
+#undef tcase_add_test
+#define tcase_add_test(tc,tf) __gnet_tcase_add_test(tc,tf,G_STRINGIFY(tf))
+
 G_END_DECLS
 
 #endif /* __GNET_CHECK_H__ */
