@@ -3,7 +3,7 @@
 	* tests/check/gnetcheck.c:
 	* tests/check/gnetcheck.h:
 	  Support running only specific checks of a unit test
-	  via the GST_CHECK environment variable (specify
+	  via the GNET_CHECKS environment variable (specify
 	  test case function names, comma-separated).
 
 2007-10-16  Tim-Philipp Müller  <tim at centricular dot net>
