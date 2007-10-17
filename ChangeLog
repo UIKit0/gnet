@@ -1,3 +1,11 @@
+2007-10-17  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/gnet-private.h:
+	* src/inetaddr.c:
+	  Do refcounting of GInetAddr structures atomically. Not that
+	  that is particularly useful given how the API isn't thread-safe,
+	  but it can't hurt either.
+
 2007-10-16  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* tests/check/gnetcheck.c:

@@ -254,7 +254,7 @@ struct _GTcpSocket
 struct _GInetAddr
 {
   gchar* name;
-  guint ref_count;
+  gint ref_count; /* ATOMIC */
   struct sockaddr_storage sa;
 };
 

@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000-2002  David Helder
  * Copyright (C) 2000-2003  Andrew Lanoix
+ * Copyright (C) 2007       Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -1553,9 +1554,9 @@ gnet_inetaddr_delete (GInetAddr* inetaddr)
 void
 gnet_inetaddr_ref (GInetAddr* inetaddr)
 {
-  g_return_if_fail(inetaddr != NULL);
+  g_return_if_fail (inetaddr != NULL);
 
-  inetaddr->ref_count++;
+  g_atomic_int_inc (&inetaddr->ref_count);
 }
 
 
@@ -1570,15 +1571,12 @@ gnet_inetaddr_ref (GInetAddr* inetaddr)
 void
 gnet_inetaddr_unref (GInetAddr* inetaddr)
 {
-  g_return_if_fail(inetaddr != NULL);
+  g_return_if_fail (inetaddr != NULL);
 
-  inetaddr->ref_count--;
-
-  if (inetaddr->ref_count == 0)
-    {
-      g_free (inetaddr->name);
-      g_free (inetaddr);
-    }
+  if (g_atomic_int_dec_and_test (&inetaddr->ref_count)) {
+    g_free (inetaddr->name);
+    g_free (inetaddr);
+  }
 }
 
 
