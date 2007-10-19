@@ -198,6 +198,22 @@ AC_SUBST(GLIB_LIBS)
 AC_SUBST(GTHREAD_CFLAGS)
 AC_SUBST(GTHREAD_LIBS)
 
+# make double sure GLib was compiled with GThread support
+AC_MSG_CHECKING([if GLib was compiled with support for threads])
+SAVED_CFLAGS="$CFLAGS"
+CFLAGS="$GTHREAD_CFLAGS"
+AC_TRY_COMPILE([#include <glib.h>], [
+  #ifndef G_THREADS_ENABLED
+  #error "GNet requires a GLib with support for threads"
+  #endif
+], [
+  AC_MSG_RESULT([yes])
+], [
+  AC_MSG_RESULT([no])
+  AC_MSG_ERROR([GNet requires a GLib with support for threads enabled!])
+])
+CFLAGS="$SAVED_CFLAGS"
+
 # Check for IPv6 support on unix
 # (will be done at runtime on win32)
 if test "x$gnet_native_win32" != "xyes"

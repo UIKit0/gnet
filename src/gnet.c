@@ -70,11 +70,8 @@ gnet_init (void)
   /* TODO: use atomic ops once we require Glib-2.4 */
   been_here = TRUE;
 
-#ifdef G_THREADS_ENABLED
   if (!g_thread_supported ()) 
     g_thread_init (NULL);
-#endif /* G_THREADS_ENABLED */
-
 
 #ifndef GNET_WIN32
   /* Auto-detect IPv6 policy.  Set it to IPv4 if auto-detection fails. */
@@ -123,6 +120,7 @@ gnet_init (void)
 	gnet_ipv6_set_policy (policy);
 	gnet_initialize_windows_sockets();
 
+	/* FIXME: a library should really not set up atexit handlers ... */
 	atexit(gnet_win32_at_exit);
 #endif
 }

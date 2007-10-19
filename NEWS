@@ -53,6 +53,13 @@ Changes in GNet
   add support for abstract unix sockets on
   systems where this is supported
   (Zeeshan Ali, #404583)
+* Remove unused and pointless fork() fallback
+  for asynchronous DNS lookups in cases where
+  GLib has been compiled without threading
+  support.  It's 2007 - I think it's in order
+  to require threading to be present; even my
+  wrist watch can do that.  Removs lots of
+  unmaintained code and ugly #ifdefs.
 
 
 2.0.7

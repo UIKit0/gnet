@@ -30,13 +30,6 @@
 #include <ifaddrs.h>
 #endif
 
-#ifndef G_THREADS_ENABLED /* unix fork() variant */
-static gboolean gnet_inetaddr_new_list_async_cb (GIOChannel * iochannel,
-    GIOCondition condition, gpointer data);
-static gboolean gnet_inetaddr_get_name_async_cb (GIOChannel * iochannel,
-    GIOCondition condition, gpointer data);
-#endif
-
 typedef struct _GInetAddrNewListState 
 {
   GList*	ias;
@@ -45,22 +38,10 @@ typedef struct _GInetAddrNewListState
   gpointer 	data;
 
   gboolean 	in_callback;
-#ifdef G_THREADS_ENABLED
   GStaticMutex	mutex;
   gboolean	is_cancelled;
   gboolean	lookup_failed;
   guint 	source;
-
-#else			       	/* UNIX process	*/
-  int 		fd;
-  pid_t 	pid;
-  GIOChannel* 	iochannel;
-  guint 	watch;
-  int 		len;
-  guchar 	buffer[256];
-
-#endif
-
 } GInetAddrNewListState;
 
 typedef struct _GInetAddrNewState 
@@ -69,9 +50,7 @@ typedef struct _GInetAddrNewState
   GInetAddrNewAsyncFunc     func;
   gpointer                  data;
   gboolean                  in_callback;
-#ifdef G_THREADS_ENABLED
   GStaticMutex              mutex;
-#endif
 } GInetAddrNewState;
 
 typedef struct _GInetAddrReverseAsyncState 
@@ -80,17 +59,10 @@ typedef struct _GInetAddrReverseAsyncState
   GInetAddrGetNameAsyncFunc func;
   gpointer data;
   gboolean in_callback;
-#ifdef G_THREADS_ENABLED
   GStaticMutex mutex;
   gboolean	is_cancelled;
   gchar*	name;
   guint 	source;
-#else				/* UNIX process	*/
-  int 		fd;
-  pid_t 	pid;
-  guint 	watch;
-  GIOChannel* 	iochannel;
-#endif
   guchar	buffer[256 + 1];/* Names can only be 256 characters? */
   int 		len;
 
@@ -187,9 +159,6 @@ static void   ialist_free (GList* ialist);
 
 #if defined(HAVE_GETHOSTBYNAME_R_GLIB_MUTEX) \
    || defined(HAVE_GETADDRINFO_GLIB_MUTEX)
-#  ifndef G_THREADS_ENABLED
-#    error Using GLib Mutex but thread are not enabled.
-#  endif
 G_LOCK_DEFINE (dnslock);
 #endif
 
@@ -745,10 +714,8 @@ gnet_inetaddr_new_async (const gchar* hostname, gint port,
 
   state = g_new0(GInetAddrNewState, 1);
 
-#ifdef G_THREADS_ENABLED
   g_static_mutex_init (&state->mutex);
   g_static_mutex_lock (&state->mutex);
-#endif
 
   state->func = func;
   state->data = data;
@@ -757,14 +724,10 @@ gnet_inetaddr_new_async (const gchar* hostname, gint port,
 
   state->list_id = list_id;
 
-#ifdef G_THREADS_ENABLED
   g_static_mutex_unlock (&state->mutex);
-#endif
 
   if (list_id == NULL) {
-#ifdef G_THREADS_ENABLED
     g_static_mutex_free (&state->mutex);
-#endif
     g_free (state);
     return NULL;
   }
@@ -805,12 +768,10 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 
   state->in_callback = TRUE;
 
-#ifdef G_THREADS_ENABLED
   /* make sure we don't proceed before gnet_inetaddr_new_async()
    * has set state->list_id, which is needed by _async_cancel */
   g_static_mutex_lock (&state->mutex);
   g_static_mutex_unlock (&state->mutex);
-#endif
 
   if (ialist)
     {
@@ -840,39 +801,7 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 
 static gboolean inetaddr_new_list_async_nonblock_dispatch (gpointer data);
 
-#ifdef G_THREADS_ENABLED
 static void* inetaddr_new_list_async_gthread (void* arg);
-#else
-
-static ssize_t writen (int fd, const void* buf, size_t len);
-
-static ssize_t
-writen (int fd, const void* buf, size_t len)
-{
-  size_t nleft;
-  ssize_t nwritten;
-  char* ptr;
-
-  nleft = len;
-  ptr = (char*) buf;
-  while (nleft > 0)
-    {
-      if ((nwritten = write(fd, ptr, nleft)) < 0)
-	{
-	  if (errno == EINTR)
-	    nwritten = 0;
-	  else
-	    return -1;
-	}
-      
-      nleft -= nwritten;
-      ptr += nwritten;
-    }
-
-  return len;
-}
-
-#endif
 
 
 /**
@@ -927,17 +856,14 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   if (ia)
     {
       state = g_new0 (GInetAddrNewListState, 1);
-#ifdef G_THREADS_ENABLED
       g_static_mutex_init (&state->mutex);
       g_static_mutex_lock (&state->mutex);
-#endif
       state->ias = g_list_prepend (NULL, ia);
       state->source = g_idle_add_full (G_PRIORITY_DEFAULT,
 				       inetaddr_new_list_async_nonblock_dispatch,
 				       state, NULL);
     }
   else
-# ifdef G_THREADS_ENABLED
   {
     GThread *thread;
     GError *error = NULL;
@@ -966,116 +892,6 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
         return NULL;
     }
   }
-# else 					/* Fork */
-  {
-    int pipes[2];
-    pid_t pid = -1;
-
-    /* Open a pipe */
-    if (pipe(pipes) == -1)
-      return NULL;
-
-    /* Fork to do the look up. */
-  fork_again:
-    errno = 0;
-    /* Child: Do lookup, write result to pipe */
-    if ((pid = fork()) == 0)
-      {
-	int outfd = pipes[1];
-	GList* ialist;
-
-	close (pipes[0]);
-
-	/* Try to get the host by name (ie, DNS) */
-	if ((ialist = gnet_gethostbyname(hostname)) != NULL)
-	  {
-	    GList* i;
-	    char* buf;
-	    int buflen = 0;
-	    char* bufp;
-	    int rv;
-
-	    /* Calculate size needed for buffer.  The buffer is a list
-	       of addresses.  Each address is preceeded by one byte,
-	       which is the size of the address.  The last item in the
-	       list is a zero. */
-	    for (i = ialist; i != NULL; i = i->next)
-	      {
-		GInetAddr* ia;
-		guchar size;
-
-		ia = (GInetAddr*) ialist->data;
-		size = GNET_SOCKADDR_ADDRLEN(ia->sa);
-
-		buflen += 1 + size;
-	      }
-	    buflen++;	/* 1 more byte for the ending zero */
-
-	    /* Copy addresses to buffer */
-	    buf = bufp = g_new(guchar, buflen);
-	    for (i = ialist; i != NULL; i = i->next)
-	      {
-		GInetAddr* ia;
-		guchar size;
-
-		ia = (GInetAddr*) i->data;
-		size = GNET_SOCKADDR_ADDRLEN(ia->sa);
-
-		bufp[0] = size;
-		bufp++;
-
-		memcpy (bufp, GNET_SOCKADDR_ADDRP(ia->sa), size);
-		bufp += size;
-	      }
-	    *bufp = '\0';
-	    ialist_free (ialist);
-
-	    /* Write buffer */
-	    rv = writen (outfd, buf, buflen);
-	    if (rv != buflen)
-	      g_warning ("Error writing to pipe: %s\n", 
-			 g_strerror(errno));
-	    close (outfd);
-	  }
-	else
-	  {
-	    /* Do nothing.  Exit will close the pipe. */
-	  }
-
-	/* Exit (we don't want atexit called, so do _exit instead) */
-	_exit(EXIT_SUCCESS);
-      }
-
-    /* Parent: Set up state */
-    else if (pid > 0)
-      {
-	close (pipes[1]);
-
-	state = g_new0(GInetAddrNewListState, 1);
-	state->pid = pid;
-	state->fd = pipes[0];
-	state->iochannel = gnet_private_io_channel_new(pipes[0]);
-	state->watch = g_io_add_watch(state->iochannel,
-				      (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
-				      gnet_inetaddr_new_list_async_cb, 
-				      state);
-      }
-
-    /* Try again */
-    else if (errno == EAGAIN)
-      {
-	sleep(0);	/* Yield the processor */
-	goto fork_again;
-      }
-
-    /* Else fork failed completely */
-    else
-      {
-	g_warning ("fork error: %s (%d)\n", g_strerror(errno), errno);
-	return NULL;
-      }
-  }
-#endif
 
   /* Finish setting up state for callback */
   g_assert (state);
@@ -1083,11 +899,8 @@ gnet_inetaddr_new_list_async (const gchar* hostname, gint port,
   state->func = func;
   state->data = data;
 
-# ifdef G_THREADS_ENABLED
-  {
-    g_static_mutex_unlock (&state->mutex);
-  }
-# endif
+  /* Now that we're set up the thread can go and do its thing */
+  g_static_mutex_unlock (&state->mutex);
 
   return state;
 }
@@ -1099,9 +912,7 @@ inetaddr_new_list_async_nonblock_dispatch (gpointer data)
 {
   GInetAddrNewListState* state = (GInetAddrNewListState*) data;
 
-#ifdef G_THREAD_ENABLED
-  g_thread_mutex_lock (&state->mutex);
-#endif
+  g_static_mutex_lock (&state->mutex);
 
   state->in_callback = TRUE;
 
@@ -1110,16 +921,12 @@ inetaddr_new_list_async_nonblock_dispatch (gpointer data)
   state->in_callback = FALSE;
 
   g_source_remove (state->source);
-#ifdef G_THREADS_ENABLES
-  g_thread_mutex_unlock (&state->mutex);
-  g_thread_mutex_free (&state->mutex);
-#endif
+  g_static_mutex_unlock (&state->mutex);
+  g_static_mutex_free (&state->mutex);
   g_free (state);
 
   return FALSE;
 }
-
-#ifdef G_THREADS_ENABLED
 
 static gboolean inetaddr_new_list_async_gthread_dispatch (gpointer data);
 
@@ -1266,144 +1073,6 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
     }
 }
 
-#else		/* ********** UNIX process ********** */
-
-
-static gboolean 
-gnet_inetaddr_new_list_async_cb (GIOChannel* iochannel, 
-				 GIOCondition condition, 
-				 gpointer data)
-{
-  GInetAddrNewListState* state = (GInetAddrNewListState*) data;
-
-  g_assert (!state->in_callback);
-
-  /* Read from the pipe */
-  if (condition & G_IO_IN)
-    {
-      gint rv;
-      guchar* buf;
-      gint space;
-
-      buf = &state->buffer[state->len];
-      space = sizeof(state->buffer) - state->len;
-
-      if ((rv = read(state->fd, buf, space)) > 0)
-	{
-	  guchar* end;
-	  gboolean done = FALSE;
-
-	  state->len += rv;
-	  end = state->buffer + state->len;
-
-	  /* Parse as many addresses as possible */
-	  buf = state->buffer;
-	  while (buf != end)
-	    {
-	      guchar size;
-	      GInetAddr* ia;
-
-	      /* Get the size */
-	      size = buf[0];
-	      buf++;
-
-	      /* Break if done */
-	      if (size == 0)
-		{
-		  done = TRUE;
-		  break;
-		}
-
-	      /* Break if part of the address is missing.  We will
-		 read it later. */
-	      if ((buf + size) > end)
-		break;
-
-	      /* Skip if a weird size */
-	      if (size != 4 && size != 16)
-		{
-		  buf += size;
-		  continue;
-		}
-
-	      /* Save the address */
-	      ia = g_new0(GInetAddr, 1);
-	      ia->ref_count = 1;
-	      GNET_SOCKADDR_FAMILY(ia->sa) = (size == 4)? AF_INET : AF_INET6;
-	      GNET_INETADDR_SET_SS_LEN(ia);
-	      memcpy(GNET_INETADDR_ADDRP(ia), buf, size);
-	      GNET_INETADDR_PORT(ia) = g_htons(state->port);
-
-	      state->ias = g_list_prepend (state->ias, ia);
-
-	      buf += size;
-	    }
-
-	  /* If not done, move the rest of the buffer over and read
-	     more */
-	  if (!done)
-	    {
-	      int bytes_parsed;
-
-	      bytes_parsed = buf - state->buffer;
-	      g_memmove (state->buffer, buf, bytes_parsed);
-	      state->len -= bytes_parsed;
-	      
-	      return TRUE;
-	    }
-
-	  /* Otherwise, we're done! */
-
-	  /* Reverse the list */
-	  state->ias = g_list_reverse (state->ias);
-
-	  /* Make callback (callee owns list) */
-	  state->in_callback = TRUE;
-	  (*state->func)(state->ias, state->data);
-	  state->ias = NULL;
-	  state->in_callback = FALSE;
-	  gnet_inetaddr_new_list_async_cancel (state);
-	  return FALSE;
-	}
-      /* otherwise, there was an error.  we shouldn't read 0 - we'll
-	 get a zero-length size when they're done sending. */
-    }
-  /* otherwise, there was an error */
-
-  state->in_callback = TRUE;
-  (*state->func)(NULL, state->data);
-  state->in_callback = FALSE;
-  gnet_inetaddr_new_list_async_cancel(state);
-  return FALSE;
-}
-
-
-
-void
-gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
-{
-  GInetAddrNewListState* state = (GInetAddrNewListState*) id;
-
-  g_return_if_fail (state);
-
-  /* Ignore if in callback */
-  if (state->in_callback)
-    return;
-
-  ialist_free (state->ias);
-  g_source_remove (state->watch);
-  g_io_channel_unref (state->iochannel);
-
-  close (state->fd);
-  kill (state->pid, SIGKILL);
-  waitpid (state->pid, NULL, 0);
-
-  memset (state, 0, sizeof(*state));
-  g_free (state);
-}
-
-
-#endif
 
 /**
  *  gnet_inetaddr_new_nonblock:
@@ -1636,9 +1305,7 @@ gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr)
 
 
 
-#ifdef G_THREADS_ENABLED
 static void* inetaddr_get_name_async_gthread (void* arg);
-#endif
 
 
 /**
@@ -1664,132 +1331,24 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
 			      gpointer data)
 {
   GInetAddrReverseAsyncState* state = NULL;
+  GError *err = NULL;
 
   g_return_val_if_fail(inetaddr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-# ifdef G_THREADS_ENABLED
-  {
-    GThread *thread;
-    GError *error = NULL;
+  state = g_new0(GInetAddrReverseAsyncState, 1);
 
-    state = g_new0(GInetAddrReverseAsyncState, 1);
+  g_static_mutex_init (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
 
-    g_static_mutex_init (&state->mutex);
-    g_static_mutex_lock (&state->mutex);
-
-    thread = g_thread_create (inetaddr_get_name_async_gthread, state,
-                              FALSE, &error);
-
-    if (thread == NULL)
-    {
-        g_warning ("g_thread_create error: %s\n", error->message);
-        g_error_free (error);
-        g_static_mutex_unlock (&state->mutex);
-        g_static_mutex_free (&state->mutex);
-        g_free (state);
-        return NULL;
-    }
+  if (!g_thread_create (inetaddr_get_name_async_gthread, state, FALSE, &err)) {
+    g_warning ("g_thread_create error: %s\n", err->message);
+    g_error_free (err);
+    g_static_mutex_unlock (&state->mutex);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+    return NULL;
   }
-# else 					/* Fork */
-  {
-    int pipes[2];
-    pid_t pid = -1;
-
-    /* Open a pipe */
-    if (pipe(pipes) == -1)
-      return NULL;
-
-    /* Fork to do the look up. */
-  fork_again:
-    errno = 0;
-    if ((pid = fork()) == 0)
-      {
-	int outfd = pipes[1];
-	gchar* name;
-	guchar len;
-	
-	close (pipes[0]);
-
-	if (inetaddr->name)
-	  name = g_strdup(inetaddr->name);
-	else
-	  name = gnet_gethostbyaddr(&inetaddr->sa);
-
-	/* Write the name to the pipe.  If we didn't get a name, we
-	   just write the canonical name. */
-	if (name)
-	  {
-	    guint lenint = strlen(name);
-
-	    if (lenint > 255)
-	      {
-		g_warning ("Truncating domain name: %s\n", name);
-		name[256] = '\0';
-		lenint = 255;
-	      }
-
-	    len = lenint;
-
-	    if ((write(outfd, &len, sizeof(len)) == -1) ||
-		(write(outfd, name, len) == -1) )
-	      g_warning ("Error writing to pipe: %s\n", g_strerror(errno));
-	  }
-	else
-	  {
-	    char buffer[INET6_ADDRSTRLEN];
-	    const char* rv;
-
-	    rv = inet_ntop(GNET_INETADDR_FAMILY(inetaddr), 
-			   GNET_INETADDR_ADDRP(inetaddr),
-			   buffer, sizeof(buffer));
-	    g_assert (rv);
-	    len = strlen(buffer);
-
-	    if ((write(outfd, &len, sizeof(len)) == -1) ||
-		(write(outfd, buffer, len) == -1))
-	      g_warning ("Error writing to pipe: %s\n", g_strerror(errno));
-	  }
-
-	/* Close the socket */
-	close (outfd);
-
-	/* Exit (we don't want atexit called, so do _exit instead) */
-	_exit(EXIT_SUCCESS);
-
-      }
-
-    /* Set up an IOChannel to read from the pipe */
-    else if (pid > 0)
-      {
-	close (pipes[1]);
-
-	/* Create a structure for the call back */
-	state = g_new0(GInetAddrReverseAsyncState, 1);
-	state->pid = pid;
-	state->fd = pipes[0];
-	state->iochannel = gnet_private_io_channel_new(pipes[0]);
-	state->watch = g_io_add_watch(state->iochannel,
-				      (G_IO_IN|G_IO_ERR|G_IO_HUP|G_IO_NVAL),
-				      gnet_inetaddr_get_name_async_cb, 
-				      state);
-      }
-
-    /* Try again */
-    else if (errno == EAGAIN)
-      {
-	sleep(0);	/* Yield the processor */
-	goto fork_again;
-      }
-
-    /* Else there was a goofy error */
-    else
-      {
-	g_warning ("fork error: %s (%d)\n", g_strerror(errno), errno);
-	return NULL;
-      }
-  }
-# endif
 
   /* Set up state for callback */
   g_assert (state);
@@ -1797,17 +1356,11 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
   state->func = func;
   state->data = data;
 
-# ifdef G_THREADS_ENABLED
-  {
-    g_static_mutex_unlock (&state->mutex);
-  }
-# endif
+  g_static_mutex_unlock (&state->mutex);
 
   return state;
 }
 
-
-#ifdef G_THREADS_ENABLED
 
 static gboolean inetaddr_get_name_async_gthread_dispatch (gpointer data);
 
@@ -1926,93 +1479,6 @@ inetaddr_get_name_async_gthread (void* arg)
   /* Thread exits... */
   return NULL;
 }
-
-
-#else		/* ********** UNIX process ********** */
-
-
-gboolean 
-gnet_inetaddr_get_name_async_cb (GIOChannel* iochannel, 
-				 GIOCondition condition, 
-				 gpointer data)
-{
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) data;
-  gchar* name = NULL;
-
-  g_return_val_if_fail (state, FALSE);
-  g_return_val_if_fail (!state->in_callback, FALSE);
-
-  /* Read from the pipe */
-  if (condition & G_IO_IN)
-    {
-      int rv;
-      char* buf;
-      int length;
-
-      buf = &state->buffer[state->len];
-      length = sizeof(state->buffer) - state->len;
-
-      if ((rv = read(state->fd, buf, length)) >= 0)
-	{
-	  state->len += rv;
-
-	  /* Return true if there's more to read */
-	  if ((state->len - 1) != state->buffer[0])
-	    return TRUE;
-
-	  /* Copy the name */
-	  name = g_new(gchar, state->buffer[0] + 1);
-	  memcpy (name, &state->buffer[1], state->buffer[0]);
-	  name[state->buffer[0]] = '\0';
-	  g_free(state->ia->name);
-	  state->ia->name = name;
-
-	  /* Remove the watch now in case we don't return immediately */
-	  g_source_remove (state->watch);
-	  state->watch = 0;
-
-	  /* Call back */
-	  state->in_callback = TRUE;
-	  (*state->func)(name, state->data);
-	  state->in_callback = FALSE;
-	  gnet_inetaddr_get_name_async_cancel(state);
-	  return FALSE;
-	}
-      /* otherwise, there was a read error */
-    }
-  /* otherwise, there was some error */
-
-  /* Call back */
-  state->in_callback = TRUE;
-  (*state->func)(NULL, state->data);
-  state->in_callback = FALSE;
-  gnet_inetaddr_get_name_async_cancel(state);
-  return FALSE;
-}
-
-
-
-void
-gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id)
-{
-  GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
-
-  g_return_if_fail(state != NULL);
-
-  if (state->in_callback)
-    return;
-
-  gnet_inetaddr_delete (state->ia);
-  if (state->watch)
-    g_source_remove (state->watch);
-  close (state->fd);
-  kill (state->pid, SIGKILL);
-  waitpid (state->pid, NULL, 0);
-
-  g_free(state);
-}
-
-#endif
 
 
 /**

@@ -1,3 +1,18 @@
+2007-10-19  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* NEWS:
+	* src/gnet.c:
+	* src/inetaddr.c:
+	* configure.ac:
+	  Remove fork()-and-pipe-based fallback for asynchronous DNS lookups,
+	  which was used when GLib has been compiled without support for
+	  threading, ie. G_THREADS_ENABLED was not defined.  This code is
+	  unused in practice, pointless and I simply don't want to maintain it.
+	  Also, it's 2007.  Besides, getting rid of this cruft might make it
+	  a bit easier for someone to implement a non-thread async dns variant.
+	  Lastly, fixes some cases where we didn't lock or free mutexes because
+	  we checked against a non-existant G_THREADS_ENABLES define.
+
 2007-10-17  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/gnet-private.h:
