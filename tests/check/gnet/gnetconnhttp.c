@@ -557,18 +557,29 @@ gnetconnhttp_suite (void)
 {
   Suite *s = suite_create ("GConnHttp");
   TCase *tc_chain = tcase_create ("connhttp");
+  gboolean run_network_checks;
 
   verbose = (g_getenv ("GNET_DEBUG") != NULL);
 
   tcase_set_timeout (tc_chain, 0);
 
   suite_add_tcase (s, tc_chain);
-  tcase_add_test (tc_chain, test_conn_http_run);
-  tcase_add_test (tc_chain, test_conn_http_get_async);
-  tcase_add_test (tc_chain, test_conn_http_post);
+
+#ifdef GNET_ENABLE_NETWORK_TESTS
+  run_network_checks = TRUE;
+#else
+  run_network_checks = FALSE;
+#endif
+
+  if (run_network_checks) {
+    tcase_add_test (tc_chain, test_conn_http_run);
+    tcase_add_test (tc_chain, test_conn_http_get_async);
+    tcase_add_test (tc_chain, test_conn_http_post);
+    tcase_add_test (tc_chain, test_gnet_http_get);
+    tcase_add_test (tc_chain, test_get_binary);
+  }
+
   tcase_add_test (tc_chain, test_conn_http_post_local);
-  tcase_add_test (tc_chain, test_gnet_http_get);
-  tcase_add_test (tc_chain, test_get_binary);
   return s;
 }
 

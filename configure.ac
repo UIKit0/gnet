@@ -100,13 +100,17 @@ AC_MSG_RESULT($enable_debug)
 AC_MSG_CHECKING([whether to run network tests])
 AC_ARG_ENABLE(network_tests, 
 	      AC_HELP_STRING([--enable-network-tests],
-			     [enable tests that use the network]),
+			     [enable tests that use the network (default: yes)]),
 	      ,
               [enable_network_tests=no])
 if test "x${enable_network_tests}" = "xyes"; then
-  AM_CONDITIONAL(ENABLE_NETWORK_TESTS, test "x${enable_network_tests}" = "xyes")
+  AC_DEFINE(GNET_ENABLE_NETWORK_TESTS, 1,
+      [Whether to run tests using the external network])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
 fi
-AC_MSG_RESULT($enable_network_tests)
+AM_CONDITIONAL(ENABLE_NETWORK_TESTS, test "x${enable_network_tests}" = "xyes")
 
 
 if test "$gnet_native_win32" = "yes"; then

@@ -87,8 +87,12 @@ sock_cb (GTcpSocket * socket, GTcpSocketConnectAsyncStatus status, gpointer data
 static gboolean
 idle_cb (gpointer data)
 {
+#ifdef GNET_ENABLE_NETWORK_TESTS
   const gchar *hostnames[] = { "localhost", "127.0.0.1", "www.google.com",
       "www.gnome.org", "www.yahoo.com", "www.ebay.com", "www.amazon.co.jp" };
+#else
+  const gchar *hostnames[] = { "localhost", "127.0.0.1" };
+#endif
 
   switch (cur_state) {
     case TEST_STATE_IDLE: {

@@ -167,9 +167,7 @@ EXTRA_DIST = $(SUPPRESSIONS)
 clean-local: clean-local-check
 
 if ENABLE_NETWORK_TESTS
-  NETWORK_CHECKS = \
-	gnet/gnetconnhttp  \
-	gnet/gnettcpsocket
+  NETWORK_CHECKS = gnet/gnettcpsocket
 else
   NETWORK_CHECKS =
 endif
@@ -178,6 +176,7 @@ check_PROGRAMS = \
 	$(NETWORK_CHECKS)  \
 	gnet/gnetabi       \
 	gnet/gnetbase64    \
+	gnet/gnetconnhttp  \
 	gnet/gnethash      \
 	gnet/gnetinetaddr  \
 	gnet/gnetipv6      \
