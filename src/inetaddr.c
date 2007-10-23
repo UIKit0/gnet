@@ -55,17 +55,14 @@ typedef struct _GInetAddrNewState
 
 typedef struct _GInetAddrReverseAsyncState 
 {
-  GInetAddr* ia;
-  GInetAddrGetNameAsyncFunc func;
-  gpointer data;
-  gboolean in_callback;
-  GStaticMutex mutex;
-  gboolean	is_cancelled;
-  gchar*	name;
-  guint 	source;
-  guchar	buffer[256 + 1];/* Names can only be 256 characters? */
-  int 		len;
-
+  GInetAddr                 *ia;
+  GInetAddrGetNameAsyncFunc  func;
+  gpointer                   data;
+  gboolean                   in_callback;
+  GStaticMutex               mutex;
+  gboolean                   is_cancelled;
+  gchar                     *name;
+  guint                      source;
 } GInetAddrReverseAsyncState;
 
 
