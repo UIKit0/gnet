@@ -1,5 +1,22 @@
 2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/inetaddr.c (gnet_inetaddr_get_name_async),
+	  (gnet_inetaddr_get_name_async_cancel),
+	  (inetaddr_get_name_async_gthread_dispatch),
+	  (inetaddr_get_name_async_gthread):
+	  Don't take lock in reverse lookup thread while it's doing the
+	  blocking reverse lookup, otherwise a _cancel() from the main thread
+	  will block until the blocking operation in the thread has finished,
+	  which isn't what we want; fix a small leak when cancelling a lookup;
+	  no need to take the lock before starting the lookup thread, just set
+	  up the structure before starting the thread (no point optimising for
+	  an unlikely failure case).
+
+	* tests/check/gnet/gnetinetaddr.c: (gnetinetaddr_suite):
+	  Add dumb unit test for reverse lookup cancellation.
+
+2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* configure.ac:
 	  Check if valgrind.h is available, so we can use it in
 	  unit tests to check if we're running under valgrind

@@ -55,14 +55,15 @@ typedef struct _GInetAddrNewState
 
 typedef struct _GInetAddrReverseAsyncState 
 {
-  GInetAddr                 *ia;
-  GInetAddrGetNameAsyncFunc  func;
-  gpointer                   data;
+  GStaticMutex               mutex;  /* protecting all of the below           */
+  GInetAddr                 *ia;     /* copy of GInetAddr to get the name for */
+  GInetAddrGetNameAsyncFunc  func;   /* user-provided callback function       */
+  gpointer                   data;   /* user data for callback function       */
+  gchar                     *name;   /* result                                */
+  guint                      source; /* id of idle callback to marshal result
+                                      * from lookup thread into main thread   */ 
   gboolean                   in_callback;
-  GStaticMutex               mutex;
   gboolean                   is_cancelled;
-  gchar                     *name;
-  guint                      source;
 } GInetAddrReverseAsyncState;
 
 
@@ -1304,7 +1305,6 @@ gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr)
 
 static void* inetaddr_get_name_async_gthread (void* arg);
 
-
 /**
  *  gnet_inetaddr_get_name_async:
  *  @inetaddr: a #GInetAddr
@@ -1333,41 +1333,40 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
   g_return_val_if_fail(inetaddr != NULL, NULL);
   g_return_val_if_fail(func != NULL, NULL);
 
-  state = g_new0(GInetAddrReverseAsyncState, 1);
+  state = g_new0 (GInetAddrReverseAsyncState, 1);
 
+  /* Set up state for callback */
   g_static_mutex_init (&state->mutex);
-  g_static_mutex_lock (&state->mutex);
+
+  state->ia = gnet_inetaddr_clone (inetaddr);
+  state->func = func;
+  state->data = data;
+  state->is_cancelled = FALSE;
+  state->in_callback = FALSE;
+  state->source = 0;
+  state->name = NULL;
 
   if (!g_thread_create (inetaddr_get_name_async_gthread, state, FALSE, &err)) {
     g_warning ("g_thread_create error: %s\n", err->message);
     g_error_free (err);
-    g_static_mutex_unlock (&state->mutex);
+    gnet_inetaddr_delete (state->ia);
     g_static_mutex_free (&state->mutex);
     g_free (state);
     return NULL;
   }
 
-  /* Set up state for callback */
-  g_assert (state);
-  state->ia = gnet_inetaddr_clone(inetaddr);
-  state->func = func;
-  state->data = data;
-
-  g_static_mutex_unlock (&state->mutex);
-
   return state;
 }
-
-
-static gboolean inetaddr_get_name_async_gthread_dispatch (gpointer data);
-
 
 /**
  *  gnet_inetaddr_get_name_async_cancel:
  *  @id: ID of the lookup
  *
  *  Cancels an asynchronous name lookup that was started with
- *  gnet_inetaddr_get_name_async().
+ *  gnet_inetaddr_get_name_async().  This function should only be
+ *  called from the application's main thread, ie. the thread in which
+ *  context the callback delivering the result would be called (In a
+ *  GTK+/GUI application this would be your normal GUI thread).
  * 
  */
 void
@@ -1375,33 +1374,29 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
 
+  g_return_if_fail (id != NULL);
+  g_return_if_fail (state->in_callback == FALSE);
+
   g_static_mutex_lock (&state->mutex);
 
   /* Check if the thread has finished and a reply is pending.  If a
-     reply is pending, cancel it and delete state. */
-  if (state->source)
-    {
-      g_free (state->name);
-
-      g_source_remove (state->source);
-
-      g_static_mutex_unlock (&state->mutex);
-      g_static_mutex_free (&state->mutex);
-
-      g_free (state);
-    }
-
-  /* Otherwise, the thread is still running.  Set the cancelled flag
-     and allow the thread to complete.  When the thread completes, it
-     will delete state.  We can't kill the thread because we'd loose
-     the resources allocated in gethostbyname_r. */
-
-  else
-    {
-      state->is_cancelled = TRUE;
-
-      g_static_mutex_unlock (&state->mutex);
-    }
+   * reply is pending, cancel it and delete state. */
+  if (state->source) {
+    g_free (state->name);
+    g_source_remove (state->source);
+    gnet_inetaddr_delete (state->ia);
+    g_static_mutex_unlock (&state->mutex);
+    g_static_mutex_free (&state->mutex);
+    memset (state, 0xaa, sizeof (*state));
+    g_free (state);
+  } else {
+    /* Otherwise, the thread is still running.  Set the cancelled flag
+     * and allow the thread to complete.  When the thread completes, it
+     * will delete state.  We can't kill the thread because we'd loose
+     * the resources allocated in gethostbyname_r. */
+     state->is_cancelled = TRUE;
+     g_static_mutex_unlock (&state->mutex);
+  }
 }
 
 
@@ -1412,12 +1407,14 @@ inetaddr_get_name_async_gthread_dispatch (gpointer data)
 
   g_static_mutex_lock (&state->mutex);
 
+  /* make sure we don't deadlock if user tries to cancel us from callback */
+  state->in_callback = TRUE;
+
   /* Upcall */
   (*state->func)(state->name, state->data);
 
   /* Delete state */
   gnet_inetaddr_delete (state->ia);
-  g_source_remove (state->source);
   g_static_mutex_unlock (&state->mutex);
   g_static_mutex_free (&state->mutex);
   memset (state, 0, sizeof(*state));
@@ -1433,14 +1430,21 @@ inetaddr_get_name_async_gthread (void* arg)
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) arg;
   gchar* name;
 
+  g_assert (state->ia != NULL);
+
   /* Lock */
   g_static_mutex_lock (&state->mutex);
      
   /* Do lookup */
-  if (state->ia->name)
+  if (state->ia->name) {
     name = g_strdup (state->ia->name);
-  else
+  } else {
+    /* Release lock while we block, so we can be cancelled from the main thread
+     * without blocking it until we're done */
+    g_static_mutex_unlock (&state->mutex);
     name = gnet_gethostbyaddr(&state->ia->sa);
+    g_static_mutex_lock (&state->mutex);
+  }
 
   /* If cancelled, destroy state and exit.  The main thread is no
      longer using state. */

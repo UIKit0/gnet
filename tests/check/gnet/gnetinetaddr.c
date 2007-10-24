@@ -20,7 +20,12 @@
 #include "config.h"
 #include "gnetcheck.h"
 
+#ifdef HAVE_VALGRIND
+#include <valgrind/valgrind.h>
+#endif
+
 #include <string.h>
+#include <stdio.h>
 
 /*** IPv4 tests */
 
@@ -297,11 +302,71 @@ GNET_START_TEST (test_inetaddr_is_internet_domainname)
 }
 GNET_END_TEST;
 
+static void
+reverse_lookup_func (gchar * hostname, gpointer data)
+{
+  /* should never be called, since we don't iterate the default main context */
+  g_assert_not_reached ();
+}
+
+GNET_START_TEST (test_inetaddr_reverse_lookup_ipv4_cancel)
+{
+  gint i;
+
+  ASSERT_CRITICAL (
+      gnet_inetaddr_get_name_async (NULL, reverse_lookup_func, NULL)
+  );
+
+  for (i = 0; i < 10; ++i) {
+    GInetAddrGetNameAsyncID async_id;
+    GInetAddr *ia;
+    gchar *ip_string;
+
+    if (i == 0) {
+      ip_string = g_strdup ("127.0.0.1");
+    } else if (i == 1) {
+      ip_string = g_strdup ("217.155.155.155");
+    } else if (i == 2) {
+      ip_string = g_strdup ("91.189.93.3");
+    } else {
+      ip_string = g_strdup_printf ("%u.%u.%u.%u",
+          g_random_int_range (4, 250), g_random_int_range (0, 255),
+          g_random_int_range (0, 255), g_random_int_range (0, 255));
+    }
+    g_print ("Starting reverse lookup for %s ...", ip_string);
+    fflush (stdout);
+    ia = gnet_inetaddr_new_nonblock (ip_string, 80);
+    fail_unless (ia != NULL);
+    g_free (ip_string);
+
+    ASSERT_CRITICAL (gnet_inetaddr_get_name_async (ia, NULL, NULL));
+
+    async_id = gnet_inetaddr_get_name_async (ia, reverse_lookup_func, NULL);
+    fail_unless (async_id != NULL);
+    gnet_inetaddr_delete (ia);
+
+    g_usleep (g_random_int_range (0, G_USEC_PER_SEC * 2));
+    gnet_inetaddr_get_name_async_cancel (async_id);
+    g_print (" cancelled.\n");
+  }
+
+#ifdef HAVE_VALGRIND
+  if (RUNNING_ON_VALGRIND) {
+    g_print ("Sleeping for a while to let cancelled threads finish ...\n");
+    /* sleep a while to give any cancelled threads a chance to quit, otherwise
+     * valgrind will think the threads were leaked */
+    g_usleep (60 * G_USEC_PER_SEC);
+  }
+#endif
+}
+GNET_END_TEST;
+
 static Suite *
 gnetinetaddr_suite (void)
 {
   Suite *s = suite_create ("GInetAddr");
   TCase *tc_chain = tcase_create ("inetaddr");
+  gboolean run_network_tests;
 
   tcase_set_timeout (tc_chain, 0);
 
@@ -313,6 +378,16 @@ gnetinetaddr_suite (void)
   tcase_add_test (tc_chain, test_inetaddr_ipv6);
   tcase_add_test (tc_chain, test_inetaddr_is_ipv6);
 #endif
+
+#ifdef GNET_ENABLE_NETWORK_TESTS
+  run_network_tests = TRUE;
+#else
+  run_network_tests = FALSE;
+#endif
+
+  if (run_network_tests) {
+    tcase_add_test (tc_chain, test_inetaddr_reverse_lookup_ipv4_cancel);
+  }
 
   return s;
 }
