@@ -122,6 +122,7 @@ gboolean
 _gnet_check_run_test_func (const gchar * func_name)
 {
   const gchar *gnet_checks;
+  gboolean res = FALSE;
   gchar **funcs, **f;
 
   gnet_checks = g_getenv ("GNET_CHECKS");
@@ -133,10 +134,13 @@ _gnet_check_run_test_func (const gchar * func_name)
   /* only run specified functions */
   funcs = g_strsplit (gnet_checks, ",", -1);
   for (f = funcs; f != NULL && *f != NULL; ++f) {
-    if (strcmp (*f, func_name) == 0)
-      return TRUE;
+    if (strcmp (*f, func_name) == 0) {
+      res = TRUE;
+      break;
+    }
   }
-  return FALSE;
+  g_strfreev (funcs);
+  return res;
 }
 
 
