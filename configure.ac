@@ -593,7 +593,15 @@ dnl but not normal compilation on Fedora & Ubuntu:
 
 dnl check for valgrind
 AC_PATH_PROG(VALGRIND_PATH, valgrind, no)
+AC_MSG_CHECKING([whether valgrind.h is available])
 AM_CONDITIONAL(HAVE_VALGRIND, test ! "x$VALGRIND_PATH" = "xno")
+PKG_CHECK_MODULES(VALGRIND, valgrind > 2.1, [
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_VALGRIND, 1, [Whether valgrind headers are available])
+    AC_SUBST(VALGRIND_CFLAGS)
+  ], [
+    AC_MSG_RESULT([no])
+  ])
 
 dnl just disable coverage stuff for now
 AM_CONDITIONAL(GNET_GCOV_ENABLED, test "xyes" = "xno")

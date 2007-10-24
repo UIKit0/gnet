@@ -1,5 +1,12 @@
 2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* configure.ac:
+	  Check if valgrind.h is available, so we can use it in
+	  unit tests to check if we're running under valgrind
+	  (and wait for threads to finish etc.).
+
+2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* tests/check/gnetcheck.c:
 	  Don't leak function string array when using GNET_CHECKS.
 
