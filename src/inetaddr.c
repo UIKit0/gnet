@@ -947,18 +947,14 @@ inetaddr_new_list_async_gthread (void* arg)
   g_static_mutex_lock (&state->mutex);
 
   /* If cancelled, destroy state and exit.  The main thread is no
-     longer using state. */
-  if (state->is_cancelled)
-    {
-      ialist_free (state->ias);
-
-      g_static_mutex_unlock (&state->mutex);
-      g_static_mutex_free (&state->mutex);
-
-      g_free (state);
-
-      return NULL;
-    }
+   * longer using state. */
+  if (state->is_cancelled) {
+    ialist_free (ialist);
+    g_static_mutex_unlock (&state->mutex);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+    return NULL;
+  }
 
   if (ialist)
     {

@@ -315,6 +315,10 @@ int main (int argc, char **argv)				\
   return gnet_check_run_suite (s, # name, __FILE__);		\
 }
 
+/* This is a bit of a hack to allow filtering of which tests to run
+ * at run-time, without recompiling, via the GNET_CHECKS environment
+ * variable (specify test case function names, comma-separated) */
+
 gboolean _gnet_check_run_test_func (const gchar * func_name);
 
 static inline void

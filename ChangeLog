@@ -1,5 +1,14 @@
 2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/inetaddr.c (inetaddr_new_list_async_gthread):
+	  If we've been cancelled, free the correct inetaddr list and
+	  not a yet-unassigned NULL list.
+
+	* tests/check/gnetcheck.h:
+	  Some more comments.
+
+2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/inetaddr.c (gnet_inetaddr_get_name_async),
 	  (gnet_inetaddr_get_name_async_cancel),
 	  (inetaddr_get_name_async_gthread_dispatch),
