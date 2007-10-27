@@ -1,3 +1,29 @@
+2007-10-27  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* doc/gnet-sections.txt:
+	* src/gnet-private.c: (gnet_uninitialize_windows_sockets),
+	  (__gnet_idle_add_full), (__gnet_timeout_add_full):
+	* src/gnet-private.h:
+	* src/inetaddr.c: (gnet_inetaddr_delete_list),
+	  (gnet_inetaddr_new_async_full), (gnet_inetaddr_new_async),
+	  (gnet_inetaddr_new_async_cancel), (inetaddr_new_async_cb),
+	  (gnet_inetaddr_new_list_async_full), (gnet_inetaddr_new_list_async),
+	  (inetaddr_new_list_async_nonblock_dispatch),
+	  (inetaddr_new_list_async_gthread),
+	  (inetaddr_new_list_async_gthread_dispatch),
+	  (gnet_inetaddr_new_list_async_cancel),
+	  (gnet_inetaddr_get_name_nonblock),
+	  (gnet_inetaddr_get_name_async_full), (gnet_inetaddr_get_name_async),
+	  (gnet_inetaddr_get_name_async_cancel),
+	  (inetaddr_get_name_async_gthread_dispatch),
+	  (inetaddr_get_name_async_gthread):
+	* src/inetaddr.h:
+	  API: add gnet_inetaddr_new_async_full()
+	  API: add gnet_inetaddr_new_list_async_full()
+	  API: add gnet_inetaddr_get_name_async_full()
+	  Add _full variants for async lookup functions with destroy notify
+	  function, main context and priority parameters.
+
 2007-10-24  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/inetaddr.c (inetaddr_new_list_async_gthread):

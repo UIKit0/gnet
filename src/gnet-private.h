@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
  * Copyright (C) 2000-2003  Andrew Lanoix
+ * Copyright (C) 2007 Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -207,9 +208,7 @@ struct sockaddr_storage {
 
 #define GNET_ANY_IO_CONDITION   (G_IO_IN|G_IO_OUT|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL)
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
 
 /*
@@ -508,8 +507,30 @@ SOCKET gnet_private_create_listen_socket (int type, const GInetAddr* iface, int 
 int gnet_initialize_windows_sockets(void);
 void gnet_uninitialize_windows_sockets(void);
 
-#ifdef __cplusplus
-}
-#endif				/* __cplusplus */
+/* Private utility functions */
+
+guint  __gnet_idle_add_full     (GMainContext  * context,
+                                 gint            priority,
+                                 GSourceFunc     function,
+                                 gpointer        data,
+                                 GDestroyNotify  notify);
+
+guint  __gnet_timeout_add_full  (GMainContext  * context,
+                                 gint            priority,
+                                 guint           interval,
+                                 GSourceFunc     function,
+                                 gpointer        data,
+                                 GDestroyNotify  notify);
+
+#if 0
+guint  __gnet_io_watch_add_full (GMainContext  * context,
+                                 gint            priority,
+                                 gint            interval,
+                                 GSourceFunc     function,
+                                 gpointer        data,
+                                 GDestroyNotify  notify);
+#endif
+
+G_END_DECLS
 
 #endif /* _GNET_PRIVATE_H */

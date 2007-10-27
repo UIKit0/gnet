@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
  * Copyright (C) 2000-2003  Andrew Lanoix
+ * Copyright (C) 2007 Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -244,3 +245,50 @@ void gnet_uninitialize_windows_sockets(void)
 
 
 #endif
+
+/* private utility functions */
+
+guint 
+__gnet_idle_add_full (GMainContext * context, gint priority,
+    GSourceFunc function, gpointer data, GDestroyNotify notify)
+{
+  GSource *source;
+  guint id;
+  
+  g_return_val_if_fail (context != NULL, 0);
+  g_return_val_if_fail (function != NULL, 0);
+
+  source = g_idle_source_new ();
+
+  if (priority != G_PRIORITY_DEFAULT_IDLE)
+    g_source_set_priority (source, priority);
+
+  g_source_set_callback (source, function, data, notify);
+  id = g_source_attach (source, context);
+  g_source_unref (source);
+
+  return id;
+}
+
+guint
+__gnet_timeout_add_full (GMainContext * context, gint priority, guint interval,
+    GSourceFunc function, gpointer data, GDestroyNotify notify)
+{
+  GSource *source;
+  guint id;
+  
+  g_return_val_if_fail (context != NULL, 0);
+  g_return_val_if_fail (function != NULL, 0);
+
+  source = g_timeout_source_new (interval);
+
+  if (priority != G_PRIORITY_DEFAULT)
+    g_source_set_priority (source, priority);
+
+  g_source_set_callback (source, function, data, notify);
+  id = g_source_attach (source, context);
+  g_source_unref (source);
+
+  return id;
+}
+

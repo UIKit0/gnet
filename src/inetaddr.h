@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000, 2002  David Helder
  * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2007  Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -127,14 +128,23 @@ typedef struct _GInetAddrNewState * GInetAddrNewAsyncID;
  *   The address will be NULL if the lookup failed.
  *
  **/
-typedef void (*GInetAddrNewAsyncFunc)(GInetAddr* inetaddr, gpointer data);
+typedef void (*GInetAddrNewAsyncFunc) (GInetAddr * inetaddr, gpointer data);
 
 
-GInetAddrNewAsyncID 
-gnet_inetaddr_new_async (const gchar* hostname, gint port, 
-			 GInetAddrNewAsyncFunc func, 
-			 gpointer data);
-void gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
+GInetAddrNewAsyncID  gnet_inetaddr_new_async      (const gchar          * hostname,
+                                                   gint                   port,
+                                                   GInetAddrNewAsyncFunc  func, 
+                                                   gpointer               data);
+
+GInetAddrNewAsyncID  gnet_inetaddr_new_async_full (const gchar          * hostname,
+                                                   gint                   port,
+                                                   GInetAddrNewAsyncFunc  func, 
+                                                   gpointer               data,
+                                                   GDestroyNotify         notify,
+                                                   GMainContext         * context,
+                                                   gint                   priority);
+
+void                 gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID id);
 
 
 
@@ -161,11 +171,20 @@ typedef struct _GInetAddrNewListState * GInetAddrNewListAsyncID;
  **/
 typedef void (*GInetAddrNewListAsyncFunc) (GList * list, gpointer data);
 
-GInetAddrNewListAsyncID 
-gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
-			      GInetAddrNewListAsyncFunc func, 
-			      gpointer data);
-void gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
+GInetAddrNewListAsyncID  gnet_inetaddr_new_list_async      (const gchar              * hostname,
+                                                            gint                       port, 
+                                                            GInetAddrNewListAsyncFunc  func, 
+                                                            gpointer                   data);
+
+GInetAddrNewListAsyncID  gnet_inetaddr_new_list_async_full (const gchar              * hostname,
+                                                            gint                       port, 
+                                                            GInetAddrNewListAsyncFunc  func, 
+                                                            gpointer                   data,
+                                                            GDestroyNotify             notify,
+                                                            GMainContext             * context,
+                                                            gint                       priority);
+
+void                     gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id);
 
 
 
@@ -183,22 +202,29 @@ typedef struct _GInetAddrReverseAsyncState * GInetAddrGetNameAsyncID;
 
 /**
  *   GInetAddrGetNameAsyncFunc:
- *   @hostname: Canonical name of the address (callee owned)
+ *   @hostname: Canonical name of the address (callee owned), NULL on failure
  *   @data: User data
  *   
- *   Callback for gnet_inetaddr_get_name_async().  Callee owns the
- *   name.  The name will be NULL if the lookup failed.
+ *   Callback for gnet_inetaddr_get_name_async().  Callee (that is: you) owns
+ *   the name.  Free it with g_free() when no longer needed.  The name will be
+ *   NULL if the lookup failed.
  *
  **/
 typedef void (*GInetAddrGetNameAsyncFunc) (gchar * hostname, gpointer data);
 
 
-GInetAddrGetNameAsyncID
-gnet_inetaddr_get_name_async (GInetAddr* inetaddr, 
-			      GInetAddrGetNameAsyncFunc func,
-			      gpointer data);
+GInetAddrGetNameAsyncID  gnet_inetaddr_get_name_async      (GInetAddr                 * inetaddr,
+                                                            GInetAddrGetNameAsyncFunc   func,
+                                                            gpointer                    data);
 
-void    gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
+GInetAddrGetNameAsyncID  gnet_inetaddr_get_name_async_full (GInetAddr                 * inetaddr,
+                                                            GInetAddrGetNameAsyncFunc   func,
+                                                            gpointer                    data,
+                                                            GDestroyNotify              notify,
+                                                            GMainContext              * context,
+                                                            gint                        priority);
+
+void                     gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id);
 
 G_END_DECLS
 

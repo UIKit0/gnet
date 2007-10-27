@@ -32,16 +32,20 @@
 
 typedef struct _GInetAddrNewListState 
 {
-  GList*	ias;
-  gint		port;
+  GStaticMutex              mutex;
+  GList                    *ias;
+  gint                      port;
   GInetAddrNewListAsyncFunc func;
-  gpointer 	data;
+  gpointer                  data;
+  GDestroyNotify            notify;
 
-  gboolean 	in_callback;
-  GStaticMutex	mutex;
-  gboolean	is_cancelled;
-  gboolean	lookup_failed;
-  guint 	source;
+  gboolean                  in_callback;
+  gboolean                  is_cancelled;
+  gboolean                  lookup_failed;
+  guint                     source;
+
+  GMainContext             *context;  /* main context (we hold a reference) */
+  gint                      priority;
 } GInetAddrNewListState;
 
 typedef struct _GInetAddrNewState 
@@ -49,8 +53,11 @@ typedef struct _GInetAddrNewState
   GInetAddrNewListAsyncID   list_id;
   GInetAddrNewAsyncFunc     func;
   gpointer                  data;
+  GDestroyNotify            notify;
   gboolean                  in_callback;
   GStaticMutex              mutex;
+  GMainContext             *context;  /* main context (we hold a reference) */
+  gint                      priority;
 } GInetAddrNewState;
 
 typedef struct _GInetAddrReverseAsyncState 
@@ -59,6 +66,9 @@ typedef struct _GInetAddrReverseAsyncState
   GInetAddr                 *ia;     /* copy of GInetAddr to get the name for */
   GInetAddrGetNameAsyncFunc  func;   /* user-provided callback function       */
   gpointer                   data;   /* user data for callback function       */
+  GDestroyNotify             notify;
+  GMainContext              *context; /* main context (we hold a reference)   */
+  gint                       priority;
   gchar                     *name;   /* result                                */
   guint                      source; /* id of idle callback to marshal result
                                       * from lookup thread into main thread   */ 
@@ -682,8 +692,72 @@ gnet_inetaddr_delete_list (GList* list)
 /* **************************************** */
 /* gnet_inetaddr_new_async()		    */
 
-static void
-inetaddr_new_async_cb (GList* ialist, gpointer data);
+static void inetaddr_new_async_cb (GList* ialist, gpointer data);
+
+/**
+ *  gnet_inetaddr_new_async_full
+ *  @hostname: host name
+ *  @port: port number (0 if the port doesn't matter)
+ *  @func: callback function
+ *  @data: data to pass to @func on the callback, or NULL
+ *  @notify: function to call to free @data, or NULL
+ *  @context: the #GMainContext to use for notifications, or NULL for the
+ *      default GLib main context.  If in doubt, pass NULL.
+ *  @priority: the priority with which to schedule notifications in the
+ *      main context, e.g. #G_PRIORITY_DEFAULT or #G_PRIORITY_HIGH.
+ * 
+ *  Asynchronously creates a #GInetAddr from a host name and port.
+ *  The callback is called once the #GInetAddr is created or an error
+ *  occurs during lookup.  The callback will not be called during the
+ *  call to this function.
+ *
+ *  See gnet_inetaddr_new_list_async() for implementation notes.
+ *
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be used
+ *  with gnet_inetaddr_new_async_cancel() to cancel the lookup.
+ *
+ *  Since: 2.0.8
+ **/
+GInetAddrNewAsyncID
+gnet_inetaddr_new_async_full (const gchar * hostname, gint port,
+    GInetAddrNewAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
+{
+  GInetAddrNewListAsyncID list_id;
+  GInetAddrNewState *state;
+
+  if (context == NULL)
+    context = g_main_context_default ();
+
+  state = g_new0 (GInetAddrNewState, 1);
+
+  g_static_mutex_init (&state->mutex);
+  g_static_mutex_lock (&state->mutex);
+
+  state->func = func;
+  state->data = data;
+  state->notify = notify;
+  state->context = g_main_context_ref (context);
+  state->priority = priority;
+
+  list_id = gnet_inetaddr_new_list_async_full (hostname, port,
+      inetaddr_new_async_cb, state, (GDestroyNotify) NULL, context, priority);
+
+  state->list_id = list_id;
+
+  g_static_mutex_unlock (&state->mutex);
+
+  if (list_id == NULL) {
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+    return NULL;
+  }
+
+  return state;
+}
 
 /**
  *  gnet_inetaddr_new_async
@@ -703,34 +777,19 @@ inetaddr_new_async_cb (GList* ialist, gpointer data);
  *  with gnet_inetaddr_new_async_cancel() to cancel the lookup.
  *
  **/
-GInetAddrNewAsyncID 
+GInetAddrNewAsyncID
 gnet_inetaddr_new_async (const gchar* hostname, gint port, 
 			 GInetAddrNewAsyncFunc func, gpointer data)
 {
-  GInetAddrNewState*		state;
-  GInetAddrNewListAsyncID	list_id;
+  GInetAddrNewAsyncID async_id;
 
-  state = g_new0(GInetAddrNewState, 1);
+  g_return_val_if_fail (hostname != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
 
-  g_static_mutex_init (&state->mutex);
-  g_static_mutex_lock (&state->mutex);
+  async_id = gnet_inetaddr_new_async_full (hostname, port, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
 
-  state->func = func;
-  state->data = data;
-
-  list_id = gnet_inetaddr_new_list_async (hostname, port, inetaddr_new_async_cb, state);
-
-  state->list_id = list_id;
-
-  g_static_mutex_unlock (&state->mutex);
-
-  if (list_id == NULL) {
-    g_static_mutex_free (&state->mutex);
-    g_free (state);
-    return NULL;
-  }
-
-  return state;
+  return async_id;
 }
 
 
@@ -747,12 +806,15 @@ gnet_inetaddr_new_async_cancel (GInetAddrNewAsyncID async_id)
 {
   GInetAddrNewState* state = (GInetAddrNewState*) async_id;
 
-  g_return_if_fail (state);
+  g_return_if_fail (async_id != NULL);
 
   if (state->in_callback)
     return;
 
   gnet_inetaddr_new_list_async_cancel (state->list_id);
+  if (state->notify)
+    state->notify (state->data);
+  g_main_context_unref (state->context);
   g_free (state);
 }
 
@@ -790,6 +852,7 @@ inetaddr_new_async_cb (GList* ialist, gpointer data)
 
   state->in_callback = FALSE;
 
+  /* abuse _cancel() to free the state */
   gnet_inetaddr_new_async_cancel (state);
 }
 
@@ -801,6 +864,97 @@ static gboolean inetaddr_new_list_async_nonblock_dispatch (gpointer data);
 
 static void* inetaddr_new_list_async_gthread (void* arg);
 
+/**
+ *  gnet_inetaddr_new_list_async_full
+ *  @hostname: host name
+ *  @port: port number (0 if the port doesn't matter)
+ *  @func: callback function
+ *  @data: data to pass to @func on the callback, or NULL
+ *  @notify: function to call to free @data, or NULL
+ *  @context: the #GMainContext to use for notifications, or NULL for the
+ *      default GLib main context.  If in doubt, pass NULL.
+ *  @priority: the priority with which to schedule notifications in the
+ *      main context, e.g. #G_PRIORITY_DEFAULT or #G_PRIORITY_HIGH.
+ * 
+ *  Asynchronously creates a GList of #GInetAddr's from a host name
+ *  and port.  The callback is called once the list is created or an
+ *  error occurs during lookup.  The callback will not be called
+ *  during the call to gnet_inetaddr_new_list_async().  The list
+ *  passed in the callback is callee owned (meaning that it is your
+ *  responsibility to free the list and each #GInetAddr in the list).
+ *
+ *  If you need to lookup hundreds of addresses, we recommend calling
+ *  g_main_iteration(FALSE) between calls.  This will help prevent an
+ *  explosion of threads.
+ *
+ *  If you need a more robust library for Unix, look at <ulink
+ *  url="http://www.gnu.org/software/adns/adns.html">GNU ADNS</ulink>.
+ *  GNU ADNS is under the GNU GPL.  This library does not use threads
+ *  or processes.
+ *
+ *  The Windows version is molded after the Unix GThread version.
+ *
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be
+ *  used with gnet_inetaddr_new_list_async_cancel() to cancel the
+ *  lookup.
+ *
+ *  Since: 2.0.8
+ **/
+GInetAddrNewListAsyncID
+gnet_inetaddr_new_list_async_full (const gchar * hostname, gint port,
+    GInetAddrNewListAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
+{
+  GInetAddrNewListState *state = NULL;
+  GInetAddr *ia;
+
+  g_return_val_if_fail (hostname != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  if (context == NULL)
+    context = g_main_context_default ();
+
+  state = g_new0 (GInetAddrNewListState, 1);
+
+  g_static_mutex_init (&state->mutex);
+
+  /* set everything up (must be done before we create the thread) */
+  state->port = port;
+  state->func = func;
+  state->data = data;
+  state->notify = notify;
+  state->context = g_main_context_ref (context);
+  state->priority = priority;
+
+  /* First attempt nonblocking lookup */
+  ia = gnet_inetaddr_new_nonblock (hostname, port);
+  if (ia) {
+    state->ias = g_list_prepend (NULL, ia);
+    state->source = __gnet_idle_add_full (state->context, state->priority,
+        inetaddr_new_list_async_nonblock_dispatch, state, NULL);
+  } else {
+    GError *err = NULL;
+    gpointer *args;
+
+    args = g_new (gpointer, 2);
+    args[0] = g_strdup (hostname);
+    args[1] = state;
+
+    if (!g_thread_create (inetaddr_new_list_async_gthread, args, FALSE, &err)) {
+      g_warning ("g_thread_create error: %s\n", err->message);
+      g_error_free (err);
+      if (state->notify)
+        state->notify (state->data);
+      g_main_context_unref (state->context);
+      g_static_mutex_free (&state->mutex);
+      g_free (args[0]);
+      g_free (state);
+      return NULL;
+    }
+  }
+
+  return state;
+}
 
 /**
  *  gnet_inetaddr_new_list_async
@@ -813,16 +967,12 @@ static void* inetaddr_new_list_async_gthread (void* arg);
  *  and port.  The callback is called once the list is created or an
  *  error occurs during lookup.  The callback will not be called
  *  during the call to gnet_inetaddr_new_list_async().  The list
- *  passed in the callback is callee owned.
- *
- *  The Unix version creates a GThread thread which does the lookup.
- *  If GThreads aren't available, it forks and does the lookup.
- *  Forking can be slow or even fail when using operating systems that
- *  copy the entire process when forking.
+ *  passed in the callback is callee owned (meaning that it is your
+ *  responsibility to free the list and each #GInetAddr in the list).
  *
  *  If you need to lookup hundreds of addresses, we recommend calling
  *  g_main_iteration(FALSE) between calls.  This will help prevent an
- *  explosion of threads or processes.
+ *  explosion of threads.
  *
  *  If you need a more robust library for Unix, look at <ulink
  *  url="http://www.gnu.org/software/adns/adns.html">GNU ADNS</ulink>.
@@ -838,69 +988,17 @@ static void* inetaddr_new_list_async_gthread (void* arg);
  **/
 GInetAddrNewListAsyncID
 gnet_inetaddr_new_list_async (const gchar* hostname, gint port, 
-			      GInetAddrNewListAsyncFunc func, 
-			      gpointer data)
+    GInetAddrNewListAsyncFunc func, gpointer data)
 {
-  GInetAddrNewListState* state = NULL;
-  GInetAddr* ia;
+  GInetAddrNewListAsyncID async_id;
 
-  g_return_val_if_fail(hostname != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
+  g_return_val_if_fail (hostname != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
 
-  /*
-   * First attempt nonblocking lookup
-   */
-  ia = gnet_inetaddr_new_nonblock (hostname, port);
-  if (ia)
-    {
-      state = g_new0 (GInetAddrNewListState, 1);
-      g_static_mutex_init (&state->mutex);
-      g_static_mutex_lock (&state->mutex);
-      state->ias = g_list_prepend (NULL, ia);
-      state->source = g_idle_add_full (G_PRIORITY_DEFAULT,
-				       inetaddr_new_list_async_nonblock_dispatch,
-				       state, NULL);
-    }
-  else
-  {
-    GThread *thread;
-    GError *error = NULL;
-    void** args;
+  async_id = gnet_inetaddr_new_list_async_full (hostname, port, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
 
-    state = g_new0(GInetAddrNewListState, 1);
-
-    args = g_new (void*, 2);
-    args[0] = (void*) g_strdup(hostname);
-    args[1] = state;
-
-    g_static_mutex_init (&state->mutex);
-    g_static_mutex_lock (&state->mutex);
-
-    thread = g_thread_create (inetaddr_new_list_async_gthread, args,
-                              FALSE, &error);
-
-    if (thread == NULL)
-    {
-        g_warning ("g_thread_create error: %s\n", error->message);
-        g_error_free (error);
-        g_static_mutex_unlock (&state->mutex);
-        g_static_mutex_free (&state->mutex);
-        g_free (args[0]);
-        g_free (state);
-        return NULL;
-    }
-  }
-
-  /* Finish setting up state for callback */
-  g_assert (state);
-  state->port = port;
-  state->func = func;
-  state->data = data;
-
-  /* Now that we're set up the thread can go and do its thing */
-  g_static_mutex_unlock (&state->mutex);
-
-  return state;
+  return async_id;
 }
 
 /* TODO: we could merge this with inetaddr_new_list_async_gthread_dispatch()
@@ -918,7 +1016,9 @@ inetaddr_new_list_async_nonblock_dispatch (gpointer data)
 
   state->in_callback = FALSE;
 
-  g_source_remove (state->source);
+  if (state->notify)
+    state->notify (state->data);
+  g_main_context_unref (state->context);
   g_static_mutex_unlock (&state->mutex);
   g_static_mutex_free (&state->mutex);
   g_free (state);
@@ -935,26 +1035,31 @@ inetaddr_new_list_async_gthread (void* arg)
   void** args = (void**) arg;
   gchar* name = (gchar*) args[0];
   GInetAddrNewListState* state = (GInetAddrNewListState*) args[1];
-  GList* ialist;
+  GList* ialist = NULL;
 
   g_free (args);
 
-  /* Do lookup */
-  ialist = gnet_gethostbyname (name);
-  g_free (name);
+  /* Avoid the blocking call in the unlikely case that we've already been
+   * cancelled */
+  g_static_mutex_lock (&state->mutex);
+  if (state->is_cancelled)
+    goto cancelled;
+  g_static_mutex_unlock (&state->mutex);
 
-  /* Lock */
+  /* Do lookup (without holding the lock while we're blocking so the main
+   * thread can cancel us without having to wait until we've finished our
+   * blocking call) */
+  ialist = gnet_gethostbyname (name);
+
+  /* Lock again */
   g_static_mutex_lock (&state->mutex);
 
   /* If cancelled, destroy state and exit.  The main thread is no
    * longer using state. */
-  if (state->is_cancelled) {
-    ialist_free (ialist);
-    g_static_mutex_unlock (&state->mutex);
-    g_static_mutex_free (&state->mutex);
-    g_free (state);
-    return NULL;
-  }
+  if (state->is_cancelled)
+    goto cancelled;
+
+  g_free (name);
 
   if (ialist)
     {
@@ -977,15 +1082,28 @@ inetaddr_new_list_async_gthread (void* arg)
     }
 
   /* Add a source for reply */
-  state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
-				   inetaddr_new_list_async_gthread_dispatch,
-				   state, NULL);
+  state->source = __gnet_idle_add_full (state->context, state->priority,
+      inetaddr_new_list_async_gthread_dispatch, state, NULL);
 
   /* Unlock */
   g_static_mutex_unlock (&state->mutex);
 
  /* Thread exits... */
   return NULL;
+
+cancelled:
+  {
+    ialist_free (ialist);
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
+    g_static_mutex_unlock (&state->mutex);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+    g_free (name);
+    return NULL;
+  }
+
 }
 
 static gboolean
@@ -1006,7 +1124,9 @@ inetaddr_new_list_async_gthread_dispatch (gpointer data)
   state->in_callback = FALSE;
 
   /* Delete state */
-  g_source_remove (state->source);
+  if (state->notify)
+    state->notify (state->data);
+  g_main_context_unref (state->context);
   g_static_mutex_unlock (&state->mutex);
   g_static_mutex_free (&state->mutex);
   g_free (state);
@@ -1041,30 +1161,26 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
   g_static_mutex_lock (&state->mutex);
 
   /* Check if the thread has finished and a reply is pending.  If a
-     reply is pending, cancel it and delete state. */
-  if (state->source)
-    {
-      g_source_remove (state->source);
+   * reply is pending, cancel it and delete state. */
+  if (state->source) {
+    g_source_remove (state->source);
 
-      ialist_free (state->ias);
+    ialist_free (state->ias);
 
-      g_static_mutex_unlock (&state->mutex);
-      g_static_mutex_free (&state->mutex);
-
-      g_free (state);
-    }
-
-  /* Otherwise, the thread is still running.  Set the cancelled flag
-     and allow the thread to complete.  When the thread completes, it
-     will delete state.  We can't kill the thread because we'd loose
-     the resources allocated in gethostbyname_r. */
-
-  else
-    {
-      state->is_cancelled = TRUE;
-
-      g_static_mutex_unlock (&state->mutex);
-    }
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
+    g_static_mutex_unlock (&state->mutex);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+  } else {
+    /* Otherwise, the thread is still running.  Set the cancelled flag
+     * and allow the thread to complete.  When the thread completes, it
+     * will delete state.  We can't kill the thread because we'd loose
+     * the resources allocated in gethostbyname_r. */
+    state->is_cancelled = TRUE;
+    g_static_mutex_unlock (&state->mutex);
+  }
 }
 
 
@@ -1302,6 +1418,74 @@ gnet_inetaddr_get_name_nonblock (GInetAddr* inetaddr)
 static void* inetaddr_get_name_async_gthread (void* arg);
 
 /**
+ *  gnet_inetaddr_get_name_async_full:
+ *  @inetaddr: a #GInetAddr
+ *  @func: callback function
+ *  @data: data to pass to @func on the callback
+ *  @notify: function to call to free @data, or NULL
+ *  @context: the #GMainContext to use for notifications, or NULL for the
+ *      default GLib main context.  If in doubt, pass NULL.
+ *  @priority: the priority with which to schedule notifications in the
+ *      main context, e.g. #G_PRIORITY_DEFAULT or #G_PRIORITY_HIGH.
+ *
+ *  Asynchronously gets the host name for a #GInetAddr.  The callback
+ *  is called once the reverse DNS lookup is complete.  The callback
+ *  will not be called during the call to this function.
+ *
+ *  See gnet_inetaddr_new_list_async_full() for implementation notes.
+ *
+ *  Returns: the ID of the lookup; NULL on failure.  The ID can be
+ *  used with gnet_inetaddr_get_name_async_cancel() to cancel the
+ *  lookup.
+ *
+ *  Since: 2.0.8
+ **/
+GInetAddrGetNameAsyncID
+gnet_inetaddr_get_name_async_full (GInetAddr * inetaddr,
+    GInetAddrGetNameAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
+{
+  GInetAddrReverseAsyncState *state = NULL;
+  GError *err = NULL;
+
+  g_return_val_if_fail (inetaddr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  if (context == NULL)
+    context = g_main_context_default ();
+
+  state = g_new0 (GInetAddrReverseAsyncState, 1);
+
+  /* Set up state for callback */
+  g_static_mutex_init (&state->mutex);
+
+  state->ia = gnet_inetaddr_clone (inetaddr);
+  state->func = func;
+  state->data = data;
+  state->notify = notify;
+  state->is_cancelled = FALSE;
+  state->in_callback = FALSE;
+  state->source = 0;
+  state->name = NULL;
+  state->context = g_main_context_ref (context);
+  state->priority = priority;
+
+  if (!g_thread_create (inetaddr_get_name_async_gthread, state, FALSE, &err)) {
+    g_warning ("g_thread_create error: %s\n", err->message);
+    g_error_free (err);
+    gnet_inetaddr_delete (state->ia);
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+    return NULL;
+  }
+
+  return state;
+}
+
+/**
  *  gnet_inetaddr_get_name_async:
  *  @inetaddr: a #GInetAddr
  *  @func: callback function
@@ -1319,39 +1503,15 @@ static void* inetaddr_get_name_async_gthread (void* arg);
  *
  **/
 GInetAddrGetNameAsyncID
-gnet_inetaddr_get_name_async (GInetAddr* inetaddr, 
-			      GInetAddrGetNameAsyncFunc func,
-			      gpointer data)
+gnet_inetaddr_get_name_async (GInetAddr * inetaddr, 
+    GInetAddrGetNameAsyncFunc func, gpointer data)
 {
-  GInetAddrReverseAsyncState* state = NULL;
-  GError *err = NULL;
+  GInetAddrGetNameAsyncID async_id;
 
-  g_return_val_if_fail(inetaddr != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
+  async_id = gnet_inetaddr_get_name_async_full (inetaddr, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
 
-  state = g_new0 (GInetAddrReverseAsyncState, 1);
-
-  /* Set up state for callback */
-  g_static_mutex_init (&state->mutex);
-
-  state->ia = gnet_inetaddr_clone (inetaddr);
-  state->func = func;
-  state->data = data;
-  state->is_cancelled = FALSE;
-  state->in_callback = FALSE;
-  state->source = 0;
-  state->name = NULL;
-
-  if (!g_thread_create (inetaddr_get_name_async_gthread, state, FALSE, &err)) {
-    g_warning ("g_thread_create error: %s\n", err->message);
-    g_error_free (err);
-    gnet_inetaddr_delete (state->ia);
-    g_static_mutex_free (&state->mutex);
-    g_free (state);
-    return NULL;
-  }
-
-  return state;
+  return async_id;
 }
 
 /**
@@ -1366,7 +1526,7 @@ gnet_inetaddr_get_name_async (GInetAddr* inetaddr,
  * 
  */
 void
-gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
+gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id)
 {
   GInetAddrReverseAsyncState* state = (GInetAddrReverseAsyncState*) id;
 
@@ -1381,6 +1541,9 @@ gnet_inetaddr_get_name_async_cancel(GInetAddrGetNameAsyncID id)
     g_free (state->name);
     g_source_remove (state->source);
     gnet_inetaddr_delete (state->ia);
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
     g_static_mutex_unlock (&state->mutex);
     g_static_mutex_free (&state->mutex);
     memset (state, 0xaa, sizeof (*state));
@@ -1407,10 +1570,13 @@ inetaddr_get_name_async_gthread_dispatch (gpointer data)
   state->in_callback = TRUE;
 
   /* Upcall */
-  (*state->func)(state->name, state->data);
+  (*state->func) (state->name, state->data);
 
   /* Delete state */
   gnet_inetaddr_delete (state->ia);
+  if (state->notify)
+    state->notify (state->data);
+  g_main_context_unref (state->context);
   g_static_mutex_unlock (&state->mutex);
   g_static_mutex_free (&state->mutex);
   memset (state, 0, sizeof(*state));
@@ -1444,31 +1610,30 @@ inetaddr_get_name_async_gthread (void* arg)
 
   /* If cancelled, destroy state and exit.  The main thread is no
      longer using state. */
-  if (state->is_cancelled)
-    {
-      g_free (name);
-      gnet_inetaddr_delete (state->ia);
-
-      g_static_mutex_unlock (&state->mutex);
-      g_static_mutex_free (&state->mutex);
-
-      g_free (state);
-
-      return NULL;
-    }
+  if (state->is_cancelled) {
+    g_free (name);
+    gnet_inetaddr_delete (state->ia);
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
+    g_static_mutex_unlock (&state->mutex);
+    g_static_mutex_free (&state->mutex);
+    g_free (state);
+    return NULL;
+  }
 
   /* Copy name to state */
-  if (name)
-    {
-      state->name = name;
-    }
-  else 	/* Lookup failed: name is canonical name */
-	state->name = gnet_inetaddr_get_canonical_name(state->ia);
+  if (name) {
+    state->name = name;
+  } else {
+    /* Lookup failed: name is canonical name */
+    state->name = gnet_inetaddr_get_canonical_name (state->ia);
+  }
 
   /* Add a source for reply */
-  state->source = g_idle_add_full (G_PRIORITY_DEFAULT, 
-				   inetaddr_get_name_async_gthread_dispatch,
-				   state, NULL);
+  /* FIXME use context and priority once implemented! */
+  state->source = __gnet_idle_add_full (state->context, state->priority,
+      inetaddr_get_name_async_gthread_dispatch, state, NULL);
 
   /* Unlock */
   g_static_mutex_unlock (&state->mutex);
