@@ -303,52 +303,506 @@ GNET_START_TEST (test_inetaddr_is_internet_domainname)
 GNET_END_TEST;
 
 static void
+lookup_list_cb (GList * list, gpointer data)
+{
+  gboolean *p_called = (gboolean *) data;
+  GList *l;
+
+  *p_called = TRUE;
+
+  /* g_print ("%d results\n", g_list_length (list)); */
+
+  fail_unless (list != NULL);
+  for (l = list; l != NULL; l = l->next) {
+    GInetAddr *ia;
+    gchar *name;
+
+    ia = (GInetAddr *) l->data;
+    name = gnet_inetaddr_get_canonical_name (ia);
+    fail_unless (name != NULL);
+    fail_unless_equals_int (gnet_inetaddr_get_port (ia), 80);
+    g_free (name);
+  }
+
+  g_list_foreach (list, (GFunc) gnet_inetaddr_unref, NULL);
+  g_list_free (list);
+}
+
+static void
+lookup_list_cb_do_nothing (GList * list, gpointer data)
+{
+  g_list_foreach (list, (GFunc) gnet_inetaddr_unref, NULL);
+  g_list_free (list);
+}
+
+static gboolean
+do_nothing_timeout (gpointer foo)
+{
+  return FALSE; /* don't call again */
+}
+
+static void
+destroy_notify (gpointer data)
+{
+  gboolean *p_bool = (gboolean *) data;
+
+  *p_bool = TRUE;
+}
+
+static void
+do_test_inetaddr_list_async (const gchar * hostname)
+{
+  GInetAddrNewListAsyncID list_async_id;
+  GMainContext *ctx;
+  gboolean called, destroyed;
+  gint id;
+
+  /* g_print ("list async: looking up %s ... ", hostname); */
+
+  /* list async (default main context) */
+  called = FALSE;
+  list_async_id = gnet_inetaddr_new_list_async (hostname, 80,
+      lookup_list_cb, &called);
+  id = g_timeout_add (5 * 1000, (GSourceFunc) do_nothing_timeout, NULL);
+  g_main_context_iteration (NULL, TRUE);
+  fail_unless (called);
+  g_source_remove (id);
+
+  /* list async + cancel (default main context) */
+  called = FALSE;
+  list_async_id = gnet_inetaddr_new_list_async (hostname, 80,
+      lookup_list_cb, &called);
+  fail_unless (list_async_id != NULL);
+  gnet_inetaddr_new_list_async_cancel (list_async_id);
+  while (g_main_context_iteration (NULL, FALSE)) {
+    ;
+  }
+  fail_unless (!called);
+
+  /* list async (destroy notify) */
+  destroyed = FALSE;
+  list_async_id = gnet_inetaddr_new_list_async_full (hostname, 80,
+      lookup_list_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (list_async_id != NULL);
+  g_main_context_iteration (NULL, TRUE);
+  fail_unless (destroyed);
+
+  /* list async + cancel (destroy notify; thread unlikely to start) */
+  destroyed = FALSE;
+  list_async_id = gnet_inetaddr_new_list_async_full (hostname, 80,
+      lookup_list_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (list_async_id != NULL);
+  gnet_inetaddr_new_list_async_cancel (list_async_id);
+  /* give thread a chance to execute and act on the cancelled flag */
+  g_usleep (1 * G_USEC_PER_SEC);
+  fail_unless (destroyed);
+
+  /* list async + cancel (destroy notify II) */
+  destroyed = FALSE;
+  list_async_id = gnet_inetaddr_new_list_async_full (hostname, 80,
+      lookup_list_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (list_async_id != NULL);
+  /* give thread a chance to execute and block before we cancel it */
+  g_usleep (1 * G_USEC_PER_SEC);
+  gnet_inetaddr_new_list_async_cancel (list_async_id);
+  fail_unless (destroyed);
+
+  /* list async + cancel (destroy notify III) */
+  destroyed = FALSE;
+  list_async_id = gnet_inetaddr_new_list_async_full (hostname, 80,
+      lookup_list_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (list_async_id != NULL);
+  /* give thread a chance to execute and block and be done before cancelling */
+  g_usleep (3 * G_USEC_PER_SEC);
+  gnet_inetaddr_new_list_async_cancel (list_async_id);
+  fail_unless (destroyed);
+
+  /* list async (custom main context) */
+  called = FALSE;
+  ctx = g_main_context_new ();
+  list_async_id = gnet_inetaddr_new_list_async_full (hostname, 80,
+      lookup_list_cb, &called, (GDestroyNotify) NULL, ctx,
+      G_PRIORITY_HIGH);
+  /* give thread a chance to execute and block and be done */
+  g_usleep (3 * G_USEC_PER_SEC);
+  fail_unless (!called);
+  /* there shouldn't be anyhing pending in the default context */
+  fail_unless (!g_main_context_pending (NULL));
+  /* but there should be something pending in OUR context now */
+  fail_unless (g_main_context_pending (ctx));
+  fail_unless (!called);
+  /* let's iterate it and dispatch the callback */
+  fail_unless (g_main_context_iteration (ctx, FALSE));
+  fail_unless (called);
+  g_main_context_unref (ctx);
+}
+
+GNET_START_TEST (test_inetaddr_list_async)
+{
+  do_test_inetaddr_list_async ("localhost");
+/* FIXME: these might not work right yet because of the timings in the test
+#ifdef GNET_ENABLE_NETWORK_TESTS
+  do_test_inetaddr_list_async ("www.google.com");
+  do_test_inetaddr_list_async ("www.heise.de");
+#endif
+*/
+#ifdef HAVE_VALGRIND
+  if (RUNNING_ON_VALGRIND) {
+    g_print ("Sleeping for a while to let cancelled threads finish ...\n");
+    /* sleep a while to give any cancelled threads a chance to quit, otherwise
+     * valgrind will think the threads were leaked */
+    g_usleep (60 * G_USEC_PER_SEC);
+  }
+#endif
+}
+GNET_END_TEST;
+
+static void
+lookup_name_cb (GInetAddr * ia, gpointer data)
+{
+  gboolean *p_called = (gboolean *) data;
+  gchar *name;
+
+  *p_called = TRUE;
+
+  fail_unless (ia != NULL);
+
+  name = gnet_inetaddr_get_canonical_name (ia);
+  fail_unless (name != NULL);
+  fail_unless_equals_int (gnet_inetaddr_get_port (ia), 80);
+  g_free (name);
+
+  gnet_inetaddr_unref (ia);
+}
+
+static void
+lookup_name_cb_do_nothing (GInetAddr * ia, gpointer data)
+{
+  gnet_inetaddr_unref (ia);
+}
+
+static void
+do_test_inetaddr_name_async (const gchar * hostname)
+{
+  GInetAddrNewAsyncID async_id;
+  GMainContext *ctx;
+  gboolean called, destroyed;
+  gint id;
+
+  /* name async (default main context) */
+  called = FALSE;
+  async_id = gnet_inetaddr_new_async (hostname, 80, lookup_name_cb, &called);
+  fail_unless (async_id != NULL);
+  id = g_timeout_add (5 * 1000, (GSourceFunc) do_nothing_timeout, NULL);
+  g_main_context_iteration (NULL, TRUE);
+  fail_unless (called);
+  g_source_remove (id);
+
+  /* name async + cancel (default main context) */
+  called = FALSE;
+  async_id = gnet_inetaddr_new_async (hostname, 80, lookup_name_cb, &called);
+  fail_unless (async_id != NULL);
+  gnet_inetaddr_new_async_cancel (async_id);
+  while (g_main_context_iteration (NULL, FALSE)) { ; }
+  fail_unless (!called);
+
+  /* name async (destroy notify) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_new_async_full (hostname, 80,
+      lookup_name_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  g_main_context_iteration (NULL, TRUE);
+  fail_unless (destroyed);
+
+  /* name async + cancel (destroy notify; thread unlikely to start) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_new_async_full (hostname, 80,
+      lookup_name_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  gnet_inetaddr_new_async_cancel (async_id);
+  /* give thread a chance to execute and act on the cancelled flag */
+  g_usleep (1 * G_USEC_PER_SEC);
+  fail_unless (destroyed);
+
+  /* name async + cancel (destroy notify II) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_new_async_full (hostname, 80,
+      lookup_name_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  /* give thread a chance to execute and block before we cancel it */
+  g_usleep (1 * G_USEC_PER_SEC);
+  gnet_inetaddr_new_async_cancel (async_id);
+  fail_unless (destroyed);
+
+  /* name async + cancel (destroy notify III) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_new_async_full (hostname, 80,
+      lookup_name_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  /* give thread a chance to execute and block and be done before cancelling */
+  g_usleep (3 * G_USEC_PER_SEC);
+  gnet_inetaddr_new_async_cancel (async_id);
+  fail_unless (destroyed);
+
+  /* name async (custom main context) */
+  called = FALSE;
+  ctx = g_main_context_new ();
+  async_id = gnet_inetaddr_new_async_full (hostname, 80, lookup_name_cb,
+      &called, (GDestroyNotify) NULL, ctx, G_PRIORITY_HIGH);
+  /* give thread a chance to execute and block and be done */
+  g_usleep (3 * G_USEC_PER_SEC);
+  fail_unless (!called);
+  /* there shouldn't be anyhing pending in the default context */
+  fail_unless (!g_main_context_pending (NULL));
+  /* but there should be something pending in OUR context now */
+  fail_unless (g_main_context_pending (ctx));
+  fail_unless (!called);
+  /* let's iterate it and dispatch the callback */
+  fail_unless (g_main_context_iteration (ctx, FALSE));
+  fail_unless (called);
+  g_main_context_unref (ctx);
+}
+
+GNET_START_TEST (test_inetaddr_name_async)
+{
+  do_test_inetaddr_name_async ("localhost");
+
+/* FIXME: these might not work right yet because of the timings in the test
+#ifdef GNET_ENABLE_NETWORK_TESTS
+  do_test_inetaddr_name_async ("www.google.com");
+#endif
+*/
+#ifdef HAVE_VALGRIND
+  if (RUNNING_ON_VALGRIND) {
+    g_print ("Sleeping for a while to let cancelled threads finish ...\n");
+    /* sleep a while to give any cancelled threads a chance to quit, otherwise
+     * valgrind will think the threads were leaked */
+    g_usleep (60 * G_USEC_PER_SEC);
+  }
+#endif
+}
+GNET_END_TEST;
+
+static void
 reverse_lookup_func (gchar * hostname, gpointer data)
 {
   /* should never be called, since we don't iterate the default main context */
   g_assert_not_reached ();
 }
 
-GNET_START_TEST (test_inetaddr_reverse_lookup_ipv4_cancel)
+static void
+do_test_inetaddr_reverse_async_ipv4_cancel (const gchar * ip_string)
 {
-  gint i;
+  GInetAddrGetNameAsyncID async_id;
+  GInetAddr *ia;
 
+  g_print ("Starting reverse lookup for %s ...", ip_string);
+  fflush (stdout);
+  ia = gnet_inetaddr_new_nonblock (ip_string, 80);
+  fail_unless (ia != NULL);
+
+  ASSERT_CRITICAL (gnet_inetaddr_get_name_async (ia, NULL, NULL));
+
+  async_id = gnet_inetaddr_get_name_async (ia, reverse_lookup_func, NULL);
+  fail_unless (async_id != NULL);
+  gnet_inetaddr_delete (ia);
+
+  g_usleep (g_random_int_range (0, G_USEC_PER_SEC * 2));
+  gnet_inetaddr_get_name_async_cancel (async_id);
+  g_print (" cancelled.\n");
+}
+
+GNET_START_TEST (test_inetaddr_reverse_async_ipv4_cancel)
+{
   ASSERT_CRITICAL (
       gnet_inetaddr_get_name_async (NULL, reverse_lookup_func, NULL)
   );
 
-  for (i = 0; i < 10; ++i) {
-    GInetAddrGetNameAsyncID async_id;
-    GInetAddr *ia;
-    gchar *ip_string;
+  do_test_inetaddr_reverse_async_ipv4_cancel ("127.0.0.1");
 
-    if (i == 0) {
-      ip_string = g_strdup ("127.0.0.1");
-    } else if (i == 1) {
-      ip_string = g_strdup ("217.155.155.155");
-    } else if (i == 2) {
-      ip_string = g_strdup ("91.189.93.3");
-    } else {
-      ip_string = g_strdup_printf ("%u.%u.%u.%u",
-          g_random_int_range (4, 250), g_random_int_range (0, 255),
-          g_random_int_range (0, 255), g_random_int_range (0, 255));
+#ifdef GNET_ENABLE_NETWORK_TESTS
+  {
+    gint i;
+
+    for (i = 0; i < 10; ++i) {
+
+      if (i == 1) {
+        do_test_inetaddr_reverse_async_ipv4_cancel ("217.155.155.155");
+      } else if (i == 2) {
+        do_test_inetaddr_reverse_async_ipv4_cancel ("91.189.93.3");
+      } else {
+        gchar *ip_string;
+
+        ip_string = g_strdup_printf ("%u.%u.%u.%u",
+            g_random_int_range (4, 250), g_random_int_range (0, 255),
+            g_random_int_range (0, 255), g_random_int_range (0, 255));
+        do_test_inetaddr_reverse_async_ipv4_cancel (ip_string);
+        g_free (ip_string);
+      }
     }
-    g_print ("Starting reverse lookup for %s ...", ip_string);
-    fflush (stdout);
-    ia = gnet_inetaddr_new_nonblock (ip_string, 80);
-    fail_unless (ia != NULL);
-    g_free (ip_string);
-
-    ASSERT_CRITICAL (gnet_inetaddr_get_name_async (ia, NULL, NULL));
-
-    async_id = gnet_inetaddr_get_name_async (ia, reverse_lookup_func, NULL);
-    fail_unless (async_id != NULL);
-    gnet_inetaddr_delete (ia);
-
-    g_usleep (g_random_int_range (0, G_USEC_PER_SEC * 2));
-    gnet_inetaddr_get_name_async_cancel (async_id);
-    g_print (" cancelled.\n");
   }
+#endif
+
+#ifdef HAVE_VALGRIND
+  if (RUNNING_ON_VALGRIND) {
+    g_print ("Sleeping for a while to let cancelled threads finish ...\n");
+    /* sleep a while to give any cancelled threads a chance to quit, otherwise
+     * valgrind will think the threads were leaked */
+    g_usleep (60 * G_USEC_PER_SEC);
+  }
+#endif
+}
+GNET_END_TEST;
+
+static GInetAddr *current_ia; /* NULL */
+
+static void
+lookup_reverse_cb (gchar * hostname, gpointer data)
+{
+  gboolean *p_called = (gboolean *) data;
+
+  *p_called = TRUE;
+
+  fail_unless (hostname != NULL);
+
+  g_free (hostname);
+}
+
+static void
+lookup_reverse_cb_do_nothing (gchar * hostname, gpointer data)
+{
+  if (current_ia != NULL && hostname != NULL) {
+    gchar *can_name;
+
+    can_name = gnet_inetaddr_get_canonical_name (current_ia);
+    g_print ("%s --> %s\n", can_name, hostname);
+    g_free (can_name);
+  }
+
+  g_free (hostname);
+}
+
+static void
+do_test_inetaddr_reverse_async (const gchar * hostname)
+{
+  GInetAddrGetNameAsyncID async_id;
+  GMainContext *ctx;
+  GInetAddr *ia;
+  gboolean called, destroyed;
+  gchar *ip_string;
+  gint id;
+
+  /* we assume the given host has a 1:1 IP<->hostname mapping */
+  ia = gnet_inetaddr_new (hostname, 80);
+  fail_unless (ia != NULL);
+  ip_string = gnet_inetaddr_get_canonical_name (ia);
+  fail_unless (ip_string != NULL);
+  gnet_inetaddr_unref (ia);
+  ia = NULL;
+
+  g_print ("%s --> %s\n", hostname, ip_string);
+
+  ia = gnet_inetaddr_new_nonblock (ip_string, 80);
+  fail_unless (ia != NULL);
+  current_ia = ia;
+
+  /* name async (default main context) */
+  called = FALSE;
+  async_id = gnet_inetaddr_get_name_async (ia, lookup_reverse_cb, &called);
+  fail_unless (async_id != NULL);
+  id = g_timeout_add (10 * 1000, (GSourceFunc) do_nothing_timeout, NULL);
+  g_main_context_iteration (NULL, TRUE);
+  fail_unless (called);
+  g_source_remove (id);
+
+  /* name async + cancel (default main context) */
+  called = FALSE;
+  async_id = gnet_inetaddr_get_name_async (ia, lookup_reverse_cb, &called);
+  fail_unless (async_id != NULL);
+  gnet_inetaddr_get_name_async_cancel (async_id);
+  while (g_main_context_iteration (NULL, FALSE)) { ; }
+  fail_unless (!called);
+
+  /* name async (destroy notify) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_get_name_async_full (ia,
+      lookup_reverse_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  g_main_context_iteration (NULL, TRUE);
+  fail_unless (destroyed);
+
+  /* name async + cancel (destroy notify; thread unlikely to start) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_get_name_async_full (ia,
+      lookup_reverse_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  gnet_inetaddr_get_name_async_cancel (async_id);
+  /* give thread a chance to execute and act on the cancelled flag */
+  g_usleep (1 * G_USEC_PER_SEC);
+  fail_unless (destroyed);
+
+  /* name async + cancel (destroy notify II) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_get_name_async_full (ia,
+      lookup_reverse_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  /* give thread a chance to execute and block before we cancel it */
+  g_usleep (1 * G_USEC_PER_SEC);
+  gnet_inetaddr_get_name_async_cancel (async_id);
+  fail_unless (destroyed);
+
+  /* name async + cancel (destroy notify III) */
+  destroyed = FALSE;
+  async_id = gnet_inetaddr_get_name_async_full (ia,
+      lookup_reverse_cb_do_nothing, &destroyed, destroy_notify, NULL,
+      G_PRIORITY_HIGH);
+  fail_unless (async_id != NULL);
+  /* give thread a chance to execute and block and be done before cancelling */
+  g_usleep (3 * G_USEC_PER_SEC);
+  gnet_inetaddr_get_name_async_cancel (async_id);
+  fail_unless (destroyed);
+
+  /* name async (custom main context) */
+  called = FALSE;
+  ctx = g_main_context_new ();
+  async_id = gnet_inetaddr_get_name_async_full (ia, lookup_reverse_cb,
+      &called, (GDestroyNotify) NULL, ctx, G_PRIORITY_HIGH);
+  /* give thread a chance to execute and block and be done */
+  g_usleep (10 * G_USEC_PER_SEC);
+  fail_unless (!called);
+  /* there shouldn't be anyhing pending in the default context */
+  fail_unless (!g_main_context_pending (NULL));
+  /* but there should be something pending in OUR context now */
+  fail_unless (g_main_context_pending (ctx));
+  fail_unless (!called);
+  /* let's iterate it and dispatch the callback */
+  fail_unless (g_main_context_iteration (ctx, FALSE));
+  fail_unless (called);
+  g_main_context_unref (ctx);
+
+  g_free (ip_string);
+  gnet_inetaddr_unref (ia);
+  current_ia = NULL;
+}
+
+GNET_START_TEST (test_inetaddr_reverse_async)
+{
+  do_test_inetaddr_reverse_async ("localhost");
+
+#ifdef GNET_ENABLE_NETWORK_TESTS
+  do_test_inetaddr_reverse_async ("gabe.freedesktop.org");
+#endif
 
 #ifdef HAVE_VALGRIND
   if (RUNNING_ON_VALGRIND) {
@@ -366,7 +820,6 @@ gnetinetaddr_suite (void)
 {
   Suite *s = suite_create ("GInetAddr");
   TCase *tc_chain = tcase_create ("inetaddr");
-  gboolean run_network_tests;
 
   tcase_set_timeout (tc_chain, 0);
 
@@ -374,20 +827,15 @@ gnetinetaddr_suite (void)
   tcase_add_test (tc_chain, test_inetaddr_is_internet_domainname);
   tcase_add_test (tc_chain, test_inetaddr_ipv4);
   tcase_add_test (tc_chain, test_inetaddr_is_ipv4);
+  tcase_add_test (tc_chain, test_inetaddr_list_async);
+  tcase_add_test (tc_chain, test_inetaddr_name_async);
+  tcase_add_test (tc_chain, test_inetaddr_reverse_async);
+  tcase_add_test (tc_chain, test_inetaddr_reverse_async_ipv4_cancel);
 #if HAVE_IPV6
   tcase_add_test (tc_chain, test_inetaddr_ipv6);
   tcase_add_test (tc_chain, test_inetaddr_is_ipv6);
 #endif
 
-#ifdef GNET_ENABLE_NETWORK_TESTS
-  run_network_tests = TRUE;
-#else
-  run_network_tests = FALSE;
-#endif
-
-  if (run_network_tests) {
-    tcase_add_test (tc_chain, test_inetaddr_reverse_lookup_ipv4_cancel);
-  }
 
   return s;
 }

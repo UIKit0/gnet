@@ -1,5 +1,11 @@
 2007-10-27  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* tests/check/gnet/gnetinetaddr.c:
+	  Add unit tests for the various _async() and _async_full()
+	  functions.
+
+2007-10-27  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* doc/gnet-sections.txt:
 	* src/gnet-private.c: (gnet_uninitialize_windows_sockets),
 	  (__gnet_idle_add_full), (__gnet_timeout_add_full):
