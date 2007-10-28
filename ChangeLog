@@ -1,3 +1,10 @@
+2007-10-28  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/gnet-private.c: (__gnet_io_watch_add_full):
+	* src/gnet-private.h:
+	  Implement (private) __gnet_io_watch_add_full(), which we'll
+	  need shortly.
+
 2007-10-27  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* tests/check/gnet/gnetinetaddr.c:

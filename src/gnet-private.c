@@ -292,3 +292,28 @@ __gnet_timeout_add_full (GMainContext * context, gint priority, guint interval,
   return id;
 }
 
+guint
+__gnet_io_watch_add_full (GMainContext * context, gint priority,
+    GIOChannel * channel, GIOCondition condition, GIOFunc function,
+    gpointer data, GDestroyNotify notify)
+{
+  GSource *source;
+  guint id;
+  
+  g_return_val_if_fail (context != NULL, 0);
+  g_return_val_if_fail (channel != NULL, 0);
+  g_return_val_if_fail (condition != 0, 0);
+
+  source = g_io_create_watch (channel, condition);
+
+  if (priority != G_PRIORITY_DEFAULT)
+    g_source_set_priority (source, priority);
+
+  g_source_set_callback (source, (GSourceFunc) function, data, notify);
+
+  id = g_source_attach (source, context);
+  g_source_unref (source);
+
+  return id;
+}
+

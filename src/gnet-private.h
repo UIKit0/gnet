@@ -522,14 +522,13 @@ guint  __gnet_timeout_add_full  (GMainContext  * context,
                                  gpointer        data,
                                  GDestroyNotify  notify);
 
-#if 0
 guint  __gnet_io_watch_add_full (GMainContext  * context,
                                  gint            priority,
-                                 gint            interval,
-                                 GSourceFunc     function,
+                                 GIOChannel    * channel,
+                                 GIOCondition    condition,
+                                 GIOFunc         function,
                                  gpointer        data,
                                  GDestroyNotify  notify);
-#endif
 
 G_END_DECLS
 
