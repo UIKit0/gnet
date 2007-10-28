@@ -1,5 +1,14 @@
 2007-10-28  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/tcp.h: (GTcpSocketNewAsyncID):
+	  Typedef GTcpSocketNewAsyncID to real structure instead of gpointer
+	  so the compiler can help us catch nonsense.
+
+	* src/socks-private.c: (gnet_private_socks_tcp_socket_new_async):
+	  Like this.
+
+2007-10-28  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/gnet-private.c: (__gnet_io_watch_add_full):
 	* src/gnet-private.h:
 	  Implement (private) __gnet_io_watch_add_full(), which we'll

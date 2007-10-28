@@ -159,7 +159,7 @@ void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
  *  calling gnet_tcp_socket_new_async_cancel() with the ID.
  *
  **/
-typedef gpointer GTcpSocketNewAsyncID;
+typedef struct _GTcpSocketAsyncState * GTcpSocketNewAsyncID;
 
 
 

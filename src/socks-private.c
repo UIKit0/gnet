@@ -81,7 +81,7 @@ gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr,
 					 GTcpSocketNewAsyncFunc func,
 					 gpointer data)
 {
-  GTcpSocket* 		s;
+  GTcpSocketNewAsyncID	async_id;
   GInetAddr* 		ss_addr = NULL;
   struct async_data*	ad;
 
@@ -100,9 +100,9 @@ gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr,
   ad->data = data;
 
   /* Connect to SOCKS server */
-  s = gnet_tcp_socket_new_async_direct (ss_addr, async_cb, ad);
+  async_id = gnet_tcp_socket_new_async_direct (ss_addr, async_cb, ad);
   gnet_inetaddr_delete (ss_addr);
-  return s;  /* s might be NULL */
+  return async_id;  /* async_id might be NULL */
 }
 
 
