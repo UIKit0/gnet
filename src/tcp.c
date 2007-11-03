@@ -306,7 +306,7 @@ gnet_tcp_socket_new (const GInetAddr* addr)
 
   /* Use SOCKS if enabled */
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_new (addr);
+    return _gnet_socks_tcp_socket_new (addr);
 
   /* Otherwise, connect directly to the address */
   return gnet_tcp_socket_new_direct (addr);
@@ -393,7 +393,7 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
 
   /* Use SOCKS if enabled */
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_new_async (addr, func, data);
+    return _gnet_socks_tcp_socket_new_async (addr, func, data);
 
   /* Otherwise, connect directly to the address */
   return gnet_tcp_socket_new_async_direct (addr, func, data);
@@ -679,7 +679,7 @@ gnet_tcp_socket_get_io_channel (GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
+    socket->iochannel = _gnet_io_channel_new(socket->sockfd);
 
   return socket->iochannel;
 }
@@ -879,10 +879,10 @@ gnet_tcp_socket_server_new_full (const GInetAddr* iface, gint port)
 
   /* Use SOCKS if enabled */
   if (!iface && gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_new (port);
+    return _gnet_socks_tcp_socket_server_new (port);
 
   /* Create sockfd and address */
-  sockfd = gnet_private_create_listen_socket (SOCK_STREAM, iface, port, &sa);
+  sockfd = _gnet_create_listen_socket (SOCK_STREAM, iface, port, &sa);
   if (!GNET_IS_SOCKET_VALID(sockfd))
     return NULL;
   
@@ -978,7 +978,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_accept(socket);
+    return _gnet_socks_tcp_socket_server_accept(socket);
 
  try_again:
   
@@ -1050,7 +1050,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_accept(socket);
+    return _gnet_socks_tcp_socket_server_accept(socket);
 
  try_again:
 
@@ -1099,7 +1099,7 @@ gnet_tcp_socket_server_accept (GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_accept(socket);
+    return _gnet_socks_tcp_socket_server_accept(socket);
 	
   FD_ZERO(&fdset);
   FD_SET((unsigned)socket->sockfd, &fdset);
@@ -1139,7 +1139,7 @@ gnet_tcp_socket_server_accept_nonblock (GTcpSocket* socket)
   g_return_val_if_fail (socket != NULL, NULL);
 
   if (gnet_socks_get_enabled())
-    return gnet_private_socks_tcp_socket_server_accept(socket);
+    return _gnet_socks_tcp_socket_server_accept(socket);
 
   FD_ZERO(&fdset);
   FD_SET((unsigned)socket->sockfd, &fdset);
@@ -1201,7 +1201,7 @@ gnet_tcp_socket_server_accept_async (GTcpSocket* socket,
 
   if (gnet_socks_get_enabled())
     {
-      gnet_private_socks_tcp_socket_server_accept_async (socket, accept_func, user_data);
+      _gnet_socks_tcp_socket_server_accept_async (socket, accept_func, user_data);
       return;
     }
 

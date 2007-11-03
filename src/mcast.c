@@ -84,7 +84,7 @@ gnet_mcast_socket_new_full (const GInetAddr* iface, gint port)
   int                     sockfd;
 
   /* Create sockfd and address */
-  sockfd = gnet_private_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
+  sockfd = _gnet_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
   if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");

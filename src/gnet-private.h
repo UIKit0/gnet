@@ -85,7 +85,7 @@ struct sockaddr_storage {
 
 #define GNET_CLOSE_SOCKET(SOCKFD) close(SOCKFD)
 
-/* Use gnet_private_io_channel_new() to create iochannels */
+/* Use _gnet_io_channel_new() to create iochannels */
 #define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_unix_new(SOCKFD)
 
 #define GNET_IS_SOCKET_VALID(S) ((S) >= 0)
@@ -114,7 +114,7 @@ struct sockaddr_storage {
 
 #define GNET_CLOSE_SOCKET(SOCKFD) closesocket(SOCKFD)
 
-/* Use gnet_private_io_channel_new() to create iochannels */
+/* Use _gnet_io_channel_new() to create iochannels */
 #define GNET_SOCKET_IO_CHANNEL_NEW(SOCKFD) g_io_channel_win32_new_socket(SOCKFD)
 
 #endif	/*********** End Windows specific ***********/
@@ -500,29 +500,29 @@ PFN_GETADAPTERSADDRESSES pfn_getaddaptersaddresses;
 
 /* Private/Experimental functions */
 
-GIOChannel* gnet_private_io_channel_new (SOCKET sockfd);
+GIOChannel* _gnet_io_channel_new (SOCKET sockfd);
 
-SOCKET gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
+SOCKET _gnet_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa);
 
 int gnet_initialize_windows_sockets(void);
 void gnet_uninitialize_windows_sockets(void);
 
 /* Private utility functions */
 
-guint  __gnet_idle_add_full     (GMainContext  * context,
+guint   _gnet_idle_add_full     (GMainContext  * context,
                                  gint            priority,
                                  GSourceFunc     function,
                                  gpointer        data,
                                  GDestroyNotify  notify);
 
-guint  __gnet_timeout_add_full  (GMainContext  * context,
+guint   _gnet_timeout_add_full  (GMainContext  * context,
                                  gint            priority,
                                  guint           interval,
                                  GSourceFunc     function,
                                  gpointer        data,
                                  GDestroyNotify  notify);
 
-guint  __gnet_io_watch_add_full (GMainContext  * context,
+guint   _gnet_io_watch_add_full (GMainContext  * context,
                                  gint            priority,
                                  GIOChannel    * channel,
                                  GIOCondition    condition,

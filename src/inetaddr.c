@@ -930,7 +930,7 @@ gnet_inetaddr_new_list_async_full (const gchar * hostname, gint port,
   ia = gnet_inetaddr_new_nonblock (hostname, port);
   if (ia) {
     state->ias = g_list_prepend (NULL, ia);
-    state->source = __gnet_idle_add_full (state->context, state->priority,
+    state->source = _gnet_idle_add_full (state->context, state->priority,
         inetaddr_new_list_async_nonblock_dispatch, state, NULL);
   } else {
     GError *err = NULL;
@@ -1082,7 +1082,7 @@ inetaddr_new_list_async_gthread (void* arg)
     }
 
   /* Add a source for reply */
-  state->source = __gnet_idle_add_full (state->context, state->priority,
+  state->source = _gnet_idle_add_full (state->context, state->priority,
       inetaddr_new_list_async_gthread_dispatch, state, NULL);
 
   /* Unlock */
@@ -1632,7 +1632,7 @@ inetaddr_get_name_async_gthread (void* arg)
 
   /* Add a source for reply */
   /* FIXME use context and priority once implemented! */
-  state->source = __gnet_idle_add_full (state->context, state->priority,
+  state->source = _gnet_idle_add_full (state->context, state->priority,
       inetaddr_get_name_async_gthread_dispatch, state, NULL);
 
   /* Unlock */

@@ -1,3 +1,33 @@
+2007-11-03  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/gnet-private.c: (_gnet_create_ipv4_listen_socket),
+	  (_gnet_create_ipv6_listen_socket), (_gnet_create_listen_socket),
+	  (_gnet_io_channel_new), (_gnet_idle_add_full), (_gnet_timeout_add_full),
+	  (_gnet_io_watch_add_full):
+	* src/gnet-private.h:
+	* src/inetaddr.c: (gnet_inetaddr_new_list_async_full),
+	  (inetaddr_new_list_async_gthread), (inetaddr_get_name_async_gthread):
+	* src/mcast.c: (gnet_mcast_socket_new_full):
+	* src/socks-private.c: (_gnet_socks_tcp_socket_new),
+	  (_gnet_socks_tcp_socket_new_async), (_gnet_socks_tcp_socket_server_new),
+	  (_gnet_socks_tcp_socket_server_accept),
+	  (_gnet_socks_tcp_socket_server_accept_async),
+	  (socks_tcp_socket_server_accept_async_cb):
+	* src/socks-private.h:
+	* src/tcp.c: (gnet_tcp_socket_new), (gnet_tcp_socket_new_async),
+	  (gnet_tcp_socket_get_io_channel), (gnet_tcp_socket_server_new_full),
+	  (gnet_tcp_socket_server_accept),
+	  (gnet_tcp_socket_server_accept_nonblock),
+	  (gnet_tcp_socket_server_accept),
+	  (gnet_tcp_socket_server_accept_nonblock),
+	  (gnet_tcp_socket_server_accept_async):
+	* src/udp.c: (gnet_udp_socket_new_full), (gnet_udp_socket_get_io_channel):
+	* src/unix.c: (gnet_unix_socket_get_io_channel):
+	  Rename private function from gnet_private_foo() to _gnet_foo(), which is
+	  a bit shorter and makes it easier to make sure those symbols aren't
+	  exported later. Also rename __gnet_foo_add_full() to _gnet_foo_add_full()
+	  for consistency.
+
 2007-10-28  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/tcp.h: (GTcpSocketNewAsyncID):

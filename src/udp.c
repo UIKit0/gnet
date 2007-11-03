@@ -79,7 +79,7 @@ gnet_udp_socket_new_full (const GInetAddr* iface, gint port)
   const int 		  on = 1;
 
   /* Create sockfd and address */
-  sockfd = gnet_private_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
+  sockfd = _gnet_create_listen_socket (SOCK_DGRAM, iface, port, &sa);
   if (!GNET_IS_SOCKET_VALID(sockfd))
     {
       g_warning ("socket() failed");
@@ -205,7 +205,7 @@ gnet_udp_socket_get_io_channel (GUdpSocket* socket)
   g_return_val_if_fail (GNET_IS_UDP_SOCKET (socket), NULL);
 
   if (socket->iochannel == NULL)
-    socket->iochannel = gnet_private_io_channel_new(socket->sockfd);
+    socket->iochannel = _gnet_io_channel_new (socket->sockfd);
   
   return socket->iochannel;
 }

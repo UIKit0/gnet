@@ -32,7 +32,7 @@ static int socks5_negotiate_connect (GIOChannel *ioc, const GInetAddr *dst);
 
 
 GTcpSocket* 
-gnet_private_socks_tcp_socket_new (const GInetAddr* addr)
+_gnet_socks_tcp_socket_new (const GInetAddr* addr)
 {
   GInetAddr* 		ss_addr = NULL;
   GTcpSocket* 		s;
@@ -77,9 +77,8 @@ static void async_cb (GTcpSocket* socket, gpointer data);
 
 
 GTcpSocketNewAsyncID
-gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr, 
-					 GTcpSocketNewAsyncFunc func,
-					 gpointer data)
+_gnet_socks_tcp_socket_new_async (const GInetAddr * addr,
+    GTcpSocketNewAsyncFunc func, gpointer data)
 {
   GTcpSocketNewAsyncID	async_id;
   GInetAddr* 		ss_addr = NULL;
@@ -232,7 +231,7 @@ static gboolean socks_tcp_socket_server_accept_async_cb (GIOChannel* iochannel,
 
 
 GTcpSocket*
-gnet_private_socks_tcp_socket_server_new (gint port)
+_gnet_socks_tcp_socket_server_new (gint port)
 {
   GInetAddr* 		ss_addr = NULL;
   GTcpSocket* 		s;
@@ -317,7 +316,7 @@ socks5_negotiate_bind (GTcpSocket* socket, int port)
 /* XXX 0 server SOCKS compliant? */
  
 GTcpSocket*
-gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
+_gnet_socks_tcp_socket_server_accept (GTcpSocket* socket)
 {
   gint server_port;
   struct socks5_h s5h;
@@ -346,7 +345,7 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
   s->ref_count = 1;
 
   /* Create a new server socket (we just use the sockfd) */
-  new_socket = gnet_private_socks_tcp_socket_server_new (server_port);
+  new_socket = _gnet_socks_tcp_socket_server_new (server_port);
   if (new_socket == NULL)
     {
       g_free (s); /* ok, we copied sockfd */
@@ -385,9 +384,8 @@ gnet_private_socks_tcp_socket_server_accept (GTcpSocket* socket)
 
 
 void
-gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* socket, 
-						   GTcpSocketAcceptFunc accept_func, 
-						   gpointer user_data)
+_gnet_socks_tcp_socket_server_accept_async (GTcpSocket * socket,
+    GTcpSocketAcceptFunc accept_func, gpointer user_data)
 {
   GIOChannel* iochannel;
 
@@ -420,7 +418,7 @@ socks_tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition con
     {
       GTcpSocket* client;
 
-      client = gnet_private_socks_tcp_socket_server_accept (server);
+      client = _gnet_socks_tcp_socket_server_accept (server);
       if (!client) 
 	return TRUE;
 

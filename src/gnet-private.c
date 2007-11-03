@@ -34,7 +34,7 @@
  */
 
 static SOCKET
-gnet_private_create_ipv4_listen_socket (int type, int port, struct sockaddr_storage* sa)
+_gnet_create_ipv4_listen_socket (int type, int port, struct sockaddr_storage* sa)
 {
   struct sockaddr_in* sa_in;
 
@@ -48,7 +48,7 @@ gnet_private_create_ipv4_listen_socket (int type, int port, struct sockaddr_stor
 }
 
 static SOCKET
-gnet_private_create_ipv6_listen_socket (int type, int port, struct sockaddr_storage* sa)
+_gnet_create_ipv6_listen_socket (int type, int port, struct sockaddr_storage* sa)
 {
 #ifdef HAVE_IPV6
   struct sockaddr_in6* sa_in6;
@@ -83,7 +83,7 @@ gnet_private_create_ipv6_listen_socket (int type, int port, struct sockaddr_stor
 }
 
 SOCKET
-gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
+_gnet_create_listen_socket (int type, const GInetAddr* iface, int port, struct sockaddr_storage* sa)
 {
   SOCKET sockfd = GNET_INVALID_SOCKET;
 
@@ -102,20 +102,20 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
       ipv6_policy = gnet_ipv6_get_policy();
       switch (ipv6_policy) {
 	case GIPV6_POLICY_IPV4_THEN_IPV6:
-	  sockfd = gnet_private_create_ipv4_listen_socket (type, port, sa);
+	  sockfd = _gnet_create_ipv4_listen_socket (type, port, sa);
 	  if (!GNET_IS_SOCKET_VALID(sockfd))
-	    sockfd = gnet_private_create_ipv6_listen_socket (type, port, sa);
+	    sockfd = _gnet_create_ipv6_listen_socket (type, port, sa);
 	  break;
 	case GIPV6_POLICY_IPV6_THEN_IPV4:
-	  sockfd = gnet_private_create_ipv6_listen_socket (type, port, sa);
+	  sockfd = _gnet_create_ipv6_listen_socket (type, port, sa);
 	  if (!GNET_IS_SOCKET_VALID(sockfd))
-	    sockfd = gnet_private_create_ipv4_listen_socket (type, port, sa);
+	    sockfd = _gnet_create_ipv4_listen_socket (type, port, sa);
 	  break;
 	case GIPV6_POLICY_IPV4_ONLY:
-	  sockfd = gnet_private_create_ipv4_listen_socket (type, port, sa);
+	  sockfd = _gnet_create_ipv4_listen_socket (type, port, sa);
 	  break;
 	case GIPV6_POLICY_IPV6_ONLY:
-	  sockfd = gnet_private_create_ipv6_listen_socket (type, port, sa);
+	  sockfd = _gnet_create_ipv6_listen_socket (type, port, sa);
 	  break;
 	default:
 	  g_assert_not_reached ();
@@ -130,18 +130,16 @@ gnet_private_create_listen_socket (int type, const GInetAddr* iface, int port, s
 
 
 
-/**
- * gnet_private_io_channel_new:
+/* _gnet_io_channel_new:
  * @sockfd: socket descriptor
  *
  * Create a new IOChannel from a descriptor.  In GLib 2.0, turn off
  * encoding and buffering.
  *
  * Returns: An iochannel.
- *
- **/
+ */
 GIOChannel* 
-gnet_private_io_channel_new (SOCKET sockfd) 
+_gnet_io_channel_new (SOCKET sockfd) 
 {
   GIOChannel* iochannel;
 
@@ -249,7 +247,7 @@ void gnet_uninitialize_windows_sockets(void)
 /* private utility functions */
 
 guint 
-__gnet_idle_add_full (GMainContext * context, gint priority,
+_gnet_idle_add_full (GMainContext * context, gint priority,
     GSourceFunc function, gpointer data, GDestroyNotify notify)
 {
   GSource *source;
@@ -271,7 +269,7 @@ __gnet_idle_add_full (GMainContext * context, gint priority,
 }
 
 guint
-__gnet_timeout_add_full (GMainContext * context, gint priority, guint interval,
+_gnet_timeout_add_full (GMainContext * context, gint priority, guint interval,
     GSourceFunc function, gpointer data, GDestroyNotify notify)
 {
   GSource *source;
@@ -293,7 +291,7 @@ __gnet_timeout_add_full (GMainContext * context, gint priority, guint interval,
 }
 
 guint
-__gnet_io_watch_add_full (GMainContext * context, gint priority,
+_gnet_io_watch_add_full (GMainContext * context, gint priority,
     GIOChannel * channel, GIOCondition condition, GIOFunc function,
     gpointer data, GDestroyNotify notify)
 {

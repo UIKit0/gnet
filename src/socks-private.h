@@ -23,32 +23,38 @@
 #include "gnet-private.h"
 
 struct socks4_h {
-	guint8  vn;
-	guint8  cd;
-	guint16 dport;
-	guint32 dip;
-	guint8  userid;
+  guint8  vn;
+  guint8  cd;
+  guint16 dport;
+  guint32 dip;
+  guint8  userid;
 };
 
 struct socks5_h {
-	guint8  vn;
-	guint8  cd;
-	guint8  rsv;
-	guint8  atyp;	
-	guint32 dip;
-	guint16 dport;
+  guint8  vn;
+  guint8  cd;
+  guint8  rsv;
+  guint8  atyp;	
+  guint32 dip;
+  guint16 dport;
 };
 
-GTcpSocket* gnet_private_socks_tcp_socket_new (const GInetAddr* addr);
+/* SOCKS client */
 
-GTcpSocketNewAsyncID
-gnet_private_socks_tcp_socket_new_async (const GInetAddr* addr, 
-					 GTcpSocketNewAsyncFunc func,
-					 gpointer data);
+GTcpSocket          * _gnet_socks_tcp_socket_new (const GInetAddr* addr);
 
-GTcpSocket* gnet_private_socks_tcp_socket_server_new (gint port);
-GTcpSocket* gnet_private_socks_tcp_socket_server_accept (GTcpSocket* s);
-void gnet_private_socks_tcp_socket_server_accept_async (GTcpSocket* s, 
-							GTcpSocketAcceptFunc accept_func, 
-							gpointer user_data);
+GTcpSocketNewAsyncID  _gnet_socks_tcp_socket_new_async      (const GInetAddr        * addr, 
+                                                             GTcpSocketNewAsyncFunc   func,
+                                                             gpointer                 data);
+
+/* SOCKS server */
+
+GTcpSocket * _gnet_socks_tcp_socket_server_new (gint port);
+
+GTcpSocket * _gnet_socks_tcp_socket_server_accept (GTcpSocket * s);
+
+void         _gnet_socks_tcp_socket_server_accept_async (GTcpSocket           * s, 
+                                                         GTcpSocketAcceptFunc   accept_func, 
+                                                         gpointer               user_data);
+
 #endif /* _GNET_SOCKS_PRIVATE_H */
