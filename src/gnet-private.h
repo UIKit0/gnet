@@ -530,6 +530,9 @@ guint   _gnet_io_watch_add_full (GMainContext  * context,
                                  gpointer        data,
                                  GDestroyNotify  notify);
 
+/* will do nothing if source_id is 0 (unlike g_source_remove()) */
+void    _gnet_source_remove     (GMainContext * context, guint source_id);
+
 G_END_DECLS
 
 #endif /* _GNET_PRIVATE_H */

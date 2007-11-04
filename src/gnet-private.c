@@ -253,8 +253,10 @@ _gnet_idle_add_full (GMainContext * context, gint priority,
   GSource *source;
   guint id;
   
-  g_return_val_if_fail (context != NULL, 0);
   g_return_val_if_fail (function != NULL, 0);
+
+  if (context == NULL)
+    context = g_main_context_default ();
 
   source = g_idle_source_new ();
 
@@ -275,8 +277,10 @@ _gnet_timeout_add_full (GMainContext * context, gint priority, guint interval,
   GSource *source;
   guint id;
   
-  g_return_val_if_fail (context != NULL, 0);
   g_return_val_if_fail (function != NULL, 0);
+
+  if (context == NULL)
+    context = g_main_context_default ();
 
   source = g_timeout_source_new (interval);
 
@@ -298,9 +302,11 @@ _gnet_io_watch_add_full (GMainContext * context, gint priority,
   GSource *source;
   guint id;
   
-  g_return_val_if_fail (context != NULL, 0);
   g_return_val_if_fail (channel != NULL, 0);
   g_return_val_if_fail (condition != 0, 0);
+
+  if (context == NULL)
+    context = g_main_context_default ();
 
   source = g_io_create_watch (channel, condition);
 
@@ -313,5 +319,23 @@ _gnet_io_watch_add_full (GMainContext * context, gint priority,
   g_source_unref (source);
 
   return id;
+}
+
+void
+_gnet_source_remove (GMainContext * context, guint source_id)
+{
+  if (source_id != 0) {
+    GSource *source;
+
+    if (context == NULL)
+      context = g_main_context_default ();
+
+    source = g_main_context_find_source_by_id (context, source_id);
+
+    if (source)
+      g_source_destroy (source);
+    /* else g_warning ("Trying to remove source %u from main context %p, "
+        "but it doesn't exist!", source_id, context); */
+  }
 }
 

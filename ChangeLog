@@ -1,5 +1,14 @@
 2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/gnet-private.c: (_gnet_idle_add_full), (_gnet_timeout_add_full),
+	  (_gnet_io_watch_add_full), (_gnet_source_remove):
+	* src/gnet-private.h:
+	  Add private _gnet_source_remove() to remove a source by id from a
+	  certain main context. Also accept NULL as context for the other
+	  functions in place of the default main context.
+
+2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* doc/gnet-sections.txt:
 	* src/conn.c: (gnet_conn_new_socket), (gnet_conn_set_main_context),
 	  (gnet_conn_connect):
