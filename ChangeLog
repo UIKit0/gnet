@@ -1,5 +1,12 @@
 2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/inetaddr.c: (gnet_inetaddr_new_list_async_cancel),
+	  (gnet_inetaddr_get_name_async_cancel):
+	* src/tcp.c: (gnet_tcp_socket_new_async_cancel):
+	  Remove sources from correct main context.
+
+2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/gnet-private.c: (_gnet_idle_add_full), (_gnet_timeout_add_full),
 	  (_gnet_io_watch_add_full), (_gnet_source_remove):
 	* src/gnet-private.h:

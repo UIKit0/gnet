@@ -726,7 +726,7 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) id;
 
   if (state->connect_watch)
-    g_source_remove(state->connect_watch);
+    _gnet_source_remove (state->context, state->connect_watch);
   if (state->iochannel)
     g_io_channel_unref (state->iochannel);
   gnet_tcp_socket_delete (state->socket);

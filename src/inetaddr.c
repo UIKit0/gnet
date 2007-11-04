@@ -1163,7 +1163,7 @@ gnet_inetaddr_new_list_async_cancel (GInetAddrNewListAsyncID id)
   /* Check if the thread has finished and a reply is pending.  If a
    * reply is pending, cancel it and delete state. */
   if (state->source) {
-    g_source_remove (state->source);
+    _gnet_source_remove (state->context, state->source);
 
     ialist_free (state->ias);
 
@@ -1539,7 +1539,7 @@ gnet_inetaddr_get_name_async_cancel (GInetAddrGetNameAsyncID id)
    * reply is pending, cancel it and delete state. */
   if (state->source) {
     g_free (state->name);
-    g_source_remove (state->source);
+    _gnet_source_remove (state->context, state->source);
     gnet_inetaddr_delete (state->ia);
     if (state->notify)
       state->notify (state->data);
