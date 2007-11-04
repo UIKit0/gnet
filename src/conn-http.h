@@ -1,6 +1,6 @@
 /* GNet - Networking library
  * Copyright (C) 2000-2004  David Helder
- * Copyright (C) 2004       Tim-Philipp Müller
+ * Copyright (C) 2004       Tim-Philipp MÃ¼ller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public

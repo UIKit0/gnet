@@ -1,5 +1,11 @@
 2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn-http.c:
+	* src/conn-http.h:
+	  UTF-8-ise.
+
+2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/conn.c: (ADD_WATCH), (REMOVE_WATCH), (gnet_conn_disconnect),
 	  (conn_check_read_queue), (gnet_conn_timeout):
 	  Use the configured main context (if any) to hook up or remove
