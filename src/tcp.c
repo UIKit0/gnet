@@ -56,6 +56,10 @@ typedef struct _GTcpSocketConnectState
 
   GTcpSocketConnectAsyncFunc func;
   gpointer                   data;
+  GDestroyNotify             notify;
+
+  GMainContext             * context; /* we hold a ref */
+  gint                       priority;
 } GTcpSocketConnectState;
 
 /**
@@ -100,6 +104,67 @@ gnet_tcp_socket_connect (const gchar* hostname, gint port)
 
 
 /**
+ *  gnet_tcp_socket_connect_async_full
+ *  @hostname: host name
+ *  @port: port
+ *  @func: callback function
+ *  @data: data to pass to @func on callback
+ *  @notify: function to call to free @data, or NULL
+ *  @context: the #GMainContext to use for notifications, or NULL for the
+ *      default GLib main context.  If in doubt, pass NULL.
+ *  @priority: the priority with which to schedule notifications in the
+ *      main context, e.g. #G_PRIORITY_DEFAULT or #G_PRIORITY_HIGH.
+ *
+ *  Asynchronously creates a #GTcpSocket and connects to
+ *  @hostname:@port.  The callback is called when the connection is
+ *  made or an error occurs.  The callback will not be called during
+ *  the call to this function.
+ *
+ *  Returns: the ID of the connection; NULL on failure.  The ID can be
+ *  used with gnet_tcp_socket_connect_async_cancel() to cancel the
+ *  connection.
+ *
+ *  Since: 2.0.8
+ **/
+GTcpSocketConnectAsyncID
+gnet_tcp_socket_connect_async_full (const gchar * hostname, gint port, 
+    GTcpSocketConnectAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
+{
+  GTcpSocketConnectState* state;
+
+  g_return_val_if_fail (hostname != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  if (context == NULL)
+    context = g_main_context_default ();
+
+  state = g_new0 (GTcpSocketConnectState, 1);
+
+  state->func = func;
+  state->data = data;
+  state->notify = notify;
+  state->context = g_main_context_ref (context);
+  state->priority = priority;
+
+  state->inetaddr_id = gnet_inetaddr_new_list_async_full (hostname, port,
+      gnet_tcp_socket_connect_inetaddr_cb, state, (GDestroyNotify) NULL,
+      state->context, priority);
+
+  /* On failure, gnet_inetaddr_new_list_async_full() returns NULL.  It will
+   * not call the callback before it returns. */
+  if (state->inetaddr_id == NULL) {
+    if (state->notify)
+      state->notify (state->data);
+    g_main_context_unref (state->context);
+    g_free (state);
+    return NULL;
+  }
+
+  return state;
+}
+
+/**
  *  gnet_tcp_socket_connect_async
  *  @hostname: host name
  *  @port: port
@@ -117,37 +182,19 @@ gnet_tcp_socket_connect (const gchar* hostname, gint port)
  *
  **/
 GTcpSocketConnectAsyncID
-gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
-			       GTcpSocketConnectAsyncFunc func, 
-			       gpointer data)
+gnet_tcp_socket_connect_async (const gchar * hostname, gint port, 
+    GTcpSocketConnectAsyncFunc func, gpointer data)
 {
-  GTcpSocketConnectState* state;
+  GTcpSocketConnectAsyncID async_id;
 
-  g_return_val_if_fail(hostname != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
+  g_return_val_if_fail (hostname != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
 
-  state = g_new0(GTcpSocketConnectState, 1);
+  async_id = gnet_tcp_socket_connect_async_full (hostname, port, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
 
-  state->func = func;
-  state->data = data;
-
-  state->inetaddr_id = 
-    gnet_inetaddr_new_list_async (hostname, port,  
-				  gnet_tcp_socket_connect_inetaddr_cb,
-				  state);
-
-  /* On failure, gnet_inetaddr_new_list_async() returns NULL.  It will
-     not call the callback before it returns. */
-  if (state->inetaddr_id == NULL)
-    {
-      g_free (state);
-      return NULL;
-    }
-
-  return state;
+  return async_id;
 }
-
-
 
 static void
 gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
@@ -156,8 +203,6 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 
   if (ia_list != NULL) /* Success */
     {
-      g_assert (ia_list);
-
       state->inetaddr_id = NULL;
       state->ia_list = ia_list;
       state->ia_next = ia_list;
@@ -170,9 +215,10 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 	  ia = (GInetAddr*) state->ia_next->data;
 	  state->ia_next = state->ia_next->next;
 
-	  tcp_id = gnet_tcp_socket_new_async (ia, 
-					      gnet_tcp_socket_connect_tcp_cb, 
-					      state);
+	  tcp_id = gnet_tcp_socket_new_async_full (ia,
+              gnet_tcp_socket_connect_tcp_cb, state, (GDestroyNotify) NULL,
+              state->context, state->priority);
+
 	  if (tcp_id)	/* Success */
 	    {
 	      state->tcp_id = tcp_id;
@@ -187,6 +233,7 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 		     state->data);
       state->in_callback = FALSE;
 
+      /* FIXME: don't abuse _cancel() as free function for the state */
       gnet_tcp_socket_connect_async_cancel (state);
     }
   else /* Failure */
@@ -196,6 +243,7 @@ gnet_tcp_socket_connect_inetaddr_cb (GList* ia_list, gpointer data)
 		     state->data);
       state->in_callback = FALSE;
 
+      /* FIXME: don't abuse _cancel() as free function for the state */
       gnet_tcp_socket_connect_async_cancel (state);
     }
 }
@@ -217,6 +265,7 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, gpointer data)
       (*state->func)(socket, GTCP_SOCKET_CONNECT_ASYNC_STATUS_OK, state->data);
       state->in_callback = FALSE;
 
+      /* FIXME: don't abuse _cancel() as free function for the state */
       gnet_tcp_socket_connect_async_cancel (state);
 
       return;
@@ -233,9 +282,10 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, gpointer data)
       ia = (GInetAddr*) state->ia_next->data;
       state->ia_next = state->ia_next->next;
 
-      tcp_id = gnet_tcp_socket_new_async (ia, 
-					  gnet_tcp_socket_connect_tcp_cb, 
-					  state);
+      tcp_id = gnet_tcp_socket_new_async_full (ia,
+          gnet_tcp_socket_connect_tcp_cb, state, (GDestroyNotify) NULL,
+          state->context, state->priority);
+
       if (tcp_id)	/* Success */
 	{
 	  state->tcp_id = tcp_id;
@@ -248,6 +298,7 @@ gnet_tcp_socket_connect_tcp_cb (GTcpSocket* socket, gpointer data)
   (*state->func)(NULL, GTCP_SOCKET_CONNECT_ASYNC_STATUS_TCP_ERROR, state->data);
   state->in_callback = FALSE;
 
+  /* FIXME: don't abuse _cancel() as free function for the state */
   gnet_tcp_socket_connect_async_cancel (state);
 }
 
@@ -285,6 +336,11 @@ gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id)
 
   if (state->tcp_id)
       gnet_tcp_socket_new_async_cancel (state->tcp_id);
+
+  if (state->notify)
+    state->notify (state->data);
+
+  g_main_context_unref (state->context);
 
   g_free (state);
 }

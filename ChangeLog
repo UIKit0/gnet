@@ -1,5 +1,16 @@
 2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/tcp.c: (gnet_tcp_socket_connect),
+	  (gnet_tcp_socket_connect_async_full),
+	  (gnet_tcp_socket_connect_async),
+	  (gnet_tcp_socket_connect_inetaddr_cb),
+	  (gnet_tcp_socket_connect_tcp_cb),
+	  (gnet_tcp_socket_connect_async_cancel):
+	* src/tcp.h: (GTcpSocketConnectAsyncFunc):
+	  API: add gnet_tcp_socket_connect_async_full().
+
+2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/socks-private.h:
 	* src/socks-private.c: (_gnet_socks_tcp_socket_new), (SocksAsyncData),
 	  (socks_async_cb), (_gnet_socks_tcp_socket_new_async_full),

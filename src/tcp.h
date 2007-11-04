@@ -138,16 +138,25 @@ typedef enum {
  *  Callback for gnet_tcp_socket_connect_async().
  *
  **/
-typedef void (*GTcpSocketConnectAsyncFunc)(GTcpSocket* socket, 
-					   GTcpSocketConnectAsyncStatus status, 
-					   gpointer data);
+typedef void (*GTcpSocketConnectAsyncFunc) (GTcpSocket                   * socket, 
+                                            GTcpSocketConnectAsyncStatus   status, 
+                                            gpointer                       data);
 
 
-GTcpSocketConnectAsyncID
-gnet_tcp_socket_connect_async (const gchar* hostname, gint port, 
-			       GTcpSocketConnectAsyncFunc func, 
-			       gpointer data);
-void gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
+GTcpSocketConnectAsyncID  gnet_tcp_socket_connect_async      (const gchar              * hostname,
+                                                              gint                       port, 
+                                                              GTcpSocketConnectAsyncFunc func, 
+                                                              gpointer                   data);
+
+GTcpSocketConnectAsyncID  gnet_tcp_socket_connect_async_full (const gchar              * hostname,
+                                                              gint                       port, 
+                                                              GTcpSocketConnectAsyncFunc func,
+                                                              gpointer                   data,
+                                                              GDestroyNotify             notify,
+                                                              GMainContext             * context,
+                                                              gint                       priority);
+
+void                      gnet_tcp_socket_connect_async_cancel (GTcpSocketConnectAsyncID id);
 
 /* ********** */
 
