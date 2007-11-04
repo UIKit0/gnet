@@ -26,28 +26,36 @@
 #include <memory.h> /* required for windows */
 #include <string.h> /* needed for g_memmove/memmove */
 
+#include "gnet-private.h"
 
 #define IS_CONNECTED(C)  ((C)->socket != NULL)
 #define BUFFER_LEN	 1024
 
+/* FIXME: these macros are horrid, get rid of them */
 #define IS_WATCHING(C, FLAG) (((C)->watch_flags & (FLAG))?TRUE:FALSE)
 
 #define ADD_WATCH(C, FLAG)	do {			\
   if (!IS_WATCHING(C,FLAG)) 	{			\
     (C)->watch_flags |= (FLAG);				\
     if ((C)->iochannel) {				\
-      if ((C)->watch) g_source_remove ((C)->watch);	\
-      (C)->watch = g_io_add_watch ((C)->iochannel, (C)->watch_flags, async_cb, (C)); \
+      if ((C)->watch)					\
+        _gnet_source_remove ((C)->context, (C)->watch);	\
+      (C)->watch = _gnet_io_watch_add_full ((C)->context,\
+          G_PRIORITY_DEFAULT, (C)->iochannel,		\
+          (C)->watch_flags, async_cb, (C), NULL);	\
  }}} while (0)
 
 #define REMOVE_WATCH(C, FLAG)	do {			\
   if (IS_WATCHING(C,FLAG)) 	{			\
     (C)->watch_flags &= ~(FLAG);			\
     if ((C)->iochannel) {				\
-      if ((C)->watch) g_source_remove ((C)->watch);	\
-      (C)->watch = (C)->watch_flags ? g_io_add_watch ((C)->iochannel, \
-                                                      (C)->watch_flags, \
-                                                      async_cb, (C)) : 0; \
+      if ((C)->watch)					\
+        _gnet_source_remove ((C)->context, (C)->watch);	\
+        (C)->watch = 0;					\
+      if ((C)->watch_flags != 0)			\
+        (C)->watch = _gnet_io_watch_add_full ((C)->context, \
+            G_PRIORITY_DEFAULT, (C)->iochannel,		\
+            (C)->watch_flags, async_cb, (C), NULL);	\
  }}} while (0)
 
 #define UNSET_WATCH (C, FLAG)
@@ -477,7 +485,7 @@ gnet_conn_disconnect (GConn* conn)
 
   if (conn->watch)
     {
-      g_source_remove (conn->watch);
+      _gnet_source_remove (conn->context, conn->watch);
       conn->watch = 0;
     }
   conn->watch_flags = 0;
@@ -525,13 +533,13 @@ gnet_conn_disconnect (GConn* conn)
   conn->read_eof = FALSE;
   if (conn->process_buffer_timeout)
     {
-      g_source_remove (conn->process_buffer_timeout);
+      _gnet_source_remove (conn->context, conn->process_buffer_timeout);
       conn->process_buffer_timeout = 0;
     }
 
   if (conn->timer)
     {
-      g_source_remove (conn->timer);
+      _gnet_source_remove (conn->context, conn->timer);
       conn->timer = 0;
     }
 }
@@ -763,18 +771,14 @@ conn_check_read_queue (GConn* conn)
      OPTIMIZATION: There may be reads in the queue that cannot be
      processed given the data we have and we would need to read in
      more data.  We watch IO_IN in this case.  */
-  if ((conn->bytes_read && bytes_processable(conn) > 0) || conn->read_eof)
-    {
-      conn->process_buffer_timeout = 
-	g_timeout_add (0, process_read_buffer_cb, conn);
-    }
-
+  if ((conn->bytes_read && bytes_processable(conn) > 0) || conn->read_eof) {
+    conn->process_buffer_timeout = _gnet_timeout_add_full (conn->context,
+        G_PRIORITY_DEFAULT, 0, process_read_buffer_cb, conn, NULL);
+  } else {
   /* Otherwise, if there is no read watch, set one, so we can read
-     more bytes */
-  else
-    {
-      ADD_WATCH(conn, G_IO_IN);
-    }
+   * more bytes */
+    ADD_WATCH(conn, G_IO_IN);
+  }
 }
 
 
@@ -1358,19 +1362,18 @@ gnet_conn_set_watch_writable (GConn* conn, gboolean enable)
 void
 gnet_conn_timeout (GConn* conn, guint timeout)
 {
-  g_return_if_fail (conn);
+  g_return_if_fail (conn != NULL);
 
-  if (conn->timer)
-    {
-      g_source_remove (conn->timer);
-      conn->timer = 0;
-    }
+  if (conn->timer) {
+    _gnet_source_remove (conn->context, conn->timer);
+    conn->timer = 0;
+  }
 
-  if (timeout)
-    {
-      g_return_if_fail (conn->func);
-      conn->timer = g_timeout_add (timeout, conn_timeout_cb, conn);
-    }
+  if (timeout) {
+    g_return_if_fail (conn->func != NULL);
+    conn->timer = _gnet_timeout_add_full (conn->context, G_PRIORITY_DEFAULT,
+        timeout, conn_timeout_cb, conn, (GDestroyNotify) NULL);
+  }
 }
 
 
