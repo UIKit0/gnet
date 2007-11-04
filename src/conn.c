@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000  David Helder
  * Copyright (C) 2003-2004  Andrew Lanoix
+ * Copyright (C) 2007  Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -202,7 +203,41 @@ gnet_conn_new_socket (GTcpSocket* socket,
 
 }
 
+/**
+ *  gnet_conn_set_main_context
+ *  @conn: a #GConn
+ *  @context: a #GMainContext, or NULL to use the default GLib main context
+ *
+ *  Sets the GLib #GMainContext to use for asynchronous operations. You should
+ *  call this function right after you create @conn. You must not call this
+ *  function after the actual connection process has started.
+ *
+ *  You are very unlikely to ever need this function.
+ *
+ *  Returns: TRUE on success, FALSE on failure.
+ *
+ *  Since: 2.0.8
+ **/
+gboolean
+gnet_conn_set_main_context (GConn * conn, GMainContext * context)
+{
+  g_return_val_if_fail (conn != NULL, FALSE);
 
+  /* Must not be called if already connected or connection pending */
+  g_return_val_if_fail (conn->connect_id == 0 && conn->new_id == 0, FALSE);
+  g_return_val_if_fail (conn->socket == NULL, FALSE);
+
+  if (conn->context != context) {
+    if (conn->context)
+      g_main_context_unref (conn->context);
+    if (context)
+      conn->context = g_main_context_ref (context);
+    else
+      conn->context = NULL;
+  }
+
+  return TRUE;
+}
 
 /**
  *  gnet_conn_delete
@@ -324,30 +359,27 @@ gnet_conn_set_callback (GConn* conn, GConnFunc func, gpointer user_data)
  *
  **/
 void
-gnet_conn_connect (GConn* conn)
+gnet_conn_connect (GConn * conn)
 {
-  g_return_if_fail (conn);
-  g_return_if_fail (conn->func);
+  g_return_if_fail (conn != NULL);
+  g_return_if_fail (conn->func != NULL);
 
   /* Ignore if connected or connection pending */
-  if (conn->connect_id || conn->new_id || conn->socket)
+  if (conn->connect_id != 0 || conn->new_id != 0 || conn->socket != NULL)
     return;
 
   /* Make asynchronous connection */
-  if (conn->inetaddr)
-    {
-      conn->new_id = 
-	gnet_tcp_socket_new_async (conn->inetaddr, conn_new_cb, conn);
-    }
-  
-  else if (conn->hostname)
-    {
-      conn->connect_id = 
-	gnet_tcp_socket_connect_async (conn->hostname, conn->port, 
-				       conn_connect_cb, conn);
-    }
-  else
-    g_return_if_fail (FALSE);
+  if (conn->inetaddr) {
+    conn->new_id = gnet_tcp_socket_new_async_full (conn->inetaddr,
+        conn_new_cb, conn, (GDestroyNotify) NULL, conn->context,
+        G_PRIORITY_DEFAULT);
+  } else if (conn->hostname) {
+    conn->connect_id = gnet_tcp_socket_connect_async_full (conn->hostname,
+        conn->port, conn_connect_cb, conn, (GDestroyNotify) NULL,
+        conn->context, G_PRIORITY_DEFAULT);
+  } else {
+    g_return_if_reached ();
+  }
 }
 
 

@@ -97,6 +97,7 @@ GTcpSocketNewAsyncID
 GTcpSocketNewAsyncFunc
 gnet_tcp_socket_connect
 gnet_tcp_socket_connect_async
+gnet_tcp_socket_connect_async_full
 gnet_tcp_socket_connect_async_cancel
 gnet_tcp_socket_new
 gnet_tcp_socket_new_async
@@ -155,6 +156,7 @@ gnet_conn_delete
 gnet_conn_ref
 gnet_conn_unref
 gnet_conn_set_callback
+gnet_conn_set_main_context
 gnet_conn_connect
 gnet_conn_disconnect
 gnet_conn_is_connected

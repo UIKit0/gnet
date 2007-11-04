@@ -1,5 +1,13 @@
 2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* doc/gnet-sections.txt:
+	* src/conn.c: (gnet_conn_new_socket), (gnet_conn_set_main_context),
+	  (gnet_conn_connect):
+	* src/conn.h:
+	  API: add gnet_conn_set_main_context()
+
+2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/tcp.c: (gnet_tcp_socket_connect),
 	  (gnet_tcp_socket_connect_async_full),
 	  (gnet_tcp_socket_connect_async),

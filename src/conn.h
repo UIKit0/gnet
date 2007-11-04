@@ -25,11 +25,7 @@
 #include "tcp.h"
 #include "iochannel.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
+G_BEGIN_DECLS
 
 /**
  *   GConnEventType
@@ -194,6 +190,8 @@ struct _GConn
   GConnFunc			func;
   gpointer			user_data;
 
+  GMainContext                * context;
+  gint                          priority;
 };
 
 
@@ -215,6 +213,7 @@ void	   gnet_conn_unref (GConn* conn);
 void	   gnet_conn_set_callback (GConn* conn, 
 				   GConnFunc func, gpointer user_data);
 
+gboolean   gnet_conn_set_main_context (GConn * conn, GMainContext * context);
 
 /* ********** */
 
@@ -240,9 +239,6 @@ void	   gnet_conn_set_watch_error    (GConn* conn, gboolean enable);
 
 void	   gnet_conn_timeout (GConn* conn, guint timeout);
 
-
-#ifdef __cplusplus
-}
-#endif				/* __cplusplus */
+G_END_DECLS
 
 #endif /* _GNET_CONN_H */
