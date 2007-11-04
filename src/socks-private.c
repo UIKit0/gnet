@@ -66,26 +66,58 @@ _gnet_socks_tcp_socket_new (const GInetAddr* addr)
 
 /* **************************************** */
 
-struct async_data
+typedef struct
 {
   GInetAddr* addr;
   GTcpSocketNewAsyncFunc func;
   gpointer data;
-};
+  GDestroyNotify notify;
+} SocksAsyncData;
 
-static void async_cb (GTcpSocket* socket, gpointer data);
+static void
+socks_async_cb (GTcpSocket* socket, gpointer data)
+{
+  SocksAsyncData *ad = (SocksAsyncData *) data;
+  
+  if (socket != NULL) {
+    int rv;
 
+    rv = socks_negotiate_connect (socket, ad->addr);
+    if (rv < 0)
+      goto error;
+
+    (ad->func) (socket, ad->data);
+
+    gnet_inetaddr_delete (ad->addr);
+    if (ad->notify)
+      ad->notify (ad->data);
+    g_free (ad);
+    return;
+  }
+
+error:
+  {
+    (ad->func) (NULL, ad->data);
+
+    gnet_tcp_socket_delete (socket);
+    gnet_inetaddr_delete (ad->addr);
+    if (ad->notify)
+      ad->notify (ad->data);
+    g_free (ad);
+  }
+}
 
 GTcpSocketNewAsyncID
-_gnet_socks_tcp_socket_new_async (const GInetAddr * addr,
-    GTcpSocketNewAsyncFunc func, gpointer data)
+_gnet_socks_tcp_socket_new_async_full (const GInetAddr * addr, 
+    GTcpSocketNewAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
 {
-  GTcpSocketNewAsyncID	async_id;
-  GInetAddr* 		ss_addr = NULL;
-  struct async_data*	ad;
+  GTcpSocketNewAsyncID async_id;
+  SocksAsyncData *ad;
+  GInetAddr *ss_addr = NULL;
 
-  g_return_val_if_fail(addr != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
+  g_return_val_if_fail (addr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
 
   /* Get SOCKS server */
   ss_addr = gnet_socks_get_server();
@@ -93,45 +125,35 @@ _gnet_socks_tcp_socket_new_async (const GInetAddr * addr,
     return NULL;
 
   /* Create data */
-  ad = g_new0(struct async_data, 1);
-  ad->addr = gnet_inetaddr_clone(addr);
+  ad = g_new0 (SocksAsyncData, 1);
+  ad->addr = gnet_inetaddr_clone (addr);
   ad->func = func;
   ad->data = data;
+  ad->notify = notify;
 
   /* Connect to SOCKS server */
-  async_id = gnet_tcp_socket_new_async_direct (ss_addr, async_cb, ad);
+  async_id = gnet_tcp_socket_new_async_direct_full (ss_addr, socks_async_cb,
+      ad, (GDestroyNotify) NULL, context, priority);
+
   gnet_inetaddr_delete (ss_addr);
+
   return async_id;  /* async_id might be NULL */
 }
 
-
-
-static void
-async_cb (GTcpSocket* socket, gpointer data)
+GTcpSocketNewAsyncID
+_gnet_socks_tcp_socket_new_async (const GInetAddr * addr,
+    GTcpSocketNewAsyncFunc func, gpointer data)
 {
-  struct async_data* ad = (struct async_data*) data;
-  
-  if (socket != NULL)
-    {
-      int rv;
+  GTcpSocketNewAsyncID async_id;
 
-      rv = socks_negotiate_connect (socket, ad->addr);
-      if (rv < 0)
-	goto error;
+  g_return_val_if_fail (addr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
 
-      (ad->func)(socket, ad->data);
-      gnet_inetaddr_delete (ad->addr);
-      g_free (ad);
-      return;
-    }
+  async_id = _gnet_socks_tcp_socket_new_async_full (addr, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
 
- error:
-  (ad->func)(NULL, ad->data);
-  gnet_inetaddr_delete (ad->addr);
-  g_free (ad);
+  return async_id;
 }
-
-
 
 /* **************************************** */
 

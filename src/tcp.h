@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000-3  David Helder
  * Copyright (C) 2000  Andrew Lanoix
+ * Copyright (C) 2007  Tim-Philipp Müller <tim at centricular dot net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -172,21 +173,32 @@ typedef struct _GTcpSocketAsyncState * GTcpSocketNewAsyncID;
  *  NULL if the connection failed.
  *
  **/
-typedef void (*GTcpSocketNewAsyncFunc)(GTcpSocket* socket, 
-				       gpointer data);
+typedef void (*GTcpSocketNewAsyncFunc) (GTcpSocket * socket, gpointer data);
+
+GTcpSocketNewAsyncID  gnet_tcp_socket_new_async             (const GInetAddr        * addr, 
+                                                             GTcpSocketNewAsyncFunc   func,
+                                                             gpointer                 data);
+
+GTcpSocketNewAsyncID  gnet_tcp_socket_new_async_full        (const GInetAddr        * addr, 
+                                                             GTcpSocketNewAsyncFunc   func,
+                                                             gpointer                 data,
+                                                             GDestroyNotify           notify,
+                                                             GMainContext           * context,
+                                                             gint                     priority);
+
+void                  gnet_tcp_socket_new_async_cancel      (GTcpSocketNewAsyncID id);
 
 
-GTcpSocketNewAsyncID 
-gnet_tcp_socket_new_async (const GInetAddr* addr, 
-			   GTcpSocketNewAsyncFunc func,
-			   gpointer data);
-void gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id);
+GTcpSocketNewAsyncID  gnet_tcp_socket_new_async_direct      (const GInetAddr        * addr,
+                                                             GTcpSocketNewAsyncFunc   func,
+                                                             gpointer                 data);
 
-
-GTcpSocketNewAsyncID
-gnet_tcp_socket_new_async_direct (const GInetAddr* addr, 
-				  GTcpSocketNewAsyncFunc func,
-				  gpointer data);
+GTcpSocketNewAsyncID  gnet_tcp_socket_new_async_direct_full (const GInetAddr        * addr, 
+                                                             GTcpSocketNewAsyncFunc   func,
+                                                             gpointer                 data,
+                                                             GDestroyNotify           notify,
+                                                             GMainContext           * context,
+                                                             gint                     priority);
 
 
 /* ********** */

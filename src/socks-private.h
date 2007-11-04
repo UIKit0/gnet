@@ -47,6 +47,13 @@ GTcpSocketNewAsyncID  _gnet_socks_tcp_socket_new_async      (const GInetAddr    
                                                              GTcpSocketNewAsyncFunc   func,
                                                              gpointer                 data);
 
+GTcpSocketNewAsyncID  _gnet_socks_tcp_socket_new_async_full (const GInetAddr        * addr, 
+                                                             GTcpSocketNewAsyncFunc   func,
+                                                             gpointer                 data,
+                                                             GDestroyNotify           notify,
+                                                             GMainContext           * context,
+                                                             gint                     priority);
+
 /* SOCKS server */
 
 GTcpSocket * _gnet_socks_tcp_socket_server_new (gint port);

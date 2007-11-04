@@ -1,6 +1,7 @@
 /* GNet - Networking library
  * Copyright (C) 2000-2003  David Helder
  * Copyright (C) 2000-2004  Andrew Lanoix
+ * Copyright (C) 2007       Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -32,12 +33,15 @@ typedef struct _GTcpSocketAsyncState
   GTcpSocket             * socket;
   GTcpSocketNewAsyncFunc   func;
   gpointer                 data;
+  GDestroyNotify           notify;
   gint                     flags;
   GIOChannel             * iochannel;
   guint                    connect_watch;
 #ifdef GNET_WIN32
   gint                     errorcode;
 #endif
+  GMainContext           * context; /* we hold a ref */
+  gint                     priority;
 } GTcpSocketAsyncState;
 
 typedef struct _GTcpSocketConnectState
@@ -364,9 +368,54 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
 
 /* **************************************** */
 
+/**
+ *  gnet_tcp_socket_new_async_full:
+ *  @addr: address
+ *  @func: callback function
+ *  @data: data to pass to @func on callback
+ *  @notify: function to call to free @data, or NULL
+ *  @context: the #GMainContext to use for notifications, or NULL for the
+ *      default GLib main context.  If in doubt, pass NULL.
+ *  @priority: the priority with which to schedule notifications in the
+ *      main context, e.g. #G_PRIORITY_DEFAULT or #G_PRIORITY_HIGH.
+ *
+ *  Asynchronously creates a #GTcpSocket and connects to @addr.  The
+ *  callback is called once the connection is made or an error occurs.
+ *  The callback will not be called during the call to this function.
+ *
+ *  SOCKS is used if SOCKS is enabled.  The SOCKS negotiation will
+ *  block.
+ *
+ *  Returns: the ID of the connection; NULL on failure.  The ID can be
+ *  used with gnet_tcp_socket_new_async_cancel() to cancel the
+ *  connection.
+ *
+ *  Since: 2.0.8
+ **/
+GTcpSocketNewAsyncID
+gnet_tcp_socket_new_async_full (const GInetAddr * addr,
+    GTcpSocketNewAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
+{
+  GTcpSocketNewAsyncID async_id;
+
+  g_return_val_if_fail (addr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  /* Use SOCKS if enabled, otherwise, connect directly to the address */
+  if (gnet_socks_get_enabled()) {
+    async_id = _gnet_socks_tcp_socket_new_async_full (addr, func, data,
+        notify, context, priority);
+  } else {
+    async_id = gnet_tcp_socket_new_async_direct_full (addr, func, data,
+        notify, context, priority);
+  }
+
+  return async_id;
+}
 
 /**
- *  gnet_tcp_socket_new_async
+ *  gnet_tcp_socket_new_async:
  *  @addr: address
  *  @func: callback function
  *  @data: data to pass to @func on callback
@@ -384,27 +433,27 @@ gnet_tcp_socket_new_direct (const GInetAddr* addr)
  *
  **/
 GTcpSocketNewAsyncID
-gnet_tcp_socket_new_async (const GInetAddr* addr, 
-			   GTcpSocketNewAsyncFunc func,
-			   gpointer data)
+gnet_tcp_socket_new_async (const GInetAddr * addr, GTcpSocketNewAsyncFunc func,
+    gpointer data)
 {
   g_return_val_if_fail (addr != NULL, NULL);
   g_return_val_if_fail (func != NULL, NULL);
 
-  /* Use SOCKS if enabled */
-  if (gnet_socks_get_enabled())
-    return _gnet_socks_tcp_socket_new_async (addr, func, data);
-
-  /* Otherwise, connect directly to the address */
-  return gnet_tcp_socket_new_async_direct (addr, func, data);
+  return gnet_tcp_socket_new_async_full (addr, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
 }
 
 
 /**
- *  gnet_tcp_socket_new_async_direct
+ *  gnet_tcp_socket_new_async_direct_full:
  *  @addr: address
  *  @func: callback function
  *  @data: data to pass to @func on callback
+ *  @notify: function to call to free @data, or NULL
+ *  @context: the #GMainContext to use for notifications, or NULL for the
+ *      default GLib main context.  If in doubt, pass NULL.
+ *  @priority: the priority with which to schedule notifications in the
+ *      main context, e.g. #G_PRIORITY_DEFAULT or #G_PRIORITY_HIGH.
  *
  *  Asynchronously creates a #GTcpSocket and connects to @addr without
  *  using SOCKS.  Most users should use gnet_tcp_socket_new_async()
@@ -416,11 +465,12 @@ gnet_tcp_socket_new_async (const GInetAddr* addr,
  *  used with gnet_tcp_socket_new_async_cancel() to cancel the
  *  connection.
  *
+ *  Since: 2.0.8
  **/
 GTcpSocketNewAsyncID
-gnet_tcp_socket_new_async_direct (const GInetAddr* addr, 
-				  GTcpSocketNewAsyncFunc func,
-				  gpointer data)
+gnet_tcp_socket_new_async_direct_full (const GInetAddr * addr, 
+    GTcpSocketNewAsyncFunc func, gpointer data, GDestroyNotify notify,
+    GMainContext * context, gint priority)
 {
   SOCKET		sockfd;
 #ifndef GNET_WIN32
@@ -432,8 +482,11 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
   GTcpSocketAsyncState* state;
   gint			status;
 
-  g_return_val_if_fail(addr != NULL, NULL);
-  g_return_val_if_fail(func != NULL, NULL);
+  g_return_val_if_fail (addr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  if (context == NULL)
+    context = g_main_context_default ();
 
   /* Create socket */
   sockfd = socket(GNET_INETADDR_FAMILY(addr), SOCK_STREAM, 0);
@@ -492,21 +545,55 @@ gnet_tcp_socket_new_async_direct (const GInetAddr* addr,
      callback before we returned from this function.  */
 
   /* Wait for the connection */
-  state = g_new0(GTcpSocketAsyncState, 1);
+  state = g_new0 (GTcpSocketAsyncState, 1);
   state->socket = s;
   state->func = func;
   state->data = data;
+  state->notify = notify;
 #ifndef GNET_WIN32
   state->flags = flags;
 #endif
-  state->iochannel = gnet_tcp_socket_get_io_channel (s);
-  g_io_channel_ref (state->iochannel);
-  state->connect_watch = g_io_add_watch(state->iochannel,
-					GNET_ANY_IO_CONDITION,
-					gnet_tcp_socket_new_async_cb, 
-					state);
+  state->iochannel = g_io_channel_ref (gnet_tcp_socket_get_io_channel (s));
+  state->context = g_main_context_ref (context);
+  state->priority = priority;
+
+  state->connect_watch = _gnet_io_watch_add_full (state->context,
+      state->priority, state->iochannel, GNET_ANY_IO_CONDITION,
+      gnet_tcp_socket_new_async_cb, state, NULL);
 
   return state;
+}
+
+/**
+ *  gnet_tcp_socket_new_async_direct
+ *  @addr: address
+ *  @func: callback function
+ *  @data: data to pass to @func on callback
+ *
+ *  Asynchronously creates a #GTcpSocket and connects to @addr without
+ *  using SOCKS.  Most users should use gnet_tcp_socket_new_async()
+ *  instead.  The callback is called once the connection is made or an
+ *  error occurs.  The callback will not be called during the call to
+ *  this function.
+ *
+ *  Returns: the ID of the connection; NULL on failure.  The ID can be
+ *  used with gnet_tcp_socket_new_async_cancel() to cancel the
+ *  connection.
+ *
+ **/
+GTcpSocketNewAsyncID
+gnet_tcp_socket_new_async_direct (const GInetAddr * addr, 
+    GTcpSocketNewAsyncFunc func, gpointer data)
+{
+  GTcpSocketNewAsyncID async_id;
+
+  g_return_val_if_fail (addr != NULL, NULL);
+  g_return_val_if_fail (func != NULL, NULL);
+
+  async_id = gnet_tcp_socket_new_async_direct_full (addr, func, data,
+      (GDestroyNotify) NULL, NULL, G_PRIORITY_DEFAULT);
+
+  return async_id;
 }
 
 
@@ -518,11 +605,6 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
   GTcpSocketAsyncState* state = (GTcpSocketAsyncState*) data;
   socklen_t len;
   gint error;
-
-  g_source_remove (state->connect_watch);
-  state->connect_watch = 0;
-  g_io_channel_unref (state->iochannel);
-  state->iochannel = NULL;
 
   if (!((condition & G_IO_IN) || (condition & G_IO_OUT)))
     goto error;
@@ -550,17 +632,27 @@ gnet_tcp_socket_new_async_cb (GIOChannel* iochannel,
 #endif
 
   /* Success */
-  (*state->func)(state->socket, state->data);
-  g_free(state);
-  return FALSE;
+  (*state->func) (state->socket, state->data);
 
-  /* Error */
- error:
-  (*state->func)(NULL, state->data);
-  gnet_tcp_socket_delete (state->socket);
-  g_free(state);
+done:
 
-  return FALSE;
+  state->connect_watch = 0;
+  g_io_channel_unref (state->iochannel);
+  g_main_context_unref (state->context);
+  /* FIXME: is notify really useful in this context? */
+  if (state->notify)
+    state->notify (state->data);
+  memset (state, 0xaa, sizeof (*state));
+  g_free (state);
+  return FALSE; /* don't call us again */
+
+/* ERROR */
+error:
+  {
+    (*state->func) (NULL, state->data);
+    gnet_tcp_socket_delete (state->socket);
+    goto done;
+  }
 }
 
 
@@ -582,6 +674,9 @@ gnet_tcp_socket_new_async_cancel (GTcpSocketNewAsyncID id)
   if (state->iochannel)
     g_io_channel_unref (state->iochannel);
   gnet_tcp_socket_delete (state->socket);
+  g_main_context_unref (state->context);
+  if (state->notify)
+    state->notify (state->data);
   g_free (state);
 }
 

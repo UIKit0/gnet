@@ -1,3 +1,23 @@
+2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/socks-private.h:
+	* src/socks-private.c: (_gnet_socks_tcp_socket_new), (SocksAsyncData),
+	  (socks_async_cb), (_gnet_socks_tcp_socket_new_async_full),
+	  (_gnet_socks_tcp_socket_new_async):
+	  Add _gnet_socks_tcp_socket_new_async_full() variant that takes a
+	  caller-specified GMainContext.
+
+	* doc/gnet-sections.txt:
+	* src/tcp.h: (GTcpSocketNewAsyncFunc):
+	* src/tcp.c: (gnet_tcp_socket_new_direct),
+	  (gnet_tcp_socket_new_async_full), (gnet_tcp_socket_new_async),
+	  (gnet_tcp_socket_new_async_direct_full),
+	  (gnet_tcp_socket_new_async_direct), (gnet_tcp_socket_new_async_cb),
+	  (gnet_tcp_socket_new_async_cancel):
+	  API: add gnet_tcp_socket_new_async_direct_full()
+	  API: add gnet_tcp_socket_new_direct_full()
+	  Add _full() variants that take a caller-specified GMainContext.
+
 2007-11-03  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/gnet-private.c: (_gnet_create_ipv4_listen_socket),
