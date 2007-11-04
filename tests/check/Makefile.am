@@ -176,6 +176,7 @@ check_PROGRAMS = \
 	$(NETWORK_CHECKS)  \
 	gnet/gnetabi       \
 	gnet/gnetbase64    \
+	gnet/gnetconn      \
 	gnet/gnetconnhttp  \
 	gnet/gnethash      \
 	gnet/gnetinetaddr  \
