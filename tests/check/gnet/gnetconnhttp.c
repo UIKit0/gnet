@@ -124,7 +124,8 @@ GNET_START_TEST (test_conn_http_run)
    * to the same host */
   const gchar *uris[] = { "http://www.google.com", "http://www.google.co.uk",
       "http://www.google.de", "http://www.google.fr", "http://www.google.es",
-      "http://www.gnome.org", "http://www.amazon.com", "http://sf.net" };
+      "http://www.gnome.org", "http://www.amazon.com", "http://sf.net",
+      "http://news.bbc.co.uk" };
   guint i;
 
   for (i = 0; i < G_N_ELEMENTS (uris); ++i) {
