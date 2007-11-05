@@ -95,7 +95,9 @@ struct _GConnHttp
 	gchar               *buffer;
 	gsize                bufalloc; /* number of bytes allocated             */
 	gsize                buflen;   /* number of bytes of data in the buffer */
-	
+
+	GMainContext        *context;  /* we hold a reference, may be NULL */
+
 	GMainLoop           *loop;
 
 	guint                refcount; /* used internally only, if >1 we are in the callback */
@@ -1319,7 +1321,8 @@ gnet_conn_http_ia_cb (GInetAddr *ia, GConnHttp *conn)
 			                                G_STRLOC);
 			return;
 		}
-		
+
+		gnet_conn_set_main_context (conn->conn, conn->context);
 		gnet_conn_timeout(conn->conn, conn->timeout); 
 		gnet_conn_connect(conn->conn);
 		gnet_conn_set_watch_error(conn->conn, TRUE);
@@ -1369,10 +1372,9 @@ gnet_conn_http_run_async (GConnHttp        *conn,
 
 	if (conn->ia == NULL)
 	{
-		conn->ia_id = gnet_inetaddr_new_async (conn->uri->hostname,
-		                                       conn->uri->port,
-		                                       (GInetAddrNewAsyncFunc) gnet_conn_http_ia_cb,
-		                                       conn);
+		conn->ia_id = gnet_inetaddr_new_async_full (conn->uri->hostname,
+		    conn->uri->port, (GInetAddrNewAsyncFunc) gnet_conn_http_ia_cb,
+		    conn, (GDestroyNotify) NULL, conn->context, G_PRIORITY_DEFAULT);
 	}
 	else
 	{
@@ -1390,14 +1392,16 @@ gnet_conn_http_run_async (GConnHttp        *conn,
  *   return once the operation has finished and either an error has 
  *   occured, or the data has been received in full.
  *
- *   This function will run its own main loop in the default GLib main context,
- *   which means that if your application is based on Gtk+ or sets up GLib
- *   timeouts or idle callbacks, it is possible that those callback functions
- *   are invoked while you are waiting for gnet_conn_http_run() to return. This
- *   means you shouldn't make assumptions about any state you set up before
- *   calling this function, because it might have been changed again from
- *   within a callback in the mean time (if this can happen or not depends on
- *   your callbacks and what they do of course).
+ *   This function will run its own main loop in the default GLib main context
+ *   (or the user-specified main context, if one was specified with
+ *   gnet_conn_http_set_main_context()), which means that if your application
+ *   is based on Gtk+ or sets up GLib timeouts or idle callbacks, it is
+ *   possible that those callback functions are invoked while you are waiting
+ *   for gnet_conn_http_run() to return. This means you shouldn't make
+ *   assumptions about any state you set up before calling this function,
+ *   because it might have been changed again from within a callback in the
+ *   mean time (if this can happen or not depends on your callbacks and what
+ *   they do of course).
  *
  *   Returns: TRUE if no error occured before connecting
  *
@@ -1421,10 +1425,9 @@ gnet_conn_http_run (GConnHttp        *conn,
 
 	if (conn->ia == NULL)
 	{
-		conn->ia_id = gnet_inetaddr_new_async (conn->uri->hostname,
-		                                       conn->uri->port,
-		                                       (GInetAddrNewAsyncFunc) gnet_conn_http_ia_cb,
-		                                       conn);
+		conn->ia_id = gnet_inetaddr_new_async_full (conn->uri->hostname,
+		    conn->uri->port, (GInetAddrNewAsyncFunc) gnet_conn_http_ia_cb,
+		    conn, (GDestroyNotify) NULL, conn->context, G_PRIORITY_DEFAULT);
 	}
 	else
 	{
@@ -1560,6 +1563,9 @@ gnet_conn_http_delete_internal (GConnHttp *conn)
 	
 	if (conn->loop)
 		g_main_loop_unref(conn->loop);
+
+	if (conn->context)
+		g_main_context_unref (conn->context);
 
 	g_free(conn->post_data);
 
@@ -1721,5 +1727,39 @@ gnet_http_get (const gchar  *url,
 	gnet_conn_http_delete(conn);
 
 	return ret;
+}
+
+/**
+ *  gnet_conn_http_set_main_context:
+ *  @conn: a #GConnHttp
+ *  @context: a #GMainContext, or NULL to use the default GLib main context
+ *
+ *  Sets the GLib #GMainContext to use for asynchronous operations. You should
+ *  call this function right after you create @conn. You must not call this
+ *  function after the actual connection process has started.
+ *
+ *  You are very unlikely to ever need this function.
+ *
+ *  Returns: TRUE on success, FALSE on failure.
+ *
+ *  Since: 2.0.8
+ **/
+gboolean
+gnet_conn_http_set_main_context (GConnHttp * conn, GMainContext * context)
+{
+  g_return_val_if_fail (conn != NULL, FALSE);
+  g_return_val_if_fail (GNET_IS_CONN_HTTP (conn), FALSE);
+  g_return_val_if_fail (conn->conn == NULL && conn->ia_id == NULL, FALSE);
+
+  if (conn->context != context) {
+    if (conn->context)
+      g_main_context_unref (conn->context);
+    if (context)
+      conn->context = g_main_context_ref (context);
+    else
+      conn->context = NULL;
+  }
+
+  return TRUE;
 }
 

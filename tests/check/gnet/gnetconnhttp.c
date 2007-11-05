@@ -607,25 +607,39 @@ icy_async_cb (GConnHttp * http, GConnHttpEvent * event, gpointer data)
   }
 }
 
+/* we test that we accept an ICY response too here, and that things work
+ * okay if we specify our own main context */
 GNET_START_TEST (test_shoutcast)
 {
+  GMainContext *ctx;
   const gchar *uri;
   GConnHttp *httpconn;
   GMainLoop *loop;
 
-  loop = g_main_loop_new (NULL, FALSE);
+  ctx = g_main_context_new ();
+  loop = g_main_loop_new (ctx, FALSE);
+
+  fail_if (g_main_context_pending (ctx));
+  fail_if (g_main_context_pending (NULL));
 
   httpconn = gnet_conn_http_new ();
   uri = "http://mp3-gr-128.smgradio.com:80/";
   /* uri = "http://mp3-vr-128.smgradio.com:80/"; */
   fail_unless (gnet_conn_http_set_uri (httpconn, uri));
+  fail_unless (gnet_conn_http_set_main_context (httpconn, ctx));
+
+  fail_if (g_main_context_pending (ctx));
+  fail_if (g_main_context_pending (NULL));
 
   gnet_conn_http_run_async (httpconn, icy_async_cb, loop);
 
   g_main_loop_run (loop);
   gnet_conn_http_delete (httpconn);
 
+  fail_if (g_main_context_pending (NULL));
+
   g_main_loop_unref (loop);
+  g_main_context_unref (ctx);
 }
 GNET_END_TEST;
 

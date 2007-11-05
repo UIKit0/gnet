@@ -1,5 +1,19 @@
 2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* doc/gnet-sections.txt:
+	* src/conn-http.c: (gnet_conn_http_ia_cb), (gnet_conn_http_run_async),
+	  (gnet_conn_http_run), (gnet_conn_http_delete_internal),
+	  (gnet_http_get), (gnet_conn_http_set_main_context):
+	* src/conn-http.h: (GConnHttpFunc):
+	  API: add gnet_conn_http_set_main_context().
+	  Make GConnHttp work with a custom main context.
+
+	* tests/check/gnet/gnetconnhttp.c: (icy_async_cb), (test_shoutcast):
+	  Use our own main context in the shoutcast unit test, to make sure
+	  GConnHttp works fine with a custom main context.
+
+2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/conn-http.c: (gnet_conn_http_conn_recv_response):
 	  Check the server response for a supported protocol and emit an
 	  error event if a non-supported protocol is encountered; also emit

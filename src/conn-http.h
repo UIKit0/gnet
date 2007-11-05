@@ -365,6 +365,9 @@ gboolean         gnet_conn_http_set_method         (GConnHttp        *conn,
                                                     const gchar      *post_data,
                                                     gsize             post_data_len);
 
+gboolean         gnet_conn_http_set_main_context   (GConnHttp        *conn,
+                                                    GMainContext     *context);
+
 void             gnet_conn_http_run_async          (GConnHttp        *conn,
                                                     GConnHttpFunc     func,
                                                     gpointer          user_data);
