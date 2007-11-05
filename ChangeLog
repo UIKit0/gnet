@@ -1,5 +1,20 @@
 2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn-http.c: (gnet_conn_http_conn_recv_response):
+	  Check the server response for a supported protocol and emit an
+	  error event if a non-supported protocol is encountered; also emit
+	  an error if the response is malformed.
+
+	* src/conn-http.h:
+	  Fix typo in docs.
+
+	* tests/check/gnet/gnetconnhttp.c: (icy_async_cb),
+	  (test_shoutcast), (gnetconnhttp_suite):
+	  Add unit test to make sure we accept shoutcast (ICY) server responses
+	  in addition to HTTP server responses.
+
+2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/socks-private.c: (_gnet_socks_tcp_socket_server_accept):
 	* src/tcp.c: (gnet_tcp_socket_ref), (gnet_tcp_socket_unref_internal),
 	  (gnet_tcp_socket_unref), (tcp_socket_server_accept_async_cb):

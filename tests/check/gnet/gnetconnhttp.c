@@ -553,6 +553,82 @@ GNET_START_TEST (test_get_binary)
 }
 GNET_END_TEST;
 
+static void
+icy_async_cb (GConnHttp * http, GConnHttpEvent * event, gpointer data)
+{
+  GMainLoop *loop = (GMainLoop *) data;
+
+  if (verbose) {
+    g_printerr ("%s: event->type = %u\n", __FUNCTION__, event->type);
+    http_dbg_callback (http, event, NULL);
+  }
+
+  switch (event->type) {
+    case GNET_CONN_HTTP_RESPONSE: {
+      GConnHttpEventResponse *r = (GConnHttpEventResponse *) event;
+
+      if (r->response_code == 200) {
+        gboolean found_icy_name = FALSE;
+        gchar **keys, **vals;
+
+        keys = r->header_fields;
+        vals = r->header_values;
+        while (keys != NULL && *keys != NULL) {
+          if (verbose)
+            g_printerr ("%s: %20s: %s\n", __FUNCTION__, *keys, *vals);
+          if (strcmp (*keys, "icy-name") == 0) {
+            g_print ("icy name: %s\n", *vals);
+            found_icy_name = TRUE;
+            break;
+          }
+          ++keys;
+          ++vals;
+        }
+        fail_unless (found_icy_name);
+      }
+      /* wait for data */
+      break;
+    }
+    case GNET_CONN_HTTP_RESOLVED:
+    case GNET_CONN_HTTP_REDIRECT:
+    case GNET_CONN_HTTP_CONNECTED:
+      break;
+    case GNET_CONN_HTTP_DATA_COMPLETE:
+    case GNET_CONN_HTTP_DATA_PARTIAL:
+      g_main_loop_quit (loop);
+      break;
+    case GNET_CONN_HTTP_ERROR:
+    case GNET_CONN_HTTP_TIMEOUT:
+      g_print ("shoutcast test: timeout or error");
+      g_main_loop_quit (loop);
+      break;
+    default:
+      g_error ("Unexpected GConnHttpEventType value %d\n", event->type);
+  }
+}
+
+GNET_START_TEST (test_shoutcast)
+{
+  const gchar *uri;
+  GConnHttp *httpconn;
+  GMainLoop *loop;
+
+  loop = g_main_loop_new (NULL, FALSE);
+
+  httpconn = gnet_conn_http_new ();
+  uri = "http://mp3-gr-128.smgradio.com:80/";
+  /* uri = "http://mp3-vr-128.smgradio.com:80/"; */
+  fail_unless (gnet_conn_http_set_uri (httpconn, uri));
+
+  gnet_conn_http_run_async (httpconn, icy_async_cb, loop);
+
+  g_main_loop_run (loop);
+  gnet_conn_http_delete (httpconn);
+
+  g_main_loop_unref (loop);
+}
+GNET_END_TEST;
+
 static Suite *
 gnetconnhttp_suite (void)
 {
@@ -578,6 +654,7 @@ gnetconnhttp_suite (void)
     tcase_add_test (tc_chain, test_conn_http_post);
     tcase_add_test (tc_chain, test_gnet_http_get);
     tcase_add_test (tc_chain, test_get_binary);
+    tcase_add_test (tc_chain, test_shoutcast);
   }
 
   tcase_add_test (tc_chain, test_conn_http_post_local);

@@ -215,7 +215,7 @@ struct _GConnHttpEventRedirect
  *  GConnHttpEventResponse
  *  @response_code: response code from the HTTP server (e.g. 200 or 404)
  *  @header_fields: array of header field strings, NULL-terminated
- *  @header_values: array of header value strings, NULL-termintaed
+ *  @header_values: array of header value strings, NULL-terminated
  *
  *  Emitted when the server has sent a response and response headers.
  *

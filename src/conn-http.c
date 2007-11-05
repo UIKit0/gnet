@@ -943,35 +943,53 @@ gnet_conn_http_conn_recv_response (GConnHttp *conn, gchar *data, gsize len)
 		gnet_conn_readline(conn->conn);
 		return;
 	}
-	
-	start = strchr(data, ' ');
-	if (start)
-	{
-		conn->response_code = (guint) strtol(start+1, &endptr, 10);
 
-		/* read first header */
-		gnet_conn_readline(conn->conn);
+	/* This should be a response line */
+	if (g_ascii_strncasecmp (data, "ICY ", 4) != 0 &&
+	    g_ascii_strncasecmp (data, "HTTP/", 5) != 0) {
+		goto unsupported_proto;
+	}
+
+	start = strchr (data, ' ');
+	if (start == NULL)
+		goto malformed_response;
+
+	/* FIXME: should we also check the HTTP protocol version? */
+	conn->response_code = (guint) strtol(start+1, &endptr, 10);
+
+	/* read first header */
+	gnet_conn_readline(conn->conn);
 		
-		/* may we continue the POST request? */
-		if (conn->response_code == 100 && conn->method == GNET_CONN_HTTP_METHOD_POST)
-		{
-			gnet_conn_write(conn->conn, conn->post_data, conn->post_data_len + conn->post_data_term_len);
-			conn->status = STATUS_SENT_REQUEST; /* expecting the response for the content next */
-			return;
-		}
-
-		/* note: redirection is handled after we have all headers */
-
-		conn->status = STATUS_RECV_HEADERS; /* response ok - expect headers next */
+	/* may we continue the POST request? */
+	if (conn->response_code == 100 && conn->method == GNET_CONN_HTTP_METHOD_POST)
+	{
+		gnet_conn_write(conn->conn, conn->post_data, conn->post_data_len + conn->post_data_term_len);
+		conn->status = STATUS_SENT_REQUEST; /* expecting the response for the content next */
 		return;
 	}
-	
-	/* invalid response or problems parsing */
-	conn->response_code = 0; 
-	conn->status = STATUS_ERROR;
-		
-	/* can't continue, so let's emit event right away */
-	gnet_conn_http_conn_parse_response_headers(conn);
+
+	/* note: redirection is handled after we have all headers */
+
+	conn->status = STATUS_RECV_HEADERS; /* response ok - expect headers next */
+	return;
+
+/* ERRORS */
+unsupported_proto:
+  {
+    conn->response_code = 0; 
+    gnet_conn_http_emit_error_event (conn,
+        GNET_CONN_HTTP_ERROR_PROTOCOL_UNSUPPORTED, 
+        "Not a HTTP or ICY protocol response: '%s'", data);
+    return;
+  }
+malformed_response:
+  {
+    conn->response_code = 0; 
+    gnet_conn_http_emit_error_event (conn,
+        GNET_CONN_HTTP_ERROR_PROTOCOL_UNSUPPORTED, 
+        "Malformed response: '%s'", data);
+    return;
+  }
 }
 
 /***************************************************************************
