@@ -360,6 +360,7 @@ _gnet_socks_tcp_socket_server_accept (GTcpSocket* socket)
     return NULL;
 
   /* The client socket is the server socket */
+  /* FIXME: this code should be in tcp.c, just like the struct definition */
   s = g_new0(GTcpSocket, 1);
   s->sockfd = socket->sockfd;
   GNET_SOCKADDR_IN(s->sa).sin_addr.s_addr = s5h.dip;

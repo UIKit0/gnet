@@ -1,5 +1,12 @@
 2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/socks-private.c: (_gnet_socks_tcp_socket_server_accept):
+	* src/tcp.c: (gnet_tcp_socket_ref), (gnet_tcp_socket_unref_internal),
+	  (gnet_tcp_socket_unref), (tcp_socket_server_accept_async_cb):
+	  Do atomic refcounting for GTcpSocket (however much sense that makes).
+
+2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* tests/check/Makefile.am:
 	* tests/check/gnet/gnetmisc.c: (test_versions), (gnetmisc_suite),
 	  (gnetmisc):

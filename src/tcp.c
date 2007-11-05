@@ -766,9 +766,27 @@ gnet_tcp_socket_ref (GTcpSocket* socket)
 {
   g_return_if_fail (socket != NULL);
 
-  ++socket->ref_count;
+  g_atomic_int_inc (&socket->ref_count);
 }
 
+/* returns TRUE if the socket has been deleted (useful for io watches) */
+static gboolean
+gnet_tcp_socket_unref_internal (GTcpSocket * socket)
+{
+  if (!g_atomic_int_dec_and_test (&socket->ref_count))
+    return FALSE;
+
+  if (socket->accept_watch)
+    g_source_remove (socket->accept_watch);
+
+  GNET_CLOSE_SOCKET (socket->sockfd); /* Don't care if this fails... */
+
+  if (socket->iochannel)
+    g_io_channel_unref (socket->iochannel);
+
+  g_free (socket);
+  return TRUE;
+}
 
 /**
  *  gnet_tcp_socket_unref
@@ -783,20 +801,7 @@ gnet_tcp_socket_unref (GTcpSocket* socket)
 {
   g_return_if_fail (socket != NULL);
 
-  socket->ref_count--;
-
-  if (socket->ref_count == 0)
-    {
-      if (socket->accept_watch)
-	g_source_remove (socket->accept_watch);
-
-      GNET_CLOSE_SOCKET(socket->sockfd);/* Don't care if this fails... */
-
-      if (socket->iochannel)
-	g_io_channel_unref (socket->iochannel);
-
-      g_free(socket);
-    }
+  gnet_tcp_socket_unref_internal (socket);
 }
 
 
@@ -1379,7 +1384,6 @@ tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition
   if (condition & G_IO_IN)
     {
       GTcpSocket* client;
-      gboolean destroyed = FALSE;
 
       client = gnet_tcp_socket_server_accept_nonblock (server);
       if (!client) 
@@ -1390,10 +1394,7 @@ tcp_socket_server_accept_async_cb (GIOChannel* iochannel, GIOCondition condition
 
       (server->accept_func)(server, client, server->accept_data);
 
-      if (server->ref_count == 1)
-	destroyed = TRUE;
-      gnet_tcp_socket_unref (server);
-      if (destroyed || !server->accept_watch)
+      if (gnet_tcp_socket_unref_internal (server) || !server->accept_watch)
 	return FALSE;
     }
   else
