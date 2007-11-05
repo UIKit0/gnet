@@ -218,7 +218,8 @@ gnet_conn_new_socket (GTcpSocket* socket,
  *
  *  Sets the GLib #GMainContext to use for asynchronous operations. You should
  *  call this function right after you create @conn. You must not call this
- *  function after the actual connection process has started.
+ *  function after the actual connection process has started or watches have
+ *  been set up (e.g. for reading, writing or errors).
  *
  *  You are very unlikely to ever need this function.
  *
@@ -231,9 +232,10 @@ gnet_conn_set_main_context (GConn * conn, GMainContext * context)
 {
   g_return_val_if_fail (conn != NULL, FALSE);
 
-  /* Must not be called if already connected or connection pending */
+  /* Must not be called if already connected or connection pending; should
+   * be okay if the socket is connected but no watches set up yet */
   g_return_val_if_fail (conn->connect_id == 0 && conn->new_id == 0, FALSE);
-  g_return_val_if_fail (conn->socket == NULL, FALSE);
+  g_return_val_if_fail (conn->watch == 0, FALSE);
 
   if (conn->context != context) {
     if (conn->context)

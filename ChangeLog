@@ -1,3 +1,14 @@
+2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn.c: (gnet_conn_set_main_context):
+	  Also allow setting a context when we already have a socket
+	  as long as no watches have been set up yet.
+
+	* tests/check/gnet/gnetconn.c: (conn_fail_cb), (conn_cb),
+	  (test_conn_new), (test_conn_new_inetaddr), (test_conn_new_socket),
+	  (gnetconn_suite):
+	  Some more unit tests.
+
 2007-11-04  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* tests/check/Makefile.am:

@@ -26,6 +26,20 @@
 #include <string.h>
 
 static void
+conn_fail_cb (GConn * conn, GConnEvent * event, gpointer data)
+{
+  GMainLoop *loop = (GMainLoop *) data;
+
+  /* the domain doesn't exist, it should give us an error */
+  fail_unless_equals_int (event->type, GNET_CONN_ERROR);
+
+  /* test that we can delete the connection in the callback */
+  gnet_conn_delete (conn);
+
+  g_main_loop_quit (loop);
+}
+
+static void
 conn_cb (GConn * conn, GConnEvent * event, gpointer data)
 {
   GMainLoop *loop = (GMainLoop *) data;
@@ -47,7 +61,7 @@ conn_cb (GConn * conn, GConnEvent * event, gpointer data)
       gnet_conn_read (conn);
       break;
     case GNET_CONN_READ:
-      g_print ("Read %u bytes\n", event->length);
+      g_print (".");
       /* write (1, event->buffer, event->length); */
       gnet_conn_read (conn);
       break;
@@ -58,7 +72,7 @@ conn_cb (GConn * conn, GConnEvent * event, gpointer data)
       g_error ("WRITABLE event shouldn't have happened without explicit watch");
       break;
     case GNET_CONN_CLOSE:
-      g_print ("Connection closed by server.\n");
+      g_print ("\nConnection closed by server.\n");
       g_main_loop_quit (loop);
       break;
     case GNET_CONN_TIMEOUT:
@@ -75,7 +89,7 @@ conn_cb (GConn * conn, GConnEvent * event, gpointer data)
   }
 }
 
-GNET_START_TEST (test_conn)
+GNET_START_TEST (test_conn_new)
 {
   GMainContext *ctx;
   GMainLoop *loop;
@@ -101,22 +115,134 @@ GNET_START_TEST (test_conn)
   gnet_conn_delete (conn);
 
   fail_if (g_main_context_pending (NULL));
+  fail_if (g_main_context_pending (ctx));
+
+  /* test failure case too */
+  conn = gnet_conn_new ("does.not.exist", 80, conn_fail_cb, loop);
+  /* should always succeed, we're not doing any lookups or connecting yet */
+  fail_unless (conn != NULL);
+
+  gnet_conn_timeout (conn, 5 * 1000);
+  gnet_conn_set_main_context (conn, ctx);
+
+  fail_if (g_main_context_pending (ctx));
+
+  gnet_conn_connect (conn);
+
+  g_main_loop_run (loop);
+
+  /* we've deleted the connection in the callback */
+
+  g_main_context_unref (ctx);
+  g_main_loop_unref (loop);
+
+#ifdef HAVE_VALGRIND
+  if (RUNNING_ON_VALGRIND) {
+    /* give DNS lookup thread a chance to finish, it's not stuck in a blocking
+     * operation, so a short sleep should be fine; valgrind will think the
+     * thread was leaked if we don't do this */
+    g_usleep (1 * G_USEC_PER_SEC);
+  }
+#endif
+}
+GNET_END_TEST;
+
+GNET_START_TEST (test_conn_new_inetaddr)
+{
+  GMainContext *ctx;
+  GMainLoop *loop;
+  GInetAddr *ia;
+  GConn *conn;
+
+  ia = gnet_inetaddr_new ("www.sun.com", 80);
+
+  /* it's not fatal if this doesn't work, it's not what we're testing here */
+  if (ia == NULL) {
+    g_print ("Failed to resolve www.sun.com, skipping test.\n");
+    return;
+  }
+
+  ctx = g_main_context_new ();
+  loop = g_main_loop_new (ctx, FALSE);
+
+  ASSERT_CRITICAL (fail_if (gnet_conn_new_inetaddr (NULL, conn_cb, loop)));
+
+  conn = gnet_conn_new_inetaddr (ia, conn_cb, loop);
+  gnet_inetaddr_unref (ia);
+
+  /* should always succeed, we're not connecting yet */
+  fail_unless (conn != NULL);
+
+  gnet_conn_timeout (conn, 5 * 1000);
+  gnet_conn_set_main_context (conn, ctx);
+
+  fail_if (g_main_context_pending (ctx));
+
+  gnet_conn_connect (conn);
+
+  g_main_loop_run (loop);
+
+  gnet_conn_disconnect (conn);
+  gnet_conn_delete (conn);
+
+  fail_if (g_main_context_pending (NULL));
 
   g_main_context_unref (ctx);
   g_main_loop_unref (loop);
 }
 GNET_END_TEST;
 
-#if 0
-#ifdef HAVE_VALGRIND
-  if (RUNNING_ON_VALGRIND) {
-    g_print ("Sleeping for a while to let cancelled threads finish ...\n");
-    /* sleep a while to give any cancelled threads a chance to quit, otherwise
-     * valgrind will think the threads were leaked */
-    g_usleep (60 * G_USEC_PER_SEC);
+GNET_START_TEST (test_conn_new_socket)
+{
+  GMainContext *ctx;
+  GMainLoop *loop;
+  GTcpSocket *socket;
+  GConn *conn;
+
+  socket = gnet_tcp_socket_connect ("www.oracle.com", 80);
+
+  /* it's not fatal if this doesn't work, it's not what we're testing here */
+  if (socket == NULL) {
+    g_print ("Failed to resolve+connect to www.oracole.com, skipping test.\n");
+    return;
   }
-#endif
-#endif
+
+  ctx = g_main_context_new ();
+  loop = g_main_loop_new (ctx, FALSE);
+
+  ASSERT_CRITICAL (fail_if (gnet_conn_new_socket (NULL, conn_cb, loop)));
+  
+  conn = gnet_conn_new_socket (socket, conn_cb, loop);
+
+  /* conn took ownership of the socket */
+  socket = NULL;
+
+  /* should always succeed */
+  fail_unless (conn != NULL);
+
+  gnet_conn_timeout (conn, 5 * 1000);
+  gnet_conn_set_main_context (conn, ctx);
+
+  fail_if (g_main_context_pending (ctx));
+
+  /* we're already connected, so do fake call to callback so request is sent */
+  {
+    GConnEvent event = { GNET_CONN_CONNECT, NULL, 0 };
+
+    conn_cb (conn, &event, loop);
+  }
+
+  g_main_loop_run (loop);
+
+  gnet_conn_disconnect (conn);
+  gnet_conn_delete (conn);
+
+  fail_if (g_main_context_pending (NULL));
+
+  g_main_context_unref (ctx);
+  g_main_loop_unref (loop);
+}
+GNET_END_TEST;
 
 static Suite *
 gnetconn_suite (void)
@@ -129,7 +255,9 @@ gnetconn_suite (void)
   suite_add_tcase (s, tc_chain);
 
 #ifdef GNET_ENABLE_NETWORK_TESTS
-  tcase_add_test (tc_chain, test_conn);
+  tcase_add_test (tc_chain, test_conn_new);
+  tcase_add_test (tc_chain, test_conn_new_inetaddr);
+  tcase_add_test (tc_chain, test_conn_new_socket);
 #endif
 
   return s;
