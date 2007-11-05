@@ -1,5 +1,13 @@
 2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* tests/check/Makefile.am:
+	* tests/check/gnet/gnetmisc.c: (test_versions), (gnetmisc_suite),
+	  (gnetmisc):
+	  Unit tests for compile-time version macros and run-time version
+	  reporting.
+
+2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/conn.c: (gnet_conn_set_main_context):
 	  Also allow setting a context when we already have a socket
 	  as long as no watches have been set up yet.

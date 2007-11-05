@@ -181,6 +181,7 @@ check_PROGRAMS = \
 	gnet/gnethash      \
 	gnet/gnetinetaddr  \
 	gnet/gnetipv6      \
+	gnet/gnetmisc      \
 	gnet/gnetpack      \
 	gnet/gnetunpack    \
 	gnet/gneturi
