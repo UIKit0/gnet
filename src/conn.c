@@ -183,8 +183,8 @@ gnet_conn_new_inetaddr (const GInetAddr* inetaddr,
  *  @user_data: data to pass to @func on callbacks
  *
  *  Creates a #GConn.  The #GConn is created from the @socket.  The
- *  socket is callee owned - do not delete it.  The callback is called
- *  when events occur.
+ *  socket is callee owned - do not delete it (meaning: #GConn will take
+ *  ownership of the socket).  The callback is called when events occur.
  *
  *  Returns: a #GConn.
  *

@@ -240,7 +240,7 @@ struct _GMcastSocket
 struct _GTcpSocket
 {
   SOCKET sockfd;
-  guint ref_count;
+  gint ref_count; /* ATOMIC */
   GIOChannel* iochannel;
   struct sockaddr_storage sa;
   /* sa is remote host for clients, local host for servers */

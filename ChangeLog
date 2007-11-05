@@ -1,5 +1,14 @@
 2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/conn.c: (gnet_conn_new_socket):
+	  Improvie docs a bit.
+
+	* src/gnet-private.h:
+	  Change refcount field from guint to gint to avoid compiler
+	  warnings when using GLib's g_atomic_* macros.
+
+2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* doc/gnet-sections.txt:
 	* src/conn-http.c: (gnet_conn_http_ia_cb), (gnet_conn_http_run_async),
 	  (gnet_conn_http_run), (gnet_conn_http_delete_internal),
