@@ -6,6 +6,7 @@ Changes in GNet
 
 2.0.8 (unreleased)
 ------------------
+* GConnHttp is no longer marked as experimental
 * Fix major memory leak in GConnHttp
 * gnet_init() can safely be called
   more than once now

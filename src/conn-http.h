@@ -22,22 +22,11 @@
 #ifndef _GNET_CONN_HTTP_H
 #define _GNET_CONN_HTTP_H
 
-/*
-   This module is experimental, buggy, and unstable.  Use at your own
-   risk.  To use this module, define GNET_EXPERIMENTAL before
-   including gnet.h.
-*/
-#ifdef GNET_EXPERIMENTAL
-
-#include <glib.h>
-
 #include "conn.h"
 #include "uri.h"
 #include "inetaddr.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
 /**
  *   GConnHttpHeaderFlags
@@ -389,11 +378,6 @@ gboolean         gnet_http_get                     (const gchar      *url,
                                                     gsize            *length, 
                                                     guint            *response);
 
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* GNET_EXPERIMENTAL */
+G_END_DECLS
 
 #endif /* _GNET_CONN_HTTP_H */

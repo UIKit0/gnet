@@ -1,3 +1,10 @@
+2007-11-07  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* NEWS:
+	* src/conn-http.h:
+	  GConnHttp is no longer marked as experimental API (which doesn't
+	  mean that it's bug-free, of course).
+
 2007-11-05  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/conn.c: (gnet_conn_new_socket):
