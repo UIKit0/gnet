@@ -99,11 +99,137 @@ for ($i = 0; $i < 32; $i++)
 }
 */
 
+typedef struct {
+  const gchar *str;
+  guint len;
+} StringPart;
 
-/* our own ISSPACE.  ANSI isspace is locale dependent */
+#define DUP_STRING_PART(sp)  (sp.len > 0) ? g_strndup (sp.str, sp.len) : NULL
+
+/* our own ISSPACE.  ANSI isspace is locale dependent and g_ascii_isspace()
+ * does not recognise #10 as space */
 #define ISSPACE(C) (((C) >= 9 && (C) <= 13) || (C) == ' ')
 
+static gboolean
+gnet_uri_parse (const gchar * uri, StringPart * scheme, StringPart * userinfo,
+    StringPart * hostname, guint * port, StringPart * path,
+    StringPart * query, StringPart * fragment)
+{
+  const StringPart empty = { NULL, 0 };
+  const gchar *p, *temp;
 
+  *scheme = *userinfo = *hostname = *path = *query = *fragment = empty;
+  *port = 0;
+
+  /* Skip initial whitespaces */
+  p = uri;
+  while (*p && ISSPACE(*p))
+    ++p;
+
+  /* Error out if it's just a string of space */
+  if (*p == '\0')
+    return FALSE;
+
+  /* Scheme */
+  temp = p;
+  while (*p && *p != ':' && *p != '/' && *p != '?' && *p != '#')
+    ++p;
+  if (*p == ':') {
+    scheme->str = temp;
+    scheme->len = (guint) (p - temp);
+    ++p;
+  } else {
+    /* This char is NUL, /, ?, or # */
+    p = temp;
+  }
+
+  /* Authority */
+  if (*p == '/' && p[1] == '/') {
+    p += 2;
+
+    /* Userinfo */
+    temp = p;
+    while (*p && *p != '@' && *p != '/' ) /* Look for @ or / */
+      ++p;
+    if (*p == '@') { /* Found userinfo */
+      userinfo->str = temp;
+      userinfo->len = (guint) (p - temp);
+      ++p;
+    } else {        
+      p = temp;
+    }
+
+    /* Hostname */
+
+    /* Check for no hostname at all (e.g. file:// URIs) */
+    if (*p == '/')
+      goto path;
+
+    /* Check for IPv6 canonical hostname in brackets */
+    if (*p == '[') {
+      p++;  /* Skip [ */
+      temp = p;
+
+      while (*p && *p != ']')
+        ++p;
+
+      if ((p - temp) == 0)
+        return FALSE;
+
+      hostname->str = temp;
+      hostname->len = (guint) (p - temp);
+
+      if (*p)
+        ++p;  /* Skip ] (if there) */
+    } else {
+      temp = p;
+      while (*p && *p != '/' && *p != '?' && *p != '#' && *p != ':')
+        ++p;
+
+      if ((p - temp) == 0) 
+        return FALSE;
+
+      hostname->str = temp;
+      hostname->len = (guint) (p - temp);
+    }
+
+    /* Port */
+    if (*p == ':') {
+      for (++p; isdigit((int)*p); ++p)
+        *port = (*port) * 10 + (*p - '0');
+    }
+  }
+
+  /* Path (we are liberal and won't check if it starts with /) */
+
+path:
+
+  temp = p;
+  while (*p && *p != '?' && *p != '#')
+    ++p;
+  if (p != temp) {
+    path->str = temp;
+    path->len = (guint) (p - temp);
+  }
+
+  /* Query */
+  if (*p == '?') {
+    temp = p + 1;
+    while (*p && *p != '#')
+      ++p;
+    query->str = temp;
+    query->len = (guint) (p - temp);
+  }
+
+  /* Fragment */
+  if (*p == '#') {
+    ++p;
+    fragment->str = p;
+    fragment->len = strlen (p);
+  }
+
+  return TRUE;
+}
 
 /**
  *  gnet_uri_new
@@ -121,120 +247,28 @@ for ($i = 0; $i < 32; $i++)
  *  Returns: a new #GURI, or NULL if there was a failure.
  *
  **/
-GURI* 
-gnet_uri_new (const gchar* uri)
+GURI *
+gnet_uri_new (const gchar * uri)
 {
-  GURI* guri = NULL;
-  const gchar* p;
-  const gchar* temp;
+  StringPart scheme, usr, host, path, query, frag;
+  guint port;
+  GURI *guri;
 
-  g_return_val_if_fail (uri, NULL);
+  g_return_val_if_fail (uri != NULL, NULL);
 
-  /* Skip initial whitespace */
-  p = uri;
-  while (*p && ISSPACE((int)*p))
-    ++p;
-  if (!*p)	/* Error if it's just a string of space */
+  if (!gnet_uri_parse (uri, &scheme, &usr, &host, &port, &path, &query, &frag))
     return NULL;
 
-  guri = g_new0 (GURI, 1);
-
-  /* Scheme */
-  temp = p;
-  while (*p && *p != ':' && *p != '/' && *p != '?' && *p != '#')
-    ++p;
-  if (*p == ':')
-    {
-      guri->scheme = g_strndup (temp, p - temp);
-      ++p;
-    }
-  else	/* This char is NUL, /, ?, or # */
-    p = temp;
-
-  /* Authority */
-  if (*p == '/' && p[1] == '/')
-    {
-      p += 2;
-
-      /* Userinfo */
-      temp = p;
-      while (*p && *p != '@' && *p != '/' ) /* Look for @ or / */
-	++p;
-      if (*p == '@') /* Found userinfo */
-	{
-	  guri->userinfo = g_strndup (temp, p - temp);
-	  ++p;
-	}
-      else
-	p = temp;
-
-      /* Hostname */
-
-      /* Check for no hostname at all (e.g. file:// URIs) */ 
-      if (*p == '/')
-        goto path;
-
-      /* Check for IPv6 canonical hostname in brackets */
-      if (*p == '[')
-	{
-	  p++;  /* Skip [ */
-	  temp = p;
-	  while (*p && *p != ']') ++p;
-	  if ((p - temp) == 0)
-	    goto error;
-	  guri->hostname = g_strndup (temp, p - temp);
-	  if (*p)
-	    p++;	/* Skip ] (if there) */
-	}
-      else
-	{
-	  temp = p;
-	  while (*p && *p != '/' && *p != '?' && *p != '#' && *p != ':') ++p;
-	  if ((p - temp) == 0) 
-	    goto error;
-	  guri->hostname = g_strndup (temp, p - temp);
-	}
-
-      /* Port */
-      if (*p == ':')
-	{
-	  for (++p; isdigit((int)*p); ++p)
-	    guri->port = guri->port * 10 + (*p - '0');
-	}
-
-    }
-
-  /* Path (we are liberal and won't check if it starts with /) */
-
-path:
-
-  temp = p;
-  while (*p && *p != '?' && *p != '#')
-    ++p;
-  if (p != temp)
-    guri->path = g_strndup(temp, p - temp);
-
-  /* Query */
-  if (*p == '?')
-    {
-      temp = p + 1;
-      while (*p && *p != '#')
-        ++p;
-      guri->query = g_strndup (temp, p - temp);
-    }
-
-  /* Fragment */
-  if (*p == '#')
-    {
-      ++p;
-      guri->fragment = g_strdup (p);
-    }
+  guri = g_new (GURI, 1);
+  guri->scheme = DUP_STRING_PART (scheme);
+  guri->userinfo = DUP_STRING_PART (usr);
+  guri->hostname = DUP_STRING_PART (host);
+  guri->path = DUP_STRING_PART (path);
+  guri->query = DUP_STRING_PART (query);
+  guri->fragment = DUP_STRING_PART (frag);
+  guri->port = port;
 
   return guri;
-
- error:
-  gnet_uri_delete (guri);
-  return NULL;
 }
 
 

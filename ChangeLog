@@ -1,3 +1,9 @@
+2007-12-09  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/uri.c: (neednt_escape_table), (StringPart), (DUP_STRING_PART),
+	  (ISSPACE), (gnet_uri_parse), (gnet_uri_new):
+	  Split out URI parsing code.
+
 2007-11-07  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* NEWS:
