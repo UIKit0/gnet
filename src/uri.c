@@ -605,7 +605,11 @@ field_unescape (gchar* s)
       else
 	{
 	regular_copy:
-	  *dst = *src;
+	  /* micro-optimisation: a lot of URIs do not include escape
+	   * sequences. By testing the pointer addresses we can avoid
+	   * a lot of reading+writing of the same data */
+	  if (dst != src)
+	    *dst = *src;
 	}
     }
 

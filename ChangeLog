@@ -1,3 +1,10 @@
+2007-12-14  Tim-Philipp Müller  <tim at centricular dot net>
+
+	Patch by: Jeff Garzik <jeff at garzik org>.
+
+	* src/uri.c: (field_unescape):
+	  Micro-optimisation: avoid unnecessary read/writes.
+
 2007-12-09  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/uri.c: (neednt_escape_table), (StringPart), (DUP_STRING_PART),
