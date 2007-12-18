@@ -293,6 +293,7 @@ gnet_uri_set_query
 gnet_uri_set_fragment
 gnet_uri_hash
 gnet_uri_equal
+gnet_uri_parse_inplace
 </SECTION>
 
 <SECTION>

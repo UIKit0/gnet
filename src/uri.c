@@ -1,5 +1,6 @@
-/* GNet - Networking library
+/* GNet - Networking library URI parser
  * Copyright (C) 2000-2003  David Helder, David Bolcsfoldi, Eric Williams
+ * Copyright (C) 2007       Tim-Philipp Müller <tim centricular net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -227,6 +228,90 @@ path:
     fragment->str = p;
     fragment->len = strlen (p);
   }
+
+  return TRUE;
+}
+
+static gchar *
+parse_inplace_munge_string_part (StringPart * part)
+{
+  if (part->len == 0)
+    return NULL;
+  ((gchar*)part->str)[part->len] = '\0';
+  return (gchar *) part->str;
+}
+
+/**
+ *  gnet_uri_parse_inplace:
+ *  @guri: pointer to an uninitialised #GURI structure (usually on the stack)
+ *  @uri: a writable URI string (which will be modified by this function!)
+ *  @hostname: a preallocated array of size @len, into which the hostname will
+ *             be copied if the URI has a hostname. This array should live
+ *             as long as @guri may be used, since @guri might reference it.
+ *             You may pass NULL here if you know your URIs won't contain a
+ *             hostname field
+ *  @size: size of @hostname in bytes
+ *
+ *  This function parses an URI string very efficiently and without allocating
+ *  any memory on the heap. It does this by modifying the passed-in string
+ *  @uri and changing field separators into string terminators in place. The
+ *  result will then be put into the already-allocated and usually
+ *  uninitialised, GURI structure @guri.
+ *
+ *  Because the slash (') which separates the hostname from the path in an URI
+ *  is needed as the first character of the path, it cannot be turned into a
+ *  string terminator for the hostname. This makes it necessary for the caller
+ *  (ie. you) to pass in an array where the hostname can be put.
+ *
+ *  If the URI has been parsed successfully, the fields of the GURI structure
+ *  will either point into the given string @uri (or to @hostname in case of
+ *  the hostname field), or be NULL. No freeing or de-initialising of the
+ *  GURI structure is required.
+ *
+ *  The only gnet_uri_*() functions you are allowed to call with this URI
+ *  structure are gnet_uri_clone(), gnet_uri_equal(), gnet_uri_hash(),
+ *  gnet_uri_get_string() and gnet_uri_unescape() (the latter unescapes the
+ *  string fragments in place, so is safe to use here).
+ *
+ *  You must not call any other gnet_uri_*() functions with this GURI,
+ *  especially not any gnet_uri_set() functions.
+ *
+ *  Under normal circumstances, you should never need to use this function.
+ *  Use gnet_uri_new() instead.
+ *  
+ *  Returns: TRUE if @uri was parsed successfully and #GURI is usable,
+ *           or FALSE if there was a failure.
+ *
+ *  Since: 2.0.8
+ *
+ **/
+gboolean
+gnet_uri_parse_inplace (GURI * guri, gchar * uri, gchar * hostname, gsize len)
+{
+  StringPart scheme, usr, host, path, query, frag;
+  guint port;
+
+  if (!gnet_uri_parse (uri, &scheme, &usr, &host, &port, &path, &query, &frag))
+    return FALSE;
+
+  if (host.len >= len)
+    return FALSE;
+
+  if (host.len > 0) {
+    if (hostname == NULL)
+      return FALSE;
+
+    strncpy (hostname, host.str, host.len);
+    hostname[host.len] = '\0';
+  }
+
+  guri->scheme = parse_inplace_munge_string_part (&scheme);
+  guri->userinfo = parse_inplace_munge_string_part (&usr);
+  guri->hostname = (host.len > 0) ? hostname : NULL;
+  guri->path = parse_inplace_munge_string_part (&path);
+  guri->query = parse_inplace_munge_string_part (&query);
+  guri->fragment = parse_inplace_munge_string_part (&frag);
+  guri->port = port;
 
   return TRUE;
 }

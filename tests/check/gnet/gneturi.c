@@ -27,11 +27,20 @@
 
 GNET_START_TEST (test_uri_errors)
 {
+  GURI guri;
+  gchar *uri;
+
   /* Empty string is an error */
   fail_unless (gnet_uri_new("") == NULL);
+  uri = g_strdup ("");
+  fail_unless (!gnet_uri_parse_inplace (&guri, uri, NULL, 0));
+  g_free (uri);
 
   /* String of whitespace is an error */
   fail_unless (gnet_uri_new(" \n\t\r") == NULL);
+  uri = g_strdup (" \n\t\r");
+  fail_unless (!gnet_uri_parse_inplace (&guri, uri, NULL, 0));
+  g_free (uri);
 }
 
 GNET_END_TEST;
@@ -148,62 +157,90 @@ struct URITest tests[] =
     {"file", NULL, NULL, 0, "/home/joe/foo.txt", NULL, NULL}}
 };
 
+static void
+test_single_uri (struct URITest * test, GURI * uri,
+    gboolean test_escape_unescape)
+{
+  gchar *pretty;
+
+  if (g_getenv ("GNET_DEBUG")) {
+    g_printerr ("%s: uri='%s'\n", __FUNCTION__, test->str);
+  }
+
+  pretty = gnet_uri_get_string (uri);
+  fail_unless (pretty != NULL, "no pretty string for '%s'", test->str);
+
+  if (test->pretty) {
+    fail_unless_equals_string (pretty, test->pretty);
+  } else {
+    fail_unless_equals_string (pretty, test->str);
+  }
+
+#define fail_unless_equals_string_safe(a,b) \
+  { \
+     fail_unless (((a) != NULL && (b) != NULL) || ((a) == NULL && (b) == NULL));  \
+     if ((a) && (b)) {                                                            \
+       fail_unless_equals_string ((a), (b));                                      \
+     }                                                                            \
+  }
+
+  fail_unless_equals_string_safe (uri->scheme, test->uri.scheme);
+  fail_unless_equals_string_safe (uri->userinfo, test->uri.userinfo);
+  fail_unless_equals_string_safe (uri->hostname, test->uri.hostname);
+  fail_unless_equals_string_safe (uri->scheme, test->uri.scheme);
+  fail_unless_equals_int (uri->port, test->uri.port);
+  fail_unless_equals_string_safe (uri->path, test->uri.path);
+  fail_unless_equals_string_safe (uri->query, test->uri.query);
+  fail_unless_equals_string_safe (uri->fragment, test->uri.fragment);
+
+  if (test_escape_unescape) {
+    gchar *unescape;
+    gchar *escape;
+
+    gnet_uri_escape (uri);
+    escape = gnet_uri_get_string (uri);
+    fail_unless (escape != NULL,
+        "gnet_uri_escape() failed for %s", test->str);
+
+    gnet_uri_unescape (uri);
+    unescape = gnet_uri_get_string (uri);
+    fail_unless (unescape != NULL,
+        "gnet_uri_unescape() failed for %s after escape", test->str);
+      
+    fail_unless_equals_string (pretty, unescape);
+    g_free (escape);
+    g_free (unescape);
+  }
+
+  g_free (pretty);
+}
+
 GNET_START_TEST (test_uri_parsing)
 {
   guint i;
 
   for (i = 0; i < G_N_ELEMENTS (tests); ++i) {
-    gchar *unescape;
-    gchar *escape;
-    gchar *pretty;
-    GURI *uri;
+    /* first the normal heap allocated one */
+    {
+      GURI *uri;
 
-    uri = gnet_uri_new (tests[i].str);
-    fail_unless (uri != NULL, "gnet_uri_new(%s) failed", tests[i].str);
-
-    pretty = gnet_uri_get_string (uri);
-    fail_unless (pretty != NULL, "no pretty string for '%s'", tests[i].str);
-
-    if (tests[i].pretty) {
-      fail_unless_equals_string (pretty, tests[i].pretty);
-    } else {
-      fail_unless_equals_string (pretty, tests[i].str);
+      uri = gnet_uri_new (tests[i].str);
+      fail_unless (uri != NULL, "gnet_uri_new(%s) failed", tests[i].str);
+      test_single_uri (&tests[i], uri, TRUE);
+      gnet_uri_delete (uri);
     }
 
-#define fail_unless_equals_string_safe(a,b) \
-    { \
-       fail_unless (((a) != NULL && (b) != NULL) || ((a) == NULL && (b) == NULL));  \
-       if ((a) && (b)) {                                                            \
-         fail_unless_equals_string ((a), (b));                                      \
-       }                                                                            \
+    /* and the same with a stack-allocated one */
+    {
+      GURI uri;
+      gchar hostname[100], *uricpy;
+
+      uricpy = g_strdup (tests[i].str);
+      fail_unless (gnet_uri_parse_inplace (&uri, uricpy, hostname, 100),
+          "gnet_uri_parse_inplace(%s) failed", tests[i].str);
+      test_single_uri (&tests[i], &uri, FALSE);
+      g_free (uricpy);
     }
-
-    fail_unless_equals_string_safe (uri->scheme, tests[i].uri.scheme);
-    fail_unless_equals_string_safe (uri->userinfo, tests[i].uri.userinfo);
-    fail_unless_equals_string_safe (uri->hostname, tests[i].uri.hostname);
-    fail_unless_equals_string_safe (uri->scheme, tests[i].uri.scheme);
-    fail_unless_equals_int (uri->port, tests[i].uri.port);
-    fail_unless_equals_string_safe (uri->path, tests[i].uri.path);
-    fail_unless_equals_string_safe (uri->query, tests[i].uri.query);
-    fail_unless_equals_string_safe (uri->fragment, tests[i].uri.fragment);
-
-    gnet_uri_escape (uri);
-    escape = gnet_uri_get_string (uri);
-    fail_unless (escape != NULL,
-        "gnet_uri_escape() failed for %s", tests[i].str);
-
-    gnet_uri_unescape (uri);
-    unescape = gnet_uri_get_string (uri);
-    fail_unless (unescape != NULL,
-        "gnet_uri_unescape() failed for %s after escape", tests[i].str);
-      
-    fail_unless_equals_string (pretty, unescape);
-
-    g_free (escape);
-    g_free (unescape);
-    g_free (pretty);
-
-    gnet_uri_delete (uri);
   }
 }
 

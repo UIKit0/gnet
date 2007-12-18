@@ -201,3 +201,15 @@ unescaped URIs.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_uri_parse_inplace ##### -->
+<para>
+
+</para>
+
+@guri: 
+@uri: 
+@hostname: 
+@len: 
+@Returns: 
+
+

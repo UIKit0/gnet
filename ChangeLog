@@ -1,5 +1,17 @@
 2007-12-18  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* src/uri.c: (gnet_uri_parse), (parse_inplace_munge_string_part),
+	  (gnet_uri_parse_inplace):
+	* src/uri.h:
+	  API: add gnet_uri_parse_inplace()
+
+	* tests/check/gnet/gneturi.c:
+	* doc/gnet-sections.txt:
+	* doc/tmpl/uri.sgml:
+	  Add unit test and docs for the above.
+
+2007-12-18  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* src/tcp.c: (gnet_tcp_socket_get_remote_inetaddr):
 	* src/udp.c: (gnet_udp_socket_unref):
 	  Two small doc additions.

@@ -23,10 +23,7 @@
 
 #include <glib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
+G_BEGIN_DECLS
 
 /**
  *  GURI:
@@ -83,8 +80,8 @@ void 	  gnet_uri_set_path	(GURI* uri, const gchar* path);
 void 	  gnet_uri_set_query 	(GURI* uri, const gchar* query);
 void 	  gnet_uri_set_fragment (GURI* uri, const gchar* fragment);
 
-#ifdef __cplusplus
-}
-#endif				/* __cplusplus */
+gboolean  gnet_uri_parse_inplace (GURI * guri, gchar * uri, gchar * hostname, gsize len);
+
+G_END_DECLS
 
 #endif /* _GNET_URI_H */
