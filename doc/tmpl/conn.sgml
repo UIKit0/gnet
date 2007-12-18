@@ -80,6 +80,8 @@ See also GServer and the echoclient-gconn example.
 @timer: 
 @func: 
 @user_data: 
+@context: 
+@priority: 
 
 <!-- ##### STRUCT GConnEvent ##### -->
 <para>
@@ -180,6 +182,16 @@ See also GServer and the echoclient-gconn example.
 @conn: 
 @func: 
 @user_data: 
+
+
+<!-- ##### FUNCTION gnet_conn_set_main_context ##### -->
+<para>
+
+</para>
+
+@conn: 
+@context: 
+@Returns: 
 
 
 <!-- ##### FUNCTION gnet_conn_connect ##### -->

@@ -872,7 +872,8 @@ gnet_tcp_socket_get_remote_inetaddr (const GTcpSocket* socket)
  *
  *  Gets the local host's address from a #GTcpSocket.
  *
- *  Returns: a #GInetAddr.
+ *  Returns: a #GInetAddr, or NULL on error.  Unref with gnet_inetaddr_unref()
+ *  when no longer needed.
  *
  **/
 GInetAddr*  

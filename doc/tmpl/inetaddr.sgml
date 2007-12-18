@@ -96,6 +96,21 @@ be used to automatically configure peer-to-peer applications.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_inetaddr_new_async_full ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@func: 
+@data: 
+@notify: 
+@context: 
+@priority: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_inetaddr_new_async_cancel ##### -->
 <para>
 
@@ -146,6 +161,21 @@ be used to automatically configure peer-to-peer applications.
 @port: 
 @func: 
 @data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_new_list_async_full ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@func: 
+@data: 
+@notify: 
+@context: 
+@priority: 
 @Returns: 
 
 
@@ -251,6 +281,20 @@ be used to automatically configure peer-to-peer applications.
 @inetaddr: 
 @func: 
 @data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_inetaddr_get_name_async_full ##### -->
+<para>
+
+</para>
+
+@inetaddr: 
+@func: 
+@data: 
+@notify: 
+@context: 
+@priority: 
 @Returns: 
 
 

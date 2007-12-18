@@ -195,6 +195,11 @@ gnet_udp_socket_unref (GUdpSocket* socket)
  *  channel.  The channel is closed by GNet when the socket is
  *  deleted.
  *
+ *  Before deleting the UDP socket, make sure to remove any watches you have
+ *  added with g_io_add_watch() again with g_source_remove() using the integer
+ *  id returned by g_io_add_watch(). You may find your program stuck in a busy
+ *  loop at 100% CPU utilisation if you forget to do this.
+ *
  *  Returns: a #GIOChannel.
  *
  **/

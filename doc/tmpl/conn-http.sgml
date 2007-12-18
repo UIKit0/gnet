@@ -276,6 +276,16 @@ GNet headers (otherwise you will get compiler errors when trying to use it).
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_conn_http_set_main_context ##### -->
+<para>
+
+</para>
+
+@conn: 
+@context: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_conn_http_run_async ##### -->
 <para>
 

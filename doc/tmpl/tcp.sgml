@@ -116,6 +116,21 @@ This module will use SOCKS if enabled.
 @Returns: 
 
 
+<!-- ##### FUNCTION gnet_tcp_socket_connect_async_full ##### -->
+<para>
+
+</para>
+
+@hostname: 
+@port: 
+@func: 
+@data: 
+@notify: 
+@context: 
+@priority: 
+@Returns: 
+
+
 <!-- ##### FUNCTION gnet_tcp_socket_connect_async_cancel ##### -->
 <para>
 
@@ -141,6 +156,20 @@ This module will use SOCKS if enabled.
 @addr: 
 @func: 
 @data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new_async_full ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
+@notify: 
+@context: 
+@priority: 
 @Returns: 
 
 
@@ -322,6 +351,20 @@ This module will use SOCKS if enabled.
 @addr: 
 @func: 
 @data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gnet_tcp_socket_new_async_direct_full ##### -->
+<para>
+
+</para>
+
+@addr: 
+@func: 
+@data: 
+@notify: 
+@context: 
+@priority: 
 @Returns: 
 
 
