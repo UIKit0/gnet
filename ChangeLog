@@ -1,3 +1,10 @@
+2008-01-05  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* tests/check/gnetcheck.c: (gnet_check_init):
+	  Call gnet_socks_set_enabled() if the SOCKS_SERVER environment
+	  variable is set, so we can run the unit tests through the
+	  SOCKS implementation too (e.g. in connection with ssh -D).
+
 2007-12-18  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* src/uri.c: (gnet_uri_parse), (parse_inplace_munge_string_part),

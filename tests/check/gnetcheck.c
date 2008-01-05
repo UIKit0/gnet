@@ -80,6 +80,21 @@ gnet_check_init (int *argc, char **argv[])
   if (g_getenv ("GNET_TEST_DEBUG"))
     _gnet_check_debug = TRUE;
 
+  if (g_getenv ("SOCKS_SERVER")) {
+    GInetAddr *ia;
+
+    ia = gnet_socks_get_server ();
+    if (ia) {
+      gchar *name;
+
+      name = gnet_inetaddr_get_canonical_name (ia);
+      g_print ("\nUsing SOCKS %u proxy: %s\n", gnet_socks_get_version(), name);
+      g_free (name);
+      gnet_inetaddr_unref (ia);
+      gnet_socks_set_enabled (TRUE);
+    }
+  }
+
   g_log_set_handler (NULL, G_LOG_LEVEL_MESSAGE, gnet_check_log_message_func,
       NULL);
   g_log_set_handler (NULL, G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING,
