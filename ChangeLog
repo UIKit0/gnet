@@ -1,5 +1,15 @@
 2008-01-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* configure.ac:
+	  Require check 0.9.4 or later.
+
+	* tests/check/gnetcheck.h: (__gnet_tcase_add_test), (_tcase_add_test):
+	  Fix up things so that in case of failure the test that failed
+	  is shown properly (before the variable name 'tf' would get
+	  stringified instead of the test function name).
+
+2008-01-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* tests/check/gnetcheck.c: (gnet_check_init):
 	  Call gnet_socks_set_enabled() if the SOCKS_SERVER environment
 	  variable is set, so we can run the unit tests through the

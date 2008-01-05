@@ -57,7 +57,6 @@ gint gnet_check_run_suite (Suite *suite, const gchar *name, const gchar *fname);
 /***
  * wrappers for START_TEST and END_TEST
  */
-#if CHECK_MAJOR_VERSION >= 0 && CHECK_MINOR_VERSION >= 9 && CHECK_MICRO_VERSION >= 4
 #define GNET_START_TEST(__testname) \
 static void __testname (int __i__)\
 {\
@@ -65,16 +64,6 @@ static void __testname (int __i__)\
   tcase_fn_start (""# __testname, __FILE__, __LINE__);
 
 #define GNET_END_TEST END_TEST
-#else
-#define GNET_START_TEST(__testname) \
-static void __testname ()\
-{\
-  /* GNET_DEBUG ("test start"); */ \
-  tcase_fn_start (""# __testname, __FILE__, __LINE__);
-
-#define GNET_END_TEST END_TEST
-#endif
-
 
 /* additional fail macros */
 /**
@@ -322,15 +311,15 @@ int main (int argc, char **argv)				\
 gboolean _gnet_check_run_test_func (const gchar * func_name);
 
 static inline void
-__gnet_tcase_add_test (TCase * tc, TFun tf, const gchar * func_name)
+__gnet_tcase_add_test (TCase * tc, TFun tf, const gchar * func_name,
+    int sig, int start, int end)
 {
   if (_gnet_check_run_test_func (func_name)) {
-    tcase_add_test (tc, tf);
+    _tcase_add_test (tc, tf, func_name, sig, start, end);
   }
 }
 
-#undef tcase_add_test
-#define tcase_add_test(tc,tf) __gnet_tcase_add_test(tc,tf,G_STRINGIFY(tf))
+#define _tcase_add_test  __gnet_tcase_add_test
 
 G_END_DECLS
 
