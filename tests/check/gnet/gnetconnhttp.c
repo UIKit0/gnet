@@ -452,6 +452,9 @@ GNET_START_TEST (test_conn_http_post_local)
   gchar *uri;
   gchar *buf;
 
+  /* Disable any SOCKS proxies if enabled, since this test works locally */
+  gnet_socks_set_enabled (FALSE);
+
   /* Test case where we get headers after the HTTP/1.1 100 Continue */
   ia = gnet_inetaddr_new ("127.0.0.1", 0);
   fail_unless (ia != NULL);
@@ -672,6 +675,7 @@ gnetconnhttp_suite (void)
   }
 
   tcase_add_test (tc_chain, test_conn_http_post_local);
+
   return s;
 }
 

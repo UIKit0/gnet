@@ -1,5 +1,11 @@
 2008-01-05  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* tests/check/gnet/gnetconnhttp.c: (test_conn_http_post_local):
+	  Disable SOCKS use for test that connects to server on
+	  localhost.
+
+2008-01-05  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* configure.ac:
 	  Require check 0.9.4 or later.
 
