@@ -193,7 +193,7 @@ TESTS = $(check_PROGRAMS)
 
 noinst_HEADERS =              \
 	gnet/struct_i386.h    \
-	gnet/struct_ppc64.h   \
+	gnet/struct_ppc32.h   \
 	gnet/struct_x86_64.h
 
 AM_CFLAGS = \

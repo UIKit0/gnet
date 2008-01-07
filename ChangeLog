@@ -1,3 +1,11 @@
+2008-01-07  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* tests/check/Makefile.am:
+	* tests/check/gnet/gnetabi.c:
+	* tests/check/gnet/struct_ppc64.h:
+	* tests/check/gnet/struct_ppc32.h:
+	  Include header based on userland ABI, not on kernel/CPU.
+
 2008-01-06  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* doc/tmpl/conn.sgml:
