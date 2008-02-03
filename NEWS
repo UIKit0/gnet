@@ -1,14 +1,25 @@
-
 GNet NEWS
 ---------
 
 Changes in GNet
 
-2.0.8 (unreleased)
-------------------
-* GConnHttp is no longer marked as experimental
+2.0.8
+-----
+* New API:
+  gnet_conn_set_main_context
+  gnet_conn_http_set_main_context
+  gnet_inetaddr_new_async_full
+  gnet_inetaddr_new_list_async_full
+  gnet_inetaddr_get_name_async_full
+  gnet_tcp_socket_connect_async_full
+  gnet_tcp_socket_new_async_full
+  gnet_tcp_socket_new_async_direct_full
+  gnet_unix_socket_new_abstract
+  gnet_unix_socket_server_new_abstract
+  gnet_uri_parse_inplace
+* GConnHttp API is no longer marked as experimental
 * Fix major memory leak in GConnHttp
-* gnet_init() can safely be called
+* gnet_init() can now safely be called
   more than once now
 * Fix crash when gnet_conn_http_delete()
   is called from within the user callback.
@@ -61,7 +72,7 @@ Changes in GNet
   to require threading to be present; even my
   wrist watch can do that.  Removs lots of
   unmaintained code and ugly #ifdefs.
-
+(Released Feb 3, 2008)
 
 2.0.7
 -----
