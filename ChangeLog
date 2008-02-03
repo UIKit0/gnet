@@ -1,5 +1,16 @@
 2008-02-03  Tim-Philipp Müller  <tim at centricular dot net>
 
+	* configure.ac:
+	* NEWS:
+	  Back to trunk.
+
+	* Makefile.am:
+	  Dist MAINTAINERS.
+
+=== release 2.0.8 ===
+
+2008-02-03  Tim-Philipp Müller  <tim at centricular dot net>
+
 	* NEWS:
 	* RELEASE:
 	* debian/changelog:

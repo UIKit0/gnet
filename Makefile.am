@@ -7,6 +7,7 @@ SUBDIRS = src examples macros tests doc
 EXTRA_DIST= 					\
 	TODO 					\
 	HACKING 				\
+	MAINTAINERS 				\
 	BUGS   					\
 	README.macosx  				\
 	gnetconfig.h.in 			\
