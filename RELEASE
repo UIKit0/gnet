@@ -1,6 +1,5 @@
 
 Creating the release tarball:
- - update debian/changelog
  - update NEWS
  - do 'make distcheck'
  - make sure the created tarball really includes the HTML docs

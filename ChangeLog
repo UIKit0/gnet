@@ -1,3 +1,14 @@
+2008-04-07  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* RELEASE:
+	* debian/.cvsignore:
+	* debian/changelog:
+	* debian/copyright:
+	* debian/libgnet-dev.preinst:
+	* debian/libgnet2.0-0.files:
+	* debian/rules:
+	  Remove outdated debian directory.
+
 2008-02-03  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* configure.ac:
