@@ -1,3 +1,9 @@
+2008-05-13  Tim-Philipp Müller  <tim at centricular dot net>
+
+	* src/conn.c: (gnet_conn_unref):
+	  Don't leak main context ref when one was set.
+	  Spotted by Kuang-Chun Cheng.
+
 2008-04-07  Tim-Philipp Müller  <tim at centricular dot net>
 
 	* RELEASE:
