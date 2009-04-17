@@ -1,0 +1,20 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	 xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	 xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	 xmlns:gnome="http://api.gnome.org/doap-extensions#"
+	 xmlns="http://usefulinc.com/ns/doap#">
+	<name xml:lang="en">GNet</name>
+	<shortdesc xml:lang="en">Simple network library built upon GLib (soon to be deprecated, do not use for new projects)</shortdesc>
+	<homepage rdf:resource="http://www.gnetlibrary.org/" />
+	<maintainer>
+		<foaf:Person>
+			<foaf:name>Tim-Philipp Müller</foaf:name>
+			<foaf:mbox rdf:resource="tim@centricular.net" />
+			<gnome:userid>tpm</gnome:userid>
+		</foaf:Person>
+	</maintainer>
+	<download-page rdf:resource="ftp://ftp.gnome.org/pub/GNOME/sources/gnet/"/>
+	<bug-database rdf:resource="http://bugzilla.gnome.org/browse.cgi?product=gnet"/>
+	<mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnet-list"/>
+	<mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnet-devel-list"/>
+</Project>

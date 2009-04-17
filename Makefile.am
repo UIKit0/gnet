@@ -15,6 +15,7 @@ EXTRA_DIST= 					\
 	GNET.DSP  				\
 	config.h.win32  			\
 	gnet.def  				\
+	gnet.doap				\
 	gnet.spec  				\
 	gnet.spec.in 				\
 	examples/makefile.mingw 		\
