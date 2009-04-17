@@ -11,6 +11,7 @@ EXTRA_DIST= 					\
 	BUGS   					\
 	README.macosx  				\
 	$(top_builddir)/ChangeLog               \
+	gen-changelog.py                        \
 	gnetconfig.h.in 			\
 	README.win32  				\
 	GNET.DSP  				\
@@ -30,6 +31,9 @@ EXTRA_DIST= 					\
 	tests/dns_test.pl			\
 	gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).m4		\
 	gnet-$(GNET_MAJOR_VERSION).$(GNET_MINOR_VERSION).pc.in
+
+EXTRA_CLEAN_FILES = \
+	$(top_builddir)/ChangeLog
 
 # build documentation when doing distcheck
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
