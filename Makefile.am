@@ -10,6 +10,7 @@ EXTRA_DIST= 					\
 	MAINTAINERS 				\
 	BUGS   					\
 	README.macosx  				\
+	$(top_builddir)/ChangeLog               \
 	gnetconfig.h.in 			\
 	README.win32  				\
 	GNET.DSP  				\
@@ -46,7 +47,7 @@ configinclude_DATA = gnetconfig.h
 
 WEBPATH=/home/web/gnetlibrary.org/data
 
-DOCS=README TODO NEWS ChangeLog COPYING AUTHORS HACKING MAINTAINERS
+DOCS=README TODO NEWS COPYING AUTHORS HACKING MAINTAINERS
 
 TARBALL=gnet-$(VERSION).tar.gz
 
@@ -59,6 +60,12 @@ RPMFILE=$(RPMROOT)/RPMS/i386/gnet-$(VERSION)-*.i386.rpm
 RPMFILEDEV=$(RPMROOT)/RPMS/i386/gnet-devel-$(VERSION)-*.i386.rpm
 RPMFILESRC=$(RPMROOT)/SRPMS/gnet-$(VERSION)-*.src.rpm
 
+
+ChangeLog: gen-changelog.py
+	python $(top_srcdir)/gen-changelog.py > $(top_builddir)/ChangeLog || { \
+	  echo "python and python 're' and 'subprocess' modules are required for 'make dist'"; \
+	  exit 1; \
+	}
 
 snapshot:
 	$(MAKE) dist distdir=$(PACKAGE)`date +"%y%m%d"`
