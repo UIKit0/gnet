@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <glib.h>
 #include <gnet.h>
 
@@ -106,7 +107,9 @@ normal_echoclient(gchar* path, gboolean abstract)
     e = gnet_io_channel_readn(iochannel, buffer, n, &n);
     if (e != G_IO_ERROR_NONE)
       break;
-    fwrite(buffer, n, 1, stdout);
+    if (fwrite(buffer, n, 1, stdout) != 1) {
+     fprintf (stderr, "Error: fwrite to stdout failed: %s\n", g_strerror (errno));
+    }
   }
 
   if (e != G_IO_ERROR_NONE) 

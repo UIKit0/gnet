@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <glib.h>
 #include <gnet.h>
 
@@ -149,7 +150,9 @@ async_client_sin_iofunc (GIOChannel* iochannel, GIOCondition condition,
 	{
 	  gint i;
 
-	  fwrite (buffer, 1, bytes_read, stdout);
+	  if (fwrite (buffer, 1, bytes_read, stdout) != 1) {
+            fprintf (stderr, "Error: fwrite to stdout failed: %s\n", g_strerror (errno));
+          }
 
 	  for (i = 0; i < bytes_read; ++i)
 	    if (buffer[i] == '\n')

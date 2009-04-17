@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <glib.h>
 #include <gnet.h>
 
@@ -155,7 +156,9 @@ ob_conn_func (GConn* conn, GConnEvent* event, gpointer user_data)
       {
 	/* Write line out */
 	event->buffer[event->length - 1] = '\n';
-	fwrite (event->buffer, event->length, 1, stdout);
+        if (fwrite (event->buffer, event->length, 1, stdout) != 1) {
+         fprintf (stderr, "Error: fwrite to stdout failed: %s\n", g_strerror (errno));
+        }
 
 	/* Check if done */
 	lines_pending--;

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <glib.h>
 #include <gnet.h>
 
@@ -153,7 +154,9 @@ hfetch(gchar* server, gint port, gchar* filename)
       if (n == 0)
 	break;
 
-      fwrite(buffer, n, 1, stdout);
+      if (fwrite(buffer, n, 1, stdout) != 1) {
+       fprintf (stderr, "Error: fwrite to stdout failed: %s\n", g_strerror (errno));
+      }
     }
   
   gnet_tcp_socket_delete(socket);

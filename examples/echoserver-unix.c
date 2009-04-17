@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <unistd.h>
 #include <signal.h>
 #include <glib.h>
@@ -119,7 +120,9 @@ normal_echoserver(gchar *path, gboolean abstract)
       e = gnet_io_channel_writen(ioclient, buffer, n, &n);
       if (e != G_IO_ERROR_NONE)
 	break;
-      fwrite(buffer, n, 1, stdout);
+      if (fwrite(buffer, n, 1, stdout) != 1) {
+       fprintf (stderr, "Error: fwrite to stdout failed: %s\n", g_strerror (errno));
+      }
     }
     if (e != G_IO_ERROR_NONE)
       fprintf(stderr,
@@ -260,7 +263,9 @@ async_client_iofunc(GIOChannel *iochannel, GIOCondition c,
 			 async_client_iofunc,
 			 cs);
       }
-      fwrite(&cs->buffer[cs->n], bytes_read, 1, stdout);
+      if (fwrite(&cs->buffer[cs->n], bytes_read, 1, stdout) != 1) {
+       fprintf (stderr, "Error: fwrite to stdout failed: %s\n", g_strerror (errno));
+      }
       cs->n += bytes_read;
     }
   }
