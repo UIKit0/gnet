@@ -550,7 +550,7 @@ fi
 # If the compiler is gcc, turn on as many warnings as possible
 if test "x$GCC" = "xyes"; then
   CFLAGS="$CFLAGS -Wall -Wstrict-prototypes \
-    -Wmissing-prototypes -Wmissing-declarations"
+    -Wmissing-prototypes -Wmissing-declarations -fno-strict-aliasing"
   if test "x$enable_debug" = "xyes"; then
     CFLAGS="$CFLAGS -Werror"
   fi
