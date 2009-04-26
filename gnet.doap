@@ -9,7 +9,7 @@
 	<maintainer>
 		<foaf:Person>
 			<foaf:name>Tim-Philipp Müller</foaf:name>
-			<foaf:mbox rdf:resource="tim@centricular.net" />
+			<foaf:mbox rdf:resource="mailto:tim@centricular.net" />
 			<gnome:userid>tpm</gnome:userid>
 		</foaf:Person>
 	</maintainer>
