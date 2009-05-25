@@ -34,6 +34,17 @@ Comments and questions should be sent to gnet@gnetlibrary.org.
 The GNet homepage is at <http://www.gnetlibrary.org>.
 
 
+Development Status
+==================
+
+GNet is, for all practical purposes, deprecated. You should not
+use it for new application. As of May 2009, networking and
+socket abstractions have been added to the GLib (gio) development
+branch and will be in the upcoming GLib 2.22 release.
+
+Bugs in GNet will still be fixed, but no new major features added.
+
+
 Install
 =======
 

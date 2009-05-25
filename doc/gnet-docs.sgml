@@ -45,12 +45,25 @@
 	  </address>
         </affiliation>
       </author>
+      <author>
+        <firstname>Tim-Philipp</firstname>
+        <surname>Müller</surname>
+        <affiliation>
+	  <address>
+	    <email>tim centricular net</email>
+	  </address>
+        </affiliation>
+      </author>
     </authorgroup>
 
     <copyright>
       <year>2000-2005</year>
       <holder>David Helder</holder>
     </copyright>	
+    <copyright>
+      <year>2005-2009</year>
+      <holder>Tim-Philipp Müller</holder>
+    </copyright>
 
     <legalnotice>
       <para>
@@ -80,6 +93,16 @@
 	overview of GNet, discusses examples that come with GNet, and
 	includes detailed documentation of the GNet API.
       </para>
+      <note>
+      <para>
+        GNet is, for all practical purposes, deprecated. You should not
+        use it for new application. As of May 2009, networking and
+        socket abstractions have been added to the GLib (gio) development
+        branch and will be in the upcoming GLib 2.22 release.
+
+        Bugs in GNet will still be fixed, but no new major features added.
+      </para>
+      </note>
     </abstract>
 
   </bookinfo>
