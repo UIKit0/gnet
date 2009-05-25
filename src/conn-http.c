@@ -598,6 +598,7 @@ gnet_conn_http_set_uri (GConnHttp *conn, const gchar *uri)
  *
  *  Returns: TRUE if the URI has been accepted.
  *
+ *  Since: 2.0.8
  **/
 
 gboolean
@@ -780,8 +781,9 @@ gnet_conn_http_done (GConnHttp *conn)
 
 	gnet_conn_timeout (conn->conn, 0);
 
-	/* we don't want to emit a DATA_COMPLETE event
-	 *  if we are getting redirected, do we? */
+	/* we don't want to emit data events if we're getting redirected, if
+	 * the app is interested in the redirect page data, it can retrieve
+	 * it from within the callback with the REDIRECT event */
 	if (conn->redirect_location == NULL)
 	{
 		ev = gnet_conn_http_new_event (GNET_CONN_HTTP_DATA_COMPLETE);
@@ -1092,8 +1094,9 @@ gnet_conn_http_conn_recv_chunk_body (GConnHttp *conn, gchar *data, gsize len)
 	conn->content_recv += len;
 	gnet_conn_http_append_to_buf(conn, data, len);
 
-	/* we don't want to emit data events if we're 
-	 *  getting redirected anyway, do we? */
+	/* we don't want to emit data events if we're getting redirected, if
+	 * the app is interested in the redirect page data, it can retrieve
+	 * it from within the callback with the REDIRECT event */
 	if (conn->redirect_location == NULL)
 	{
 		GConnHttpEventData *ev_data;

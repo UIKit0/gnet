@@ -100,7 +100,9 @@ typedef enum
  *   structure will be a #GConnHttpEventResponse structure
  *   @GNET_CONN_HTTP_REDIRECT: the HTTP server has sent 
  *   a redirect response. The event structure will be a
- *   #GConnHttpEventRedirect structure
+ *   #GConnHttpEventRedirect structure. The redirect response
+ *   may be accompanied by data, use gnet_conn_http_steal_buffer()
+ *   to retrieve it.
  *   @GNET_CONN_HTTP_DATA_PARTIAL: data has been received.
  *   The buffer is caller-owned (ie. owned by GNet), but 
  *   may be emptied using gnet_conn_http_steal_buffer(). The

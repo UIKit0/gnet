@@ -193,7 +193,7 @@ flipmemcpy(char* dst, const char* src, gsize n)
  *
  *  An example:
  *
- *  <informalexample>
+ *  <informalexample id="gnet-pack-example">
  *  <programlisting>
  *  char buf[5];
  *  int myint = 42;
@@ -776,7 +776,7 @@ gnet_vpack (const gchar* format, gchar* buffer, const gint length, va_list args)
  *
  *  An example:
  *
- *  <informalexample>
+ *  <informalexample id="gnet-unpack-example">
  *  <programlisting>
  *  char buf[5] = { 42, 0, 0, 0, 23 };
  *  int myint;
