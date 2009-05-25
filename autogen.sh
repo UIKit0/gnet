@@ -201,7 +201,7 @@ do
   fi
 done
 
-conf_flags="--enable-maintainer-mode --enable-compile-warnings --enable-debug=yes --enable-gtk-doc=yes --enable-network-tests=yes"
+conf_flags="--enable-maintainer-mode --enable-debug=yes --enable-gtk-doc=yes --enable-network-tests=yes"
 
 if test x$NOCONFIGURE = x; then
   echo Running $srcdir/configure $conf_flags "$@" ...

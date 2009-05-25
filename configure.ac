@@ -8,7 +8,7 @@ AC_PREREQ([2.53])
 # Init autoconf and automake
 AC_INIT([gnet], [2.0.8.1], [gnet@gnetlibrary.org])
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
+AM_INIT_AUTOMAKE([-Wno-portability])
 AM_MAINTAINER_MODE
 AC_REVISION([$Revision: 1.58 $])
 AC_CONFIG_SRCDIR([src/gnet.c])
