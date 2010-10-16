@@ -586,7 +586,7 @@ GTK_DOC_CHECK(1.2)
 
 dnl pkg-config check that for libcheck that works for cross-compiling
 dnl but not normal compilation on Fedora & Ubuntu:
- PKG_CHECK_MODULES(CHECK, check >= 0.9.4,
+ PKG_CHECK_MODULES(CHECK, check >= 0.9.7,
    AM_CONDITIONAL(HAVE_CHECK, true),
    AM_CONDITIONAL(HAVE_CHECK, false)
  )

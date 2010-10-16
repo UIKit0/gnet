@@ -311,11 +311,11 @@ int main (int argc, char **argv)				\
 gboolean _gnet_check_run_test_func (const gchar * func_name);
 
 static inline void
-__gnet_tcase_add_test (TCase * tc, TFun tf, const gchar * func_name,
-    int sig, int start, int end)
+__gnet_tcase_add_test (TCase * tc, TFun tf, const char * fname, int signal,
+    int allowed_exit_value, int start, int end)
 {
-  if (_gnet_check_run_test_func (func_name)) {
-    _tcase_add_test (tc, tf, func_name, sig, start, end);
+  if (_gnet_check_run_test_func (fname)) {
+    _tcase_add_test (tc, tf, fname, signal, allowed_exit_value, start, end);
   }
 }
 
