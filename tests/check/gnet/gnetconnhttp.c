@@ -487,7 +487,7 @@ GNET_END_TEST;
 
 GNET_START_TEST (test_gnet_http_get)
 {
-  const gchar *urls[] = {"http://www.gnetlibrary.org/src/",
+  const gchar *urls[] = {"http://www.gnome.org/",
       "http://www.heise.de" };
   guint i;
 
@@ -514,7 +514,7 @@ GNET_END_TEST;
 
 GNET_START_TEST (test_get_binary)
 {
-  gchar *uris[] = { "http://www.gnetlibrary.org/gnet.png" };
+  gchar *uris[] = { "http://www.gnome.org/img/logo/foot-16.png" };
   guint i;
 
   for (i = 0; i < G_N_ELEMENTS (uris); ++i) {
