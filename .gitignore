@@ -41,6 +41,7 @@ doc/gnet.signals
 doc/version.xml
 doc/html/
 doc/xml/
+/doc/tmpl/*.bak
 
 examples/dnslookup
 examples/echoclient
@@ -59,4 +60,17 @@ examples/hostinfo
 examples/sdr
 examples/xmlrpc/test-xmlrpc-client
 examples/xmlrpc/test-xmlrpc-server
+
+/tests/check/gnet/gnetabi
+/tests/check/gnet/gnetbase64
+/tests/check/gnet/gnetconn
+/tests/check/gnet/gnetconnhttp
+/tests/check/gnet/gnethash
+/tests/check/gnet/gnetinetaddr
+/tests/check/gnet/gnetipv6
+/tests/check/gnet/gnetmisc
+/tests/check/gnet/gnetpack
+/tests/check/gnet/gnettcpsocket
+/tests/check/gnet/gnetunpack
+/tests/check/gnet/gneturi
 
