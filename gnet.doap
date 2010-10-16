@@ -4,8 +4,8 @@
 	 xmlns:gnome="http://api.gnome.org/doap-extensions#"
 	 xmlns="http://usefulinc.com/ns/doap#">
 	<name xml:lang="en">GNet</name>
-	<shortdesc xml:lang="en">Simple network library built upon GLib (soon to be deprecated, do not use for new projects)</shortdesc>
-	<homepage rdf:resource="http://www.gnetlibrary.org/" />
+	<shortdesc xml:lang="en">Simple network library built upon GLib (DEPRECATED)</shortdesc>
+	<homepage rdf:resource="http://live.gnome.org/GNetLibrary/" />
 	<maintainer>
 		<foaf:Person>
 			<foaf:name>Tim-Philipp Müller</foaf:name>
@@ -17,4 +17,10 @@
 	<bug-database rdf:resource="http://bugzilla.gnome.org/browse.cgi?product=gnet"/>
 	<mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnet-list"/>
 	<mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnet-devel-list"/>
+        <repository>
+          <GitRepository>
+            <location rdf:resource="git://git.gnome.org/gnet"/>
+            <browse rdf:resource="http://git.gnome.org/browse/gnet"/>
+          </GitRepository>
+        </repository>
 </Project>
