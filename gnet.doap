@@ -13,7 +13,7 @@
 			<gnome:userid>tpm</gnome:userid>
 		</foaf:Person>
 	</maintainer>
-	<download-page rdf:resource="ftp://ftp.gnome.org/pub/GNOME/sources/gnet/"/>
+	<download-page rdf:resource="http://download.gnome.org/sources/gnet/"/>
 	<bug-database rdf:resource="http://bugzilla.gnome.org/browse.cgi?product=gnet"/>
 	<mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnet-list"/>
 	<mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnet-devel-list"/>
